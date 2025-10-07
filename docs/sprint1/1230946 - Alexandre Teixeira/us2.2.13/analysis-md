@@ -1,0 +1,25 @@
+# US_2.2.13 – Register and manage qualifications
+
+### 2. Analysis
+
+### 2.1. Stakeholders
+
+- **Primary Actor:** Logistics Operator
+- **Other Stakeholders:** Physical Resource
+
+---
+
+### 2.2. Business Rules
+
+1. **User Authentication:**
+    - Only authenticated users with the role *Logistics Operator* can register and manage operating staff members.
+2. **Data Consistency:**
+    - Only physical resources that have already been created can be updated or deactivated.
+
+---
+
+### 2.3. Domain Model Impact
+
+
+
+---
