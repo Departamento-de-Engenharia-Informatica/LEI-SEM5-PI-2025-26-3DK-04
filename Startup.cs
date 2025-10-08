@@ -35,6 +35,9 @@ namespace DDDSample1
 
             ConfigureMyServices(services);
             
+            // Add Swagger services
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen();
 
             services.AddControllers().AddNewtonsoftJson();
         }
@@ -45,6 +48,9 @@ namespace DDDSample1
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                // Add Swagger middleware
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
             else
             {
