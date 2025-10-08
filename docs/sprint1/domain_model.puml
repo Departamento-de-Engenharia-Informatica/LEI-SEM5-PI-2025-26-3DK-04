@@ -1,0 +1,126 @@
+@startuml
+title Domain Model
+
+class Vessel {
+    IMOnumber: int
+    name: String
+}
+
+class VesselType {
+    name: String
+    description: String
+    capacity: double
+    maximumNumberOfRows: int
+    bays: int
+    tiers: int
+}
+
+class Owner {
+    name: String
+    ID: int
+}
+
+class Dock {
+    ID: int
+    name: String
+    location: String
+    length: double
+    depth: double
+    maxDraft: int
+}
+
+class StorageArea {
+    ID: int
+    type: String
+    location: String
+    maxCapacity: double
+    currentOccupancy: double
+}
+
+class ShippingAgentOrganization {
+    ID: int
+    legalName: String
+    altName: String
+    address: String
+    taxNumber: int
+}
+
+class OrganizationRepresentative {
+    name: String
+    ID: int
+    nationality: String
+    email: String
+    phoneNumber: int
+}
+
+class VesselVisit {
+    ID: int
+    state: String
+    rejectionReason: String
+    decisionTimeStamp: String
+    decisionOutcome: String
+}
+
+class Cargo {
+    Type: String
+    Quantity: double
+}
+
+class Crew {
+    ID: int
+}
+
+class CrewMember {
+    ID: int
+    name: String
+    nationality: String
+    dateOfBirth: String
+}
+
+class StaffMember {
+    ID: int
+    name: String
+    email: String
+    phoneNumber: int
+    qualifications: String
+    operationalWindow: String
+    currentStatus: String
+}
+
+class PhysicalResource {
+    ID: String
+    name: String
+    description: String
+    operationalCapacity: int
+    status: String
+    setupTime: String
+    qualifRequirements: String
+}
+
+class Qualification {
+    ID: int
+    name: String
+    Description: String
+}
+
+Vessel "*" --> "1" VesselType : has 
+Vessel "*" --> "*" Owner : has
+Dock "*" --> "*" VesselType : has
+StorageArea "*" --> "*" Vessel : (un)loads
+ShippingAgentOrganization "1" --> "*" OrganizationRepresentative : has
+ShippingAgentOrganization "1" --> "*" Vessel : has
+Vessel "1" --> "1" VesselVisit : has
+VesselVisit "*" --> "1" Dock : happens
+Vessel "1" --> "*" Cargo : has
+VesselVisit "1" --> "*" Cargo : has
+Vessel "1" --> "1" Crew : has
+VesselVisit "1" --> "1" Crew : has
+Crew "1" --> "*" CrewMember : has
+OrganizationRepresentative "1" --> "*" VesselVisit : submits
+StaffMember "*" --> "*" PhysicalResource : uses
+StaffMember "*" --> "*" Dock : works
+StaffMember "*" --> "*" Qualification : has
+PhysicalResource "*" --> "*" Qualification : has
+
+
+@enduml
