@@ -1,126 +1,180 @@
 @startuml
 title Domain Model
 
-class Vessel {
-    IMOnumber: int
-    name: String
+package "Vessel Aggregate" {
+    class Vessel <<Entity, AggregateRoot>>{
+        IMOnumber: int
+        name: String
+    }
+
+    class Owner <<Entity>>{
+        name: String
+        ID: int
+    }
+
+    class Cargo <<Value Object>>{
+        Type: String
+        Quantity: double
+    }
+
+    class Crew <<Entity>> {
+        ID: int
+    }
+
+    class CrewMember <<Entity>> {
+        ID: int
+        name: String
+        nationality: String
+        dateOfBirth: String
+    }
 }
 
-class VesselType {
-    name: String
-    description: String
-    capacity: double
-    maximumNumberOfRows: int
-    bays: int
-    tiers: int
+package "VesselType Aggregate" {
+    class VesselType <<Entity>>{
+        name: String
+        description: String
+        capacity: double
+        maximumNumberOfRows: int
+        bays: int
+        tiers: int
+    }
 }
 
-class Owner {
-    name: String
-    ID: int
+package "VesselVisitNotification Aggregate" {
+    class VesselVisitNotification <<Entity, AggregateRoot>> {
+        ID: int
+        rejectionReason: String? #pode ser null
+        decisionTimeStamp: String
+        decisionOutcome: String
+    }
+
+    enum NotificationState{
+        name: String
+    }
+
+    class ManifestCargo <<Value Object>>{
+        type: String
+        quantity: double
+    }
+
+    class LoadingCargoManifest <<Value Object>>{
+
+    }
+
+    class UnloadingCargoManifest <<Value Object>>{
+
+    }
 }
 
-class Dock {
-    ID: int
-    name: String
-    location: String
-    length: double
-    depth: double
-    maxDraft: int
+package "ShippingAgentOrganization Aggregate" {
+    class ShippingAgentOrganization <<Entity, AggregateRoot>>{
+        ID: int
+        legalName: String
+        altName: String
+        taxNumber: int
+    }
+
+    class Address <<ValueObject>>{
+        street: String
+        city: String
+        postalCode: String
+        country: String
+    }
+
+    class OrganizationRepresentative <<Entity>>{
+        name: String
+        ID: int
+        nationality: String
+        email: String
+        phoneNumber: int
+    }
 }
 
-class StorageArea {
-    ID: int
-    type: String
-    location: String
-    maxCapacity: double
-    currentOccupancy: double
+package "Port Infrastructure Aggregate" {
+    class Dock <<Entity, AggregateRoot>>{
+        ID: int
+        name: String
+        length: double
+        depth: double
+        maxDraft: int
+    }
+
+    class StorageArea <<Entity>>{
+        ID: int
+        type: String
+        maxCapacity: double
+        currentOccupancy: double
+    }
+
+    class Location <<ValueObject>>{
+        coordinates: String
+        description: String
+    }
+}    
+
+package "Staff Management Aggregate" {
+    class StaffMember <<Entity, AggregateRoot>> {
+        ID: int
+        name: String
+        email: String
+        phoneNumber: int
+        operationalWindow: String
+        currentStatus: String
+    }
+
+    enum MemberStatus{
+        name: String
+    }
+}    
+
+package "Qualification Aggregate" {
+    class Qualification <<Entity, AggregateRoot>>{
+        ID: int
+        name: String
+        description: String
+    }
 }
 
-class ShippingAgentOrganization {
-    ID: int
-    legalName: String
-    altName: String
-    address: String
-    taxNumber: int
-}
+package "Physical Resource Aggregate" {
+    class PhysicalResource <<Entity, AggregateRoot>>{
+        ID: String
+        name: String
+        description: String
+        operationalCapacity: int
+        setupTime: String
+        qualifRequirements: String
+    }
 
-class OrganizationRepresentative {
-    name: String
-    ID: int
-    nationality: String
-    email: String
-    phoneNumber: int
-}
-
-class VesselVisit {
-    ID: int
-    state: String
-    rejectionReason: String
-    decisionTimeStamp: String
-    decisionOutcome: String
-}
-
-class Cargo {
-    Type: String
-    Quantity: double
-}
-
-class Crew {
-    ID: int
-}
-
-class CrewMember {
-    ID: int
-    name: String
-    nationality: String
-    dateOfBirth: String
-}
-
-class StaffMember {
-    ID: int
-    name: String
-    email: String
-    phoneNumber: int
-    qualifications: String
-    operationalWindow: String
-    currentStatus: String
-}
-
-class PhysicalResource {
-    ID: String
-    name: String
-    description: String
-    operationalCapacity: int
-    status: String
-    setupTime: String
-    qualifRequirements: String
-}
-
-class Qualification {
-    ID: int
-    name: String
-    Description: String
+    enum ResourceStatus{
+        name: String
+    }
 }
 
 Vessel "*" --> "1" VesselType : has 
-Vessel "*" --> "*" Owner : has
+Vessel "*" --> "1..*" Owner : has
 Dock "*" --> "*" VesselType : has
-StorageArea "*" --> "*" Vessel : (un)loads
-ShippingAgentOrganization "1" --> "*" OrganizationRepresentative : has
+Dock "1" --> "1" Location : located at
+StorageArea "1" --> "1" Location : located at
+StorageArea "*" --> "*" Dock : serves
+ShippingAgentOrganization "1" --> "1..*" OrganizationRepresentative : has
 ShippingAgentOrganization "1" --> "*" Vessel : has
-Vessel "1" --> "1" VesselVisit : has
-VesselVisit "*" --> "1" Dock : happens
+ShippingAgentOrganization "1" --> "1..*" Address : located at
+Vessel "1" --> "*" VesselVisitNotification : has
+VesselVisitNotification "*" --> "1" Dock : happens
 Vessel "1" --> "*" Cargo : has
-VesselVisit "1" --> "*" Cargo : has
+LoadingCargoManifest "1" --> "*" ManifestCargo : has
+UnloadingCargoManifest "1" --> "*" ManifestCargo : has
+VesselVisitNotification "1" --> "0..1" LoadingCargoManifest : has
+VesselVisitNotification "1" --> "0..1" UnloadingCargoManifest : has
+VesselVisitNotification "*" --> "1" NotificationState : has
 Vessel "1" --> "1" Crew : has
-VesselVisit "1" --> "1" Crew : has
 Crew "1" --> "*" CrewMember : has
-OrganizationRepresentative "1" --> "*" VesselVisit : submits
+OrganizationRepresentative "1" --> "*" VesselVisitNotification : submits
 StaffMember "*" --> "*" PhysicalResource : uses
 StaffMember "*" --> "*" Dock : works
 StaffMember "*" --> "*" Qualification : has
+StaffMember "*" --> "1" MemberStatus : has
 PhysicalResource "*" --> "*" Qualification : has
-
+PhysicalResource "*" --> "1" ResourceStatus : has
 
 @enduml
