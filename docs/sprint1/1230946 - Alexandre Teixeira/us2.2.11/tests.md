@@ -64,7 +64,7 @@
   - Validate that staff members can be filtered by qualifications.
   - Verify staff with matching qualifications are returned.
 
-### 4.3. Functional Tests
+### 4.2. Functional Tests
 
 - **Test Create Staff Member via UI:**
   - Operator logs in and navigates to staff management.

@@ -45,7 +45,7 @@
   - Validate that only pending (not yet reviewed) notifications are displayed.
   - Ensure approved/rejected notifications are excluded from the list.
 
-### 4.3. Functional Tests
+### 4.2. Functional Tests
 
 - **Test Approval via UI:**
   - Officer logs in and navigates to pending notifications.

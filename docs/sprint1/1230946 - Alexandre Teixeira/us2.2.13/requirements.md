@@ -1,10 +1,10 @@
-# US_2.2.11 – Register and manage operating staff members
+# US_2.2.13 – Register and manage qualifications
 
 ## 1. Requirements
 
 ### 1.1. User Story
 
-**As a Logistics Operator**, I want to register and manage operating staff members (create, update, deactivate), so that the system can accurately reflect staff availability and ensure that only qualified personnel are assigned to resources during scheduling.
+**As a Logistics Operator**, I want to register and manage qualifications (create, update), so that staff members and resources can be consistently associated with the correct skills and certifications required for port operations.
 
 ---
 
@@ -21,16 +21,16 @@
 
 ### 1.3. Acceptance Criteria
 
-- Each staff member must have a unique mecanographic number (ID), short name, contact details (email, phone), qualifications, operational window, and current status (e.g., available, unavailable).
-- Deactivation/reactivation must not delete staff data but preserve it for audit and historical planning purposes.
-- Staff members must be searchable and filterable by id, name, status, and qualifications.
+- Each qualification has a unique code and a descriptive name (e.g., "STS Crane Operator," "Truck Driver").
+- Qualifications must be searchable and filterable by code or name.
+- A qualification must exist before it can be assigned to staff members or resources.
 
 ---
 
 ### 1.4. Found Dependencies
 
+- US_2.2.11 - Register and manage operating staff members.
 - US_2.2.12 - Register and manage physical resources.
-- US_2.2.13 - Register and manage qualifications.
 
 ---
 
