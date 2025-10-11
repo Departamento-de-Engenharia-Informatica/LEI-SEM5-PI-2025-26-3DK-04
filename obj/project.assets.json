@@ -1057,19 +1057,19 @@
     ]
   },
   "packageFolders": {
-    "/home/bruno-teixeira/.nuget/packages/": {}
+    "C:\\Users\\luisg\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/bruno-teixeira/ISEP/Proj/LEI-SEM5-PI-2025-26-3DK-04/DDDNetCore.csproj",
+      "projectUniqueName": "C:\\Users\\luisg\\IdeaProjects\\LEI-SEM5-PI-2025-26-3DK-04\\DDDNetCore.csproj",
       "projectName": "DDDNetCore",
-      "projectPath": "/home/bruno-teixeira/ISEP/Proj/LEI-SEM5-PI-2025-26-3DK-04/DDDNetCore.csproj",
-      "packagesPath": "/home/bruno-teixeira/.nuget/packages/",
-      "outputPath": "/home/bruno-teixeira/ISEP/Proj/LEI-SEM5-PI-2025-26-3DK-04/obj/",
+      "projectPath": "C:\\Users\\luisg\\IdeaProjects\\LEI-SEM5-PI-2025-26-3DK-04\\DDDNetCore.csproj",
+      "packagesPath": "C:\\Users\\luisg\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\luisg\\IdeaProjects\\LEI-SEM5-PI-2025-26-3DK-04\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/bruno-teixeira/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\luisg\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -1087,6 +1087,11 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -1133,7 +1138,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.120/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.414/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
