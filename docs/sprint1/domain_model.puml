@@ -119,7 +119,6 @@ package "Staff Management Aggregate" {
         email: String
         phoneNumber: int
         operationalWindow: String
-        currentStatus: String
     }
 
     enum MemberStatus{
