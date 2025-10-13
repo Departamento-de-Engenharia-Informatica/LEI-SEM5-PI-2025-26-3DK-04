@@ -24,18 +24,7 @@ namespace DDDSample1.Domain.Vessels
         {
             var notifications = await _repo.GetCompletedNotificationsAsync();
             
-            return notifications.Select(n => new VesselVisitNotificationDto
-            {
-                Id = n.Id.AsGuid(),
-                State = n.State,
-                AssignedDock = n.AssignedDock,
-                RejectedReason = n.RejectedReason,
-                DecisionTimeStamp = n.DecisionTimeStamp,
-                DecisionOutcome = n.DecisionOutcome,
-                OfficerId = n.OfficerId,
-                LoadingCargo = n.LoadingCargo,
-                UnloadingCargo = n.UnloadingCargo
-            }).ToList();
+            return notifications.Select(n => MapToDto(n)).ToList();
         }
         
         // Procurar notificação por ID
@@ -46,18 +35,7 @@ namespace DDDSample1.Domain.Vessels
             if (notification == null)
                 return null;
             
-            return new VesselVisitNotificationDto
-            {
-                Id = notification.Id.AsGuid(),
-                State = notification.State,
-                AssignedDock = notification.AssignedDock,
-                RejectedReason = notification.RejectedReason,
-                DecisionTimeStamp = notification.DecisionTimeStamp,
-                DecisionOutcome = notification.DecisionOutcome,
-                OfficerId = notification.OfficerId,
-                LoadingCargo = notification.LoadingCargo,
-                UnloadingCargo = notification.UnloadingCargo
-            };
+            return MapToDto(notification);
         }
         
         // Aprovar notificação
@@ -74,34 +52,29 @@ namespace DDDSample1.Domain.Vessels
             // Persistir mudanças
             await _unitOfWork.CommitAsync();
             
-            return new VesselVisitNotificationDto
-            {
-                Id = notification.Id.AsGuid(),
-                State = notification.State,
-                AssignedDock = notification.AssignedDock,
-                RejectedReason = notification.RejectedReason,
-                DecisionTimeStamp = notification.DecisionTimeStamp,
-                DecisionOutcome = notification.DecisionOutcome,
-                OfficerId = notification.OfficerId,
-                LoadingCargo = notification.LoadingCargo,
-                UnloadingCargo = notification.UnloadingCargo
-            };
+            return MapToDto(notification);
         }
-        
+
         // Rejeitar notificação
         public async Task<VesselVisitNotificationDto> RejectAsync(Guid id, string reason, string officerId)
         {
             var notification = await _repo.GetByIdAsync(new VesselVisitNotificationID(id));
-            
+
             if (notification == null)
                 throw new BusinessRuleValidationException("Vessel Visit Notification not found.");
-            
+
             // Chamar método de domínio que contém as regras de negócio
             notification.Reject(reason, officerId);
-            
+
             // Persistir mudanças
             await _unitOfWork.CommitAsync();
-            
+
+            return MapToDto(notification);
+        }
+        
+        // Helper method
+        private VesselVisitNotificationDto MapToDto(VesselVisitNotification notification)
+        {
             return new VesselVisitNotificationDto
             {
                 Id = notification.Id.AsGuid(),

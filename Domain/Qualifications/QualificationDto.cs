@@ -1,10 +1,9 @@
 using System;
 
-namespace DDDSample1.Domain.StaffMembers
+namespace DDDSample1.Domain.Qualifications
 {
     /// <summary>
     /// DTO de resposta para Qualification
-    /// Usado dentro de StaffMemberDto para representar qualificações
     /// </summary>
     public class QualificationDto
     {

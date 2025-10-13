@@ -16,7 +16,7 @@ namespace DDDSample1.Domain.Vessels
         }
 
         override
-        protected  Object createFromString(String text){
+        protected Object createFromString(String text){
             return new Guid(text);
         }
         
