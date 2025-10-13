@@ -10,12 +10,16 @@ using DDDSample1.Infrastructure.Categories;
 using DDDSample1.Infrastructure.Products;
 using DDDSample1.Infrastructure.Families;
 using DDDSample1.Infrastructure.Vessels;
+using DDDSample1.Infrastructure.StaffMembers;
+using DDDSample1.Infrastructure.Qualifications;
 using DDDSample1.Infrastructure.Shared;
 using DDDSample1.Domain.Shared;
 using DDDSample1.Domain.Categories;
 using DDDSample1.Domain.Products;
 using DDDSample1.Domain.Families;
 using DDDSample1.Domain.Vessels;
+using DDDSample1.Domain.StaffMembers;
+using DDDSample1.Domain.Qualifications;
 
 namespace DDDSample1
 {
@@ -87,6 +91,12 @@ namespace DDDSample1
             
             services.AddTransient<IVesselVisitNotificationRepository,VesselVisitNotificationRepository>();
             services.AddTransient<VesselVisitNotificationService>();
+            
+            services.AddTransient<IStaffMemberRepository,StaffMemberRepository>();
+            services.AddTransient<StaffMemberService>();
+            
+            services.AddTransient<IQualificationRepository,QualificationRepository>();
+            services.AddTransient<QualificationService>();
         }
     }
 }
