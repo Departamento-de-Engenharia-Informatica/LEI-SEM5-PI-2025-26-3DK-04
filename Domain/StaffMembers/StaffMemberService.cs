@@ -214,6 +214,6 @@ namespace DDDSample1.Domain.StaffMembers
                     Description = q.Description
                 }).ToList() ?? new List<QualificationDto>()
             };
-        }
+        }   
     }
 }
