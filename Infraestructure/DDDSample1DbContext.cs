@@ -22,6 +22,7 @@ namespace DDDSample1.Infrastructure
         public DbSet<VesselVisitNotification> VesselVisitNotifications { get; set; }
         
         public DbSet<Organization> Organizations { get; set; }
+        public DbSet<Representative> Representatives { get; set; }
 
         public DDDSample1DbContext(DbContextOptions options) : base(options)
         {
@@ -35,6 +36,7 @@ namespace DDDSample1.Infrastructure
             modelBuilder.ApplyConfiguration(new FamilyEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VesselVisitNotificationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new OrganizationEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new RepresentativeEntityTypeConfiguration());
         }
     }
 }
