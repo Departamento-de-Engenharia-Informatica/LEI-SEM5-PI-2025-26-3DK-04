@@ -50,9 +50,15 @@ namespace DDDSample1.Domain.Organizations
             _representatives.Add(rep);
         }
 
-        public bool HasRepresentatives()
+        public bool HasRepresentative()
         {
-            return _representatives.Any();
+            return _representatives != null && _representatives.Any();
+        }
+        
+        public void ValidateReadyForRegistration()
+        {
+            if (!HasRepresentative())
+                throw new BusinessRuleValidationException("An organization must have at least one representative at registration.");
         }
     }
 }

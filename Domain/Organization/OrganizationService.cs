@@ -9,15 +9,15 @@ namespace DDDSample1.Domain.Organizations
     public class OrganizationService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly OrganizationRepository _repo;
+        private readonly IOrganizationRepository _repo;
 
-        public OrganizationService(IUnitOfWork unitOfWork, OrganizationRepository repo)
+        public OrganizationService(IUnitOfWork unitOfWork, IOrganizationRepository repo)
         {
             _unitOfWork = unitOfWork;
             _repo = repo;
         }
 
-        // ✅ Criar nova organização
+
         public async Task<OrganizationDto> RegisterOrganizationAsync(OrganizationDto dto)
         {
             if (await _repo.ExistsWithLegalNameAsync(dto.LegalName))
@@ -25,13 +25,27 @@ namespace DDDSample1.Domain.Organizations
 
             var org = new Organization(dto.LegalName, dto.AlternativeName, dto.Address, dto.TaxNumber);
 
+
+            if (dto.Representatives != null && dto.Representatives.Any())
+            {
+                foreach (var repDto in dto.Representatives)
+                {
+                    var rep = new Representative(repDto.Name, repDto.CitizenId, repDto.Nationality, repDto.Email,
+                        repDto.PhoneNumber);
+                    org.AddRepresentative(rep);
+                }
+            }
+
+
+            org.ValidateReadyForRegistration();
+
             await _repo.AddAsync(org);
             await _unitOfWork.CommitAsync();
 
             return ToDto(org);
         }
 
-        // ✅ Adicionar representante a uma organização existente
+
         public async Task<OrganizationDto> AddRepresentativeAsync(Guid organizationId, AddRepresentativeDto dto)
         {
             var org = await _repo.GetByIdAsync(new OrganizationId(organizationId));
@@ -48,21 +62,21 @@ namespace DDDSample1.Domain.Organizations
             return ToDto(org);
         }
 
-        // ✅ Obter todas as organizações
+
         public async Task<List<OrganizationDto>> GetAllAsync()
         {
             var orgs = await _repo.GetAllAsync();
             return orgs.Select(ToDto).ToList();
         }
 
-        // ✅ Obter por ID
+
         public async Task<OrganizationDto> GetByIdAsync(Guid id)
         {
             var org = await _repo.GetByIdAsync(new OrganizationId(id));
             return org == null ? null : ToDto(org);
         }
 
-        // 🔧 Conversão para DTO
+
         private static OrganizationDto ToDto(Organization org)
         {
             return new OrganizationDto

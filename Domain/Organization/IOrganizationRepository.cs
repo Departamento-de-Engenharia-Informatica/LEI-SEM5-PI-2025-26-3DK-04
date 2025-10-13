@@ -4,7 +4,7 @@ using DDDSample1.Domain.Shared;
 
 namespace DDDSample1.Domain.Organizations
 {
-    public interface OrganizationRepository : IRepository<Organization, OrganizationId>
+    public interface IOrganizationRepository : IRepository<Organization, OrganizationId>
     {
         // Método para procurar por número fiscal (único)
         Task<Organization> GetByTaxNumberAsync(string taxNumber);
