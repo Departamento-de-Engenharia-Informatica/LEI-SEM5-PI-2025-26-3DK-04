@@ -46,14 +46,22 @@ namespace DDDSample1.Domain.Organizations
         }
 
 
-        public async Task<OrganizationDto> AddRepresentativeAsync(Guid organizationId, AddRepresentativeDto dto)
+        public async Task<OrganizationDto> AddRepresentativeAsync(AddRepresentativeDto dto)
         {
-            var org = await _repo.GetByIdAsync(new OrganizationId(organizationId));
+            if (dto.OrganizationId == null)
+                throw new BusinessRuleValidationException("Organization ID must be provided.");
 
+            var org = await _repo.GetByIdAsync(new OrganizationId(dto.OrganizationId.Value));
             if (org == null)
                 throw new BusinessRuleValidationException("Organization not found.");
 
-            var rep = new Representative(dto.Name, dto.CitizenId, dto.Nationality, dto.Email, dto.PhoneNumber);
+            var rep = new Representative(
+                dto.Name,
+                dto.CitizenId,
+                dto.Nationality,
+                dto.Email,
+                dto.PhoneNumber
+            );
 
             org.AddRepresentative(rep);
 

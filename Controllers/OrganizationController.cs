@@ -67,13 +67,11 @@ namespace DDDSample1.Controllers
         /// Adiciona um representante a uma organização existente.
         /// </summary>
         [HttpPut("{id}/add-representative")]
-        public async Task<ActionResult<OrganizationDto>> AddRepresentative(
-            Guid id,
-            [FromBody] AddRepresentativeDto dto)
+        public async Task<ActionResult<OrganizationDto>> AddRepresentative([FromBody] AddRepresentativeDto dto)
         {
             try
             {
-                var org = await _service.AddRepresentativeAsync(id, dto);
+                var org = await _service.AddRepresentativeAsync(dto);
                 return Ok(org);
             }
             catch (BusinessRuleValidationException ex)

@@ -1,4 +1,6 @@
-﻿namespace DDDSample1.Domain.Organizations
+﻿using System;
+
+namespace DDDSample1.Domain.Organizations
 {
     public class AddRepresentativeDto
     {
@@ -7,5 +9,6 @@
         public string Nationality { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
+        public Guid? OrganizationId { get; set; }
     }
 }

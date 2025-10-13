@@ -60,5 +60,16 @@ namespace DDDSample1.Domain.Organizations
             if (!HasRepresentative())
                 throw new BusinessRuleValidationException("An organization must have at least one representative at registration.");
         }
+        
+        public void RemoveRepresentative(Representative rep)
+        {
+            if (rep == null) return;
+            if (_representatives.Contains(rep))
+            {
+                _representatives.Remove(rep);
+                rep.AssignToOrganization(null); // opcional: limpa o OrganizationId se quiseres
+            }
+        }
+
     }
 }
