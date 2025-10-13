@@ -7,43 +7,50 @@ using DDDSample1.Domain.Shared;
 
 namespace DDDSample1.Infrastructure.Shared
 {
-    public class BaseRepository<TEntity,TEntityId> : IRepository<TEntity,TEntityId>
-    where TEntity : Entity<TEntityId>
-    where TEntityId : EntityId
+    public class BaseRepository<TEntity, TEntityId> : IRepository<TEntity, TEntityId>
+        where TEntity : Entity<TEntityId>
+        where TEntityId : EntityId
     {
         private protected readonly DbSet<TEntity> _objs;
-        
-        public BaseRepository(DbSet<TEntity> objs)
+        private protected readonly DbContext _context;
+
+        public BaseRepository(DbSet<TEntity> objs, DbContext context)
         {
-            this._objs = objs ?? throw new ArgumentNullException(nameof(objs));
-        
+            _objs = objs ?? throw new ArgumentNullException(nameof(objs));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public async Task<List<TEntity>> GetAllAsync()
         {
-            return await this._objs.ToListAsync();
+            return await _objs.ToListAsync();
         }
-        
+
         public async Task<TEntity> GetByIdAsync(TEntityId id)
         {
-            //return await this._context.Categories.FindAsync(id);
-            return await this._objs
-                .Where(x => id.Equals(x.Id)).FirstOrDefaultAsync();
+            return await _objs.Where(x => id.Equals(x.Id)).FirstOrDefaultAsync();
         }
+
         public async Task<List<TEntity>> GetByIdsAsync(List<TEntityId> ids)
         {
-            return await this._objs
-                .Where(x => ids.Contains(x.Id)).ToListAsync();
+            return await _objs.Where(x => ids.Contains(x.Id)).ToListAsync();
         }
+
         public async Task<TEntity> AddAsync(TEntity obj)
         {
-            var ret = await this._objs.AddAsync(obj);
+            var ret = await _objs.AddAsync(obj);
+            await _context.SaveChangesAsync();
             return ret.Entity;
+        }
+
+        public async Task UpdateAsync(TEntity obj)
+        {
+            _objs.Update(obj);
+            await _context.SaveChangesAsync();
         }
 
         public void Remove(TEntity obj)
         {
-            this._objs.Remove(obj);
+            _objs.Remove(obj);
         }
     }
 }

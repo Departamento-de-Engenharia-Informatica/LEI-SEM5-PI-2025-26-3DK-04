@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using DDDSample1.Domain.PortInfrastructure;
+using DDDSample1.Domain.Docks;
 using DDDSample1.Domain.VesselTypes;
 using DDDSample1.Infrastructure.Shared;
 
-namespace DDDSample1.Infrastructure.PortInfrastructure
+namespace DDDSample1.Infrastructure.Docks
 {
-    public class DockRepository : BaseRepository<Dock, DockId>
+    public class DockRepository : BaseRepository<Dock, DockId>, IDockRepository
     {
-        public DockRepository(DDDSample1DbContext context) : base(context.Docks)
+        public DockRepository(DDDSample1DbContext context) : base(context.Docks, context)
         {
         }
 

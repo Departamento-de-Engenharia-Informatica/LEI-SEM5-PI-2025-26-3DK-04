@@ -4,29 +4,30 @@ using DDDSample1.Domain.Products;
 using DDDSample1.Domain.Families;
 using DDDSample1.Domain.Organizations;
 using DDDSample1.Domain.Vessels;
+using DDDSample1.Domain.Docks;
+
 using DDDSample1.Infrastructure.Categories;
 using DDDSample1.Infrastructure.Organizations;
 using DDDSample1.Infrastructure.Products;
 using DDDSample1.Infrastructure.Vessels;
+using DDDSample1.Infrastructure.Docks;
+using DDDSample1.Infrastructure.PortInfrastructure;
 
 namespace DDDSample1.Infrastructure
 {
     public class DDDSample1DbContext : DbContext
     {
         public DbSet<Category> Categories { get; set; }
-
         public DbSet<Product> Products { get; set; }
-
         public DbSet<Family> Families { get; set; }
-        
         public DbSet<VesselVisitNotification> VesselVisitNotifications { get; set; }
-        
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Representative> Representatives { get; set; }
 
+        public DbSet<Dock> Docks { get; set; }
+
         public DDDSample1DbContext(DbContextOptions options) : base(options)
         {
-
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,6 +38,7 @@ namespace DDDSample1.Infrastructure
             modelBuilder.ApplyConfiguration(new VesselVisitNotificationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new OrganizationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new RepresentativeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DockEntityTypeConfiguration());
         }
     }
 }
