@@ -39,5 +39,10 @@ namespace DDDSample1.Infrastructure.Docks
         {
             return await _objs.AnyAsync(d => d.Name == name);
         }
+        public async Task<List<Dock>> GetAllAsync()
+        {
+            return await _objs.Where(d => d.Active).ToListAsync();
+        }
+
     }
 }

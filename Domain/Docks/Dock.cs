@@ -13,6 +13,8 @@ public class Dock : Entity<DockId>, IAggregateRoot
     public double Depth { get; private set; }
     public int MaxDraft { get; private set; }
     public Location Location { get; private set; }
+    public bool Active { get; private set; } = true;
+
 
     private readonly List<VesselType> _allowedVesselTypes = new();
     public IReadOnlyCollection<VesselType> AllowedVesselTypes => _allowedVesselTypes.AsReadOnly();
@@ -41,5 +43,18 @@ public class Dock : Entity<DockId>, IAggregateRoot
         _allowedVesselTypes.Clear();
         _allowedVesselTypes.AddRange(vesselTypes);
     }
+    public void MarkAsInactive()
+    {
+        if (!Active)
+            throw new BusinessRuleValidationException("Dock is already inactive.");
+
+        Active = false;
+    }
+    public bool IsActive()
+    {
+        return Active;
+    }
+
+
 }
 

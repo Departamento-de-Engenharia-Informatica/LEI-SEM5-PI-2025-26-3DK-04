@@ -6,8 +6,6 @@ using DDDNetCore.Infraestructure.Docks;
 using DDDSample1.Domain.Docks;
 using DDDSample1.Domain.Shared;
 using DDDSample1.Domain.VesselTypes;
-using DDDSample1.Infrastructure.PortInfrastructure;
-using DDDSample1.Infrastructure.VesselTypes;
 
 namespace DDDSample1.Infrastructure.Docks
 {
@@ -22,21 +20,69 @@ namespace DDDSample1.Infrastructure.Docks
             _vesselTypeRepo = vesselTypeRepo;
         }
 
-        public async Task<DockDetailsDto> RegisterDockAsync(DockDto dto)
+        public async Task<DockDetailsDto> AddAsync(DockDto dto)
         {
-            var vesselTypes = new List<VesselType>();
-            foreach (var id in dto.VesselTypeIds)
-            {
-                var vt = await _vesselTypeRepo.GetByIdAsync(new VesselTypeId(id));
-                if (vt == null)
-                    throw new BusinessRuleValidationException($"Vessel type {id} not found.");
-                vesselTypes.Add(vt);
-            }
+            var vesselTypes = await GetVesselTypes(dto.VesselTypeIds);
 
             var location = new Location(dto.Coordinates, dto.LocationDescription);
             var dock = new Dock(dto.Name, dto.Length, dto.Depth, dto.MaxDraft, location, vesselTypes);
+
             await _dockRepo.AddAsync(dock);
 
+            return ToDetailsDto(dock);
+        }
+
+        public async Task<DockDetailsDto> UpdateAsync(string id, DockDto dto)
+        {
+            var dockId = new DockId(id);
+            var dock = await _dockRepo.GetByIdAsync(dockId);
+            if (dock == null)
+                return null;
+
+            var vesselTypes = await GetVesselTypes(dto.VesselTypeIds);
+            var location = new Location(dto.Coordinates, dto.LocationDescription);
+
+            dock.Update(dto.Name, dto.Length, dto.Depth, dto.MaxDraft, location, vesselTypes);
+            await _dockRepo.UpdateAsync(dock);
+
+            return ToDetailsDto(dock);
+        }
+
+        public async Task<DockDetailsDto> GetByIdAsync(DockId id)
+        {
+            var dock = await _dockRepo.GetByIdAsync(id);
+            return dock == null ? null : ToDetailsDto(dock);
+        }
+
+        public async Task<List<DockDetailsDto>> GetAllAsync()
+        {
+            var docks = await _dockRepo.GetAllAsync();
+            return docks.Select(ToDetailsDto).ToList();
+        }
+
+        public async Task<DockDetailsDto> InactivateAsync(DockId id)
+        {
+            var dock = await _dockRepo.GetByIdAsync(id);
+            if (dock == null) return null;
+
+            dock.MarkAsInactive();
+            await _dockRepo.UpdateAsync(dock);
+
+            return ToDetailsDto(dock);
+        }
+
+        public async Task<DockDetailsDto> DeleteAsync(DockId id)
+        {
+            var dock = await _dockRepo.GetByIdAsync(id);
+            if (dock == null) return null;
+
+            _dockRepo.Remove(dock);
+            return ToDetailsDto(dock);
+        }
+
+        // Helper: Convert domain to DTO
+        private DockDetailsDto ToDetailsDto(Dock dock)
+        {
             return new DockDetailsDto
             {
                 Id = dock.Id.AsGuid(),
@@ -50,36 +96,18 @@ namespace DDDSample1.Infrastructure.Docks
             };
         }
 
-        public async Task<DockDetailsDto> UpdateDockAsync(Guid dockId, DockDto dto)
+        // Helper: Load vessel types
+        private async Task<List<VesselType>> GetVesselTypes(List<Guid> ids)
         {
-            var dock = await _dockRepo.GetByIdAsync(new DockId(dockId));
-            if (dock == null)
-                throw new BusinessRuleValidationException("Dock not found.");
-
-            var vesselTypes = new List<VesselType>();
-            foreach (var id in dto.VesselTypeIds)
+            var types = new List<VesselType>();
+            foreach (var id in ids)
             {
                 var vt = await _vesselTypeRepo.GetByIdAsync(new VesselTypeId(id));
                 if (vt == null)
                     throw new BusinessRuleValidationException($"Vessel type {id} not found.");
-                vesselTypes.Add(vt);
+                types.Add(vt);
             }
-
-            var location = new Location(dto.Coordinates, dto.LocationDescription);
-            dock.Update(dto.Name, dto.Length, dto.Depth, dto.MaxDraft, location, vesselTypes);
-            await _dockRepo.UpdateAsync(dock);
-
-            return new DockDetailsDto
-            {
-                Id = dock.Id.AsGuid(),
-                Name = dock.Name,
-                Length = dock.Length,
-                Depth = dock.Depth,
-                MaxDraft = dock.MaxDraft,
-                Coordinates = dock.Location.Coordinates,
-                LocationDescription = dock.Location.Description,
-                AllowedVesselTypes = dock.AllowedVesselTypes.Select(v => v.Name).ToList()
-            };
+            return types;
         }
     }
 }
