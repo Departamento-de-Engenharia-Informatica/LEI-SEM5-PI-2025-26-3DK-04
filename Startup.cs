@@ -18,10 +18,12 @@ using DDDSample1.Domain.Categories;
 using DDDSample1.Domain.Docks;
 using DDDSample1.Domain.Products;
 using DDDSample1.Domain.Families;
+using DDDSample1.Domain.Organizations;
 using DDDSample1.Domain.Vessels;
 using DDDSample1.Domain.StaffMembers;
 using DDDSample1.Domain.Qualifications;
 using DDDSample1.Infrastructure.Docks;
+using DDDSample1.Infrastructure.Organizations;
 
 namespace DDDSample1
 {
@@ -102,6 +104,12 @@ namespace DDDSample1
             
             services.AddTransient<IDockRepository,DockRepository>();
             services.AddTransient<DockService>();
+            
+            services.AddTransient<IOrganizationRepository,OrganizationRepository>();
+            services.AddTransient<OrganizationService>();
+            
+            services.AddTransient<IRepresentativeRepository,RepresentativeRepository>();
+            services.AddTransient<RepresentativeService>();
         }
     }
 }

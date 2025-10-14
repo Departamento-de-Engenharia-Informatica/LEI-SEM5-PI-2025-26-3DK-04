@@ -1081,19 +1081,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\jtmon\\.nuget\\packages\\": {}
+    "C:\\Users\\luisg\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\jtmon\\OneDrive\\Ambiente de Trabalho\\ISEP\\3ºano 1ºsemestre\\LAPR5\\Projeto\\DDDNetCore.csproj",
+      "projectUniqueName": "C:\\Users\\luisg\\IdeaProjects\\LEI-SEM5-PI-2025-26-3DK-04\\DDDNetCore.csproj",
       "projectName": "DDDNetCore",
-      "projectPath": "C:\\Users\\jtmon\\OneDrive\\Ambiente de Trabalho\\ISEP\\3ºano 1ºsemestre\\LAPR5\\Projeto\\DDDNetCore.csproj",
-      "packagesPath": "C:\\Users\\jtmon\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\jtmon\\OneDrive\\Ambiente de Trabalho\\ISEP\\3ºano 1ºsemestre\\LAPR5\\Projeto\\obj\\",
+      "projectPath": "C:\\Users\\luisg\\IdeaProjects\\LEI-SEM5-PI-2025-26-3DK-04\\DDDNetCore.csproj",
+      "packagesPath": "C:\\Users\\luisg\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\luisg\\IdeaProjects\\LEI-SEM5-PI-2025-26-3DK-04\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\jtmon\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\luisg\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
