@@ -83,5 +83,43 @@ namespace DDDSample1.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
+        // PUT: api/VesselVisitNotifications/{id}/update
+        /// <summary>
+        /// Permite ao representante atualizar uma notificação enquanto está em progresso.
+        /// </summary>
+        [HttpPut("{id}/update")]
+        public async Task<ActionResult<VesselVisitNotificationDto>> UpdateInProgress(
+            Guid id,
+            [FromBody] UpdateNotificationDto dto)
+        {
+            try
+            {
+                var updated = await _service.UpdateInProgressAsync(id, dto.LoadingCargo, dto.UnloadingCargo);
+                return Ok(updated);
+            }
+            catch (BusinessRuleValidationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+// PUT: api/VesselVisitNotifications/{id}/submit
+        /// <summary>
+        /// Permite ao representante submeter uma notificação para aprovação.
+        /// </summary>
+        [HttpPut("{id}/submit")]
+        public async Task<ActionResult<VesselVisitNotificationDto>> Submit(Guid id)
+        {
+            try
+            {
+                var submitted = await _service.SubmitForApprovalAsync(id);
+                return Ok(submitted);
+            }
+            catch (BusinessRuleValidationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
     }
 }

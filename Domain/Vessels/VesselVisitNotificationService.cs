@@ -88,5 +88,32 @@ namespace DDDSample1.Domain.Vessels
                 UnloadingCargo = notification.UnloadingCargo
             };
         }
+        
+        public async Task<VesselVisitNotificationDto> UpdateInProgressAsync(Guid id, LoadingCargoMaterial newLoading, UnloadingCargoMaterial newUnloading)
+        {
+            var notification = await _repo.GetByIdAsync(new VesselVisitNotificationID(id));
+
+            if (notification == null)
+                throw new BusinessRuleValidationException("Vessel Visit Notification not found.");
+
+            notification.UpdateNotification(newLoading, newUnloading);
+
+            await _unitOfWork.CommitAsync();
+            return MapToDto(notification);
+        }
+
+        public async Task<VesselVisitNotificationDto> SubmitForApprovalAsync(Guid id)
+        {
+            var notification = await _repo.GetByIdAsync(new VesselVisitNotificationID(id));
+
+            if (notification == null)
+                throw new BusinessRuleValidationException("Vessel Visit Notification not found.");
+
+            notification.SubmitForApproval();
+
+            await _unitOfWork.CommitAsync();
+            return MapToDto(notification);
+        }
+
     }
 }

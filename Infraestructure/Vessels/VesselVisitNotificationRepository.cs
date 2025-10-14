@@ -9,7 +9,7 @@ namespace DDDSample1.Infrastructure.Vessels
 {
     public class VesselVisitNotificationRepository : BaseRepository<VesselVisitNotification, VesselVisitNotificationID>, IVesselVisitNotificationRepository
     {
-        public VesselVisitNotificationRepository(DDDSample1DbContext context) : base(context.VesselVisitNotifications)
+        public VesselVisitNotificationRepository(DDDSample1DbContext context) : base(context.VesselVisitNotifications,context)
         {
         }
         

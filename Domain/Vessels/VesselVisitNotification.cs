@@ -1,4 +1,5 @@
 using System;
+using DDDSample1.Domain.Docks;
 using DDDSample1.Domain.Shared;
 
 namespace DDDSample1.Domain.Vessels
@@ -100,6 +101,30 @@ namespace DDDSample1.Domain.Vessels
             this.DecisionOutcome = null;
             this.AssignedDock = null;
         }
+        public void UpdateInProgress(LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo)
+        {
+            if (this.State != NotificationState.InProgress)
+                throw new BusinessRuleValidationException("Only notifications in progress can be updated by a representative.");
+
+            if (loadingCargo == null && unloadingCargo == null)
+                throw new BusinessRuleValidationException("At least one cargo section must be provided to update.");
+            
+            if (loadingCargo != null)
+                this.LoadingCargo = loadingCargo;
+
+            if (unloadingCargo != null)
+                this.UnloadingCargo = unloadingCargo;
+        }
+
+        public void SubmitForApproval()
+        {
+            if (this.State != NotificationState.InProgress)
+                throw new BusinessRuleValidationException("Only notifications in progress can be submitted for approval.");
+
+            this.State = NotificationState.Submitted;
+        }
+
+
     }
     
 }
