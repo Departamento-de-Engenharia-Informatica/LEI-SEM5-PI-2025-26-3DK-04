@@ -482,3 +482,12 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Ignore build artifacts
+bin/
+obj/
+*.user
+*.suo
+
+# Ignore NuGet-generated files
+project.assets.json
