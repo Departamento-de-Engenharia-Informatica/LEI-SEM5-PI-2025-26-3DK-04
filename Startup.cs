@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using DDDNetCore.Domain.PortInfrastructure.StorageArea;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -19,11 +20,13 @@ using DDDSample1.Domain.Docks;
 using DDDSample1.Domain.Products;
 using DDDSample1.Domain.Families;
 using DDDSample1.Domain.Organizations;
+using DDDSample1.Domain.PortInfrastructure.StorageArea;
 using DDDSample1.Domain.Vessels;
 using DDDSample1.Domain.StaffMembers;
 using DDDSample1.Domain.Qualifications;
 using DDDSample1.Infrastructure.Docks;
 using DDDSample1.Infrastructure.Organizations;
+using DDDSample1.Infrastructure.StorageAreas;
 
 namespace DDDSample1
 {
@@ -95,6 +98,9 @@ namespace DDDSample1
             
             services.AddTransient<IVesselVisitNotificationRepository,VesselVisitNotificationRepository>();
             services.AddTransient<VesselVisitNotificationService>();
+            
+            services.AddTransient<IStorageAreaRepository,StorageAreaRepository>();
+            services.AddTransient<StorageAreaService>();
             
             services.AddTransient<IStaffMemberRepository,StaffMemberRepository>();
             services.AddTransient<StaffMemberService>();

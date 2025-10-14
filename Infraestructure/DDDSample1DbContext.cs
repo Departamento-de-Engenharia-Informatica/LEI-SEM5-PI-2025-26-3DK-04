@@ -5,13 +5,14 @@ using DDDSample1.Domain.Families;
 using DDDSample1.Domain.Organizations;
 using DDDSample1.Domain.Vessels;
 using DDDSample1.Domain.Docks;
-
+using DDDSample1.Domain.PortInfrastructure.StorageArea;
 using DDDSample1.Infrastructure.Categories;
 using DDDSample1.Infrastructure.Organizations;
 using DDDSample1.Infrastructure.Products;
 using DDDSample1.Infrastructure.Vessels;
 using DDDSample1.Infrastructure.Docks;
 using DDDSample1.Infrastructure.PortInfrastructure;
+using DDDSample1.Infrastructure.StorageAreas;
 
 namespace DDDSample1.Infrastructure
 {
@@ -25,6 +26,7 @@ namespace DDDSample1.Infrastructure
         public DbSet<Representative> Representatives { get; set; }
 
         public DbSet<Dock> Docks { get; set; }
+        public DbSet<StorageArea> StorageAreas { get; set; }
 
         public DDDSample1DbContext(DbContextOptions options) : base(options)
         {
@@ -39,6 +41,7 @@ namespace DDDSample1.Infrastructure
             modelBuilder.ApplyConfiguration(new OrganizationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new RepresentativeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new DockEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StorageAreaEntityTypeConfiguration());
         }
     }
 }
