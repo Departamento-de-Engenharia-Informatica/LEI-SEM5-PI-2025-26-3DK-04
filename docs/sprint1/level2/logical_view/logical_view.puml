@@ -1,0 +1,36 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_TOP_DOWN()
+
+actor admin  as "Administrator UI"
+actor agent   as "Shipping Agent Representative UI"
+actor officer as "Port Authority Officer UI"
+actor operator as "Logistics Operator UI"
+interface "API" as API
+
+System_Boundary(pms, "Port Management System") {
+
+  Container(gui, "Web App (GUI)")
+  Container(api, "Backend App", ".NET")
+
+  Container(planning, "Planning Service", "Service")
+  Container(mdv, "VVN Service", "Service", "Vessel Visit Notifications, Cargo Manifests")
+  Container(mdr, "Data Service", "Service", "Organizations, Staff Members, Storage, Docks, Vessels")
+}
+
+Rel(agent, gui, "Uses")
+Rel(officer, gui, "Uses")
+Rel(operator, gui, "Uses")
+Rel(admin, gui, "Uses")
+
+Rel(gui, api, "REST")
+Rel(api, planning, "invokes planning APIs")
+Rel(api, mdv, "invokes VVN APIs")
+Rel(api, mdr, "invokes main data APIs")
+
+Rel(mdv, planning, "Provides approved VVNs and Cargo for scheduling")
+Rel(mdr, mdv, "Provides main data (Vessels, Docks, Agents)")
+
+Rel(mdv, API, "Stores/loads cargo manifests")
+Rel(mdr, API, "Stores main data")
+@enduml
