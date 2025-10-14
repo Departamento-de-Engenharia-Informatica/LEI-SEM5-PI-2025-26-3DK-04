@@ -3,7 +3,7 @@ using DDDSample1.Domain.Docks;
 
 namespace DDDNetCore.Domain.PortInfrastructure.StorageArea;
 
-public class StorageDockAssignment : ValueObject
+public class StorageDockAssignment
 {
     public DockId DockId { get; private set; }
     public double DistanceMeters { get; private set; }
@@ -14,7 +14,7 @@ public class StorageDockAssignment : ValueObject
         DistanceMeters = distanceMeters;
     }
 
-    protected override IEnumerable<object> GetEqualityComponents()
+    protected IEnumerable<object> GetEqualityComponents()
     {
         yield return DockId;
         yield return DistanceMeters;
