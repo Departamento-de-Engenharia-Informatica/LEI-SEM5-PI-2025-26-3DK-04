@@ -10,17 +10,15 @@ namespace DDDSample1.Infrastructure.Organizations
     public class OrganizationRepository : BaseRepository<Organization, OrganizationId>, IOrganizationRepository
     {
         public OrganizationRepository(DDDSample1DbContext context)
-            : base(context.Organizations)
+            : base(context.Organizations,context)
         {
         }
 
-        // 🔍 Verifica se já existe organização com o mesmo nome legal
         public async Task<bool> ExistsWithLegalNameAsync(string legalName)
         {
             return await _objs.AnyAsync(o => o.LegalName == legalName);
         }
-
-        // 🔍 Busca todas as organizações com seus representantes
+        
         public Task<Organization> GetByTaxNumberAsync(string taxNumber)
         {
             throw new System.NotImplementedException();
@@ -31,7 +29,6 @@ namespace DDDSample1.Infrastructure.Organizations
             return await _objs.Include(o => o.Representatives).ToListAsync();
         }
 
-        // 🔍 Busca organização por ID (incluindo representantes)
         public async Task<Organization> GetByIdAsync(OrganizationId id)
         {
             return await _objs

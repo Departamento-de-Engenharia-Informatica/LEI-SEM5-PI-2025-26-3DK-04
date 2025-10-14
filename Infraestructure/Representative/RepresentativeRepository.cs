@@ -11,7 +11,7 @@ namespace DDDSample1.Infrastructure.Organizations
     public class RepresentativeRepository : BaseRepository<Representative, RepresentativeId>, IRepresentativeRepository
     {
         public RepresentativeRepository(DDDSample1DbContext context)
-            : base(context.Representatives)
+            : base(context.Representatives,context)
         {
         }
 
