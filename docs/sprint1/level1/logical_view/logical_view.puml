@@ -1,0 +1,26 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Level 1 - Logical View
+
+' ==== Actors ====
+actor admin  as "Administrator UI"
+actor agent   as "Shipping Agent Representative UI"
+actor officer as "Port Authority Officer UI"
+actor operator as "Logistics Operator UI"
+
+' ==== System ====
+System(pms, "Port Management System")
+
+' ==== API Interface ====
+interface "API" as apiIF
+
+' ==== Relationships ====
+Rel(admin,   pms, "")
+Rel(agent,   pms, "")
+Rel(officer, pms, "")
+Rel(operator,pms, "")
+
+Rel(pms,     apiIF, "REST API")
+
+@enduml
