@@ -1,0 +1,61 @@
+@startuml
+title Level 3 Development View
+
+skinparam packageStyle rectangle
+skinparam package {
+  BackgroundColor #87cefaff
+  BorderColor #000000
+  FontSize 12
+}
+skinparam rectangle {
+  BackgroundColor #87cefaff
+  BorderColor #000000
+}
+
+top to bottom direction
+
+package "Port Magement System" #87cefaff {
+    
+    together {
+        rectangle "Infrastructure                                                                                                    " as infra #87CEFA {
+            package Routes
+            package Persistence
+        }
+    }
+    
+    together {
+        rectangle "Interface Adapters                                                                                                " as adapters #87CEFA {
+            package Controllers
+            package Repositories
+        }
+    }
+    
+    together {
+        rectangle "Application Services / Use Case Services                                                             " as appserv #87CEFA {
+            package AppServices
+        }
+    }
+    
+    together {
+        rectangle "Entities/Core/Domain                                                                                            " as domain #87CEFA {
+            package Aggregates
+            package "Value_Objects"
+            package Services
+            package Factories
+            package IRepositories
+        }
+    }
+}
+
+Routes .down.> Controllers
+Controllers .down.> AppServices
+Repositories .up.> Persistence
+Repositories .right.> AppServices
+
+AppServices .down.> Aggregates
+AppServices .down.> Value_Objects
+AppServices .down.> Services
+AppServices ..> IRepositories
+AppServices ..> Factories
+
+@enduml
