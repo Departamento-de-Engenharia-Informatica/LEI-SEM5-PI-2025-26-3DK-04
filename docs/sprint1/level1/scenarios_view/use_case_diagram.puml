@@ -1,0 +1,62 @@
+@startuml use_case_diagram
+
+left to right direction
+
+title Use Case Diagram
+
+actor "Port Authority Officer" as POA
+actor "Shipping Agent Representative" as SAR
+actor "Logistics Operator" as LO
+
+rectangle System {
+    usecase "2.2.1 Create Vessel Type" as CVT
+    usecase "2.2.1 Update Vessel Type" as UVT
+    usecase "2.2.2 Create Vessel Record" as CVR
+    usecase "2.2.2 Update Vessel Record" as UVR
+    usecase "2.2.3 Create Docks" as CD
+    usecase "2.2.3 Update Docks" as UD
+    usecase "2.2.4 Create Storage Area" as CSA
+    usecase "2.2.4 Update Storage Area" as USA
+    usecase "2.2.5 Register Shipping Agent" as RSA
+    usecase "2.2.6 Register Shipping Agent Representative" as RSR
+    usecase "2.2.6 Manage Shipping Agent Representative" as MSR
+    usecase "2.2.7 Review Vessel Visit Notification" as RVV
+    usecase "2.2.8 Create Vessel Visit Notification" as CVV
+    usecase "2.2.9 Change/Complete Vessel Visit Notification" as CCVV
+    usecase "2.2.10 View Vessel Visit Status" as VVV
+    usecase "2.2.11 Register Staff Members" as RSM
+    usecase "2.2.11 Manage Staff Members" as MSM
+    usecase "2.2.12 Register Resources" as RR
+    usecase "2.2.12 Manage Resources" as MR
+    usecase "2.2.13 Create Qualifications" as CQ
+    usecase "2.2.13 Update Qualifications" as UQ
+}
+
+' Port Authority Officer connections
+POA --> CVT
+POA --> UVT
+POA --> CVR
+POA --> UVR
+POA --> CD
+POA --> UD
+POA --> CSA
+POA --> USA
+POA --> RSA
+POA --> RSR
+POA --> MSR
+POA --> RVV
+
+' Shipping Agent Representative connections
+SAR --> CVV
+SAR --> CCVV
+SAR --> VVV
+
+' Logistics Operator connections
+LO --> RSM
+LO --> MSM
+LO --> RR
+LO --> MR
+LO --> CQ
+LO --> UQ
+
+@enduml
