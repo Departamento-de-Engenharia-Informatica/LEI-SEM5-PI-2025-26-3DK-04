@@ -1,0 +1,17 @@
+@startuml SD_US2.2.13_CREATE
+autonumber
+
+actor "Logistics Operator" as Operator
+participant "<<system>>\nPort Operations\nSystem" as System
+
+Operator -> System : create qualification
+activate System
+System --> Operator : insert qualification data
+deactivate System
+
+Operator -> System : qualification data
+activate System
+System --> Operator : qualification created / error
+deactivate System
+
+@enduml

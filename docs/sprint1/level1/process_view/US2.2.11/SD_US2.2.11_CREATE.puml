@@ -1,0 +1,17 @@
+@startuml SD_US2.2.11_CREATE
+autonumber
+
+actor "Logistics Operator" as Operator
+participant "<<system>>\nPort\nOperations\nSystem" as System
+
+Operator -> System : create staff member
+activate System
+System --> Operator : insert the needed data
+deactivate System
+
+Operator -> System : staff member data
+activate System
+System --> Operator : staff member created / error
+deactivate System
+
+@enduml

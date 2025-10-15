@@ -1,0 +1,17 @@
+@startuml SD_US2.2.11_DEACTIVATE
+autonumber
+
+actor "Logistics Operator" as Operator
+participant "<<system>>\nPort\nOperations\nSystem" as System
+
+Operator -> System : deactivate staff member
+activate System
+System --> Operator : select staff member
+deactivate System
+
+Operator -> System : selected staff member
+activate System
+System --> Operator : deactivation successfuly / error
+deactivate System
+
+@enduml

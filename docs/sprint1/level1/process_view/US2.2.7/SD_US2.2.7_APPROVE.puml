@@ -1,0 +1,27 @@
+@startuml SD_US2.2.7_APPROVE
+autonumber
+
+actor "Port Authority Officer" as Officer
+participant "<<system>> Port Operations System" as System
+
+Officer -> System : review pending Vessel Visit Notification
+activate System
+System --> Officer : show pending Vessel Visit Notifications
+deactivate System
+
+Officer -> System : selected pending Vessel Visit Notification
+activate System
+System --> Officer : display Vessel Visit Notification contents
+deactivate System
+
+Officer -> System : approve Vessel Visit Notification
+activate System
+System --> Officer : ask which available dock to assign
+deactivate System
+
+Officer -> System : selected dock
+activate System
+System --> Officer : successfully assigned / error
+deactivate System
+
+@enduml

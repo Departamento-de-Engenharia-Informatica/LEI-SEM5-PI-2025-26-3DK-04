@@ -1,0 +1,22 @@
+@startuml SD_US2.2.13_UPDATE
+autonumber
+
+actor "Logistics Operator" as Operator
+participant "<<system>>\nPort\nOperations\nSystem" as System
+
+Operator -> System : update qualifications
+activate System
+System --> Operator : select qualification
+deactivate System
+
+Operator -> System : selected qualification
+activate System
+System --> Operator : insert the new data
+deactivate System
+
+Operator -> System : new qualification data
+activate System
+System --> Operator : qualification updated / error
+deactivate System
+
+@enduml

@@ -1,0 +1,27 @@
+@startuml SD_US2.2.7_REJECT
+autonumber
+
+actor "Port Authority Officer" as Officer
+participant "<<system>> Port Operations System" as System <<system>>
+
+Officer -> System : review pending Vessel Visit Notification
+activate System
+System --> Officer : show pending Vessel Visit Notifications
+deactivate System
+
+Officer -> System : selected pending VVN
+activate System
+System --> Officer : display VVN contents
+deactivate System
+
+Officer -> System : reject VVN
+activate System
+System --> Officer : ask reason for rejection
+deactivate System
+
+Officer -> System : provides reason
+activate System
+System --> Officer : success / error
+deactivate System
+
+@enduml

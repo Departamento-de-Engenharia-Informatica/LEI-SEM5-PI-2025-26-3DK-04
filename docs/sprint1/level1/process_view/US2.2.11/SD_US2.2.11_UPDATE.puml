@@ -1,0 +1,22 @@
+@startuml SD_US2.2.11_UPDATE
+autonumber
+
+actor "Logistics Operator" as Operator
+participant "<<system>>\nPort\nOperations\nSystem" as System
+
+Operator -> System : update staff member information
+activate System
+System --> Operator : select staff member
+deactivate System
+
+Operator -> System : selected staff member
+activate System
+System --> Operator : insert the new data
+deactivate System
+
+Operator -> System : new staff member data
+activate System
+System --> Operator : staff member updated / error
+deactivate System
+
+@enduml
