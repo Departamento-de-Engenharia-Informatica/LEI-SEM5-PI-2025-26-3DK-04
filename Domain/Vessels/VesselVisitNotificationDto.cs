@@ -6,7 +6,7 @@ namespace DDDSample1.Domain.Vessels
     public class VesselVisitNotificationDto
     {
         public Guid Id { get; set; }
-        public NotificationState State { get; set; }
+        public NotificationStatus Status { get; set; }
         public Dock AssignedDock { get; set; }
         public string RejectedReason { get; set; }
         public DateTime? DecisionTimeStamp { get; set; }

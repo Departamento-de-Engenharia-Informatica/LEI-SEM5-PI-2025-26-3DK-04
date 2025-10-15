@@ -12,7 +12,7 @@ namespace DDDSample1.Infrastructure.Vessels
             
             builder.HasKey(b => b.Id);
             
-            builder.Property(b => b.State)
+            builder.Property(b => b.Status)
                 .IsRequired()
                 .HasConversion<string>(); // Armazena enum como string
             

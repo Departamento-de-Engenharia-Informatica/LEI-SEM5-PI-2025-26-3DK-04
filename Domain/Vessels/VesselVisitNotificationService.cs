@@ -78,7 +78,7 @@ namespace DDDSample1.Domain.Vessels
             return new VesselVisitNotificationDto
             {
                 Id = notification.Id.AsGuid(),
-                State = notification.State,
+                Status = notification.Status,
                 AssignedDock = notification.AssignedDock,
                 RejectedReason = notification.RejectedReason,
                 DecisionTimeStamp = notification.DecisionTimeStamp,

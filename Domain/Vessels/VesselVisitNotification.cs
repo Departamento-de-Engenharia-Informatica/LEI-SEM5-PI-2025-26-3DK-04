@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using DDDSample1.Domain.Docks;
 using DDDSample1.Domain.Shared;
 
@@ -17,11 +18,13 @@ namespace DDDSample1.Domain.Vessels
 
         public string DecisionOutcome { get; private set; }
 
-        public NotificationState State { get; private set; }
+        public NotificationStatus Status { get; private set; }
 
         public Dock AssignedDock { get; private set; }
 
         public string OfficerId { get; private set; }
+        private List<CargoManifest> _cargoManifests;
+        private List<CrewMember> _crewMembers;
 
         private VesselVisitNotification()
         {
@@ -33,13 +36,13 @@ namespace DDDSample1.Domain.Vessels
             this.Id = new VesselVisitNotificationID(Guid.NewGuid());
             this.LoadingCargo = loadingCargo;
             this.UnloadingCargo = unloadingCargo;
-            this.State = NotificationState.Pending;
+            this.Status = NotificationStatus.Pending;
         }
 
         public void Approve(string dockId, string officerId)
         {
             // Validação: só pode aprovar se estiver Completed
-            if (this.State != NotificationState.Completed)
+            if (this.Status != NotificationStatus.Completed)
                 throw new BusinessRuleValidationException(
                     "Only notifications marked as completed can be approved.");
 
@@ -54,7 +57,7 @@ namespace DDDSample1.Domain.Vessels
                     "Officer ID is required for approval.");
 
             // Atualizar estado
-            this.State = NotificationState.Approved;
+            this.Status = NotificationStatus.Approved;
             this.AssignedDock = dockId;
             this.OfficerId = officerId;
             this.DecisionTimeStamp = DateTime.UtcNow;
@@ -65,7 +68,7 @@ namespace DDDSample1.Domain.Vessels
         public void Reject(string reason, string officerId)
         {
             // Validação: só pode rejeitar se estiver Completed
-            if (this.State != NotificationState.Completed)
+            if (this.Status != NotificationStatus.Completed)
                 throw new BusinessRuleValidationException(
                     "Only notifications marked as completed can be rejected.");
 
@@ -80,7 +83,7 @@ namespace DDDSample1.Domain.Vessels
                     "Officer ID is required for rejection.");
 
             // Atualizar estado
-            this.State = NotificationState.Rejected;
+            this.Status = NotificationStatus.Rejected;
             this.RejectedReason = reason;
             this.OfficerId = officerId;
             this.DecisionTimeStamp = DateTime.UtcNow;
@@ -90,11 +93,11 @@ namespace DDDSample1.Domain.Vessels
         
         public void ResetToPending()
         {
-            if (this.State != NotificationState.Rejected)
+            if (this.Status != NotificationStatus.Rejected)
                 throw new BusinessRuleValidationException(
                     "Only rejected notifications can be reset to pending.");
             
-            this.State = NotificationState.Pending;
+            this.Status = NotificationStatus.Pending;
             this.RejectedReason = null;
             this.OfficerId = null;
             this.DecisionTimeStamp = null;
@@ -103,7 +106,7 @@ namespace DDDSample1.Domain.Vessels
         }
         public void UpdateInProgress(LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo)
         {
-            if (this.State != NotificationState.InProgress)
+            if (this.Status != NotificationStatus.InProgress)
                 throw new BusinessRuleValidationException("Only notifications in progress can be updated by a representative.");
 
             if (loadingCargo == null && unloadingCargo == null)
@@ -118,10 +121,10 @@ namespace DDDSample1.Domain.Vessels
 
         public void SubmitForApproval()
         {
-            if (this.State != NotificationState.InProgress)
+            if (this.Status != NotificationStatus.InProgress)
                 throw new BusinessRuleValidationException("Only notifications in progress can be submitted for approval.");
 
-            this.State = NotificationState.Submitted;
+            this.Status = NotificationStatus.Submitted;
         }
 
 

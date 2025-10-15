@@ -1,6 +1,6 @@
 ﻿namespace DDDSample1.Domain.Shared;
 
-public class Location
+public class Location: IValueObject
 {
     public string Coordinates { get; private set; }
     public string Description { get; private set; }

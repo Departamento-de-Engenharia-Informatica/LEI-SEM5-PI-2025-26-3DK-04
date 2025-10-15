@@ -10,6 +10,6 @@ namespace DDDSample1.Domain.Vessels
         Task<List<VesselVisitNotification>> GetCompletedNotificationsAsync();
         
         // Método para procurar notificações por estado
-        Task<List<VesselVisitNotification>> GetByStateAsync(NotificationState state);
+        Task<List<VesselVisitNotification>> GetByStateAsync(NotificationStatus status);
     }
 }

@@ -1,13 +1,14 @@
 ﻿namespace DDDSample1.Domain.Vessels;
 
 
-    public enum NotificationState
+    public enum NotificationStatus
     {
+        Pending,
         InProgress, 
         Submitted,    
         Completed,    
         Approved,
-        Rejected,
-        Pending
+        Rejected
+        
     }
 

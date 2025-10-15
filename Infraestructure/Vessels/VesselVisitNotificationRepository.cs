@@ -16,14 +16,14 @@ namespace DDDSample1.Infrastructure.Vessels
         public async Task<List<VesselVisitNotification>> GetCompletedNotificationsAsync()
         {
             return await _objs
-                .Where(n => n.State == NotificationState.Completed)
+                .Where(n => n.Status == NotificationStatus.Completed)
                 .ToListAsync();
         }
         
-        public async Task<List<VesselVisitNotification>> GetByStateAsync(NotificationState state)
+        public async Task<List<VesselVisitNotification>> GetByStateAsync(NotificationStatus status)
         {
             return await _objs
-                .Where(n => n.State == state)
+                .Where(n => n.Status == status)
                 .ToListAsync();
         }
     }
