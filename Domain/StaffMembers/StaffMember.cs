@@ -25,7 +25,7 @@ namespace DDDSample1.Domain.StaffMembers
             this.Email = email;
             this.PhoneNumber = phoneNumber;
             this.OperationalWindow = operationalWindow;
-            this.Status = MemberStatus.Active;
+            this.Status = MemberStatus.Avaliable;
             this.Qualifications = new List<Qualification>(); // Lista vazia
         }
 
@@ -37,7 +37,7 @@ namespace DDDSample1.Domain.StaffMembers
             this.Email = email;
             this.PhoneNumber = phoneNumber;
             this.OperationalWindow = operationalWindow;
-            this.Status = MemberStatus.Active;
+            this.Status = MemberStatus.Avaliable;
             this.Qualifications = qualifications;
         }
 
@@ -127,18 +127,18 @@ namespace DDDSample1.Domain.StaffMembers
         // Desativar staff member
         public void Deactivate()
         {
-            if (this.Status == MemberStatus.Inactive)
+            if (this.Status == MemberStatus.Unavailable)
                 throw new BusinessRuleValidationException("Staff member is already inactive.");
             
-            this.Status = MemberStatus.Inactive;
+            this.Status = MemberStatus.Unavailable;
         }
 
         public void Reactivate()
         {
-            if (this.Status == MemberStatus.Active)
+            if (this.Status == MemberStatus.Avaliable)
                 throw new BusinessRuleValidationException("Staff member is already active.");
             
-            this.Status = MemberStatus.Active;
+            this.Status = MemberStatus.Avaliable;
         }
     }
 }
