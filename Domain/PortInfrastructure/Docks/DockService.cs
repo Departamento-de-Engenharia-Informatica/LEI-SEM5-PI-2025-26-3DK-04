@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using DDDNetCore.Infraestructure.Docks;
 using DDDSample1.Domain.Docks;
 using DDDSample1.Domain.Shared;
-using DDDSample1.Domain.VesselTypes;
+using DDDSample1.Domain.Vessels;
+//using DDDSample1.Domain.VesselTypes;
 
 namespace DDDSample1.Infrastructure.Docks
 {

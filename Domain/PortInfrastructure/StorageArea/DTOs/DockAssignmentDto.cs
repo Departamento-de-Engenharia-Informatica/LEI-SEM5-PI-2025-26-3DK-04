@@ -1,4 +1,5 @@
 ﻿using System;
+using DDDSample1.Domain.Docks;
 
 namespace DDDNetCore.Infraestructure.PortInfrastructure.DTOs;
 

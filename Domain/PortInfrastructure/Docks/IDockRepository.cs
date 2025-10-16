@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using DDDSample1.Domain.Shared;
+using DDDSample1.Domain.Vessels;
 
 namespace DDDSample1.Domain.Docks
 {

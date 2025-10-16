@@ -25,7 +25,7 @@ public class StorageAreaService
 
         foreach (var dock in dto.AssignedDocks ?? new List<DockAssignmentDto>())
         {
-            area.AssignDock(new DockId(dock.DockId), dock.DistanceMeters);
+            area.AssignDock(new DockID(dock.DockId), dock.DistanceMeters);
         }
 
         await _repo.AddAsync(area);

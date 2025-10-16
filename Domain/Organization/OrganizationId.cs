@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Text.Json.Serialization;
-using DDDSample1.Domain.Shared;
 using Newtonsoft.Json;
+using DDDSample1.Domain.Shared;
+
 
 namespace DDDSample1.Domain.Organizations
 {

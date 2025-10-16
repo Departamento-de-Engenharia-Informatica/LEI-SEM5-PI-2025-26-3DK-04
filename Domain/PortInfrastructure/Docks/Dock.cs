@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using DDDSample1.Domain.Shared;
 using System.Linq;
+using DDDSample1.Domain.Vessels;
 
 
 namespace DDDSample1.Domain.Docks;

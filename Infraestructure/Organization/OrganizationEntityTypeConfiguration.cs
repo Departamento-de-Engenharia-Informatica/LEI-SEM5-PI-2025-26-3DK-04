@@ -9,9 +9,9 @@ namespace DDDSample1.Infrastructure.Organizations
     {
         public void Configure(EntityTypeBuilder<Organization> builder)
         {
-            builder.ToTable("Organizations", SchemaNames.DDDSample1);
+            //builder.ToTable("Organizations", SchemaNames.DDDSample1);
 
-            // 🔑 Primary Key
+            
             builder.HasKey(o => o.Id);
 
             builder.Property(o => o.Id)
@@ -20,7 +20,7 @@ namespace DDDSample1.Infrastructure.Organizations
                     value => new OrganizationId(value))
                 .IsRequired();
 
-            // 🏢 Organização
+            
             builder.Property(o => o.LegalName)
                 .IsRequired()
                 .HasMaxLength(200);
@@ -36,10 +36,10 @@ namespace DDDSample1.Infrastructure.Organizations
                 .IsRequired()
                 .HasMaxLength(50);
 
-            // 👥 Representantes (Owned Entity)
+          
             builder.OwnsMany(o => o.Representatives, rep =>
             {
-                rep.ToTable("Representatives", SchemaNames.DDDSample1);
+                //rep.ToTable("Representatives", SchemaNames.DDDSample1);
 
                 rep.WithOwner().HasForeignKey("OrganizationId");
 
