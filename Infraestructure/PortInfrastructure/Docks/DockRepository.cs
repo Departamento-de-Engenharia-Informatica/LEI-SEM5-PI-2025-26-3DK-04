@@ -21,6 +21,8 @@ namespace DDDSample1.Infrastructure.Docks
                 .ToListAsync();
         }
 
+       
+
         public async Task<List<Dock>> FilterByVesselTypeAsync(VesselTypeId typeId)
         {
             return await _objs

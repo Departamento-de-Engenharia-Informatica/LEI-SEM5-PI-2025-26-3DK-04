@@ -10,6 +10,8 @@ namespace DDDSample1.Infrastructure.StorageAreas
     {
         public void Configure(EntityTypeBuilder<StorageArea> builder)
         {
+            //builder.ToTable("StorageAreas", SchemaNames.DDDSample1);
+
             builder.HasKey(sa => sa.Id);
             builder.Property(sa => sa.Id)
                 .HasConversion(id => id.AsGuid(), guid => new StorageAreaID(guid))
@@ -31,6 +33,8 @@ namespace DDDSample1.Infrastructure.StorageAreas
 
             builder.OwnsMany(sa => sa.DockAssignments, da =>
             {
+                //da.ToTable("StorageDockAssignments", SchemaNames.DDDSample1);
+                
                 da.WithOwner().HasForeignKey("StorageAreaId");
 
                 da.Property(d => d.DockId)

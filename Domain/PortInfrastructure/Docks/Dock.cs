@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DDDSample1.Domain.Shared;
 using DDDSample1.Domain.Vessels;
 using System.Linq;
+using DDDSample1.Domain.Vessels;
 
 
 namespace DDDSample1.Domain.Docks;
