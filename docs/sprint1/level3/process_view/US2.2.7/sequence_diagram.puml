@@ -1,0 +1,96 @@
+@startuml vessel_visit_notification_review
+autonumber
+
+actor "Port Authority Officer" as Officer
+participant "VesselVisitNotificationsController" as Controller
+participant "VesselVisitNotificationService" as Service
+participant "VesselVisitNotification" as Entity
+participant "IVesselVisitNotificationRepository" as Repository
+participant "UnitOfWork" as UoW
+database "Database" as DB
+
+== Officer Reviews Completed Notifications ==
+activate Officer
+Officer -> Controller : GET /api/VesselVisitNotifications/completed
+activate Controller
+Controller -> Service : GetCompletedNotificationsAsync()
+activate Service
+Service -> Repository : GetCompletedNotificationsAsync()
+activate Repository
+Repository -> DB : query WHERE Status = Completed
+activate DB
+DB --> Repository : notification records
+deactivate DB
+Repository --> Service : List<VesselVisitNotification>
+deactivate Repository
+Service -> Service : MapToDto(notifications)
+Service --> Controller : List<VesselVisitNotificationDto>
+deactivate Service
+Controller --> Officer : 200 OK\n[completedNotifications with audit data]
+deactivate Controller
+
+== Officer Makes Decision ==
+Officer -> Controller : PUT /api/VesselVisitNotifications/{id}/approve-or-reject
+activate Controller
+Controller -> Service : ApproveAsync() or RejectAsync()
+activate Service
+Service -> Repository : GetByIdAsync(VesselVisitNotificationID(id))
+activate Repository
+Repository -> DB : query by id
+activate DB
+DB --> Repository : notification record
+deactivate DB
+Repository --> Service : VesselVisitNotification
+deactivate Repository
+
+alt Approved
+    Service -> Entity : Approve(dockId, officerId)
+    activate Entity
+    Entity --> Service : void
+    deactivate Entity
+    
+    Service -> UoW : CommitAsync()
+    activate UoW
+    UoW -> Repository : save changes
+    activate Repository
+    Repository -> DB : persist (with assigned dock)
+    activate DB
+    DB --> Repository : dockAssigned
+    deactivate DB
+    Repository --> UoW : persisted
+    deactivate Repository
+    UoW --> Service : success
+    deactivate UoW
+    
+    Service -> Service : MapToDto(notification)
+    Service --> Controller : VesselVisitNotificationDto\n(approved with dock and audit data)
+    deactivate Service
+    Controller --> Officer : 200 OK\n(approved notification)
+    deactivate Controller
+
+else Rejected
+    Service -> Entity : Reject(reason, officerId)
+    activate Entity
+    Entity --> Service : void
+    deactivate Entity
+    
+    Service -> UoW : CommitAsync()
+    activate UoW
+    UoW -> Repository : save changes
+    activate Repository
+    Repository -> DB : persist (with rejection reason)
+    activate DB
+    DB --> Repository : rejectionSet
+    deactivate DB
+    Repository --> UoW : persisted
+    deactivate Repository
+    UoW --> Service : success
+    deactivate UoW
+    
+    Service -> Service : MapToDto(notification)
+    Service --> Controller : VesselVisitNotificationDto\n(rejected with reason and audit data)
+    deactivate Service
+    Controller --> Officer : 200 OK\n(rejected notification)
+    deactivate Controller
+end
+@enduml

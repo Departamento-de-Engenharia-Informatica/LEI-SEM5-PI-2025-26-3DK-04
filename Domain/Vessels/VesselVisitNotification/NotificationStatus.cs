@@ -1,4 +1,4 @@
-﻿namespace DDDSample1.Domain.Vessels;
+﻿namespace DDDSample1.Domain.Vessels.VesselVisitNotification;
 
 
     public enum NotificationStatus
