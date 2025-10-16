@@ -8,7 +8,7 @@ using DDDSample1.Infrastructure.Shared;
 
 namespace DDDSample1.Infrastructure.Docks
 {
-    public class DockRepository : BaseRepository<Dock, DockId>, IDockRepository
+    public class DockRepository : BaseRepository<Dock, DockID>, IDockRepository
     {
         public DockRepository(DDDSample1DbContext context) : base(context.Docks, context)
         {

@@ -33,15 +33,15 @@ namespace DDDSample1.Infrastructure.Vessels
             // Configurar LoadingCargo como Value Object
             builder.OwnsOne(b => b.LoadingCargo, cargo =>
             {
-                cargo.Property(c => c.MaterialType).HasColumnName("Type").HasMaxLength(100);
-                cargo.Property(c => c.Quantity).HasColumnName("Quantity");
+                cargo.Property(c => c.Manifests).HasColumnName("Type").HasMaxLength(100);
+                cargo.Property(c => c.TotalWeightKg()).HasColumnName("Quantity");
             });
             
             // Configurar UnloadingCargo como Value Object
             builder.OwnsOne(b => b.UnloadingCargo, cargo =>
             {
-                cargo.Property(c => c.MaterialType).HasColumnName("Type").HasMaxLength(100);
-                cargo.Property(c => c.Quantity).HasColumnName("Quantity");
+                cargo.Property(c => c.Manifests).HasColumnName("Type").HasMaxLength(100);
+                cargo.Property(c => c.TotalWeightKg()).HasColumnName("Quantity");
             });
         }
     }

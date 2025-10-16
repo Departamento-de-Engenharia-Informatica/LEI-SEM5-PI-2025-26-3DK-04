@@ -37,7 +37,7 @@ namespace DDDSample1.Infrastructure.StorageAreas
                 da.WithOwner().HasForeignKey("StorageAreaId");
 
                 da.Property(d => d.DockId)
-                    .HasConversion(id => id.AsGuid(), guid => new DockId(guid))
+                    .HasConversion(id => id.AsGuid(), guid => new DockID(guid))
                     .IsRequired();
 
                 da.Property(d => d.DistanceMeters)

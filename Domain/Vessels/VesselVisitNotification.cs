@@ -2,15 +2,16 @@ using System;
 using System.Collections.Generic;
 using DDDSample1.Domain.Docks;
 using DDDSample1.Domain.Shared;
+using DDDSample1.Domain.Vessels.VesselInformation;
 
 namespace DDDSample1.Domain.Vessels
 {
 
     public class VesselVisitNotification : Entity<VesselVisitNotificationID>, IAggregateRoot
     {
-        public LoadingCargoMaterial LoadingCargo { get; private set; }
+        public LoadingCargoMaterial? LoadingCargo { get; private set; }
         
-        public UnloadingCargoMaterial UnloadingCargo { get; private set; }
+        public UnloadingCargoMaterial? UnloadingCargo { get; private set; }
 
         public string RejectedReason { get; private set; }
 
@@ -23,15 +24,15 @@ namespace DDDSample1.Domain.Vessels
         public Dock AssignedDock { get; private set; }
 
         public string OfficerId { get; private set; }
-        private List<CargoManifest> _cargoManifests;
-        private List<CrewMember> _crewMembers;
+        public List<CargoManifest> _cargoManifests { get; private set; }
+        public List<CrewMember> _crewMembers { get; private set; }
 
         private VesselVisitNotification()
         {
 
         }
 
-        public VesselVisitNotification(LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo)
+        public VesselVisitNotification(LoadingCargoMaterial? loadingCargo, UnloadingCargoMaterial? unloadingCargo)
         {
             this.Id = new VesselVisitNotificationID(Guid.NewGuid());
             this.LoadingCargo = loadingCargo;
@@ -39,7 +40,7 @@ namespace DDDSample1.Domain.Vessels
             this.Status = NotificationStatus.Pending;
         }
 
-        public void Approve(string dockId, string officerId)
+        public void Approve(Dock dock, string officerId)
         {
             // Validação: só pode aprovar se estiver Completed
             if (this.Status != NotificationStatus.Completed)
@@ -47,7 +48,7 @@ namespace DDDSample1.Domain.Vessels
                     "Only notifications marked as completed can be approved.");
 
             // Validação: dock é obrigatório
-            if (string.IsNullOrWhiteSpace(dockId))
+            if (string.IsNullOrWhiteSpace(dock.ToString()))
                 throw new BusinessRuleValidationException(
                     "A dock must be assigned when approving a notification.");
 
@@ -58,7 +59,7 @@ namespace DDDSample1.Domain.Vessels
 
             // Atualizar estado
             this.Status = NotificationStatus.Approved;
-            this.AssignedDock = dockId;
+            this.AssignedDock = dock;
             this.OfficerId = officerId;
             this.DecisionTimeStamp = DateTime.UtcNow;
             this.DecisionOutcome = "Approved";
@@ -104,7 +105,7 @@ namespace DDDSample1.Domain.Vessels
             this.DecisionOutcome = null;
             this.AssignedDock = null;
         }
-        public void UpdateInProgress(LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo)
+        public void UpdateInProgress(LoadingCargoMaterial? loadingCargo, UnloadingCargoMaterial? unloadingCargo)
         {
             if (this.Status != NotificationStatus.InProgress)
                 throw new BusinessRuleValidationException("Only notifications in progress can be updated by a representative.");
@@ -126,8 +127,24 @@ namespace DDDSample1.Domain.Vessels
 
             this.Status = NotificationStatus.Submitted;
         }
+        public bool HasLoadingCargo() => LoadingCargo != null;
+        public bool HasUnloadingCargo() => UnloadingCargo != null;
 
 
+        public void UpdateNotification(LoadingCargoMaterial newLoading, UnloadingCargoMaterial newUnloading)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddCrewMember(CrewMember crew)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void MarkAsInProgress()
+        {
+            throw new NotImplementedException();
+        }
     }
     
 }

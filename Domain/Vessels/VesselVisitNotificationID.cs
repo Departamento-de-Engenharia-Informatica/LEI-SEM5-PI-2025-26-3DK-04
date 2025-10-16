@@ -25,8 +25,8 @@ namespace DDDSample1.Domain.Vessels
             Guid obj = (Guid) base.ObjValue;
             return obj.ToString();
         }
-        public Guid AsGuid(){
-            return (Guid) base.ObjValue;
+        public VesselVisitNotificationID AsGuid(){
+            return (VesselVisitNotificationID)base.ObjValue;
         }
     }
 }

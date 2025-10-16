@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Linq;
 using DDDSample1.Domain.Shared;
 
 namespace DDDSample1.Domain.Vessels.VesselInformation;
@@ -7,17 +7,27 @@ namespace DDDSample1.Domain.Vessels.VesselInformation;
 public class CargoManifest : Entity<CargoManifestID>
 {
     private List<Container> _containers;
-    
+    //private double _weight;
+
+    private CargoManifest(CargoManifestID id)
+    {
+        _containers = new List<Container>();
+    }
+
+    public static CargoManifest Create(string id)
+    {
+        return new CargoManifest(new CargoManifestID(id));
+    }
+
     public void AddContainer(Container container)
     {
-        if (!IsValidContainerIdentifier(container.Id))
-            throw new BusinessRuleValidationException("Invalid container identifier format");
         _containers.Add(container);
     }
 
-    private bool IsValidContainerIdentifier(string identifier)
+    public IReadOnlyCollection<Container> Containers => _containers.AsReadOnly();
+    public double TotalWeightKg()
     {
-        // ISO 6346:2022 validation logic
-        return Regex.IsMatch(identifier, @"^[A-Z]{3}U\d{7}$");
+        return _containers.Sum(c => c.PayloadWeight);
     }
+
 }

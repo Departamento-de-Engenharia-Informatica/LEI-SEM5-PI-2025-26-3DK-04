@@ -12,46 +12,52 @@ namespace DDDSample1.Controllers
     public class VesselVisitNotificationsController : ControllerBase
     {
         private readonly VesselVisitNotificationService _service;
-        
+
         public VesselVisitNotificationsController(VesselVisitNotificationService service)
         {
             _service = service;
         }
-        
-        // GET: api/VesselVisitNotifications/completed
+
+        // POST: api/VesselVisitNotifications
         /// <summary>
-        /// Obtém todas as notificações completadas e prontas para revisão
+        /// Cria uma nova notificação de visita de navio com dados de carga e tripulação.
         /// </summary>
+        [HttpPost]
+        public async Task<ActionResult<VesselVisitNotificationDto>> Create([FromBody] CreateNotificationDto dto)
+        {
+            try
+            {
+                var result = await _service.CreateAsync(dto.LoadingManifests, dto.UnloadingManifests, dto.CrewMembers);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            }
+            catch (BusinessRuleValidationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        // GET: api/VesselVisitNotifications/completed
         [HttpGet("completed")]
         public async Task<ActionResult<List<VesselVisitNotificationDto>>> GetCompletedNotifications()
         {
             var notifications = await _service.GetCompletedNotificationsAsync();
             return Ok(notifications);
         }
-        
+
         // GET: api/VesselVisitNotifications/{id}
-        /// <summary>
-        /// Obtém uma notificação específica por ID
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<VesselVisitNotificationDto>> GetById(Guid id)
         {
             var notification = await _service.GetByIdAsync(id);
-            
             if (notification == null)
                 return NotFound(new { Message = $"Notification with ID {id} not found." });
-            
+
             return Ok(notification);
         }
-        
+
         // PUT: api/VesselVisitNotifications/{id}/approve
-        /// <summary>
-        /// Aprova uma notificação completada e atribui um dock
-        /// </summary>
         [HttpPut("{id}/approve")]
-        public async Task<ActionResult<VesselVisitNotificationDto>> Approve(
-            Guid id,
-            [FromBody] ApproveNotificationDto dto)
+        public async Task<ActionResult<VesselVisitNotificationDto>> Approve(Guid id, [FromBody] ApproveNotificationDto dto)
         {
             try
             {
@@ -63,15 +69,10 @@ namespace DDDSample1.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
-        
+
         // PUT: api/VesselVisitNotifications/{id}/reject
-        /// <summary>
-        /// Rejeita uma notificação completada com um motivo
-        /// </summary>
         [HttpPut("{id}/reject")]
-        public async Task<ActionResult<VesselVisitNotificationDto>> Reject(
-            Guid id,
-            [FromBody] RejectNotificationDto dto)
+        public async Task<ActionResult<VesselVisitNotificationDto>> Reject(Guid id, [FromBody] RejectNotificationDto dto)
         {
             try
             {
@@ -83,14 +84,10 @@ namespace DDDSample1.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
+
         // PUT: api/VesselVisitNotifications/{id}/update
-        /// <summary>
-        /// Permite ao representante atualizar uma notificação enquanto está em progresso.
-        /// </summary>
         [HttpPut("{id}/update")]
-        public async Task<ActionResult<VesselVisitNotificationDto>> UpdateInProgress(
-            Guid id,
-            [FromBody] UpdateNotificationDto dto)
+        public async Task<ActionResult<VesselVisitNotificationDto>> UpdateInProgress(Guid id, [FromBody] UpdateNotificationDto dto)
         {
             try
             {
@@ -103,10 +100,7 @@ namespace DDDSample1.Controllers
             }
         }
 
-// PUT: api/VesselVisitNotifications/{id}/submit
-        /// <summary>
-        /// Permite ao representante submeter uma notificação para aprovação.
-        /// </summary>
+        // PUT: api/VesselVisitNotifications/{id}/submit
         [HttpPut("{id}/submit")]
         public async Task<ActionResult<VesselVisitNotificationDto>> Submit(Guid id)
         {
@@ -120,6 +114,5 @@ namespace DDDSample1.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
-
     }
 }

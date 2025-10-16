@@ -34,7 +34,7 @@ namespace DDDSample1.Infrastructure.Docks
 
         public async Task<DockDetailsDto> UpdateAsync(string id, DockDto dto)
         {
-            var dockId = new DockId(id);
+            var dockId = new DockID(id);
             var dock = await _dockRepo.GetByIdAsync(dockId);
             if (dock == null)
                 return null;
@@ -48,7 +48,7 @@ namespace DDDSample1.Infrastructure.Docks
             return ToDetailsDto(dock);
         }
 
-        public async Task<DockDetailsDto> GetByIdAsync(DockId id)
+        public async Task<DockDetailsDto> GetByIdAsync(DockID id)
         {
             var dock = await _dockRepo.GetByIdAsync(id);
             return dock == null ? null : ToDetailsDto(dock);
@@ -60,7 +60,7 @@ namespace DDDSample1.Infrastructure.Docks
             return docks.Select(ToDetailsDto).ToList();
         }
 
-        public async Task<DockDetailsDto> InactivateAsync(DockId id)
+        public async Task<DockDetailsDto> InactivateAsync(DockID id)
         {
             var dock = await _dockRepo.GetByIdAsync(id);
             if (dock == null) return null;
@@ -71,7 +71,7 @@ namespace DDDSample1.Infrastructure.Docks
             return ToDetailsDto(dock);
         }
 
-        public async Task<DockDetailsDto> DeleteAsync(DockId id)
+        public async Task<DockDetailsDto> DeleteAsync(DockID id)
         {
             var dock = await _dockRepo.GetByIdAsync(id);
             if (dock == null) return null;
