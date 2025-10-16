@@ -102,6 +102,9 @@ namespace DDDSample1
             services.AddTransient<IVesselTypeRepository,VesselTypeRepository>();
             services.AddTransient<VesselTypeService>();
             
+            services.AddTransient<IVesselRepository,VesselRepository>();
+            services.AddTransient<VesselService>();
+            
             services.AddTransient<IStorageAreaRepository,StorageAreaRepository>();
             services.AddTransient<StorageAreaService>();
             
