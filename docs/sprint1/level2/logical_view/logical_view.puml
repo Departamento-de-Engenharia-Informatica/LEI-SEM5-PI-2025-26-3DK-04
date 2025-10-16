@@ -2,6 +2,8 @@
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 LAYOUT_TOP_DOWN()
 
+title Level 2 - Logical View
+
 actor admin  as "Administrator UI"
 actor agent   as "Shipping Agent Representative UI"
 actor officer as "Port Authority Officer UI"

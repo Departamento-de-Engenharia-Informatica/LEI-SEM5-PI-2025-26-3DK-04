@@ -158,7 +158,7 @@ StorageArea "*" --> "*" Dock : serves
 ShippingAgentOrganization "1" --> "1..*" OrganizationRepresentative : has
 ShippingAgentOrganization "1" --> "*" Vessel : has
 ShippingAgentOrganization "1" --> "1..*" Address : located at
-Vessel "1" --> "*" VesselVisitNotification : has
+VesselVisitNotification "*" --> "1" Vessel : has
 VesselVisitNotification "*" --> "1" Dock : happens
 Vessel "1" --> "*" Cargo : has
 LoadingCargoManifest "1" --> "*" ManifestCargo : has
