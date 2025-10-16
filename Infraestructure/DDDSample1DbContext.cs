@@ -22,6 +22,7 @@ namespace DDDSample1.Infrastructure
         public DbSet<Product> Products { get; set; }
         public DbSet<Family> Families { get; set; }
         public DbSet<VesselVisitNotification> VesselVisitNotifications { get; set; }
+        public DbSet<VesselType> VesselTypes { get; set; }
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Representative> Representatives { get; set; }
 
@@ -38,6 +39,7 @@ namespace DDDSample1.Infrastructure
             modelBuilder.ApplyConfiguration(new ProductEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new FamilyEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VesselVisitNotificationEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VesselTypeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new OrganizationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new RepresentativeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new DockEntityTypeConfiguration());
