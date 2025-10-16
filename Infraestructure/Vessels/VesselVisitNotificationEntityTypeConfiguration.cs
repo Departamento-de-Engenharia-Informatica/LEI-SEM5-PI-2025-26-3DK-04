@@ -29,6 +29,12 @@ namespace DDDSample1.Infrastructure.Vessels
             
             builder.Property(b => b.DecisionTimeStamp);
             
+            // Configurar relacionamento com Vessel (obrigatório)
+            builder.HasOne(b => b.Vessel)
+                .WithMany()
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+            
             // Configurar LoadingCargo como Value Object (owned entity)
             builder.OwnsOne(b => b.LoadingCargo);
             
