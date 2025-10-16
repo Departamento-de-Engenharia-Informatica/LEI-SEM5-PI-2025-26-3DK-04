@@ -3,7 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DDDSample1.Domain.Shared;
-using DDDSample1.Domain.Vessels;
+using DDDSample1.Domain.Vessels; // Para CreateNotificationDto
+using DDDSample1.Domain.Vessels.VesselVisitNotification;
 
 namespace DDDSample1.Controllers
 {

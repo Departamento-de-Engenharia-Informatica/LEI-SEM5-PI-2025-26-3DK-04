@@ -10,8 +10,6 @@ namespace DDDSample1.Infrastructure.StaffMembers
     {
         public void Configure(EntityTypeBuilder<StaffMember> builder)
         {
-            builder.ToTable("StaffMembers", SchemaNames.DDDSample1);
-            
             // Chave primária
             builder.HasKey(b => b.Id);
             
@@ -38,25 +36,14 @@ namespace DDDSample1.Infrastructure.StaffMembers
                 .IsRequired()
                 .HasConversion<string>(); // Converte enum MemberStatus para string
 
+            // Configurar relacionamento Many-to-Many com Qualifications
             builder.HasMany(s => s.Qualifications)
                 .WithMany()
-                .UsingEntity<Dictionary<string, object>>(
+                .UsingEntity(
                     "StaffMemberQualifications",  // Nome da tabela de junção
-                    j => j
-                        .HasOne<Qualification>()
-                        .WithMany()
-                        .HasForeignKey("QualificationId")
-                        .OnDelete(DeleteBehavior.Cascade),
-                    j => j
-                        .HasOne<StaffMember>()
-                        .WithMany()
-                        .HasForeignKey("StaffMemberId")
-                        .OnDelete(DeleteBehavior.Cascade),
-                    j =>
-                    {
-                        j.ToTable("StaffMemberQualifications", SchemaNames.DDDSample1);
-                        j.HasKey("StaffMemberId", "QualificationId");
-                    }
+                    l => l.HasOne(typeof(Qualification)).WithMany().HasForeignKey("QualificationId").OnDelete(DeleteBehavior.Cascade),
+                    r => r.HasOne(typeof(StaffMember)).WithMany().HasForeignKey("StaffMemberId").OnDelete(DeleteBehavior.Cascade),
+                    j => j.HasKey("StaffMemberId", "QualificationId")
                 );
         }
     }

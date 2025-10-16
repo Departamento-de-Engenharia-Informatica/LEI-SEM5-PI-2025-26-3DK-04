@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using DDDSample1.Domain.Vessels;
+using DDDSample1.Domain.Vessels.VesselVisitNotification;
 using DDDSample1.Infrastructure.Shared;
 
 namespace DDDSample1.Infrastructure.Vessels

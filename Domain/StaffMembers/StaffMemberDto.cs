@@ -19,13 +19,13 @@ namespace DDDSample1.Domain.StaffMembers
 
         public StaffMemberDto(string name, string email, int phoneNumber, string operationalWindow)
         {
-            this.Id = new StaffMemberID(Guid.NewGuid());
+            this.Id = Guid.NewGuid();
             this.Name = name;
             this.Email = email;
             this.PhoneNumber = phoneNumber;
             this.OperationalWindow = operationalWindow;
-            this.Status = MemberStatus.Active;
-            this.Qualifications = new List<Qualification>(); // Lista vazia
+            this.Status = MemberStatus.Avaliable;
+            this.Qualifications = new List<QualificationDto>(); // Lista vazia
         }
     }
 }

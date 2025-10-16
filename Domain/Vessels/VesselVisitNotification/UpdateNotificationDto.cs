@@ -1,4 +1,4 @@
-﻿using DDDSample1.Domain.Vessels.VesselVisitNotification;
+﻿using DDDSample1.Domain.Vessels.VesselInformation;
 
 namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 {

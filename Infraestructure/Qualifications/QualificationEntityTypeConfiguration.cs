@@ -8,8 +8,6 @@ namespace DDDSample1.Infrastructure.Qualifications
     {
         public void Configure(EntityTypeBuilder<Qualification> builder)
         {
-            builder.ToTable("Qualifications", SchemaNames.DDDSample1);
-            
             // Chave primária
             builder.HasKey(b => b.Id);
             

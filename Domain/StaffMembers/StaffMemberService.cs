@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DDDSample1.Domain.Shared;
+using DDDSample1.Domain.Qualifications;
 
 namespace DDDSample1.Domain.StaffMembers
 {
@@ -22,13 +23,12 @@ namespace DDDSample1.Domain.StaffMembers
         // Criar novo staff member
         public async Task<StaffMemberDto> CreateAsync(CreateStaffMemberDto dto)
         {
-            // Criar entidade de domínio
+            // Criar entidade de domínio (sem qualificações inicialmente)
             var staffMember = new StaffMember(
                 dto.Name,
                 dto.Email,
                 dto.PhoneNumber,
-                dto.OperationalWindow,
-                dto.Status
+                dto.OperationalWindow
             );
             
             // Adicionar ao repositório
@@ -199,21 +199,24 @@ namespace DDDSample1.Domain.StaffMembers
         // Mapear entidade para DTO
         private StaffMemberDto MapToDto(StaffMember staffMember)
         {
-            return new StaffMemberDto
+            var dto = new StaffMemberDto(
+                staffMember.Name,
+                staffMember.Email,
+                staffMember.PhoneNumber,
+                staffMember.OperationalWindow
+            )
             {
                 Id = staffMember.Id.AsGuid(),
-                Name = staffMember.Name,
-                Email = staffMember.Email,
-                PhoneNumber = staffMember.PhoneNumber,
-                OperationalWindow = staffMember.OperationalWindow,
                 Status = staffMember.Status,
                 Qualifications = staffMember.Qualifications?.Select(q => new QualificationDto
                 {
-                    Id = q.Id,
+                    Id = q.Id.AsGuid(),
                     Name = q.Name,
                     Description = q.Description
                 }).ToList() ?? new List<QualificationDto>()
             };
+            
+            return dto;
         }   
     }
 }

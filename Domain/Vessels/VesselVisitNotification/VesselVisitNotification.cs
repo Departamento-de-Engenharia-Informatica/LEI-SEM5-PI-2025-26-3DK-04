@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using DDDSample1.Domain.Docks;
 using DDDSample1.Domain.Shared;
-
+using DDDSample1.Domain.Vessels.VesselInformation;
 namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 {
 
@@ -20,7 +20,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
         public NotificationStatus Status { get; private set; }
 
-        public Dock AssignedDock { get; private set; }
+        public string AssignedDock { get; private set; }
 
         public string OfficerId { get; private set; }
         private List<CargoManifest> _cargoManifests;

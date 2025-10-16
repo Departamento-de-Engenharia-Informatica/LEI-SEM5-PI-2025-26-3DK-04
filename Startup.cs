@@ -22,6 +22,7 @@ using DDDSample1.Domain.Families;
 using DDDSample1.Domain.Organizations;
 using DDDSample1.Domain.PortInfrastructure.StorageArea;
 using DDDSample1.Domain.Vessels;
+using DDDSample1.Domain.Vessels.VesselVisitNotification;
 using DDDSample1.Domain.StaffMembers;
 using DDDSample1.Domain.Qualifications;
 using DDDSample1.Infrastructure.Docks;

@@ -1,5 +1,6 @@
 using System;
 using DDDSample1.Domain.Docks;
+using DDDSample1.Domain.Vessels.VesselInformation;
 
 namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 {
@@ -12,15 +13,15 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         public DateTime? DecisionTimeStamp { get; set; }
         public string DecisionOutcome { get; set; }
         public string OfficerId { get; set; }
-        
+
         public LoadingCargoMaterial LoadingCargo { get; set; }
         public UnloadingCargoMaterial UnloadingCargo { get; set; }
 
         public VesselVisitNotificationDto(LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo)
         {
-            this.Id = new VesselVisitNotificationID(Guid.NewGuid());
+            this.Id = Guid.NewGuid();
             this.LoadingCargo = loadingCargo;
             this.UnloadingCargo = unloadingCargo;
-        }        
+        }
     }
 }

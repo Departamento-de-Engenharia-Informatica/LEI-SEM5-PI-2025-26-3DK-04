@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using DDDSample1.Domain.Vessels;
+using DDDSample1.Domain.Vessels.VesselVisitNotification;
+using DDDSample1.Infrastructure;
 
 namespace DDDSample1.Infrastructure.Vessels
 {
@@ -8,8 +9,6 @@ namespace DDDSample1.Infrastructure.Vessels
     {
         public void Configure(EntityTypeBuilder<VesselVisitNotification> builder)
         {
-            builder.ToTable("VesselVisitNotifications", SchemaNames.DDDSample1);
-            
             builder.HasKey(b => b.Id);
             
             builder.Property(b => b.Status)
@@ -30,19 +29,11 @@ namespace DDDSample1.Infrastructure.Vessels
             
             builder.Property(b => b.DecisionTimeStamp);
             
-            // Configurar LoadingCargo como Value Object
-            builder.OwnsOne(b => b.LoadingCargo, cargo =>
-            {
-                cargo.Property(c => c.Manifests).HasColumnName("Type").HasMaxLength(100);
-                cargo.Property(c => c.TotalWeightKg()).HasColumnName("Quantity");
-            });
+            // Configurar LoadingCargo como Value Object (owned entity)
+            builder.OwnsOne(b => b.LoadingCargo);
             
-            // Configurar UnloadingCargo como Value Object
-            builder.OwnsOne(b => b.UnloadingCargo, cargo =>
-            {
-                cargo.Property(c => c.Manifests).HasColumnName("Type").HasMaxLength(100);
-                cargo.Property(c => c.TotalWeightKg()).HasColumnName("Quantity");
-            });
+            // Configurar UnloadingCargo como Value Object (owned entity)
+            builder.OwnsOne(b => b.UnloadingCargo);
         }
     }
 }

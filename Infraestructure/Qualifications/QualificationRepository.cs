@@ -10,7 +10,7 @@ namespace DDDSample1.Infrastructure.Qualifications
 {
     public class QualificationRepository : BaseRepository<Qualification, QualificationID>, IQualificationRepository
     {
-        public QualificationRepository(DDDSample1DbContext context) : base(context.Qualifications)
+        public QualificationRepository(DDDSample1DbContext context) : base(context.Qualifications, context)
         {
         }
         

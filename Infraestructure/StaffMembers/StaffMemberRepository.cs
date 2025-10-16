@@ -10,7 +10,7 @@ namespace DDDSample1.Infrastructure.StaffMembers
 {
     public class StaffMemberRepository : BaseRepository<StaffMember, StaffMemberID>, IStaffMemberRepository
     {
-        public StaffMemberRepository(DDDSample1DbContext context) : base(context.StaffMembers)
+        public StaffMemberRepository(DDDSample1DbContext context) : base(context.StaffMembers, context)
         {
         }
         
@@ -34,7 +34,7 @@ namespace DDDSample1.Infrastructure.StaffMembers
         public async Task<List<StaffMember>> GetByQualificationAsync(Guid qualificationId)
         {
             return await _objs
-                .Where(s => s.Qualifications.Any(q => q.Id == qualificationId))
+                .Where(s => s.Qualifications.Any(q => q.Id.AsGuid() == qualificationId))
                 .ToListAsync();
         }
         
@@ -54,7 +54,7 @@ namespace DDDSample1.Infrastructure.StaffMembers
                 query = query.Where(s => s.Status == status.Value);
 
             if (qualificationId.HasValue)
-                query = query.Where(s => s.Qualifications.Any(q => q.Id == qualificationId.Value));
+                query = query.Where(s => s.Qualifications.Any(q => q.Id.AsGuid() == qualificationId.Value));
 
             return await query.ToListAsync();
         }
@@ -63,7 +63,7 @@ namespace DDDSample1.Infrastructure.StaffMembers
         public async Task<List<StaffMember>> GetActiveStaffAsync()
         {
             return await _objs
-                .Where(s => s.Status == MemberStatus.Active)
+                .Where(s => s.Status == MemberStatus.Avaliable)
                 .ToListAsync();
         }
         
