@@ -37,7 +37,7 @@ public class StorageArea : Entity<StorageAreaID>
         CurrentOccupancyTEUs = currentOccupancyTEUs;
     }
 
-    public void AssignDock(DockId dockId, double distanceMeters)
+    public void AssignDock(DockID dockId, double distanceMeters)
     {
         if (_dockAssignments.Any(a => a.DockId.Equals(dockId)))
             throw new BusinessRuleValidationException("Dock already assigned.");

@@ -5,10 +5,10 @@ namespace DDDNetCore.Domain.PortInfrastructure.StorageArea;
 
 public class StorageDockAssignment
 {
-    public DockId DockId { get; private set; }
+    public DockID DockId { get; private set; }
     public double DistanceMeters { get; private set; }
 
-    public StorageDockAssignment(DockId dockId, double distanceMeters)
+    public StorageDockAssignment(DockID dockId, double distanceMeters)
     {
         DockId = dockId;
         DistanceMeters = distanceMeters;

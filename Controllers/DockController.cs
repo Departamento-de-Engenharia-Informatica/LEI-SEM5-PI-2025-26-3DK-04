@@ -31,7 +31,7 @@ namespace DDDSample1.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<DockDetailsDto>> GetById(string id)
         {
-            var dock = await _service.GetByIdAsync(new DockId(id));
+            var dock = await _service.GetByIdAsync(new DockID(id));
 
             if (dock == null)
             {
@@ -75,7 +75,7 @@ namespace DDDSample1.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<DockDetailsDto>> SoftDelete(string id)
         {
-            var dock = await _service.InactivateAsync(new DockId(id));
+            var dock = await _service.InactivateAsync(new DockID(id));
 
             if (dock == null)
             {
@@ -91,7 +91,7 @@ namespace DDDSample1.Controllers
         {
             try
             {
-                var dock = await _service.DeleteAsync(new DockId(id));
+                var dock = await _service.DeleteAsync(new DockID(id));
 
                 if (dock == null)
                 {

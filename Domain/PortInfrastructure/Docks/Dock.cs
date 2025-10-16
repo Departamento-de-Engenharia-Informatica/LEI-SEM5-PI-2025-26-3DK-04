@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace DDDSample1.Domain.Docks;
 
-public class Dock : Entity<DockId>, IAggregateRoot
+public class Dock : Entity<DockID>, IAggregateRoot
 {
     public string Name { get; private set; }
     public double Length { get; private set; }
@@ -24,7 +24,7 @@ public class Dock : Entity<DockId>, IAggregateRoot
         if (string.IsNullOrWhiteSpace(name)) throw new BusinessRuleValidationException("Dock name is required.");
         if (vesselTypes == null || !vesselTypes.Any()) throw new BusinessRuleValidationException("At least one vessel type must be assigned.");
 
-        Id = new DockId(Guid.NewGuid());
+        Id = new DockID(Guid.NewGuid());
         Name = name;
         Length = length;
         Depth = depth;

@@ -4,14 +4,14 @@ using Newtonsoft.Json;
 
 namespace DDDSample1.Domain.Docks
 {
-    public class DockId : EntityId
+    public class DockID : EntityId
     {
         [JsonConstructor]
-        public DockId(Guid value) : base(value)
+        public DockID(Guid value) : base(value)
         {
         }
 
-        public DockId(string value) : base(value)
+        public DockID(string value) : base(value)
         {
         }
 

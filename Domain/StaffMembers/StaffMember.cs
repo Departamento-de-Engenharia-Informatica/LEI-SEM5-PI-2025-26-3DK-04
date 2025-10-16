@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DDDSample1.Domain.Qualifications;
 using DDDSample1.Domain.Shared;
 
 namespace DDDSample1.Domain.StaffMembers
@@ -70,7 +71,7 @@ namespace DDDSample1.Domain.StaffMembers
                 throw new BusinessRuleValidationException("Invalid phone number.");
 
             // formato de telefone
-            if (!phoneNumber.ToString().Length != 9)
+            if (phoneNumber.ToString().Length != 9)
                 throw new BusinessRuleValidationException("Phone number needs to have 9 numbers.");    
             
             this.PhoneNumber = phoneNumber;

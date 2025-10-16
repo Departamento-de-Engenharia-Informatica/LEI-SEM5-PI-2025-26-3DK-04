@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DDDSample1.Domain.Qualifications;
 
 namespace DDDSample1.Domain.StaffMembers
 {

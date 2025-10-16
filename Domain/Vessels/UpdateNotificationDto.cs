@@ -1,4 +1,5 @@
 ﻿using DDDSample1.Domain.Vessels;
+using DDDSample1.Domain.Vessels.VesselInformation;
 
 namespace DDDSample1.Domain.Vessels
 {

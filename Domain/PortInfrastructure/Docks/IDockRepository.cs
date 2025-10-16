@@ -4,7 +4,7 @@ using DDDSample1.Domain.Shared;
 
 namespace DDDSample1.Domain.Docks
 {
-    public interface IDockRepository : IRepository<Dock, DockId>
+    public interface IDockRepository : IRepository<Dock, DockID>
     {
         Task<List<Dock>> SearchByNameAsync(string name);
         Task<List<Dock>> FilterByVesselTypeAsync(VesselTypeId typeId);
