@@ -1,5 +1,6 @@
 using System;
 using DDDSample1.Domain.Docks;
+using DDDSample1.Domain.Vessels.VesselInformation;
 
 namespace DDDSample1.Domain.Vessels
 {
