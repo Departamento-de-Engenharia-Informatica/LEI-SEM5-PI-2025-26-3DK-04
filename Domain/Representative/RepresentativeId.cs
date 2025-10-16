@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using DDDSample1.Domain.Shared;
+using Newtonsoft.Json;
 
 namespace DDDSample1.Domain.Organizations
 {
     public class RepresentativeId : EntityId
     {
+        [JsonConstructor]
         public RepresentativeId(Guid value) : base(value) { }
 
         public RepresentativeId(string value) : base(Guid.Parse(value)) { }
