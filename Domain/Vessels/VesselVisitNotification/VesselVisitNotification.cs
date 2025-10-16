@@ -8,6 +8,8 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
     public class VesselVisitNotification : Entity<VesselVisitNotificationID>, IAggregateRoot
     {
+        public Vessel Vessel { get; private set; }
+        
         public LoadingCargoMaterial LoadingCargo { get; private set; }
         
         public UnloadingCargoMaterial UnloadingCargo { get; private set; }
@@ -31,9 +33,13 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
         }
 
-        public VesselVisitNotification(LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo)
+        public VesselVisitNotification(Vessel vessel, LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo)
         {
+            if (vessel == null)
+                throw new BusinessRuleValidationException("Vessel is required for a visit notification.");
+                
             this.Id = new VesselVisitNotificationID(Guid.NewGuid());
+            this.Vessel = vessel;
             this.LoadingCargo = loadingCargo;
             this.UnloadingCargo = unloadingCargo;
             this.Status = NotificationStatus.Pending;

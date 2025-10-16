@@ -28,7 +28,7 @@ namespace DDDSample1.Controllers
         {
             try
             {
-                var result = await _service.CreateAsync(dto.LoadingManifests, dto.UnloadingManifests, dto.CrewMembers);
+                var result = await _service.CreateAsync(dto.VesselId, dto.LoadingManifests, dto.UnloadingManifests, dto.CrewMembers);
                 return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
             }
             catch (BusinessRuleValidationException ex)

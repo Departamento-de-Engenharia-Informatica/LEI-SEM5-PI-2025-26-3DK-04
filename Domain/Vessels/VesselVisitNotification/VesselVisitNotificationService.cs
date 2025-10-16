@@ -11,21 +11,30 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IVesselVisitNotificationRepository _repo;
+        private readonly IVesselRepository _vesselRepo;
         
         public VesselVisitNotificationService(
             IUnitOfWork unitOfWork,
-            IVesselVisitNotificationRepository repo)
+            IVesselVisitNotificationRepository repo,
+            IVesselRepository vesselRepo)
         {
             _unitOfWork = unitOfWork;
             _repo = repo;
+            _vesselRepo = vesselRepo;
         }
         
         //Create new notification
         public async Task<VesselVisitNotificationDto> CreateAsync(
+            Guid vesselId,
             List<CargoManifest> loadingManifests,
             List<CargoManifest> unloadingManifests,
             List<CrewMember> crewMembers)
         {
+            // Buscar o vessel
+            var vessel = await _vesselRepo.GetByIdAsync(new VesselId(vesselId));
+            if (vessel == null)
+                throw new BusinessRuleValidationException("Vessel not found.");
+
             var loadingCargo = loadingManifests != null && loadingManifests.Any()
                 ? new LoadingCargoMaterial(loadingManifests)
                 : null;
@@ -34,7 +43,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 ? new UnloadingCargoMaterial(unloadingManifests)
                 : null;
 
-            var notification = new VesselVisitNotification(loadingCargo, unloadingCargo);
+            var notification = new VesselVisitNotification(vessel, loadingCargo, unloadingCargo);
 
             await _repo.AddAsync(notification);
             await _unitOfWork.CommitAsync();
@@ -106,7 +115,10 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 RejectedReason = notification.RejectedReason,
                 DecisionTimeStamp = notification.DecisionTimeStamp,
                 DecisionOutcome = notification.DecisionOutcome,
-                OfficerId = notification.OfficerId
+                OfficerId = notification.OfficerId,
+                VesselId = notification.Vessel.Id.AsGuid(),
+                VesselName = notification.Vessel.Name,
+                VesselCallsign = notification.Vessel.ImoNumber.ToString()
             };
             return dto;
         }
