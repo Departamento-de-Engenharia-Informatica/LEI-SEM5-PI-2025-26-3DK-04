@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using DDDSample1.Domain.Docks;
-using DDDSample1.Domain.VesselTypes;
+using DDDSample1.Domain.Vessels;
 using DDDSample1.Infrastructure.Shared;
 
 namespace DDDSample1.Infrastructure.Docks

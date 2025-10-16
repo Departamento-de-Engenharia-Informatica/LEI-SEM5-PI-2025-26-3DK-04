@@ -9,9 +9,7 @@ namespace DDDSample1.Infrastructure.Organizations
     {
         public void Configure(EntityTypeBuilder<Representative> builder)
         {
-            builder.ToTable("Representatives", SchemaNames.DDDSample1);
-
-            // 🔑 Primary Key
+            // Primary Key
             builder.HasKey(r => r.Id);
 
             builder.Property(r => r.Id)
@@ -21,7 +19,7 @@ namespace DDDSample1.Infrastructure.Organizations
                 .IsRequired()
                 .ValueGeneratedNever();
 
-            // 🏢 FK para Organização
+            // FK para Organização
             builder.Property(r => r.OrganizationId)
                 .IsRequired(false); // pode ser null antes de associar a org
 

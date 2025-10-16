@@ -9,8 +9,6 @@ namespace DDDSample1.Infrastructure.Organizations
     {
         public void Configure(EntityTypeBuilder<Organization> builder)
         {
-            builder.ToTable("Organizations", SchemaNames.DDDSample1);
-
             // 🔑 Primary Key
             builder.HasKey(o => o.Id);
 
@@ -39,8 +37,6 @@ namespace DDDSample1.Infrastructure.Organizations
             // 👥 Representantes (Owned Entity)
             builder.OwnsMany(o => o.Representatives, rep =>
             {
-                rep.ToTable("Representatives", SchemaNames.DDDSample1);
-
                 rep.WithOwner().HasForeignKey("OrganizationId");
 
                 rep.Property(r => r.Id)

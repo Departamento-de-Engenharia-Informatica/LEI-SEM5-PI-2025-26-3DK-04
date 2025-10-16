@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.Json.Serialization;
 using DDDSample1.Domain.Shared;
 using Newtonsoft.Json;
 

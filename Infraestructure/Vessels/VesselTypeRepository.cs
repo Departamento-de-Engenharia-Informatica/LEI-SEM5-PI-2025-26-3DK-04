@@ -11,7 +11,7 @@ namespace DDDSample1.Infrastructure.Vessels
     {
         private readonly DbSet<VesselType> _dbSet;
 
-        public VesselTypeRepository(DDDSample1DbContext context) : base(context.VesselTypes)
+        public VesselTypeRepository(DDDSample1DbContext context) : base(context.VesselTypes, context)
         {
             _dbSet = context.VesselTypes;
         }

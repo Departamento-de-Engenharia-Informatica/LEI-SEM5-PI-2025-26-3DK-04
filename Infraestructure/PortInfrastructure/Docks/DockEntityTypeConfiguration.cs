@@ -8,8 +8,6 @@ namespace DDDSample1.Infrastructure.PortInfrastructure
     {
         public void Configure(EntityTypeBuilder<Dock> builder)
         {
-            builder.ToTable("Docks", SchemaNames.DDDSample1);
-
             builder.HasKey(d => d.Id);
 
             builder.Property(d => d.Name)
@@ -26,21 +24,12 @@ namespace DDDSample1.Infrastructure.PortInfrastructure
                 .IsRequired();
 
             // Configure Location as a Value Object
-            builder.OwnsOne(d => d.Location, loc =>
-            {
-                loc.Property(l => l.Coordinates)
-                    .HasColumnName("Coordinates")
-                    .HasMaxLength(100);
-
-                loc.Property(l => l.Description)
-                    .HasColumnName("LocationDescription")
-                    .HasMaxLength(200);
-            });
+            builder.OwnsOne(d => d.Location);
 
             // Configure AllowedVesselTypes as a many-to-many relationship
             builder.HasMany(d => d.AllowedVesselTypes)
                 .WithMany()
-                .UsingEntity(j => j.ToTable("DockVesselTypes", SchemaNames.DDDSample1));
+                .UsingEntity("DockVesselTypes");
         }
     }
 }

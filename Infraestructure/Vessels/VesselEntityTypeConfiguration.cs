@@ -11,13 +11,7 @@ namespace DDDSample1.Infrastructure.Vessels
             builder.HasKey(v => v.Id);
 
             // Configure IMO Number as owned type (value object)
-            builder.OwnsOne(v => v.ImoNumber, imo =>
-            {
-                imo.Property(i => i.Value)
-                    .HasColumnName("ImoNumber")
-                    .IsRequired()
-                    .HasMaxLength(7);
-            });
+            builder.OwnsOne(v => v.ImoNumber);
 
             builder.Property(v => v.Name)
                 .IsRequired()
@@ -36,11 +30,6 @@ namespace DDDSample1.Infrastructure.Vessels
 
             builder.Property(v => v.Active)
                 .IsRequired();
-
-            // Create unique index on IMO Number
-            builder.HasIndex("ImoNumber_Value")
-                .IsUnique()
-                .HasDatabaseName("IX_Vessel_ImoNumber");
 
             // Create indexes for search performance
             builder.HasIndex(v => v.Name);
