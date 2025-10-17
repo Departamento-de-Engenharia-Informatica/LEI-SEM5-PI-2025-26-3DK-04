@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using DDDSample1.Domain.Organizations;
 
@@ -9,9 +8,6 @@ namespace DDDSample1.Infrastructure.Organizations
     {
         public void Configure(EntityTypeBuilder<Representative> builder)
         {
-            //builder.ToTable("Representatives", SchemaNames.DDDSample1);
-
-            
             builder.HasKey(r => r.Id);
 
             builder.Property(r => r.Id)
@@ -21,11 +17,6 @@ namespace DDDSample1.Infrastructure.Organizations
                 .IsRequired()
                 .ValueGeneratedNever();
 
-          
-            builder.Property(r => r.OrganizationId)
-                .IsRequired(false); // pode ser null antes de associar a org
-
-            // Campos do representante
             builder.Property(r => r.Name)
                 .IsRequired()
                 .HasMaxLength(150);
@@ -48,9 +39,14 @@ namespace DDDSample1.Infrastructure.Organizations
 
             builder.Property(r => r.Status)
                 .IsRequired()
-                .HasConversion<string>(); // Armazena enum como string
+                .HasConversion<string>();
 
-       
+            // Foreign key configurada no OrganizationEntityTypeConfiguration
+            builder.Property(r => r.OrganizationId)
+                .HasMaxLength(10)  // limite de 10 caracteres
+                .IsRequired()
+                .ValueGeneratedNever();
+
             builder.HasIndex(r => r.Email).IsUnique();
         }
     }

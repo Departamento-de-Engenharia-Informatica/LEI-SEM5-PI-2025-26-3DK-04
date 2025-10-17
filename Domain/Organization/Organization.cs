@@ -17,23 +17,27 @@ namespace DDDSample1.Domain.Organizations
 
         private Organization() { } // EF Core
 
-        public Organization(string legalName, string alternativeName, string address, string taxNumber)
+        public Organization(string id, string legalName, string alternativeName, string address, string taxNumber)
         {
+            if (string.IsNullOrWhiteSpace(id) || id.Length > 10)
+                throw new BusinessRuleValidationException("Identifier is required and must be max 10 characters.");
+
             if (string.IsNullOrWhiteSpace(legalName))
                 throw new BusinessRuleValidationException("Legal name is required.");
 
             if (string.IsNullOrWhiteSpace(address))
                 throw new BusinessRuleValidationException("Address is required.");
 
-            if (string.IsNullOrWhiteSpace(taxNumber))
-                throw new BusinessRuleValidationException("Tax number is required.");
+            // Validação do Tax Number europeu
+            Validators.ValidateTaxNumber(taxNumber);
 
-            this.Id = new OrganizationId(Guid.NewGuid());
+            this.Id = new OrganizationId(id);
             this.LegalName = legalName;
             this.AlternativeName = alternativeName;
             this.Address = address;
             this.TaxNumber = taxNumber;
         }
+
 
         public void AddRepresentative(Representative rep)
         {
