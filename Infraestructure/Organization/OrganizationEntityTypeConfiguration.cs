@@ -72,8 +72,9 @@ namespace DDDSample1.Infrastructure.Organizations
 
                 rep.Property(r => r.OrganizationId)
                     .HasConversion(
-                        id => id.AsGuid(),
+                        id => id.AsString(),
                         value => new OrganizationId(value))
+                    .HasMaxLength(10)
                     .IsRequired();
 
                 rep.HasKey(r => r.Id);

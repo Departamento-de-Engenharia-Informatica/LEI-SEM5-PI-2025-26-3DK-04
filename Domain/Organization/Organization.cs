@@ -17,10 +17,10 @@ namespace DDDSample1.Domain.Organizations
 
         private Organization() { } // EF Core
 
-        public Organization(/*string id,*/ string legalName, string alternativeName, string address, string taxNumber)
+        public Organization(string id, string legalName, string alternativeName, string address, string taxNumber)
         {
-            /*if (string.IsNullOrWhiteSpace(id) || id.Length > 10)
-                throw new BusinessRuleValidationException("Identifier is required and must be max 10 characters.");*/
+            if (string.IsNullOrWhiteSpace(id))
+                throw new BusinessRuleValidationException("Organization identifier is required.");
 
             if (string.IsNullOrWhiteSpace(legalName))
                 throw new BusinessRuleValidationException("Legal name is required.");
@@ -31,7 +31,7 @@ namespace DDDSample1.Domain.Organizations
             // Validação do Tax Number europeu
             Validators.ValidateTaxNumber(taxNumber);
 
-            this.Id = new OrganizationId(Guid.NewGuid());
+            this.Id = new OrganizationId(id); // O OrganizationId já valida o formato
             this.LegalName = legalName;
             this.AlternativeName = alternativeName;
             this.Address = address;
