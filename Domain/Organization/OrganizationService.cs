@@ -44,33 +44,7 @@ namespace DDDSample1.Domain.Organizations
 
             return ToDto(org);
         }
-
-
-        public async Task<OrganizationDto> AddRepresentativeAsync(AddRepresentativeDto dto)
-        {
-            if (dto.OrganizationId == null)
-                throw new BusinessRuleValidationException("Organization ID must be provided.");
-
-            var org = await _repo.GetByIdAsync(new OrganizationId(dto.OrganizationId.Value));
-            if (org == null)
-                throw new BusinessRuleValidationException("Organization not found.");
-
-            var rep = new Representative(
-                dto.Name,
-                dto.CitizenId,
-                dto.Nationality,
-                dto.Email,
-                dto.PhoneNumber
-            );
-
-            org.AddRepresentative(rep);
-
-            await _unitOfWork.CommitAsync();
-
-            return ToDto(org);
-        }
-
-
+        
         public async Task<List<OrganizationDto>> GetAllAsync()
         {
             var orgs = await _repo.GetAllAsync();
@@ -94,9 +68,8 @@ namespace DDDSample1.Domain.Organizations
                 AlternativeName = org.AlternativeName,
                 Address = org.Address,
                 TaxNumber = org.TaxNumber,
-                Representatives = org.Representatives.Select(r => new RepresentativeDto
+                Representatives = org.Representatives.Select(r => new AddRepresentativeToOrgDto()
                 {
-                    Id = r.Id.AsGuid(),
                     Name = r.Name,
                     CitizenId = r.CitizenId,
                     Nationality = r.Nationality,

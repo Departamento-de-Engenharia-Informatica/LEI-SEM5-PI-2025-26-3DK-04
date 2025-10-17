@@ -10,6 +10,6 @@ namespace DDDSample1.Domain.Organizations
         public string AlternativeName { get; set; }
         public string Address { get; set; }
         public string TaxNumber { get; set; }
-        public List<RepresentativeDto> Representatives { get; set; }
+        public List<AddRepresentativeToOrgDto> Representatives { get; set; }
     }
 }
