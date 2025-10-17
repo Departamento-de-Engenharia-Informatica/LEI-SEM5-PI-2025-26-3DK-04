@@ -50,7 +50,8 @@ namespace DDDSample1.Infrastructure
             modelBuilder.ApplyConfiguration(new VesselTypeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VesselEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new OrganizationEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new RepresentativeEntityTypeConfiguration());
+            // Representative is configured as an owned entity within OrganizationEntityTypeConfiguration
+            // modelBuilder.ApplyConfiguration(new RepresentativeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new DockEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StorageAreaEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QualificationEntityTypeConfiguration());

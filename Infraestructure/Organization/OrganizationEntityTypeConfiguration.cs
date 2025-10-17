@@ -41,9 +41,12 @@ namespace DDDSample1.Infrastructure.Organizations
             {
                 //rep.ToTable("Representatives", SchemaNames.DDDSample1);
 
-                rep.WithOwner().HasForeignKey("OrganizationId");
+                rep.WithOwner().HasForeignKey(r => r.OrganizationId);
 
                 rep.Property(r => r.Id)
+                    .HasConversion(
+                        id => id.AsGuid(),
+                        value => new RepresentativeId(value))
                     .ValueGeneratedNever();
 
                 rep.Property(r => r.Name)
@@ -66,7 +69,11 @@ namespace DDDSample1.Infrastructure.Organizations
                     .IsRequired()
                     .HasMaxLength(50);
 
-                rep.Property<Guid>("OrganizationId"); // FK
+                rep.Property(r => r.OrganizationId)
+                    .HasConversion(
+                        id => id.AsGuid(),
+                        value => new OrganizationId(value))
+                    .IsRequired();
 
                 rep.HasKey(r => r.Id);
             });

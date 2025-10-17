@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DDDSample1.Controllers;
 
-[Microsoft.AspNetCore.Components.Route("api/[controller]")]
+[Route("api/[controller]")]
 [ApiController]
 public class StorageAreaController : ControllerBase
 {

@@ -10,8 +10,10 @@ namespace DDDSample1.Infrastructure.Vessels
         {
             builder.HasKey(v => v.Id);
 
-            // Configure IMO Number as owned type (value object)
-            builder.OwnsOne(v => v.ImoNumber);
+            // Configure IMO Number as a simple string
+            builder.Property(v => v.ImoNumber)
+                .IsRequired()
+                .HasMaxLength(15); // IMO + 7 digits = 10 chars, but allowing some buffer
 
             builder.Property(v => v.Name)
                 .IsRequired()

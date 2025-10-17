@@ -16,7 +16,7 @@ namespace DDDSample1.Infrastructure.Vessels
             _dbSet = context.Vessels;
         }
 
-        public async Task<Vessel> GetByImoNumberAsync(ImoNumber imoNumber)
+        public async Task<Vessel> GetByImoNumberAsync(string imoNumber)
         {
             return await _dbSet
                 .Where(v => v.ImoNumber == imoNumber)
@@ -50,14 +50,14 @@ namespace DDDSample1.Infrastructure.Vessels
             
             // Search by IMO number, name, owner, or operator
             return await _dbSet
-                .Where(v => v.ImoNumber.Value.Contains(searchTerm) ||
+                .Where(v => v.ImoNumber.ToLower().Contains(lowerSearchTerm) ||
                            v.Name.ToLower().Contains(lowerSearchTerm) ||
                            v.Owner.ToLower().Contains(lowerSearchTerm) ||
                            v.Operator.ToLower().Contains(lowerSearchTerm))
                 .ToListAsync();
         }
 
-        public async Task<bool> ExistsByImoNumberAsync(ImoNumber imoNumber)
+        public async Task<bool> ExistsByImoNumberAsync(string imoNumber)
         {
             return await _dbSet
                 .AnyAsync(v => v.ImoNumber == imoNumber);

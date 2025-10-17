@@ -6,7 +6,7 @@ namespace DDDSample1.Domain.Vessels
 {
     public class Vessel : Entity<VesselId>, IAggregateRoot
     {
-        public ImoNumber ImoNumber { get; private set; }
+        public string ImoNumber { get; private set; }
         public string Name { get; private set; }
         public VesselTypeId VesselTypeId { get; private set; }
         public string Owner { get; private set; }
@@ -20,10 +20,13 @@ namespace DDDSample1.Domain.Vessels
             this.Active = true;
         }
 
-        public Vessel(ImoNumber imoNumber, string name, VesselTypeId vesselTypeId, string owner, string operatorName)
+        public Vessel(string imoNumber, string name, VesselTypeId vesselTypeId, string owner, string operatorName)
         {
-            if (imoNumber == null)
+            if (string.IsNullOrWhiteSpace(imoNumber))
                 throw new BusinessRuleValidationException("IMO number is required.");
+
+            if (!IsValidImoFormat(imoNumber))
+                throw new BusinessRuleValidationException("IMO number must be in the format: IMO1234567 (7 digits after IMO prefix).");
 
             if (string.IsNullOrWhiteSpace(name))
                 throw new BusinessRuleValidationException("Vessel name is required.");
@@ -99,6 +102,21 @@ namespace DDDSample1.Domain.Vessels
         public void MarkAsActive()
         {
             this.Active = true;
+        }
+
+        private static bool IsValidImoFormat(string imoNumber)
+        {
+            if (string.IsNullOrWhiteSpace(imoNumber))
+                return false;
+
+            var cleaned = imoNumber.Trim().ToUpper();
+            
+            if (!cleaned.StartsWith("IMO"))
+                return false;
+
+            var numericPart = cleaned.Substring(3).Trim();
+            
+            return numericPart.Length == 7 && long.TryParse(numericPart, out _);
         }
     }
 }

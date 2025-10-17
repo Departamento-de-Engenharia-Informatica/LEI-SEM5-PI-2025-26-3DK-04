@@ -29,7 +29,7 @@ namespace DDDSample1.Domain.Vessels
                 vesselDtos.Add(new VesselDto
                 {
                     Id = vessel.Id.AsGuid(),
-                    ImoNumber = vessel.ImoNumber.ToString(),
+                    ImoNumber = vessel.ImoNumber,
                     Name = vessel.Name,
                     VesselTypeId = vessel.VesselTypeId.AsGuid(),
                     VesselTypeName = vesselType?.Name,
@@ -54,7 +54,7 @@ namespace DDDSample1.Domain.Vessels
             return new VesselDto
             {
                 Id = vessel.Id.AsGuid(),
-                ImoNumber = vessel.ImoNumber.ToString(),
+                ImoNumber = vessel.ImoNumber,
                 Name = vessel.Name,
                 VesselTypeId = vessel.VesselTypeId.AsGuid(),
                 VesselTypeName = vesselType?.Name,
@@ -66,7 +66,7 @@ namespace DDDSample1.Domain.Vessels
 
         public async Task<VesselDto> GetByImoNumberAsync(string imoNumber)
         {
-            var imo = new ImoNumber(imoNumber);
+            var imo = imoNumber;
             var vessel = await this._vesselRepo.GetByImoNumberAsync(imo);
 
             if (vessel == null)
@@ -77,7 +77,7 @@ namespace DDDSample1.Domain.Vessels
             return new VesselDto
             {
                 Id = vessel.Id.AsGuid(),
-                ImoNumber = vessel.ImoNumber.ToString(),
+                ImoNumber = vessel.ImoNumber,
                 Name = vessel.Name,
                 VesselTypeId = vessel.VesselTypeId.AsGuid(),
                 VesselTypeName = vesselType?.Name,
@@ -133,7 +133,7 @@ namespace DDDSample1.Domain.Vessels
                 vesselDtos.Add(new VesselDto
                 {
                     Id = vessel.Id.AsGuid(),
-                    ImoNumber = vessel.ImoNumber.ToString(),
+                    ImoNumber = vessel.ImoNumber,
                     Name = vessel.Name,
                     VesselTypeId = vessel.VesselTypeId.AsGuid(),
                     VesselTypeName = vesselType?.Name,
@@ -149,7 +149,7 @@ namespace DDDSample1.Domain.Vessels
         public async Task<VesselDto> AddAsync(CreatingVesselDto dto)
         {
             // Validate IMO number format
-            var imoNumber = new ImoNumber(dto.ImoNumber);
+            var imoNumber = dto.ImoNumber;
 
             // Check if vessel with this IMO already exists
             if (await this._vesselRepo.ExistsByImoNumberAsync(imoNumber))
@@ -180,7 +180,7 @@ namespace DDDSample1.Domain.Vessels
             return new VesselDto
             {
                 Id = vessel.Id.AsGuid(),
-                ImoNumber = vessel.ImoNumber.ToString(),
+                ImoNumber = vessel.ImoNumber,
                 Name = vessel.Name,
                 VesselTypeId = vessel.VesselTypeId.AsGuid(),
                 VesselTypeName = vesselType.Name,
@@ -216,7 +216,7 @@ namespace DDDSample1.Domain.Vessels
             return new VesselDto
             {
                 Id = vessel.Id.AsGuid(),
-                ImoNumber = vessel.ImoNumber.ToString(),
+                ImoNumber = vessel.ImoNumber,
                 Name = vessel.Name,
                 VesselTypeId = vessel.VesselTypeId.AsGuid(),
                 VesselTypeName = vesselType.Name,
@@ -241,7 +241,7 @@ namespace DDDSample1.Domain.Vessels
             return new VesselDto
             {
                 Id = vessel.Id.AsGuid(),
-                ImoNumber = vessel.ImoNumber.ToString(),
+                ImoNumber = vessel.ImoNumber,
                 Name = vessel.Name,
                 VesselTypeId = vessel.VesselTypeId.AsGuid(),
                 VesselTypeName = vesselType?.Name,
@@ -266,7 +266,7 @@ namespace DDDSample1.Domain.Vessels
             return new VesselDto
             {
                 Id = vessel.Id.AsGuid(),
-                ImoNumber = vessel.ImoNumber.ToString(),
+                ImoNumber = vessel.ImoNumber,
                 Name = vessel.Name,
                 VesselTypeId = vessel.VesselTypeId.AsGuid(),
                 VesselTypeName = vesselType?.Name,
@@ -291,7 +291,7 @@ namespace DDDSample1.Domain.Vessels
             return new VesselDto
             {
                 Id = vessel.Id.AsGuid(),
-                ImoNumber = vessel.ImoNumber.ToString(),
+                ImoNumber = vessel.ImoNumber,
                 Name = vessel.Name,
                 VesselTypeId = vessel.VesselTypeId.AsGuid(),
                 VesselTypeName = vesselType?.Name,
