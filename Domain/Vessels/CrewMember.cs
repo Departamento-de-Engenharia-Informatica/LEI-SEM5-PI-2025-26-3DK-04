@@ -9,6 +9,11 @@ namespace DDDSample1.Domain.Vessels
         public string CitizenId { get; private set; }
         public string Nationality { get; private set; }
 
+        // Parameterless constructor for EF Core
+        private CrewMember()
+        {
+        }
+
         public CrewMember(string name, string citizenId, string nationality)
         {
             if (string.IsNullOrWhiteSpace(name))

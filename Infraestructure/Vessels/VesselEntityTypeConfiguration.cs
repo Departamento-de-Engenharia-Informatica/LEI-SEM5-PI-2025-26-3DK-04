@@ -33,6 +33,26 @@ namespace DDDSample1.Infrastructure.Vessels
             builder.Property(v => v.Active)
                 .IsRequired();
 
+            // Configure Crew as owned entities (value objects)
+            builder.OwnsMany(v => v.Crew, crew =>
+            {
+                // Use a shadow property as the key for the owned entity
+                crew.Property<int>("Id");
+                crew.HasKey("Id");
+
+                crew.Property(c => c.Name)
+                    .IsRequired()
+                    .HasMaxLength(150);
+
+                crew.Property(c => c.CitizenId)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                crew.Property(c => c.Nationality)
+                    .IsRequired()
+                    .HasMaxLength(50);
+            });
+
             // Create indexes for search performance
             builder.HasIndex(v => v.Name);
             builder.HasIndex(v => v.Owner);

@@ -36,10 +36,16 @@ namespace DDDSample1.Infrastructure.Vessels
                 .OnDelete(DeleteBehavior.Restrict);
             
             // Configurar LoadingCargo como Value Object (owned entity)
-            builder.OwnsOne(b => b.LoadingCargo);
+            builder.OwnsOne(b => b.LoadingCargo, cargo =>
+            {
+                cargo.Ignore(c => c.Manifests); // Ignore navigation property for now
+            });
             
             // Configurar UnloadingCargo como Value Object (owned entity)
-            builder.OwnsOne(b => b.UnloadingCargo);
+            builder.OwnsOne(b => b.UnloadingCargo, cargo =>
+            {
+                cargo.Ignore(c => c.Manifests); // Ignore navigation property for now
+            });
         }
     }
 }

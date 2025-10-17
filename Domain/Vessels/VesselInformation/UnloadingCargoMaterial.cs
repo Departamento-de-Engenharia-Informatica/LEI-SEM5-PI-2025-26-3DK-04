@@ -9,6 +9,11 @@ public class UnloadingCargoMaterial : ValueObject
     private readonly List<CargoManifest> _manifests = new();
     public IReadOnlyCollection<CargoManifest> Manifests => _manifests.AsReadOnly();
 
+    // Parameterless constructor for EF Core
+    private UnloadingCargoMaterial()
+    {
+    }
+
     public UnloadingCargoMaterial(IEnumerable<CargoManifest> manifests)
     {
         if (manifests == null || !manifests.Any())
