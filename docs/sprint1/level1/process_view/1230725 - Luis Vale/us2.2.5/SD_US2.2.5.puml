@@ -1,0 +1,27 @@
+﻿@startuml SD_US2.2.5_REGISTER_ORGANIZATION
+autonumber
+
+actor "Port Authority Officer" as Officer
+participant "<<system>> Port Operations System" as System
+
+Officer -> System : open "Register New Organization" form
+activate System
+System --> Officer : asks for the needed information
+deactivate System
+
+Officer -> System : enter organization details (identifier, names, address, tax number)
+activate System
+System --> Officer : validate organization data
+deactivate System
+
+Officer -> System : add representative(s) with required info\n(name, citizen ID, nationality, email, phone)
+activate System
+System --> Officer : validate representative(s) data
+deactivate System
+
+Officer -> System : submit registration
+activate System
+System --> Officer : confirm registration success\nand send notifications to representative(s)
+deactivate System
+
+@enduml

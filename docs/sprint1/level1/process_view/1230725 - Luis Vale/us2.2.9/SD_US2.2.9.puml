@@ -1,0 +1,28 @@
+﻿@startuml SD_US2.2.9_EDIT_VESSEL_VISIT_NOTIFICATION
+autonumber
+
+actor "Shipping Agent Representative" as Rep
+participant "<<system>> Port Operations System" as System
+
+Rep -> System : access Vessel Visit Notification list
+activate System
+System --> Rep : display notifications (status: in progress, submitted)
+deactivate System
+
+Rep -> System : open a Vessel Visit Notification (status = in progress)
+activate System
+System --> Rep : show editable notification form
+deactivate System
+
+Rep -> System : edit or complete details
+activate System
+System --> Rep : save changes (status remains "in progress")
+deactivate System
+
+Rep -> System : submit notification for approval
+activate System
+System --> Rep : validate required fields
+System --> Rep : update status to "submitted / approval pending"
+deactivate System
+
+@enduml

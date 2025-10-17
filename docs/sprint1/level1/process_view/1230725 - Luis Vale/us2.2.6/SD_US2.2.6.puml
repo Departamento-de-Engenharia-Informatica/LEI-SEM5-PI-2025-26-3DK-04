@@ -1,0 +1,22 @@
+﻿@startuml SD_US2.2.6_MANAGE_REPRESENTATIVES
+autonumber
+
+actor "Port Authority Officer" as Officer
+participant "<<system>> Port Operations System" as System
+
+Officer -> System : asks to create / edit / deactivate representative
+activate System
+System --> Officer : asks for the needed information
+deactivate System
+
+Officer -> System : enters the needed details(name, citizen ID, nationality, email, phone,organizationId)
+activate System
+System --> Officer : validate representative data
+deactivate System
+
+Officer -> System : confirm action
+activate System
+System --> Officer : update representative record\n(send status notification if applicable)
+deactivate System
+
+@enduml
