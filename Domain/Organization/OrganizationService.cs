@@ -23,7 +23,7 @@ namespace DDDSample1.Domain.Organizations
             if (await _repo.ExistsWithLegalNameAsync(dto.LegalName))
                 throw new BusinessRuleValidationException("An organization with this legal name already exists.");
 
-            var org = new Organization(dto.LegalName, dto.AlternativeName, dto.Address, dto.TaxNumber);
+            var org = new Organization(dto.Id,dto.LegalName, dto.AlternativeName, dto.Address, dto.TaxNumber);
 
 
             if (dto.Representatives != null && dto.Representatives.Any())
@@ -89,7 +89,7 @@ namespace DDDSample1.Domain.Organizations
         {
             return new OrganizationDto
             {
-                Id = org.Id.AsGuid(),
+                Id = org.Id.AsString(),
                 LegalName = org.LegalName,
                 AlternativeName = org.AlternativeName,
                 Address = org.Address,

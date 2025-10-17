@@ -20,7 +20,10 @@ public class Dock : Entity<DockID>, IAggregateRoot
 
     private readonly List<VesselType> _allowedVesselTypes = new();
     public IReadOnlyCollection<VesselType> AllowedVesselTypes => _allowedVesselTypes.AsReadOnly();
-
+        
+    // Construtor usado pelo EF Core
+    private Dock() { }
+    
     public Dock(string name, double length, double depth, int maxDraft, Location location, List<VesselType> vesselTypes)
     {
         if (string.IsNullOrWhiteSpace(name)) throw new BusinessRuleValidationException("Dock name is required.");

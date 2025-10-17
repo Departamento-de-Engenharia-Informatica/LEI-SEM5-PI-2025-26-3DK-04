@@ -21,6 +21,7 @@ namespace DDDSample1.Domain.Organizations
                 throw new BusinessRuleValidationException("Name is required.");
             if (string.IsNullOrWhiteSpace(citizenId))
                 throw new BusinessRuleValidationException("Citizen ID is required.");
+            Validators.ValidateCitizenId(citizenId);
             if (string.IsNullOrWhiteSpace(nationality))
                 throw new BusinessRuleValidationException("Nationality is required.");
             if (string.IsNullOrWhiteSpace(email))
@@ -53,8 +54,7 @@ namespace DDDSample1.Domain.Organizations
             string citizenId,
             string nationality,
             string email,
-            string phoneNumber,
-            Organization newOrganization = null
+            string phoneNumber
         )
         {
             if (!string.IsNullOrWhiteSpace(name))
@@ -67,20 +67,6 @@ namespace DDDSample1.Domain.Organizations
                 Email = email;
             if (!string.IsNullOrWhiteSpace(phoneNumber))
                 PhoneNumber = phoneNumber;
-
-            if (newOrganization != null)
-            {
-                // Se estiver numa organização diferente
-                if (OrganizationId != null && OrganizationId != newOrganization.Id)
-                {
-                    // Remove da organização antiga
-                    var oldOrg = newOrganization; // na prática, passarias a referência da antiga
-                    oldOrg?.RemoveRepresentative(this);
-                }
-
-                // Associa à nova organização
-                AssignToOrganization(newOrganization.Id);
-            }
         }
 
         public void Deactivate()

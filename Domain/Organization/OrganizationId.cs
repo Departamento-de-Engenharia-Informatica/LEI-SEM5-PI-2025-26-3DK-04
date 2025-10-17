@@ -10,7 +10,8 @@ namespace DDDSample1.Domain.Organizations
         [JsonConstructor]
         public OrganizationId(Guid value) : base(value) { }
 
-        public OrganizationId(string value) : base(Guid.Parse(value)) { }
+        public OrganizationId(string value) : base(value) { } // base agora aceita string alfanumérica
+
 
         public Guid AsGuid()
         {

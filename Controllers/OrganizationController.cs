@@ -61,23 +61,5 @@ namespace DDDSample1.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
-
-        // PUT: api/Organizations/{id}/add-representative
-        /// <summary>
-        /// Adiciona um representante a uma organização existente.
-        /// </summary>
-        [HttpPut("{id}/add-representative")]
-        public async Task<ActionResult<OrganizationDto>> AddRepresentative([FromBody] AddRepresentativeDto dto)
-        {
-            try
-            {
-                var org = await _service.AddRepresentativeAsync(dto);
-                return Ok(org);
-            }
-            catch (BusinessRuleValidationException ex)
-            {
-                return BadRequest(new { Message = ex.Message });
-            }
-        }
     }
 }

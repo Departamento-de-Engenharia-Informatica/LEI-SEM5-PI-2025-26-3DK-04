@@ -59,22 +59,13 @@ namespace DDDSample1.Domain.Organizations
             var rep = await _repo.GetByIdAsync(new RepresentativeId(representativeId));
             if (rep == null)
                 throw new BusinessRuleValidationException("Representative not found.");
-
-            Organization newOrg = null;
-            if (dto.OrganizationId != null)
-            {
-                newOrg = await _organizationRepo.GetByIdAsync(new OrganizationId(dto.OrganizationId.Value));
-                if (newOrg == null)
-                    throw new BusinessRuleValidationException("Organization not found.");
-            }
-
+            
             rep.Update(
                 dto.Name,
                 dto.CitizenId,
                 dto.Nationality,
                 dto.Email,
-                dto.PhoneNumber,
-                newOrg
+                dto.PhoneNumber
             );
 
             await _unitOfWork.CommitAsync();

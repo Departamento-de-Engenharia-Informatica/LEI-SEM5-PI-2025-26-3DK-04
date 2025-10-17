@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using DDDSample1.Domain.Organizations;
 
@@ -9,38 +8,40 @@ namespace DDDSample1.Infrastructure.Organizations
     {
         public void Configure(EntityTypeBuilder<Organization> builder)
         {
-            //builder.ToTable("Organizations", SchemaNames.DDDSample1);
-
-            
+            // Chave primária
             builder.HasKey(o => o.Id);
 
+            // Id fornecido pelo usuário, máximo 10 caracteres
             builder.Property(o => o.Id)
                 .HasConversion(
                     id => id.AsString(),
                     value => new OrganizationId(value))
-                .IsRequired();
+                .HasMaxLength(10)  // limite de 10 caracteres
+                .IsRequired()
+                .ValueGeneratedNever();
 
-            
+            // Legal Name
             builder.Property(o => o.LegalName)
                 .IsRequired()
                 .HasMaxLength(200);
 
+            // Alternative Name
             builder.Property(o => o.AlternativeName)
                 .HasMaxLength(200);
 
+            // Address
             builder.Property(o => o.Address)
                 .IsRequired()
                 .HasMaxLength(500);
 
+            // Tax Number (obrigatório)
             builder.Property(o => o.TaxNumber)
                 .IsRequired()
                 .HasMaxLength(50);
 
-          
+            // Representatives as owned entities
             builder.OwnsMany(o => o.Representatives, rep =>
             {
-                //rep.ToTable("Representatives", SchemaNames.DDDSample1);
-
                 rep.WithOwner().HasForeignKey(r => r.OrganizationId);
 
                 rep.Property(r => r.Id)
@@ -78,6 +79,7 @@ namespace DDDSample1.Infrastructure.Organizations
                 rep.HasKey(r => r.Id);
             });
 
+            // Configuração para EF Core acessar campo privado
             builder.Metadata.FindNavigation(nameof(Organization.Representatives))
                 ?.SetPropertyAccessMode(PropertyAccessMode.Field);
         }
