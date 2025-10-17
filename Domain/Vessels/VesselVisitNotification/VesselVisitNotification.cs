@@ -26,7 +26,6 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
         public string OfficerId { get; private set; }
         private List<CargoManifest> _cargoManifests;
-        private List<CrewMember> _crewMembers;
 
         private VesselVisitNotification()
         {

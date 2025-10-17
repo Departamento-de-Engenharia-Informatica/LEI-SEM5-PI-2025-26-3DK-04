@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using DDDSample1.Domain.Shared;
 
 namespace DDDSample1.Domain.Vessels
@@ -11,6 +12,7 @@ namespace DDDSample1.Domain.Vessels
         public string Owner { get; private set; }
         public string Operator { get; private set; }
         public bool Active { get; private set; }
+        public List<CrewMember> Crew { get; set; }
 
         // Required for EF Core
         private Vessel()
@@ -42,6 +44,7 @@ namespace DDDSample1.Domain.Vessels
             this.Owner = owner;
             this.Operator = operatorName;
             this.Active = true;
+            this.Crew = new List<CrewMember>();
         }
 
         public void ChangeName(string name)

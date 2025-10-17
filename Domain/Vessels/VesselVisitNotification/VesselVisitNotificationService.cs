@@ -27,8 +27,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         public async Task<VesselVisitNotificationDto> CreateAsync(
             Guid vesselId,
             List<CargoManifest> loadingManifests,
-            List<CargoManifest> unloadingManifests,
-            List<CrewMember> crewMembers)
+            List<CargoManifest> unloadingManifests)
         {
             // Buscar o vessel
             var vessel = await _vesselRepo.GetByIdAsync(new VesselId(vesselId));

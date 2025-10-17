@@ -9,5 +9,5 @@ public class CreateNotificationDto
     public Guid VesselId { get; set; }
     public List<CargoManifest> LoadingManifests { get; set; }
     public List<CargoManifest> UnloadingManifests { get; set; }
-    public List<CrewMember> CrewMembers { get; set; }
+    //public List<CrewMember> CrewMembers { get; set; }
 }

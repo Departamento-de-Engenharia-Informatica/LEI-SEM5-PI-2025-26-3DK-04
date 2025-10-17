@@ -1081,19 +1081,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Alexandre Teixeira\\.nuget\\packages\\": {}
+    "C:\\Users\\jtmon\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\Install\\Semestre 5\\PROJETO\\LEI-SEM5-PI-2025-26-3DK-04\\DDDNetCore.csproj",
+      "projectUniqueName": "C:\\Users\\jtmon\\OneDrive\\Ambiente de Trabalho\\ISEP\\3ºano 1ºsemestre\\LAPR5\\Projeto\\DDDNetCore.csproj",
       "projectName": "DDDNetCore",
-      "projectPath": "E:\\Install\\Semestre 5\\PROJETO\\LEI-SEM5-PI-2025-26-3DK-04\\DDDNetCore.csproj",
-      "packagesPath": "C:\\Users\\Alexandre Teixeira\\.nuget\\packages\\",
-      "outputPath": "E:\\Install\\Semestre 5\\PROJETO\\LEI-SEM5-PI-2025-26-3DK-04\\obj\\",
+      "projectPath": "C:\\Users\\jtmon\\OneDrive\\Ambiente de Trabalho\\ISEP\\3ºano 1ºsemestre\\LAPR5\\Projeto\\DDDNetCore.csproj",
+      "packagesPath": "C:\\Users\\jtmon\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\jtmon\\OneDrive\\Ambiente de Trabalho\\ISEP\\3ºano 1ºsemestre\\LAPR5\\Projeto\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Alexandre Teixeira\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\jtmon\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -1116,8 +1116,7 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      },
-      "SdkAnalysisLevel": "9.0.300"
+      }
     },
     "frameworks": {
       "net8.0": {
@@ -1155,24 +1154,6 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "downloadDependencies": [
-          {
-            "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[8.0.21, 8.0.21]"
-          },
-          {
-            "name": "Microsoft.NETCore.App.Host.win-x64",
-            "version": "[8.0.21, 8.0.21]"
-          },
-          {
-            "name": "Microsoft.NETCore.App.Ref",
-            "version": "[8.0.21, 8.0.21]"
-          },
-          {
-            "name": "Microsoft.WindowsDesktop.App.Ref",
-            "version": "[8.0.21, 8.0.21]"
-          }
-        ],
         "frameworkReferences": {
           "Microsoft.AspNetCore.App": {
             "privateAssets": "none"
@@ -1181,7 +1162,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.414/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
