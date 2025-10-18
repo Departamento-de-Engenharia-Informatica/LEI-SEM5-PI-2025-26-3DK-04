@@ -33,7 +33,12 @@ namespace DDDSample1.Domain.Organizations
                 if (org == null)
                     throw new BusinessRuleValidationException("Organization not found.");
             }
+            if (await _repo.ExistsWithEmailAsync(dto.Email))
+                throw new BusinessRuleValidationException("Email already in use by another representative.");
 
+            if (await _repo.ExistsWithPhoneAsync(dto.PhoneNumber))
+                throw new BusinessRuleValidationException("Phone number already in use by another representative.");
+            
             var rep = new Representative(
                 dto.Name,
                 dto.CitizenId,
@@ -60,6 +65,11 @@ namespace DDDSample1.Domain.Organizations
             if (rep == null)
                 throw new BusinessRuleValidationException("Representative not found.");
             
+            if (await _repo.ExistsWithEmailAsync(dto.Email))
+                throw new BusinessRuleValidationException("Email already in use by another representative.");
+
+            if (await _repo.ExistsWithPhoneAsync(dto.PhoneNumber))
+                throw new BusinessRuleValidationException("Phone number already in use by another representative.");
             rep.Update(
                 dto.Name,
                 dto.CitizenId,

@@ -46,10 +46,14 @@ namespace DDDSample1.Domain.Organizations
 
             if (rep.OrganizationId != null && rep.OrganizationId != this.Id)
                 throw new BusinessRuleValidationException("Representative already assigned to another organization.");
-
+            
+            
             if (_representatives.Any(r => r.Email == rep.Email))
                 throw new BusinessRuleValidationException("A representative with this email already exists in this organization.");
 
+            if (_representatives.Any(r => r.PhoneNumber == rep.PhoneNumber))
+                throw new BusinessRuleValidationException("A representative with this phone number already exists in this organization.");
+            
             rep.AssignToOrganization(this.Id);
             _representatives.Add(rep);
         }

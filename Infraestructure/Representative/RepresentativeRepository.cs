@@ -11,7 +11,7 @@ namespace DDDSample1.Infrastructure.Organizations
     public class RepresentativeRepository : BaseRepository<Representative, RepresentativeId>, IRepresentativeRepository
     {
         public RepresentativeRepository(DDDSample1DbContext context)
-            : base(context.Representatives,context)
+            : base(context.Representatives, context)
         {
         }
 
@@ -33,6 +33,16 @@ namespace DDDSample1.Infrastructure.Organizations
         {
             return await _objs
                 .FirstOrDefaultAsync(r => r.Email == email);
+        }
+        
+        public async Task<bool> ExistsWithEmailAsync(string email)
+        {
+            return await _objs.AnyAsync(r => r.Email == email);
+        }
+        
+        public async Task<bool> ExistsWithPhoneAsync(string phoneNumber)
+        {
+            return await _objs.AnyAsync(r => r.PhoneNumber == phoneNumber);
         }
     }
 }

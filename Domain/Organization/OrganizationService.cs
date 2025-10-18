@@ -10,6 +10,7 @@ namespace DDDSample1.Domain.Organizations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IOrganizationRepository _repo;
+        private readonly IRepresentativeRepository _repRepo;
 
         public OrganizationService(IUnitOfWork unitOfWork, IOrganizationRepository repo)
         {
@@ -38,6 +39,12 @@ namespace DDDSample1.Domain.Organizations
             {
                 foreach (var repDto in dto.Representatives)
                 {
+                    if (await _repRepo.ExistsWithEmailAsync(repDto.Email))
+                        throw new BusinessRuleValidationException("Email already in use by another representative.");
+
+                    if (await _repRepo.ExistsWithPhoneAsync(repDto.PhoneNumber))
+                        throw new BusinessRuleValidationException("Phone number already in use by another representative.");
+                    
                     var rep = new Representative(repDto.Name, repDto.CitizenId, repDto.Nationality, repDto.Email,
                         repDto.PhoneNumber);
                     org.AddRepresentative(rep);

@@ -40,14 +40,14 @@ namespace DDDSample1.Infrastructure.Organizations
             builder.Property(r => r.Status)
                 .IsRequired()
                 .HasConversion<string>();
-
-            // Foreign key configurada no OrganizationEntityTypeConfiguration
+            
             builder.Property(r => r.OrganizationId)
-                .HasMaxLength(10)  // limite de 10 caracteres
-                .IsRequired()
+                .HasMaxLength(10) 
+                .IsRequired() 
                 .ValueGeneratedNever();
-
+            
             builder.HasIndex(r => r.Email).IsUnique();
+            builder.HasIndex(r => r.PhoneNumber).IsUnique();
         }
     }
 }
