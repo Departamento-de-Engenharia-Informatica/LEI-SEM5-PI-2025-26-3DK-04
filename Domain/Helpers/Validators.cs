@@ -45,5 +45,26 @@ namespace DDDSample1.Domain.Shared
             if (citizenId.Length < 5 || citizenId.Length > 20)
                 throw new BusinessRuleValidationException("Citizen ID must be between 5 and 20 characters.");
         }
+        public static void ValidateEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                throw new BusinessRuleValidationException("Email is required.");
+
+            // Expressão regular para emails dos domínios permitidos
+            var regex = new Regex(@"^[\w\.-]+@(gmail|hotmail|email)\.com$", RegexOptions.IgnoreCase);
+
+            if (!regex.IsMatch(email))
+                throw new BusinessRuleValidationException("Email must be from @gmail.com, @hotmail.com, or @email.com domains.");
+        }
+        public static void ValidatePhoneNumber(string phoneNumber)
+        {
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+                throw new BusinessRuleValidationException("Phone number is required.");
+
+            var regex = new Regex(@"^\d{9}$");
+
+            if (!regex.IsMatch(phoneNumber))
+                throw new BusinessRuleValidationException("Phone number must have exactly 9 digits.");
+        }
     }
 }

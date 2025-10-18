@@ -22,8 +22,17 @@ so that they can operate within the port’s digital system.
 - Email and phone number are used for system notifications, including approval decisions and authentication.
 
 **Clarifications:**
-
-
+>
+> > **Question:** Good morning, In User Story 2.2.5 the System Specifications document delineates that "Each organization must have at least an identifier, legal and alternative names, an address, its tax number."I have a few questions about this description:
+> >* Should the identifier be provided by the user when creating a new Organization or should it be generated? 
+> >* What pattern should it follow? 
+> >* How many legal or alternative names are there? (1 legal name and multiple alternatives names?)
+> >* Must the tax number follow any specific pattern?
+>
+> > **Answer:**
+> >1. Identifier is provided by the user. Alphanumeric code (max. length 10).
+> >2. One legal name and one alternative is enough.
+> >3. The system must support Tax Numbers of every European Country.
 
 ---
 

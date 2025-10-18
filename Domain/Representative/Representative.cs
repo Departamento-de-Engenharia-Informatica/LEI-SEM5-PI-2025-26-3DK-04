@@ -26,8 +26,10 @@ namespace DDDSample1.Domain.Organizations
                 throw new BusinessRuleValidationException("Nationality is required.");
             if (string.IsNullOrWhiteSpace(email))
                 throw new BusinessRuleValidationException("Email is required.");
+            Validators.ValidateEmail(email);
             if (string.IsNullOrWhiteSpace(phoneNumber))
                 throw new BusinessRuleValidationException("Phone number is required.");
+            Validators.ValidatePhoneNumber(phoneNumber);           
 
             this.Id = new RepresentativeId(Guid.NewGuid());
             this.Name = name;
