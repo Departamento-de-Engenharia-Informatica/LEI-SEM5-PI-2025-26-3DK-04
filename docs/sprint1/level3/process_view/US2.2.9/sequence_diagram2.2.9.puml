@@ -1,0 +1,92 @@
+﻿@startuml vessel_visit_notification_edit_or_submit
+autonumber
+
+actor "Shipping Agent Representative" as Agent
+participant "VesselVisitNotificationsController" as Controller
+participant "VesselVisitNotificationService" as Service
+participant "VesselVisitNotification" as Entity
+participant "IVesselVisitNotificationRepository" as Repository
+participant "UnitOfWork" as UoW
+database "Database" as DB
+
+== Agent Edits In-Progress Notification ==
+activate Agent
+Agent -> Controller : PUT /api/VesselVisitNotifications/{id}/update\n{updatedNotificationData}
+activate Controller
+
+Controller -> Service : UpdateAsync(id, dto)
+activate Service
+
+Service -> Repository : GetByIdAsync(id)
+activate Repository
+Repository -> DB : query by id
+activate DB
+DB --> Repository : notification record
+deactivate DB
+Repository --> Service : VesselVisitNotification
+deactivate Repository
+
+Service -> Entity : Update(dto)
+activate Entity
+Entity -> Entity : validate editable state (must be InProgress)
+Entity -> Entity : apply property updates
+Entity --> Service : void
+deactivate Entity
+
+Service -> UoW : CommitAsync()
+activate UoW
+UoW -> DB : SaveChangesAsync()\n(persist updated data)
+activate DB
+DB --> UoW : success
+deactivate DB
+UoW --> Service : success
+deactivate UoW
+
+Service -> Service : MapToDto(notification)
+Service --> Controller : VesselVisitNotificationDto\n(updated)
+deactivate Service
+
+Controller --> Agent : 200 OK\n(updated notification details)
+deactivate Controller
+
+== Agent Submits Notification ==
+Agent -> Controller : PUT /api/VesselVisitNotifications/{id}/submit
+activate Controller
+
+Controller -> Service : SubmitAsync(id)
+activate Service
+
+Service -> Repository : GetByIdAsync(id)
+activate Repository
+Repository -> DB : query by id
+activate DB
+DB --> Repository : notification record
+deactivate DB
+Repository --> Service : VesselVisitNotification
+deactivate Repository
+
+Service -> Entity : Submit()
+activate Entity
+Entity -> Entity : validate state (must be InProgress)
+Entity -> Entity : set Status = Submitted\nset SubmittedAt = now()
+Entity --> Service : void
+deactivate Entity
+
+Service -> UoW : CommitAsync()
+activate UoW
+UoW -> DB : SaveChangesAsync()\n(persist submission)
+activate DB
+DB --> UoW : success
+deactivate DB
+UoW --> Service : success
+deactivate UoW
+
+Service -> Service : MapToDto(notification)
+Service --> Controller : VesselVisitNotificationDto\n(submitted)
+deactivate Service
+
+Controller --> Agent : 200 OK\n(submission confirmed)
+deactivate Controller
+deactivate Agent
+
+@enduml
