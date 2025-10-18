@@ -34,21 +34,28 @@ namespace DDDSample1.Controllers
         /// Obtém uma organização específica por ID.
         /// </summary>
         [HttpGet("{id}")]
-        public async Task<ActionResult<OrganizationDto>> GetById(Guid id)
+        public async Task<ActionResult<OrganizationDto>> GetById(string id)
         {
-            var org = await _service.GetByIdAsync(id);
+            try
+            {
+                var org = await _service.GetByIdAsync(id);
 
-            if (org == null)
-                return NotFound(new { Message = $"Organization with ID {id} not found." });
+                if (org == null)
+                    return NotFound(new { Message = $"Organization with ID {id} not found." });
 
-            return Ok(org);
+                return Ok(org);
+            }
+            catch (BusinessRuleValidationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
         }
 
-        // POST: api/Organizations/register
+        // POST: api/Organizations
         /// <summary>
         /// Regista uma nova organização.
         /// </summary>
-        [HttpPost("register")]
+        [HttpPost]
         public async Task<ActionResult<OrganizationDto>> Register([FromBody] OrganizationDto dto)
         {
             try

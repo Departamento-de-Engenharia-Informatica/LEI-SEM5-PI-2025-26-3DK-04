@@ -21,7 +21,19 @@ so that the right individuals are authorized to interact with the system on beha
 - Required representative details include: name, citizen ID, nationality, email, and phone number.
 
 **Clarifications:**
-
+>
+> > **Question:** Which attributes of a representative can be updated after registration?
+>
+> > **Answer:** Most often, it is the contact information (email and phone).
+Other data like name and citizen ID can be updated too, but mainly due to user input mistakes.
+However, deactivation (and activation) may occur regularly
+> 
+> > **Question:** Good morning,
+Does the Shipping Agent Representative's Citizen ID have to follow any specific format?
+Since all Shipping Agent Organizations' Tax Numbers must follow the formats for each european country (https://moodle.isep.ipp.pt/mod/forum/discuss.php?d=941), should the Citizen ID work the same way?
+>
+> > **Answer:** Definitely, yes. You are on the right path.
+>
 
 ---
 

@@ -12,15 +12,18 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         private readonly IUnitOfWork _unitOfWork;
         private readonly IVesselVisitNotificationRepository _repo;
         private readonly IVesselRepository _vesselRepo;
+        private readonly IVesselTypeRepository _vesselTypeRepo;
         
         public VesselVisitNotificationService(
             IUnitOfWork unitOfWork,
             IVesselVisitNotificationRepository repo,
-            IVesselRepository vesselRepo)
+            IVesselRepository vesselRepo,
+            IVesselTypeRepository vesselTypeRepo)
         {
             _unitOfWork = unitOfWork;
             _repo = repo;
             _vesselRepo = vesselRepo;
+            _vesselTypeRepo = vesselTypeRepo;
         }
         
         //Create new notification
@@ -30,10 +33,15 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             List<CargoManifest> unloadingManifests,
             List<CrewMember>? crew)
         {
-            // Fetch vessel
-            Vessel vessel = await _vesselRepo.GetByIdAsync(new VesselId(vesselId));
+            // Procurar o vessel
+            var vessel = await _vesselRepo.GetByIdAsync(new VesselId(vesselId));
             if (vessel == null)
                 throw new BusinessRuleValidationException("Vessel not found.");
+
+            // Procurar o vessel type para obter a capacidade
+            var vesselType = await _vesselTypeRepo.GetByIdAsync(vessel.VesselTypeId);
+            if (vesselType == null)
+                throw new BusinessRuleValidationException("Vessel type not found.");
 
             // If controller passed a crew list, update the vessel’s crew
             if (crew != null && crew.Any())
@@ -51,6 +59,17 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 : null;
 
             // Create the vessel visit notification
+            // Validar que o unloading cargo não excede a capacidade do vessel
+            if (unloadingCargo != null)
+            {
+                var unloadingWeight = unloadingCargo.TotalWeightKg();
+                var vesselCapacity = vesselType.Capacity;
+                
+                if (unloadingWeight > vesselCapacity)
+                    throw new BusinessRuleValidationException(
+                        $"Unloading cargo weight ({unloadingWeight} kg) cannot exceed vessel capacity ({vesselCapacity} kg).");
+            }
+
             var notification = new VesselVisitNotification(vessel, loadingCargo, unloadingCargo);
 
             await _repo.AddAsync(notification);
@@ -58,9 +77,6 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
             return MapToDto(notification);
         }
-
-
-
         
         // Listar notificações completadas (prontas para review)
         public async Task<List<VesselVisitNotificationDto>> GetCompletedNotificationsAsync()
@@ -140,6 +156,21 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
             if (notification == null)
                 throw new BusinessRuleValidationException("Vessel Visit Notification not found.");
+
+            // Se está a atualizar unloading cargo, validar capacidade
+            if (newUnloading != null)
+            {
+                var vesselType = await _vesselTypeRepo.GetByIdAsync(notification.Vessel.VesselTypeId);
+                if (vesselType == null)
+                    throw new BusinessRuleValidationException("Vessel type not found.");
+
+                var unloadingWeight = newUnloading.TotalWeightKg();
+                var vesselCapacity = vesselType.Capacity;
+                
+                if (unloadingWeight > vesselCapacity)
+                    throw new BusinessRuleValidationException(
+                        $"Unloading cargo weight ({unloadingWeight} kg) cannot exceed vessel capacity ({vesselCapacity} kg).");
+            }
 
             notification.UpdateInProgress(newLoading, newUnloading);
 

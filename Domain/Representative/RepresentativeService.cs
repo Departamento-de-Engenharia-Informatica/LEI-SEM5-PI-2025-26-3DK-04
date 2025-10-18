@@ -27,9 +27,9 @@ namespace DDDSample1.Domain.Organizations
         {
             Organization org = null;
 
-            if (dto.OrganizationId != null)
+            if (!string.IsNullOrWhiteSpace(dto.OrganizationId))
             {
-                org = await _organizationRepo.GetByIdAsync(new OrganizationId(dto.OrganizationId.Value));
+                org = await _organizationRepo.GetByIdAsync(new OrganizationId(dto.OrganizationId));
                 if (org == null)
                     throw new BusinessRuleValidationException("Organization not found.");
             }
@@ -119,7 +119,7 @@ namespace DDDSample1.Domain.Organizations
                 Nationality = rep.Nationality,
                 Email = rep.Email,
                 PhoneNumber = rep.PhoneNumber,
-                OrganizationId = rep.OrganizationId?.AsGuid(),
+                OrganizationId = rep.OrganizationId?.AsString(),
                 Status = rep.Status.ToString()
             };
         }

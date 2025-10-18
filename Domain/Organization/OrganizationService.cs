@@ -20,10 +20,18 @@ namespace DDDSample1.Domain.Organizations
 
         public async Task<OrganizationDto> RegisterOrganizationAsync(OrganizationDto dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.Id))
+                throw new BusinessRuleValidationException("Organization ID is required.");
+
+            // Validar se já existe uma organização com este ID
+            var existingById = await _repo.GetByIdAsync(new OrganizationId(dto.Id));
+            if (existingById != null)
+                throw new BusinessRuleValidationException($"An organization with ID '{dto.Id}' already exists.");
+
             if (await _repo.ExistsWithLegalNameAsync(dto.LegalName))
                 throw new BusinessRuleValidationException("An organization with this legal name already exists.");
 
-            var org = new Organization(dto.LegalName, dto.AlternativeName, dto.Address, dto.TaxNumber);
+            var org = new Organization(dto.Id, dto.LegalName, dto.AlternativeName, dto.Address, dto.TaxNumber);
 
 
             if (dto.Representatives != null && dto.Representatives.Any())
@@ -52,7 +60,7 @@ namespace DDDSample1.Domain.Organizations
         }
 
 
-        public async Task<OrganizationDto> GetByIdAsync(Guid id)
+        public async Task<OrganizationDto> GetByIdAsync(string id)
         {
             var org = await _repo.GetByIdAsync(new OrganizationId(id));
             return org == null ? null : ToDto(org);

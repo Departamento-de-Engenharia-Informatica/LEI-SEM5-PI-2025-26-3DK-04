@@ -1,0 +1,53 @@
+﻿@startuml ActivateObject
+autonumber
+
+actor "User" as User
+participant "ObjectController" as Controller
+participant "ObjectService" as Service
+participant "Object" as Object
+participant "IObjectRepository" as Repository
+participant "UnitOfWork" as UoW
+database "Database" as DB
+
+activate User
+
+User -> Controller : PATCH /api/Object/{id}/activate
+activate Controller
+
+Controller -> Service : ActivateAsync(id)
+activate Service
+
+Service -> Repository : GetByIdAsync(id)
+activate Repository
+Repository -> DB : query by id
+activate DB
+DB --> Repository : object record
+deactivate DB
+Repository --> Service : object
+deactivate Repository
+
+Service -> Object : Activate()
+activate Object
+Object -> Object : validate activation rules
+Object -> Object : set Active = true
+Object --> Service : void
+deactivate Object
+
+Service -> UoW : CommitAsync()
+activate UoW
+UoW -> DB : SaveChangesAsync()\n(persist tracked changes)
+activate DB
+DB --> UoW : int (rows affected)
+deactivate DB
+UoW --> Service : int
+deactivate UoW
+
+Service -> Service : MapToDto(object)
+Service --> Controller : ObjectDto
+deactivate Service
+
+Controller --> User : 200 OK\n{activatedObjectDto}
+deactivate Controller
+deactivate User
+
+@enduml
