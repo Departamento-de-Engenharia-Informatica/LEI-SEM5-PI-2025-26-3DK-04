@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using DDDSample1.Domain.Vessels.VesselInformation;
 
-namespace DDDSample1.Domain.Vessels;
-
-public class CreateNotificationDto
+namespace DDDSample1.Domain.Vessels
 {
-    public Guid VesselId { get; set; }
-    public List<CargoManifest> LoadingManifests { get; set; }
-    public List<CargoManifest> UnloadingManifests { get; set; }
-    //public List<CrewMember> CrewMembers { get; set; }
+    public class CreateNotificationDto
+    {
+        public Guid VesselId { get; set; }
+        public List<CargoManifest> LoadingManifests { get; set; }
+        public List<CargoManifest> UnloadingManifests { get; set; }
+        public List<CrewMemberDto> Crew { get; set; } // Optional
+    }
+
+    
 }

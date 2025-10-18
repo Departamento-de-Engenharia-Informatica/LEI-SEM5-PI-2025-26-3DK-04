@@ -13,6 +13,7 @@ public class CargoManifest : Entity<CargoManifestID>
     {
         _containers = new List<Container>();
     }
+    public CargoManifest() { } // Parameterless constructor for EF Core
 
     public static CargoManifest Create(string id)
     {

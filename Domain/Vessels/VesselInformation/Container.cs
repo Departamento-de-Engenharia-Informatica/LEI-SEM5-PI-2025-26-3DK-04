@@ -17,6 +17,7 @@ public class Container : Entity<ContainerID>
         ContentsDescription = contentsDescription;
         //Type = type;
     }
+    public Container() { } // Parameterless constructor for EF Core
 
     public static Container Create(string identifier, double payloadWeight, string contentsDescription)
     {

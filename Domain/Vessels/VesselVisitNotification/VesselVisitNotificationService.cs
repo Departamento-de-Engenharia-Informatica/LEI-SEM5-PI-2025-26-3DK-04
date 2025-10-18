@@ -27,12 +27,20 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         public async Task<VesselVisitNotificationDto> CreateAsync(
             Guid vesselId,
             List<CargoManifest> loadingManifests,
-            List<CargoManifest> unloadingManifests)
+            List<CargoManifest> unloadingManifests,
+            List<CrewMember>? crew)
         {
-            // Buscar o vessel
-            var vessel = await _vesselRepo.GetByIdAsync(new VesselId(vesselId));
+            // Fetch vessel
+            Vessel vessel = await _vesselRepo.GetByIdAsync(new VesselId(vesselId));
             if (vessel == null)
                 throw new BusinessRuleValidationException("Vessel not found.");
+
+            // If controller passed a crew list, update the vessel’s crew
+            if (crew != null && crew.Any())
+            {
+                vessel.setCrew(crew); // You need to add this method in Vessel aggregate
+                await _vesselRepo.UpdateAsync(vessel);
+            }
 
             var loadingCargo = loadingManifests != null && loadingManifests.Any()
                 ? new LoadingCargoMaterial(loadingManifests)
@@ -42,6 +50,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 ? new UnloadingCargoMaterial(unloadingManifests)
                 : null;
 
+            // Create the vessel visit notification
             var notification = new VesselVisitNotification(vessel, loadingCargo, unloadingCargo);
 
             await _repo.AddAsync(notification);
@@ -49,6 +58,9 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
             return MapToDto(notification);
         }
+
+
+
         
         // Listar notificações completadas (prontas para review)
         public async Task<List<VesselVisitNotificationDto>> GetCompletedNotificationsAsync()

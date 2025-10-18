@@ -118,5 +118,9 @@ namespace DDDSample1.Domain.Vessels
             
             return numericPart.Length == 7 && long.TryParse(numericPart, out _);
         }
+        public void setCrew(List<CrewMember> crewMembers)
+        {
+            this.Crew = crewMembers;
+        }   
     }
 }
