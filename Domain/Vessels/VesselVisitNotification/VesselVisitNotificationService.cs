@@ -190,6 +190,30 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             await _unitOfWork.CommitAsync();
             return MapToDto(notification);
         }
+        
+        public async Task<VesselVisitNotificationDto> WithdrawRequestAsync(Guid id)
+        {
+            var notification = await _repo.GetByIdAsync(new VesselVisitNotificationID(id));
+            if (notification == null)
+                throw new BusinessRuleValidationException("Notification not found.");
 
+            notification.Withdraw();
+            await _unitOfWork.CommitAsync();
+
+            return MapToDto(notification);
+        }
+
+        public async Task<VesselVisitNotificationDto> ResumeAsync(Guid id)
+        {
+            var notification = await _repo.GetByIdAsync(new VesselVisitNotificationID(id));
+            if (notification == null)
+                throw new BusinessRuleValidationException("Notification not found.");
+
+            notification.Resume();
+            await _unitOfWork.CommitAsync();
+
+            return MapToDto(notification);
+        }
+        
     }
 }

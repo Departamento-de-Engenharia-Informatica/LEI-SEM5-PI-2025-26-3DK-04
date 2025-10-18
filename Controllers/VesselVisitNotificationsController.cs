@@ -125,5 +125,32 @@ namespace DDDSample1.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
+        [HttpPut("{id}/withdraw")]
+        public async Task<ActionResult<VesselVisitNotificationDto>> Withdraw(Guid id)
+        {
+            try
+            {
+                var notification = await _service.WithdrawRequestAsync(id);
+                return Ok(notification);
+            }
+            catch (BusinessRuleValidationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}/resume")]
+        public async Task<ActionResult<VesselVisitNotificationDto>> Resume(Guid id)
+        {
+            try
+            {
+                var notification = await _service.ResumeAsync(id);
+                return Ok(notification);
+            }
+            catch (BusinessRuleValidationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
     }
 }

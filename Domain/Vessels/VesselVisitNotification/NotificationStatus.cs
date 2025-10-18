@@ -8,7 +8,8 @@
         Submitted,    
         Completed,    
         Approved,
-        Rejected
+        Rejected,
+        WithdrawnRequest
         
     }
 

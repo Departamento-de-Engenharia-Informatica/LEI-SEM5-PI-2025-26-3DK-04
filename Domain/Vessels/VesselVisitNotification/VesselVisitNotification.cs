@@ -131,8 +131,24 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
             this.Status = NotificationStatus.Submitted;
         }
+        
+        public void Withdraw()
+        {
+            if (this.Status != NotificationStatus.InProgress)
+                throw new BusinessRuleValidationException(
+                    "Only notifications in progress for approval can be withdrawn.");
+            this.Status = NotificationStatus.WithdrawnRequest;
+        }
+        
+        public void Resume()
+        {
+            if (Status != NotificationStatus.WithdrawnRequest)
+                throw new BusinessRuleValidationException("Only withdrawn notifications can be resumed.");
 
+            Status = NotificationStatus.InProgress;
+        }
 
+        
     }
     
 }

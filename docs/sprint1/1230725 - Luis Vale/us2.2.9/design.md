@@ -2,7 +2,16 @@
 
 ### 3.1. System Sequence Diagram (SSD)
 
+#### Edit or Submit Vessel Visit Notification
 ![sdUS2.2.9.svg](vessel_visit_notification_edit_or_submit.svg)
+
+#### Resume Request
+
+![sdUS2.2.9.svg](ActivateObject.svg)
+
+#### Withdraw Request
+
+![sdUS2.2.9.svg](DeactivateObject.svg)
 ---
 
 ### 3.2. Interaction Responsibility Assignment — US 2.2.9 (Edit or Submit Vessel Visit Notification)
