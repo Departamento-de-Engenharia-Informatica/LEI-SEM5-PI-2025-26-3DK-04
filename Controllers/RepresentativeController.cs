@@ -40,7 +40,7 @@ namespace DDDSample1.Controllers
         /// <summary>
         /// Atualiza os dados de um representante existente
         /// </summary>
-        [HttpPut("{id}")]
+        [HttpPut("{id}/update")]
         public async Task<ActionResult<RepresentativeDto>> UpdateRepresentative(Guid id, [FromBody] AddRepresentativeDto dto)
         {
             try
