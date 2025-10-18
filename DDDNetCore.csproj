@@ -16,6 +16,7 @@
  
   <ItemGroup>
     <Folder Include="docs\sprint1\level1\process_view\1230946 - Alexandre Texeira\" />
+    <Folder Include="out\" />
   </ItemGroup>
 
 </Project>
