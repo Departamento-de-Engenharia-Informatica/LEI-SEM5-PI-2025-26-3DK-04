@@ -21,6 +21,7 @@ using DDDSample1.Domain.Docks;
 using DDDSample1.Domain.Products;
 using DDDSample1.Domain.Families;
 using DDDSample1.Domain.Organizations;
+using DDDSample1.Domain.PhysicalResources;
 using DDDSample1.Domain.PortInfrastructure.StorageArea;
 using DDDSample1.Domain.Vessels;
 using DDDSample1.Domain.Vessels.VesselVisitNotification;
@@ -28,6 +29,7 @@ using DDDSample1.Domain.StaffMembers;
 using DDDSample1.Domain.Qualifications;
 using DDDSample1.Infrastructure.Docks;
 using DDDSample1.Infrastructure.Organizations;
+using DDDSample1.Infrastructure.PhysicalResources;
 using DDDSample1.Infrastructure.StorageAreas;
 
 namespace DDDSample1
@@ -133,6 +135,9 @@ namespace DDDSample1
             
             services.AddTransient<IRepresentativeRepository,RepresentativeRepository>();
             services.AddTransient<RepresentativeService>();
+            
+            services.AddTransient<IPhysicalResourceRepository,PhysicalResourcesRepository>();
+            services.AddTransient<PhysicalResourceService>();
         }
     }
 }

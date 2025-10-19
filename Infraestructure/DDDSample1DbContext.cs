@@ -6,6 +6,7 @@ using DDDSample1.Domain.Organizations;
 using DDDSample1.Domain.Vessels;
 using DDDSample1.Domain.Vessels.VesselVisitNotification;
 using DDDSample1.Domain.Docks;
+using DDDSample1.Domain.PhysicalResources;
 using DDDSample1.Domain.PortInfrastructure.StorageArea;
 using DDDSample1.Domain.Qualifications;
 using DDDSample1.Domain.StaffMembers;
@@ -14,6 +15,7 @@ using DDDSample1.Infrastructure.Organizations;
 using DDDSample1.Infrastructure.Products;
 using DDDSample1.Infrastructure.Vessels;
 using DDDSample1.Infrastructure.Docks;
+using DDDSample1.Infrastructure.PhysicalResources;
 using DDDSample1.Infrastructure.PortInfrastructure;
 using DDDSample1.Infrastructure.StorageAreas;
 using DDDSample1.Infrastructure.Qualifications;
@@ -36,6 +38,8 @@ namespace DDDSample1.Infrastructure
         public DbSet<StorageArea> StorageAreas { get; set; }
         public DbSet<Qualification> Qualifications { get; set; }
         public DbSet<StaffMember> StaffMembers { get; set; }
+        
+        public DbSet<PhysicalResource> PhysicalResources { get; set; }
 
         public DDDSample1DbContext(DbContextOptions options) : base(options)
         {
@@ -56,6 +60,7 @@ namespace DDDSample1.Infrastructure
             modelBuilder.ApplyConfiguration(new StorageAreaEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QualificationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StaffMemberEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PhysicalResourceEntityTypeConfiguration());
         }
     }
 }
