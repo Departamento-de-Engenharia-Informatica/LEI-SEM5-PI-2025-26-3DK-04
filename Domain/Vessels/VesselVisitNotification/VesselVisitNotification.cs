@@ -10,9 +10,9 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
     {
         public Vessel Vessel { get; private set; }
         
-        public LoadingCargoMaterial LoadingCargo { get; private set; }
+        public LoadingCargoMaterial? LoadingCargo { get; private set; }
         
-        public UnloadingCargoMaterial UnloadingCargo { get; private set; }
+        public UnloadingCargoMaterial? UnloadingCargo { get; private set; }
 
         public string RejectedReason { get; private set; }
 
@@ -25,7 +25,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         public string AssignedDock { get; private set; }
 
         public string OfficerId { get; private set; }
-        private List<CargoManifest> _cargoManifests;
+        //private List<CargoManifest> _cargoManifests;
 
         private VesselVisitNotification()
         {
