@@ -14,10 +14,20 @@ namespace DDDSample1.Infrastructure.StaffMembers
         {
         }
         
+        // Sobrescrever GetByIdAsync para incluir qualificações
+        public new async Task<StaffMember> GetByIdAsync(StaffMemberID id)
+        {
+            return await _objs
+                .Include(s => s.Qualifications)  // Carregar qualificações
+                .Where(x => id.Equals(x.Id))
+                .FirstOrDefaultAsync();
+        }
+        
         // Pesquisar por nome
         public async Task<List<StaffMember>> GetByNameAsync(string name)
         {
             return await _objs
+                .Include(s => s.Qualifications)  // Carregar qualificações
                 .Where(s => s.Name.ToLower().Contains(name.ToLower()))
                 .ToListAsync();
         }
@@ -26,6 +36,7 @@ namespace DDDSample1.Infrastructure.StaffMembers
         public async Task<List<StaffMember>> GetByStatusAsync(MemberStatus status)
         {
             return await _objs
+                .Include(s => s.Qualifications)  // Carregar qualificações
                 .Where(s => s.Status == status)
                 .ToListAsync();
         }
@@ -34,6 +45,7 @@ namespace DDDSample1.Infrastructure.StaffMembers
         public async Task<List<StaffMember>> GetByQualificationAsync(Guid qualificationId)
         {
             return await _objs
+                .Include(s => s.Qualifications)  // Carregar qualificações
                 .Where(s => s.Qualifications.Any(q => q.Id.AsGuid() == qualificationId))
                 .ToListAsync();
         }
@@ -44,7 +56,7 @@ namespace DDDSample1.Infrastructure.StaffMembers
             MemberStatus? status = null,
             Guid? qualificationId = null)
         {
-            var query = _objs.AsQueryable();
+            var query = _objs.Include(s => s.Qualifications).AsQueryable();  // Carregar qualificações
 
             // Aplicar filtros apenas se foram fornecidos
             if (!string.IsNullOrWhiteSpace(name))
@@ -63,6 +75,7 @@ namespace DDDSample1.Infrastructure.StaffMembers
         public async Task<List<StaffMember>> GetActiveStaffAsync()
         {
             return await _objs
+                .Include(s => s.Qualifications)  // Carregar qualificações
                 .Where(s => s.Status == MemberStatus.Available)
                 .ToListAsync();
         }
@@ -70,7 +83,9 @@ namespace DDDSample1.Infrastructure.StaffMembers
         // Listar todos (incluindo inativos) para auditoria
         public async Task<List<StaffMember>> GetAllForAuditAsync()
         {
-            return await _objs.ToListAsync();
+            return await _objs
+                .Include(s => s.Qualifications)  // Carregar qualificações
+                .ToListAsync();
         }
     }
 }

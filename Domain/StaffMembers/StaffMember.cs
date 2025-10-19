@@ -23,7 +23,21 @@ namespace DDDSample1.Domain.StaffMembers
         {
             this.Id = new StaffMemberID(Guid.NewGuid());
             this.Name = name;
+            
+            // Validar formato de email
+            if (string.IsNullOrWhiteSpace(email))
+                throw new BusinessRuleValidationException("Email cannot be empty.");
+            if (!email.Contains("@"))
+                throw new BusinessRuleValidationException("Invalid email format.");
+            
             this.Email = email;
+            
+            // Validar número de telefone
+            if (phoneNumber <= 0)
+                throw new BusinessRuleValidationException("Invalid phone number.");
+            if (phoneNumber.ToString().Length != 9)
+                throw new BusinessRuleValidationException("Phone number needs to have 9 numbers.");
+            
             this.PhoneNumber = phoneNumber;
             this.OperationalWindow = operationalWindow;
             this.Status = MemberStatus.Available; // Status inicia sempre como Available
@@ -35,7 +49,21 @@ namespace DDDSample1.Domain.StaffMembers
         {
             this.Id = new StaffMemberID(Guid.NewGuid());
             this.Name = name;
+            
+            // Validar formato de email
+            if (string.IsNullOrWhiteSpace(email))
+                throw new BusinessRuleValidationException("Email cannot be empty.");
+            if (!email.Contains("@"))
+                throw new BusinessRuleValidationException("Invalid email format.");
+            
             this.Email = email;
+            
+            // Validar número de telefone
+            if (phoneNumber <= 0)
+                throw new BusinessRuleValidationException("Invalid phone number.");
+            if (phoneNumber.ToString().Length != 9)
+                throw new BusinessRuleValidationException("Phone number needs to have 9 numbers.");
+            
             this.PhoneNumber = phoneNumber;
             this.OperationalWindow = operationalWindow;
             this.Status = MemberStatus.Available; // Status sempre inicia como Available
@@ -43,7 +71,10 @@ namespace DDDSample1.Domain.StaffMembers
         }
 
         // Parameterless constructor for ORM
-        private StaffMember() { }
+        private StaffMember() 
+        {
+            this.Qualifications = new List<Qualification>(); // Inicializar lista vazia para evitar NullReferenceException
+        }
 
         public void ChangeName(string name)
         {
@@ -93,6 +124,10 @@ namespace DDDSample1.Domain.StaffMembers
             if (qualification == null)
                 throw new BusinessRuleValidationException("Qualification cannot be null.");
             
+            // Garantir que a lista está inicializada (proteção adicional)
+            if (this.Qualifications == null)
+                this.Qualifications = new List<Qualification>();
+            
             // Validar se já existe (evitar duplicados)
             if (this.Qualifications.Exists(q => q.Id == qualification.Id))
                 throw new BusinessRuleValidationException("Qualification already exists for this staff member.");
@@ -106,6 +141,10 @@ namespace DDDSample1.Domain.StaffMembers
             if (qualification == null)
                 throw new BusinessRuleValidationException("Qualification cannot be null.");
             
+            // Garantir que a lista está inicializada
+            if (this.Qualifications == null)
+                this.Qualifications = new List<Qualification>();
+            
             if (!this.Qualifications.Remove(qualification))
                 throw new BusinessRuleValidationException("Qualification not found.");
         }
@@ -113,6 +152,10 @@ namespace DDDSample1.Domain.StaffMembers
         // Limpar todas as qualificações
         public void ClearQualifications()
         {
+            // Garantir que a lista está inicializada
+            if (this.Qualifications == null)
+                this.Qualifications = new List<Qualification>();
+            
             this.Qualifications.Clear();
         }
 

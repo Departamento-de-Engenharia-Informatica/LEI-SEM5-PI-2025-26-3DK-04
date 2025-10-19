@@ -11,13 +11,16 @@ namespace DDDSample1.Domain.StaffMembers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStaffMemberRepository _repo;
+        private readonly IQualificationRepository _qualificationRepo;
         
         public StaffMemberService(
             IUnitOfWork unitOfWork,
-            IStaffMemberRepository repo)
+            IStaffMemberRepository repo,
+            IQualificationRepository qualificationRepo)
         {
             _unitOfWork = unitOfWork;
             _repo = repo;
+            _qualificationRepo = qualificationRepo;
         }
         
         // Criar novo staff member
@@ -119,12 +122,12 @@ namespace DDDSample1.Domain.StaffMembers
             if (staffMember == null)
                 throw new BusinessRuleValidationException("Staff member not found.");
             
-            // TODO: Buscar qualificação do repositório de Qualifications
-            // var qualification = await _qualificationRepo.GetByIdAsync(qualificationId);
-            // if (qualification == null)
-            //     throw new BusinessRuleValidationException("Qualification not found.");
+            // Procurar qualificação do repositório de Qualifications
+            var qualification = await _qualificationRepo.GetByIdAsync(new QualificationID(qualificationId));
+            if (qualification == null)
+                throw new BusinessRuleValidationException("Qualification not found.");
             
-            // staffMember.AddQualification(qualification);
+            staffMember.AddQualification(qualification);
             
             await _unitOfWork.CommitAsync();
             
@@ -139,12 +142,12 @@ namespace DDDSample1.Domain.StaffMembers
             if (staffMember == null)
                 throw new BusinessRuleValidationException("Staff member not found.");
             
-            // TODO: Buscar qualificação e remover
-            // var qualification = staffMember.Qualifications.FirstOrDefault(q => q.Id == qualificationId);
-            // if (qualification == null)
-            //     throw new BusinessRuleValidationException("Qualification not found.");
+            // Procurar qualificação na lista do staff member
+            var qualification = staffMember.Qualifications.FirstOrDefault(q => q.Id.AsGuid() == qualificationId);
+            if (qualification == null)
+                throw new BusinessRuleValidationException("Qualification not found in this staff member.");
             
-            // staffMember.RemoveQualification(qualification);
+            staffMember.RemoveQualification(qualification);
             
             await _unitOfWork.CommitAsync();
             
