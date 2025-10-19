@@ -38,6 +38,8 @@ namespace DDDSample1.Domain.Organizations
 
             if (await _repo.ExistsWithPhoneAsync(dto.PhoneNumber))
                 throw new BusinessRuleValidationException("Phone number already in use by another representative.");
+            if(await _repo.ExistsWithCidAsync(dto.CitizenId))
+                throw new BusinessRuleValidationException("Citizen Id already in use by another representative.");
             
             var rep = new Representative(
                 dto.Name,
@@ -67,9 +69,11 @@ namespace DDDSample1.Domain.Organizations
             
             if (await _repo.ExistsWithEmailAsync(dto.Email))
                 throw new BusinessRuleValidationException("Email already in use by another representative.");
-
             if (await _repo.ExistsWithPhoneAsync(dto.PhoneNumber))
                 throw new BusinessRuleValidationException("Phone number already in use by another representative.");
+            if(await _repo.ExistsWithCidAsync(dto.CitizenId))
+                throw new BusinessRuleValidationException("Citizen Id already in use by another representative.");
+            
             rep.Update(
                 dto.Name,
                 dto.CitizenId,

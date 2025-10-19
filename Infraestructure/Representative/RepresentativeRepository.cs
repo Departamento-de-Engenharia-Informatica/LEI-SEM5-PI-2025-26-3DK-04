@@ -44,5 +44,9 @@ namespace DDDSample1.Infrastructure.Organizations
         {
             return await _objs.AnyAsync(r => r.PhoneNumber == phoneNumber);
         }
+        public async Task<bool> ExistsWithCidAsync(string cid)
+        {
+            return await _objs.AnyAsync(r => r.CitizenId == cid);
+        }
     }
 }

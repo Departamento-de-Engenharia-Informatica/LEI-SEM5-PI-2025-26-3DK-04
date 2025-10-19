@@ -44,7 +44,8 @@ namespace DDDSample1.Domain.Organizations
 
                     if (await _repRepo.ExistsWithPhoneAsync(repDto.PhoneNumber))
                         throw new BusinessRuleValidationException("Phone number already in use by another representative.");
-                    
+                    if(await _repRepo.ExistsWithCidAsync(repDto.CitizenId))
+                        throw new BusinessRuleValidationException("Citizen Id already in use by another representative.");
                     var rep = new Representative(repDto.Name, repDto.CitizenId, repDto.Nationality, repDto.Email,
                         repDto.PhoneNumber);
                     org.AddRepresentative(rep);

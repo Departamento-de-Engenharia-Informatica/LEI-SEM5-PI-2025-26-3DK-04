@@ -17,5 +17,6 @@ namespace DDDSample1.Domain.Organizations
         Task<Representative> GetByEmailAsync(string email);
         Task<bool> ExistsWithEmailAsync(string email);
         Task<bool> ExistsWithPhoneAsync(string phoneNumber);
+        Task<bool> ExistsWithCidAsync(string cid);
     }
 }
