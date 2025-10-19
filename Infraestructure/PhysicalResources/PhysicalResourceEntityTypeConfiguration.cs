@@ -20,13 +20,22 @@ public class PhysicalResourceEntityTypeConfiguration : IEntityTypeConfiguration<
         builder.Property(r => r.SetupTime);
         builder.Property(r => r.Status).HasConversion<string>();
 
-        builder.Property<List<QualificationID>>("_qualificationIds")
-            .HasConversion(
-                ids => string.Join(",", ids.Select(id => id.Value.ToString())),
-                str => str.Split(",", StringSplitOptions.RemoveEmptyEntries)
-                    .Select(s => new QualificationID(Guid.Parse(s)))
-                    .ToList()
+        builder.HasMany(r => r.Qualifications)
+            .WithMany()
+            .UsingEntity(
+                "PhysicalResourceQualifications", // Nome da tabela de junção
+                l => l.HasOne(typeof(Qualification))
+                    .WithMany()
+                    .HasForeignKey("QualificationId")
+                    .OnDelete(DeleteBehavior.Cascade),
+                r => r.HasOne(typeof(PhysicalResource))
+                    .WithMany()
+                    .HasForeignKey("PhysicalResourceId")
+                    .OnDelete(DeleteBehavior.Cascade),
+                j => j.HasKey("PhysicalResourceId", "QualificationId")
             );
+
+
 
     }
 }

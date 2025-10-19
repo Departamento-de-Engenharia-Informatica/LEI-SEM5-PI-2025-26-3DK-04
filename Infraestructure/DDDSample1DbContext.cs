@@ -61,6 +61,8 @@ namespace DDDSample1.Infrastructure
             modelBuilder.ApplyConfiguration(new QualificationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StaffMemberEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PhysicalResourceEntityTypeConfiguration());
+            
+           // modelBuilder.Ignore<QualificationID>();
         }
     }
 }

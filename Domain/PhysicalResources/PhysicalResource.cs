@@ -14,12 +14,11 @@ public class PhysicalResource : Entity<PhysicalResourceId>, IAggregateRoot
     public int? SetupTime { get; private set; }
     public ResourceStatus Status { get; private set; }
 
-    private readonly List<QualificationID> _qualificationIds = new();
-    public IReadOnlyCollection<QualificationID> QualificationIds => _qualificationIds.AsReadOnly();
+    public List<Qualification> Qualifications { get; private set; } = new();
 
     private PhysicalResource() { }
 
-    public PhysicalResource(string description, string type, double capacity, string? assignedArea, int? setupTime, ResourceStatus status, List<QualificationID> qualificationIds)
+    public PhysicalResource(string description, string type, double capacity, string? assignedArea, int? setupTime, ResourceStatus status, List<Qualification> qualifications)
     {
         if (string.IsNullOrWhiteSpace(description)) throw new BusinessRuleValidationException("Description is required.");
         if (string.IsNullOrWhiteSpace(type)) throw new BusinessRuleValidationException("Type is required.");
@@ -32,17 +31,16 @@ public class PhysicalResource : Entity<PhysicalResourceId>, IAggregateRoot
         AssignedArea = assignedArea;
         SetupTime = setupTime;
         Status = status;
-        _qualificationIds = qualificationIds ?? new List<QualificationID>();
+        Qualifications = qualifications ?? new List<Qualification>();
     }
 
-    public void Update(string description, double capacity, string? assignedArea, int? setupTime, List<QualificationID> qualificationIds)
+    public void Update(string description, double capacity, string? assignedArea, int? setupTime, List<Qualification> qualifications)
     {
         Description = description;
         Capacity = capacity;
         AssignedArea = assignedArea;
         SetupTime = setupTime;
-        _qualificationIds.Clear();
-        _qualificationIds.AddRange(qualificationIds);
+        Qualifications = qualifications ?? new List<Qualification>();
     }
 
     public void ChangeStatus(ResourceStatus newStatus)
@@ -50,4 +48,5 @@ public class PhysicalResource : Entity<PhysicalResourceId>, IAggregateRoot
         Status = newStatus;
     }
 }
+
 

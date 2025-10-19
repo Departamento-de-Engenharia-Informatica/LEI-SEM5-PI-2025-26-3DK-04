@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DDDSample1.Domain.Qualifications;
 
 namespace DDDSample1.Domain.PhysicalResources.DTOs;
 
@@ -9,6 +10,6 @@ public class UpdatePhysicalResourceDto
     public double Capacity { get; set; }
     public string? AssignedArea { get; set; }
     public int? SetupTime { get; set; }
-    public List<Guid> QualificationIds { get; set; }
+    public List<QualificationID> QualificationIds { get; set; }
 }
 

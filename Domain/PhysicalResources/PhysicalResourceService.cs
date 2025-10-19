@@ -13,19 +13,23 @@ public class PhysicalResourceService
     private readonly IPhysicalResourceRepository _repo;
     private readonly IUnitOfWork _unitOfWork;
 
-    public PhysicalResourceService(IPhysicalResourceRepository repo, IUnitOfWork unitOfWork)
+    private readonly IQualificationRepository _qualificationRepo;
+
+    public PhysicalResourceService(IPhysicalResourceRepository repo, IQualificationRepository qualificationRepo,
+        IUnitOfWork unitOfWork)
     {
         _repo = repo;
+        _qualificationRepo = qualificationRepo;
         _unitOfWork = unitOfWork;
     }
 
     public async Task<PhysicalResourceDto> CreateAsync(CreatePhysicalResourceDto dto)
     {
-        var qualificationIds = dto.QualificationIds.Select(id => new QualificationID(id)).ToList();
+        var qualifications = await _qualificationRepo.GetByIdsAsync(dto.QualificationIds);
 
         var resource = new PhysicalResource(
             dto.Description, dto.Type, dto.Capacity,
-            dto.AssignedArea, dto.SetupTime, dto.Status, qualificationIds);
+            dto.AssignedArea, dto.SetupTime, dto.Status, qualifications);
 
         await _repo.AddAsync(resource);
         await _unitOfWork.CommitAsync();
@@ -39,29 +43,11 @@ public class PhysicalResourceService
         if (resource == null)
             throw new BusinessRuleValidationException("Resource not found.");
 
-        var qualificationIds = dto.QualificationIds.Select(id => new QualificationID(id)).ToList();
-        resource.Update(dto.Description, dto.Capacity, dto.AssignedArea, dto.SetupTime, qualificationIds);
+        var qualifications = await _qualificationRepo.GetByIdsAsync(dto.QualificationIds);
+        resource.Update(dto.Description, dto.Capacity, dto.AssignedArea, dto.SetupTime, qualifications);
 
         await _unitOfWork.CommitAsync();
         return Map(resource);
-    }
-
-    public async Task<PhysicalResourceDto> ChangeStatusAsync(Guid id, ResourceStatus newStatus)
-    {
-        var resource = await _repo.GetByIdAsync(new PhysicalResourceId(id));
-        if (resource == null)
-            throw new BusinessRuleValidationException("Resource not found.");
-
-        resource.ChangeStatus(newStatus);
-        await _unitOfWork.CommitAsync();
-
-        return Map(resource);
-    }
-
-    public async Task<List<PhysicalResourceDto>> SearchAsync(string? description, string? type, ResourceStatus? status)
-    {
-        var results = await _repo.SearchAsync(description, type, status);
-        return results.Select(Map).ToList();
     }
 
     private PhysicalResourceDto Map(PhysicalResource r) => new PhysicalResourceDto
@@ -73,6 +59,25 @@ public class PhysicalResourceService
         AssignedArea = r.AssignedArea,
         SetupTime = r.SetupTime,
         Status = r.Status,
-        QualificationIds = r.QualificationIds.Select(q => q.Value).ToList()
+        QualificationIds = r.Qualifications.Select(q => q.Id.AsString()).ToList()
     };
+    public async Task<PhysicalResourceDto> ChangeStatusAsync(Guid id, ResourceStatus newStatus)
+    {
+        var resource = await _repo.GetByIdAsync(new PhysicalResourceId(id));
+        if (resource == null)
+            throw new BusinessRuleValidationException("Resource not found.");
+
+        resource.ChangeStatus(newStatus);
+        await _unitOfWork.CommitAsync();
+
+        return Map(resource);
+    }
+    public async Task<List<PhysicalResourceDto>> SearchAsync(string? description, string? type, ResourceStatus? status)
+    {
+        var results = await _repo.SearchAsync(description, type, status);
+        return results.Select(Map).ToList();
+    }
+
+
 }
+
