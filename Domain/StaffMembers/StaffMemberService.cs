@@ -211,8 +211,7 @@ namespace DDDSample1.Domain.StaffMembers
                 Qualifications = staffMember.Qualifications?.Select(q => new QualificationDto
                 {
                     Id = q.Id.AsGuid(),
-                    Name = q.Name,
-                    Description = q.Description
+                    Name = q.Name
                 }).ToList() ?? new List<QualificationDto>()
             };
             

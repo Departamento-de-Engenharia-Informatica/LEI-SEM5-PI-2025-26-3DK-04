@@ -22,13 +22,8 @@ namespace DDDSample1.Domain.Qualifications
         // Criar nova qualificação
         public async Task<QualificationDto> CreateAsync(CreateQualificationDto dto)
         {
-            // Validar se já existe qualificação com o mesmo nome
-            if (await _repo.ExistsByNameAsync(dto.Name))
-                throw new BusinessRuleValidationException(
-                    $"Qualification with name '{dto.Name}' already exists.");
-            
-            // Criar entidade de domínio
-            var qualification = new Qualification(dto.Name, dto.Description);
+            // Criar entidade de domínio (ID é único por natureza - GUID)
+            var qualification = new Qualification(dto.Name);
             
             // Adicionar ao repositório
             await _repo.AddAsync(qualification);
@@ -65,20 +60,9 @@ namespace DDDSample1.Domain.Qualifications
             if (qualification == null)
                 throw new BusinessRuleValidationException("Qualification not found.");
             
-            // Verificar se o novo nome já existe (se foi alterado)
-            if (!string.IsNullOrWhiteSpace(dto.Name) && dto.Name != qualification.Name)
-            {
-                if (await _repo.ExistsByNameAsync(dto.Name))
-                    throw new BusinessRuleValidationException(
-                        $"Qualification with name '{dto.Name}' already exists.");
-            }
-            
             // Atualizar usando métodos de domínio
             if (!string.IsNullOrWhiteSpace(dto.Name))
                 qualification.ChangeName(dto.Name);
-            
-            if (!string.IsNullOrWhiteSpace(dto.Description))
-                qualification.ChangeDescription(dto.Description);
             
             // Persistir mudanças
             await _unitOfWork.CommitAsync();
@@ -108,20 +92,12 @@ namespace DDDSample1.Domain.Qualifications
             return qualifications.Select(q => MapToDto(q)).ToList();
         }
         
-        // Verificar se existe por nome
-        public async Task<bool> ExistsByNameAsync(string name)
-        {
-            return await _repo.ExistsByNameAsync(name);
-        }
-        
-        // Mapear entidade para DTO
         private QualificationDto MapToDto(Qualification qualification)
         {
             return new QualificationDto
             {
                 Id = qualification.Id.AsGuid(),
-                Name = qualification.Name,
-                Description = qualification.Description
+                Name = qualification.Name
             };
         }
     }

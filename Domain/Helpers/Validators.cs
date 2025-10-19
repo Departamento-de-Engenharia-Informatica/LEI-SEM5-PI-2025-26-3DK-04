@@ -45,6 +45,7 @@ namespace DDDSample1.Domain.Shared
             if (citizenId.Length < 5 || citizenId.Length > 20)
                 throw new BusinessRuleValidationException("Citizen ID must be between 5 and 20 characters.");
         }
+
         public static void ValidateEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
@@ -56,6 +57,7 @@ namespace DDDSample1.Domain.Shared
             if (!regex.IsMatch(email))
                 throw new BusinessRuleValidationException("Email must be from @gmail.com, @hotmail.com, or @email.com domains.");
         }
+
         public static void ValidatePhoneNumber(string phoneNumber)
         {
             if (string.IsNullOrWhiteSpace(phoneNumber))
@@ -65,6 +67,22 @@ namespace DDDSample1.Domain.Shared
 
             if (!regex.IsMatch(phoneNumber))
                 throw new BusinessRuleValidationException("Phone number must have exactly 9 digits.");
+        }
+
+        // Validação do Name da Qualification
+        // Name: free text with at least two words and a maximum length of 150
+        public static void ValidateQualificationName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new BusinessRuleValidationException("Qualification name is required.");
+
+            if (name.Length > 150)
+                throw new BusinessRuleValidationException("Qualification name must have a maximum length of 150 characters.");
+
+            // Verificar se tem pelo menos 2 palavras
+            string[] words = name.Trim().Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            if (words.Length < 2)
+                throw new BusinessRuleValidationException("Qualification name must contain at least two words.");
         }
     }
 }

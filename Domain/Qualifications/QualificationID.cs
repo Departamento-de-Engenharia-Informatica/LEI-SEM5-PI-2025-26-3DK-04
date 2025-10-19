@@ -25,6 +25,7 @@ namespace DDDSample1.Domain.Qualifications
             Guid obj = (Guid) base.ObjValue;
             return obj.ToString();
         }
+        
         public Guid AsGuid(){
             return (Guid) base.ObjValue;
         }

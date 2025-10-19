@@ -9,8 +9,5 @@ namespace DDDSample1.Domain.Qualifications
     {
         // Pesquisar por nome
         Task<List<Qualification>> GetByNameAsync(string name);
-        
-        // Verificar se uma qualificação já existe por nome (evitar duplicados)
-        Task<bool> ExistsByNameAsync(string name);
     }
 }

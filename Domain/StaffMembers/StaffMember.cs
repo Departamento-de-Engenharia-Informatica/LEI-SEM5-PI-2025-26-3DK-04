@@ -26,7 +26,7 @@ namespace DDDSample1.Domain.StaffMembers
             this.Email = email;
             this.PhoneNumber = phoneNumber;
             this.OperationalWindow = operationalWindow;
-            this.Status = MemberStatus.Avaliable;
+            this.Status = MemberStatus.Available; // Status inicia sempre como Available
             this.Qualifications = new List<Qualification>(); // Lista vazia
         }
 
@@ -38,7 +38,7 @@ namespace DDDSample1.Domain.StaffMembers
             this.Email = email;
             this.PhoneNumber = phoneNumber;
             this.OperationalWindow = operationalWindow;
-            this.Status = MemberStatus.Avaliable;
+            this.Status = MemberStatus.Available; // Status sempre inicia como Available
             this.Qualifications = qualifications;
         }
 
@@ -136,10 +136,10 @@ namespace DDDSample1.Domain.StaffMembers
 
         public void Reactivate()
         {
-            if (this.Status == MemberStatus.Avaliable)
+            if (this.Status == MemberStatus.Available)
                 throw new BusinessRuleValidationException("Staff member is already active.");
             
-            this.Status = MemberStatus.Avaliable;
+            this.Status = MemberStatus.Available;
         }
     }
 }

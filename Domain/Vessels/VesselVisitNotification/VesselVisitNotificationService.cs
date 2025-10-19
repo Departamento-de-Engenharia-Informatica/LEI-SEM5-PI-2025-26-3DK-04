@@ -215,5 +215,17 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             return MapToDto(notification);
         }
         
+        public async Task<VesselVisitNotificationDto> ResetToInProgressAsync(Guid id)
+        {
+            var notification = await _repo.GetByIdAsync(new VesselVisitNotificationID(id));
+
+            if (notification == null)
+                throw new BusinessRuleValidationException("Vessel Visit Notification not found.");
+
+            notification.ResetToPending();
+
+            await _unitOfWork.CommitAsync();
+            return MapToDto(notification);
+        }
     }
 }

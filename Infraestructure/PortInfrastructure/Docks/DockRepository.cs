@@ -17,7 +17,7 @@ namespace DDDSample1.Infrastructure.Docks
         public async Task<List<Dock>> SearchByNameAsync(string name)
         {
             return await _objs
-                .Where(d => d.Name.Contains(name))
+                .Where(d => d.Name.ToLower().Contains(name.ToLower()))
                 .ToListAsync();
         }
 
@@ -32,8 +32,10 @@ namespace DDDSample1.Infrastructure.Docks
 
         public async Task<List<Dock>> FilterByLocationAsync(string locationQuery)
         {
+            var lowerLocationQuery = locationQuery.ToLower();
             return await _objs
-                .Where(d => d.Location.Description.Contains(locationQuery) || d.Location.Coordinates.Contains(locationQuery))
+                .Where(d => d.Location.Description.ToLower().Contains(lowerLocationQuery) || 
+                           d.Location.Coordinates.ToLower().Contains(lowerLocationQuery))
                 .ToListAsync();
         }
 

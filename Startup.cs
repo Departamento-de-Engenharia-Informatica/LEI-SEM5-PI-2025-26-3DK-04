@@ -14,6 +14,7 @@ using DDDSample1.Infrastructure.Vessels;
 using DDDSample1.Infrastructure.StaffMembers;
 using DDDSample1.Infrastructure.Qualifications;
 using DDDSample1.Infrastructure.Shared;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using DDDSample1.Domain.Shared;
 using DDDSample1.Domain.Categories;
 using DDDSample1.Domain.Docks;
@@ -51,9 +52,18 @@ namespace DDDSample1
             
             // Add Swagger services
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+            services.AddSwaggerGen(c =>
+            {
+                // Configurar Swagger para mostrar enums como strings em vez de números
+                c.SchemaFilter<EnumSchemaFilter>();        // Para schemas (body)
+                c.ParameterFilter<EnumParameterFilter>();  // Para parâmetros (query, path)
+            });
 
-            services.AddControllers().AddNewtonsoftJson();
+            services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                // Configurar serialização de enums como strings em vez de números
+                options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

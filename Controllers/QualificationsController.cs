@@ -114,18 +114,15 @@ namespace DDDSample1.Controllers
             return Ok(qualifications);
         }
         
-        // GET: api/Qualifications/exists?name=...
+        // GET: api/Qualifications/exists/{id}
         /// <summary>
-        /// Verifica se uma qualificação já existe por nome
+        /// Verifica se uma qualificação existe por ID
         /// </summary>
-        [HttpGet("exists")]
-        public async Task<ActionResult<bool>> ExistsByName([FromQuery] string name)
+        [HttpGet("exists/{id}")]
+        public async Task<ActionResult<bool>> ExistsById(Guid id)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                return BadRequest(new { Message = "Name parameter is required." });
-            
-            var exists = await _service.ExistsByNameAsync(name);
-            return Ok(new { Exists = exists });
+            var qualification = await _service.GetByIdAsync(id);
+            return Ok(new { Exists = qualification != null });
         }
     }
 }

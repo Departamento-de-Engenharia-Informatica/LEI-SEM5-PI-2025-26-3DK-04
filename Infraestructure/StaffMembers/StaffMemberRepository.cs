@@ -18,7 +18,7 @@ namespace DDDSample1.Infrastructure.StaffMembers
         public async Task<List<StaffMember>> GetByNameAsync(string name)
         {
             return await _objs
-                .Where(s => s.Name.Contains(name))
+                .Where(s => s.Name.ToLower().Contains(name.ToLower()))
                 .ToListAsync();
         }
         
@@ -48,7 +48,7 @@ namespace DDDSample1.Infrastructure.StaffMembers
 
             // Aplicar filtros apenas se foram fornecidos
             if (!string.IsNullOrWhiteSpace(name))
-                query = query.Where(s => s.Name.Contains(name));
+                query = query.Where(s => s.Name.ToLower().Contains(name.ToLower()));
 
             if (status.HasValue)
                 query = query.Where(s => s.Status == status.Value);
@@ -63,7 +63,7 @@ namespace DDDSample1.Infrastructure.StaffMembers
         public async Task<List<StaffMember>> GetActiveStaffAsync()
         {
             return await _objs
-                .Where(s => s.Status == MemberStatus.Avaliable)
+                .Where(s => s.Status == MemberStatus.Available)
                 .ToListAsync();
         }
         

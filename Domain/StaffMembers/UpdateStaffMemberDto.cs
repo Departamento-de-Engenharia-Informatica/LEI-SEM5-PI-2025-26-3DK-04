@@ -5,6 +5,7 @@ namespace DDDSample1.Domain.StaffMembers
     /// Usado em: PUT /api/staffmembers/{id}
     /// Campos nullable permitem atualização parcial - só altera os campos fornecidos
     /// Nota: Strings já são nullable por padrão
+    /// O ID (número mecanográfico) NÃO pode ser modificado
     /// </summary>
     public class UpdateStaffMemberDto
     {

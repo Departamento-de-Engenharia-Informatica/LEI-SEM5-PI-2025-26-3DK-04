@@ -41,7 +41,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             this.Vessel = vessel;
             this.LoadingCargo = loadingCargo;
             this.UnloadingCargo = unloadingCargo;
-            this.Status = NotificationStatus.Pending;
+            this.Status = NotificationStatus.InProgress;
         }
 
         public void Approve(string dockId, string officerId)
@@ -150,5 +150,4 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
         
     }
-    
 }

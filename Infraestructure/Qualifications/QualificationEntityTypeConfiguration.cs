@@ -14,15 +14,7 @@ namespace DDDSample1.Infrastructure.Qualifications
             // Propriedade Name
             builder.Property(b => b.Name)
                 .IsRequired()
-                .HasMaxLength(200);
-            
-            // Índice único para Name (evitar duplicados ao nível da base de dados)
-            builder.HasIndex(b => b.Name)
-                .IsUnique();
-            
-            // Propriedade Description
-            builder.Property(b => b.Description)
-                .HasMaxLength(500);
+                .HasMaxLength(150);
         }
     }
 }

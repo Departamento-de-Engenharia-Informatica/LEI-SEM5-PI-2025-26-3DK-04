@@ -152,5 +152,23 @@ namespace DDDSample1.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
+        
+        // PUT: api/VesselVisitNotifications/{id}/reset
+        /// <summary>
+        /// Reseta uma notificação rejeitada para o estado "InProgress" para permitir edição.
+        /// </summary>
+        [HttpPut("{id}/reset")]
+        public async Task<ActionResult<VesselVisitNotificationDto>> ResetToInProgress(Guid id)
+        {
+            try
+            {
+                var reset = await _service.ResetToInProgressAsync(id);
+                return Ok(reset);
+            }
+            catch (BusinessRuleValidationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
     }
 }

@@ -15,8 +15,9 @@ namespace DDDSample1.Infrastructure.Vessels
         
         public async Task<List<VesselVisitNotification>> GetCompletedNotificationsAsync()
         {
+            // Procurar notificações submetidas (prontas para aprovação/rejeição)
             return await _objs
-                .Where(n => n.Status == NotificationStatus.Completed)
+                .Where(n => n.Status == NotificationStatus.Submitted)
                 .ToListAsync();
         }
         

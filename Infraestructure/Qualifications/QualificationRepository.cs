@@ -18,15 +18,8 @@ namespace DDDSample1.Infrastructure.Qualifications
         public async Task<List<Qualification>> GetByNameAsync(string name)
         {
             return await _objs
-                .Where(q => q.Name.Contains(name))
+                .Where(q => q.Name.ToLower().Contains(name.ToLower()))
                 .ToListAsync();
-        }
-        
-        // Verificar se uma qualificação já existe por nome
-        public async Task<bool> ExistsByNameAsync(string name)
-        {
-            return await _objs
-                .AnyAsync(q => q.Name.ToLower() == name.ToLower());
         }
     }
 }

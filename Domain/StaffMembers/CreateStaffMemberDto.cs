@@ -10,8 +10,8 @@ namespace DDDSample1.Domain.StaffMembers
         public string Email { get; set; }
         public int PhoneNumber { get; set; }
         public string OperationalWindow { get; set; }
-        public MemberStatus Status { get; set; }
         
+        // Status sempre inicia como Available por defeito (não pode ser definido na criação)
         // Qualifications começam vazias, podem ser adicionadas depois via endpoint específico
     }
 }

@@ -24,7 +24,7 @@ namespace DDDSample1.Domain.StaffMembers
             this.Email = email;
             this.PhoneNumber = phoneNumber;
             this.OperationalWindow = operationalWindow;
-            this.Status = MemberStatus.Avaliable;
+            this.Status = MemberStatus.Available;
             this.Qualifications = new List<QualificationDto>(); // Lista vazia
         }
     }
