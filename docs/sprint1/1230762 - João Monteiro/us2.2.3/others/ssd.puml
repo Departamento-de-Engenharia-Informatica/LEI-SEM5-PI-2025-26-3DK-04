@@ -1,0 +1,54 @@
+﻿@startuml SD_US2.2.3_REGISTER_DOCK
+
+actor PortAuthorityOfficer
+participant "Port Operations System" as POS
+participant "DockController"
+participant "DockService"
+participant "DockRepository"
+participant "VesselTypeRepository"
+database "Dock Database" as DB
+
+== Registo de nova doca ==
+PortAuthorityOfficer -> POS : Abre formulário "Registar Nova Doca"
+POS -> PortAuthorityOfficer : Solicita dados (nome, localização, comprimento, profundidade, calado máximo, tipos de navio)
+
+PortAuthorityOfficer -> POS : Submete dados da doca
+POS -> DockController : POST /docks
+DockController -> DockService : CreateDock(dto)
+
+DockService -> VesselTypeRepository : GetByIds(dto.VesselTypeIds)
+DockService -> DockRepository : AddAsync(dock)
+DockRepository -> DB : INSERT Dock + relação com VesselTypes
+DB --> DockRepository : Confirmação
+
+DockRepository --> DockService : Doca criada
+DockService --> DockController : DockDto
+DockController -> POS : Confirmação de registo
+
+== Atualização de doca existente ==
+PortAuthorityOfficer -> POS : Abre doca existente
+POS -> DockController : PUT /docks/{id}
+DockController -> DockService : UpdateDock(id, dto)
+
+DockService -> DockRepository : GetById(id)
+DockService -> VesselTypeRepository : GetByIds(dto.VesselTypeIds)
+DockService -> DockRepository : Update(dock)
+DockRepository -> DB : UPDATE Dock + relação com VesselTypes
+DB --> DockRepository : Confirmação
+
+DockRepository --> DockService : Doca atualizada
+DockService --> DockController : DockDto
+DockController -> POS : Confirmação de atualização
+
+== Pesquisa de docas ==
+PortAuthorityOfficer -> POS : Pesquisa por nome, tipo de navio ou localização
+POS -> DockController : GET /docks?name=X&type=Y&location=Z
+DockController -> DockService : SearchDocks(filters)
+DockService -> DockRepository : Search(filters)
+DockRepository -> DB : SELECT com filtros
+DB --> DockRepository : Lista de docas
+DockRepository --> DockService : Lista
+DockService --> DockController : Lista de DockDto
+DockController -> POS : Exibe resultados
+
+@enduml
