@@ -1,0 +1,6 @@
+@startuml SD_US2.2.12_CREATE
+autonumber
+
+actor "Logistics Operator" as Operator
+
+@enduml

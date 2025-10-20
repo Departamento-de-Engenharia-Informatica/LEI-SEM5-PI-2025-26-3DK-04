@@ -1,0 +1,6 @@
+@startuml SD_US2.2.8_CREATE
+autonumber
+
+actor "Shipping Agent Representative" as Agent
+
+@enduml
