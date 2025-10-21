@@ -1,0 +1,106 @@
+@startuml vessel_visit_notification_create_and_submit
+autonumber
+
+actor "Shipping Agent Representative" as Agent
+participant "VesselVisitNotificationsController" as Controller
+participant "VesselVisitNotificationService" as Service
+participant "VesselVisitNotification" as Entity
+participant "CargoManifest" as CargoManifest
+participant "IVesselVisitNotificationRepository" as Repository
+participant "UnitOfWork" as UoW
+database "Database" as DB
+
+== Agent Creates a New Notification ==
+activate Agent
+Agent -> Controller : POST /api/VesselVisitNotifications/create\n{vessel, cargo, crew}
+activate Controller
+
+Controller -> Service : CreateAsync(CreateNotificationDto dto)
+activate Service
+
+Service -> Service : Validate container identifiers\n(ISO 6346:2022 compliance)
+note right: Validation logic happens inside Service\nbased on dto.CargoManifest.Containers
+
+alt Invalid Containers
+    Service --> Controller : 400 Bad Request\n(Invalid container format)
+    deactivate Service
+    Controller --> Agent : Error message displayed
+    deactivate Controller
+    deactivate Agent
+else Valid Containers
+    Service -> Entity : new VesselVisitNotification(dto)
+    activate Entity
+    Entity -> CargoManifest : attach cargo data\n(loading/unloading)
+    activate CargoManifest
+    CargoManifest --> Entity : cargo manifest linked
+    deactivate CargoManifest
+    Entity -> Entity : set Status = InProgress
+    Entity --> Service : VesselVisitNotification
+    deactivate Entity
+
+    Service -> Repository : AddAsync(notification)
+    activate Repository
+    Repository -> DB : INSERT VesselVisitNotification
+    activate DB
+    DB --> Repository : persisted
+    deactivate DB
+    Repository --> Service : notification saved
+    deactivate Repository
+
+    Service -> UoW : CommitAsync()
+    activate UoW
+    UoW -> DB : SaveChangesAsync()
+    activate DB
+    DB --> UoW : success
+    deactivate DB
+    UoW --> Service : success
+    deactivate UoW
+
+    Service -> Service : MapToDto(notification)
+    Service --> Controller : VesselVisitNotificationDto\n(status = InProgress)
+    deactivate Service
+    Controller --> Agent : 201 Created\n(notification created - InProgress)
+    deactivate Controller
+end
+
+== Agent Submits Completed Notification ==
+activate Agent
+Agent -> Controller : PUT /api/VesselVisitNotifications/{id}/submit
+activate Controller
+
+Controller -> Service : SubmitAsync(id)
+activate Service
+
+Service -> Repository : GetByIdAsync(id)
+activate Repository
+Repository -> DB : SELECT * FROM VesselVisitNotifications WHERE Id = id
+activate DB
+DB --> Repository : notification record
+deactivate DB
+Repository --> Service : VesselVisitNotification
+deactivate Repository
+
+Service -> Entity : Submit()
+activate Entity
+Entity -> Entity : validate current state == InProgress
+Entity -> Entity : set Status = Submitted\nset SubmittedAt = now()
+Entity --> Service : void
+deactivate Entity
+
+Service -> UoW : CommitAsync()
+activate UoW
+UoW -> DB : SaveChangesAsync()
+activate DB
+DB --> UoW : success
+deactivate DB
+UoW --> Service : success
+deactivate UoW
+
+Service -> Service : MapToDto(notification)
+Service --> Controller : VesselVisitNotificationDto\n(status = Submitted)
+deactivate Service
+Controller --> Agent : 200 OK\n(submission confirmed)
+deactivate Controller
+deactivate Agent
+
+@enduml

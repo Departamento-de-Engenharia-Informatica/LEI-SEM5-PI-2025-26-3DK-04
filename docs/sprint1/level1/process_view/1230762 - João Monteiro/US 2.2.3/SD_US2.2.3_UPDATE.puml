@@ -2,4 +2,20 @@
 autonumber
 actor "Port Authority Officer" as Officer
 
+participant "<<system>>\nPort\nOperations\nSystem" as System
+
+Officer -> System : update dock information
+activate System
+System --> Officer : select dock
+deactivate System
+
+Officer -> System : selected dock
+activate System
+System --> Officer : insert the new data
+deactivate System
+
+Officer -> System : new dock
+activate System
+System --> Officer : dock updated / error
+deactivate System
 @enduml

@@ -2,5 +2,15 @@
 autonumber
 
 actor "Logistics Operator" as Operator
+participant "<<system>>\nPort\nOperations\nSystem" as System
 
+Operator -> System : deactivate physical resource
+activate System
+System --> Operator : select physical resource
+deactivate System
+
+Operator -> System : selected physical resource
+activate System
+System --> Operator : deactivation successfuly / error
+deactivate System
 @enduml

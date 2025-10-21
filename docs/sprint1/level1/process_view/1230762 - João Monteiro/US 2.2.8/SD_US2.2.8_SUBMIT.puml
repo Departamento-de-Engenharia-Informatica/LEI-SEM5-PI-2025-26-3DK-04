@@ -2,5 +2,20 @@
 autonumber
 
 actor "Shipping Agent Representative" as Agent
+participant "<<system>>\nPort\nOperations\nSystem" as System
 
+Agent -> System : submit vessel visit notification information
+activate System
+System --> Agent : select vessel visit notification
+deactivate System
+
+Agent -> System : selected vessel visit notification
+activate System
+System --> Agent : change the status to 'Submitted'
+deactivate System
+
+Agent -> System : new vessel visit notification status
+activate System
+System --> Agent : vessel visit notification updated / error
+deactivate System
 @enduml

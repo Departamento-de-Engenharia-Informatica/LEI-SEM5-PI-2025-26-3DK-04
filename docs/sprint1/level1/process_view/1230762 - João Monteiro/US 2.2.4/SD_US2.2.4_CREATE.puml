@@ -2,5 +2,15 @@
 autonumber
 
 actor "Port Authority Officer" as Officer
+participant "<<system>>\nPort\nOperations\nSystem" as System
 
+Officer -> System : create storage area
+activate System
+System --> Officer : insert the needed data
+deactivate System
+
+Officer -> System : storage area data
+activate System
+System --> Officer : storage area created / error
+deactivate System
 @enduml

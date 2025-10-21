@@ -1,5 +1,20 @@
 @startuml SD_US2.2.4_UPDATE
 autonumber
 actor "Port Authority Officer" as Officer
+participant "<<system>>\nPort\nOperations\nSystem" as System
 
+Officer -> System : update storage area information
+activate System
+System --> Officer : select storage area
+deactivate System
+
+Officer -> System : selected storage area
+activate System
+System --> Officer : insert the new data
+deactivate System
+
+Officer -> System : new storage area
+activate System
+System --> Officer : storage area updated / error
+deactivate System
 @enduml
