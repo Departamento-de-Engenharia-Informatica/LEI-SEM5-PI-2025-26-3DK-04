@@ -12,10 +12,11 @@ namespace DDDSample1.Domain.Organizations
         private readonly IOrganizationRepository _repo;
         private readonly IRepresentativeRepository _repRepo;
 
-        public OrganizationService(IUnitOfWork unitOfWork, IOrganizationRepository repo)
+        public OrganizationService(IUnitOfWork unitOfWork, IOrganizationRepository repo,IRepresentativeRepository repRepo)
         {
             _unitOfWork = unitOfWork;
             _repo = repo;
+            _repRepo = repRepo;
         }
 
 

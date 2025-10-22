@@ -57,17 +57,19 @@ namespace DDDSample1.Domain.Shared
             if (!regex.IsMatch(email))
                 throw new BusinessRuleValidationException("Email must be from @gmail.com, @hotmail.com, or @email.com domains.");
         }
+        
+      
+        
+            public static bool ValidatePhoneNumber(string phone)
+            {
+                if (string.IsNullOrWhiteSpace(phone))
+                    return false;
+                
+                string pattern = @"^(?:\+(3\d|4\d)\d{0,2})?\d{9}$";
 
-        public static void ValidatePhoneNumber(string phoneNumber)
-        {
-            if (string.IsNullOrWhiteSpace(phoneNumber))
-                throw new BusinessRuleValidationException("Phone number is required.");
-
-            var regex = new Regex(@"^\d{9}$");
-
-            if (!regex.IsMatch(phoneNumber))
-                throw new BusinessRuleValidationException("Phone number must have exactly 9 digits.");
-        }
+                return Regex.IsMatch(phone, pattern);
+            }
+        
 
         // Validação do Name da Qualification
         // Name: free text with at least two words and a maximum length of 150

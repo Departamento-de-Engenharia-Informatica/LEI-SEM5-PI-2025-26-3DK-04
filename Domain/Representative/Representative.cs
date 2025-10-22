@@ -17,7 +17,7 @@ namespace DDDSample1.Domain.Organizations
 
         public Representative(string name, string citizenId, string nationality, string email, string phoneNumber)
         {
-            if (string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrEmpty(name))
                 throw new BusinessRuleValidationException("Name is required.");
             if (string.IsNullOrWhiteSpace(citizenId))
                 throw new BusinessRuleValidationException("Citizen ID is required.");

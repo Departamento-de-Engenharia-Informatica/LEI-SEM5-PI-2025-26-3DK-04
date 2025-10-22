@@ -39,46 +39,11 @@ namespace DDDSample1.Infrastructure.Organizations
                 .IsRequired()
                 .HasMaxLength(50);
 
-            // Representatives as owned entities
-            builder.OwnsMany(o => o.Representatives, rep =>
-            {
-                rep.WithOwner().HasForeignKey(r => r.OrganizationId);
-
-                rep.Property(r => r.Id)
-                    .HasConversion(
-                        id => id.AsGuid(),
-                        value => new RepresentativeId(value))
-                    .ValueGeneratedNever();
-
-                rep.Property(r => r.Name)
-                    .IsRequired()
-                    .HasMaxLength(150);
-
-                rep.Property(r => r.CitizenId)
-                    .IsRequired()
-                    .HasMaxLength(50);
-
-                rep.Property(r => r.Nationality)
-                    .IsRequired()
-                    .HasMaxLength(50);
-
-                rep.Property(r => r.Email)
-                    .IsRequired()
-                    .HasMaxLength(150);
-
-                rep.Property(r => r.PhoneNumber)
-                    .IsRequired()
-                    .HasMaxLength(50);
-
-                rep.Property(r => r.OrganizationId)
-                    .HasConversion(
-                        id => id.AsString(),
-                        value => new OrganizationId(value))
-                    .HasMaxLength(10)
-                    .IsRequired();
-
-                rep.HasKey(r => r.Id);
-            });
+            // Relação com Representatives (NÃO OWNED!)
+            builder.HasMany(o => o.Representatives)
+                .WithOne() // Se Representative tiver uma propriedade Organization, substitui por .WithOne(r => r.Organization)
+                .HasForeignKey(r => r.OrganizationId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Configuração para EF Core acessar campo privado
             builder.Metadata.FindNavigation(nameof(Organization.Representatives))

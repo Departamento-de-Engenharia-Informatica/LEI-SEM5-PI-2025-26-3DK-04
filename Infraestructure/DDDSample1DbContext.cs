@@ -38,7 +38,6 @@ namespace DDDSample1.Infrastructure
         public DbSet<StorageArea> StorageAreas { get; set; }
         public DbSet<Qualification> Qualifications { get; set; }
         public DbSet<StaffMember> StaffMembers { get; set; }
-        
         public DbSet<PhysicalResource> PhysicalResources { get; set; }
 
         public DDDSample1DbContext(DbContextOptions options) : base(options)
@@ -54,15 +53,14 @@ namespace DDDSample1.Infrastructure
             modelBuilder.ApplyConfiguration(new VesselTypeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VesselEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new OrganizationEntityTypeConfiguration());
-            // Representative is configured as an owned entity within OrganizationEntityTypeConfiguration
-            // modelBuilder.ApplyConfiguration(new RepresentativeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new RepresentativeEntityTypeConfiguration()); 
             modelBuilder.ApplyConfiguration(new DockEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StorageAreaEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QualificationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StaffMemberEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PhysicalResourceEntityTypeConfiguration());
-            
-           // modelBuilder.Ignore<QualificationID>();
+
+            // modelBuilder.Ignore<QualificationID>();
         }
     }
 }
