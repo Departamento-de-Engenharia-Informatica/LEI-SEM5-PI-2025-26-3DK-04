@@ -41,6 +41,7 @@ namespace DDDSample1.Controllers
 
                 var result = await _service.CreateAsync(
                     dto.VesselId,
+                    dto.RepresentativeId,
                     dto.LoadingManifests,
                     dto.UnloadingManifests,
                     crew);
@@ -164,6 +165,44 @@ namespace DDDSample1.Controllers
             {
                 var reset = await _service.ResetToInProgressAsync(id);
                 return Ok(reset);
+            }
+            catch (BusinessRuleValidationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+        
+        /// <summary>
+        /// US 2.2.10: Search and filter vessel visit notifications
+        /// Representatives can view their own notifications and those from colleagues in the same organization
+        /// </summary>
+        [HttpGet("search")]
+        public async Task<ActionResult<List<VesselVisitNotificationDto>>> SearchNotifications(
+            [FromQuery] Guid? vesselId = null,
+            [FromQuery] string status = null,
+            [FromQuery] Guid? representativeId = null,
+            [FromQuery] Guid? organizationId = null,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null)
+        {
+            try
+            {
+                var filter = new NotificationFilterDto
+                {
+                    VesselId = vesselId,
+                    Status = string.IsNullOrWhiteSpace(status) ? null : Enum.Parse<NotificationStatus>(status, true),
+                    RepresentativeId = representativeId,
+                    OrganizationId = organizationId,
+                    StartDate = startDate,
+                    EndDate = endDate
+                };
+                
+                var notifications = await _service.SearchNotificationsAsync(filter);
+                return Ok(notifications);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = $"Invalid status value. {ex.Message}" });
             }
             catch (BusinessRuleValidationException ex)
             {

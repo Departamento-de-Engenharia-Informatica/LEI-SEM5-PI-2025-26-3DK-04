@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using DDDSample1.Domain.Docks;
 using DDDSample1.Domain.Shared;
 using DDDSample1.Domain.Vessels.VesselInformation;
+using DDDSample1.Domain.Organizations;
+
 namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 {
 
@@ -25,6 +27,10 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         public string AssignedDock { get; private set; }
 
         public string OfficerId { get; private set; }
+        
+        public RepresentativeId RepresentativeId { get; private set; }
+        
+        public DateTime CreatedAt { get; private set; }
         //private List<CargoManifest> _cargoManifests;
 
         private VesselVisitNotification()
@@ -32,16 +38,21 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
         }
 
-        public VesselVisitNotification(Vessel vessel, LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo)
+        public VesselVisitNotification(Vessel vessel, LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo, RepresentativeId representativeId)
         {
             if (vessel == null)
                 throw new BusinessRuleValidationException("Vessel is required for a visit notification.");
+            
+            if (representativeId == null)
+                throw new BusinessRuleValidationException("Representative is required for a visit notification.");
                 
             this.Id = new VesselVisitNotificationID(Guid.NewGuid());
             this.Vessel = vessel;
             this.LoadingCargo = loadingCargo;
             this.UnloadingCargo = unloadingCargo;
+            this.RepresentativeId = representativeId;
             this.Status = NotificationStatus.InProgress;
+            this.CreatedAt = DateTime.UtcNow;
         }
 
         public void Approve(string dockId, string officerId)

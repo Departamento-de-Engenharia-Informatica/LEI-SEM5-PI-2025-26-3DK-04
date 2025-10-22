@@ -29,6 +29,16 @@ namespace DDDSample1.Infrastructure.Vessels
             
             builder.Property(b => b.DecisionTimeStamp);
             
+            builder.Property(b => b.CreatedAt)
+                .IsRequired();
+            
+            // Configure RepresentativeId as value object
+            builder.Property(b => b.RepresentativeId)
+                .HasConversion(
+                    v => v.AsGuid(),
+                    v => new DDDSample1.Domain.Organizations.RepresentativeId(v))
+                .IsRequired();
+            
             // Configurar relacionamento com Vessel (obrigatório)
             builder.HasOne(b => b.Vessel)
                 .WithMany()

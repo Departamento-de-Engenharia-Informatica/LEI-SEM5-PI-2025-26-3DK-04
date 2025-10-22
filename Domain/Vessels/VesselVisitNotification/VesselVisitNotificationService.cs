@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DDDSample1.Domain.Shared;
 using DDDSample1.Domain.Vessels.VesselInformation;
+using DDDSample1.Domain.Organizations;
 
 namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 {
@@ -29,6 +30,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         //Create new notification
         public async Task<VesselVisitNotificationDto> CreateAsync(
             Guid vesselId,
+            Guid representativeId,
             List<CargoManifest> loadingManifests,
             List<CargoManifest> unloadingManifests,
             List<CrewMember>? crew)
@@ -70,7 +72,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                         $"Unloading cargo weight ({unloadingWeight} kg) cannot exceed vessel capacity ({vesselCapacity} kg).");
             }
 
-            var notification = new VesselVisitNotification(vessel, loadingCargo, unloadingCargo);
+            var notification = new VesselVisitNotification(vessel, loadingCargo, unloadingCargo, new RepresentativeId(representativeId));
 
             await _repo.AddAsync(notification);
             await _unitOfWork.CommitAsync();
@@ -145,7 +147,9 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 OfficerId = notification.OfficerId,
                 VesselId = notification.Vessel.Id.AsGuid(),
                 VesselName = notification.Vessel.Name,
-                VesselCallsign = notification.Vessel.ImoNumber.ToString()
+                VesselCallsign = notification.Vessel.ImoNumber.ToString(),
+                RepresentativeId = notification.RepresentativeId?.AsGuid(),
+                CreatedAt = notification.CreatedAt
             };
             return dto;
         }
@@ -226,6 +230,24 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
             await _unitOfWork.CommitAsync();
             return MapToDto(notification);
+        }
+        
+        // US 2.2.10: Search and filter notifications
+        public async Task<List<VesselVisitNotificationDto>> SearchNotificationsAsync(NotificationFilterDto filter)
+        {
+            VesselId vesselId = filter.VesselId.HasValue ? new VesselId(filter.VesselId.Value) : null;
+            RepresentativeId representativeId = filter.RepresentativeId.HasValue ? new RepresentativeId(filter.RepresentativeId.Value) : null;
+            OrganizationId organizationId = filter.OrganizationId.HasValue ? new OrganizationId(filter.OrganizationId.Value.ToString()) : null;
+            
+            var notifications = await _repo.SearchNotificationsAsync(
+                vesselId,
+                filter.Status,
+                representativeId,
+                organizationId,
+                filter.StartDate,
+                filter.EndDate);
+            
+            return notifications.Select(n => MapToDto(n)).ToList();
         }
     }
 }
