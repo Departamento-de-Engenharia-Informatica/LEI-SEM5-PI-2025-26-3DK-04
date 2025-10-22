@@ -46,9 +46,13 @@ namespace DDDSample1
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // services.AddDbContext<DDDSample1DbContext>(opt =>
+            //     opt.UseInMemoryDatabase("DDDSample1DB")
+            //     .ReplaceService<IValueConverterSelector, StronglyEntityIdValueConverterSelector>());
             services.AddDbContext<DDDSample1DbContext>(opt =>
-                opt.UseInMemoryDatabase("DDDSample1DB")
-                .ReplaceService<IValueConverterSelector, StronglyEntityIdValueConverterSelector>());
+                opt.UseSqlite("Data Source=database.db")
+                    .ReplaceService<IValueConverterSelector, StronglyEntityIdValueConverterSelector>()
+                    .EnableSensitiveDataLogging());
 
             ConfigureMyServices(services);
             
