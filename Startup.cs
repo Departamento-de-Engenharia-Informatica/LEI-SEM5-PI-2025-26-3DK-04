@@ -7,19 +7,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using DDDSample1.Infrastructure;
-using DDDSample1.Infrastructure.Categories;
-using DDDSample1.Infrastructure.Products;
-using DDDSample1.Infrastructure.Families;
 using DDDSample1.Infrastructure.Vessels;
 using DDDSample1.Infrastructure.StaffMembers;
 using DDDSample1.Infrastructure.Qualifications;
 using DDDSample1.Infrastructure.Shared;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using DDDSample1.Domain.Shared;
-using DDDSample1.Domain.Categories;
 using DDDSample1.Domain.Docks;
-using DDDSample1.Domain.Products;
-using DDDSample1.Domain.Families;
 using DDDSample1.Domain.Organizations;
 using DDDSample1.Domain.PhysicalResources;
 using DDDSample1.Domain.PortInfrastructure.StorageArea;
@@ -103,15 +97,6 @@ namespace DDDSample1
         public void ConfigureMyServices(IServiceCollection services)
         {
             services.AddTransient<IUnitOfWork,UnitOfWork>();
-
-            services.AddTransient<ICategoryRepository,CategoryRepository>();
-            services.AddTransient<CategoryService>();
-
-            services.AddTransient<IProductRepository,ProductRepository>();
-            services.AddTransient<ProductService>();
-
-            services.AddTransient<IFamilyRepository,FamilyRepository>();
-            services.AddTransient<FamilyService>();
             
             services.AddTransient<IVesselVisitNotificationRepository,VesselVisitNotificationRepository>();
             services.AddTransient<VesselVisitNotificationService>();
