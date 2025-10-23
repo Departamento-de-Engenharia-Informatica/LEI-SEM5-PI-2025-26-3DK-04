@@ -4,35 +4,38 @@ LAYOUT_TOP_DOWN()
 
 title Level 2 - Logical View
 
-actor admin  as "Administrator UI"
-actor agent   as "Shipping Agent Representative UI"
-actor officer as "Port Authority Officer UI"
-actor operator as "Logistics Operator UI"
-interface "API" as API
+interface admin  as "Administrator UI"
+interface agent   as "Shipping Agent Representative UI"
+interface officer as "Port Authority Officer UI"
+interface operator as "Logistics Operator UI"
+interface "External API" as API
+
+' Interface externa
+interface "WebUI" as webui_interface
 
 System_Boundary(pms, "Port Management System") {
 
+  ' Interfaces internas
+  interface "BackendAPI" as backend_interface
+  interface "PlanningService" as planning_interface
+
   Container(gui, "Web App (GUI)")
   Container(api, "Backend App", ".NET")
-
   Container(planning, "Planning Service", "Service")
-  Container(mdv, "VVN Service", "Service", "Vessel Visit Notifications, Cargo Manifests")
-  Container(mdr, "Data Service", "Service", "Organizations, Staff Members, Storage, Docks, Vessels")
+  
+  ' Ligação das interfaces aos containers
+  gui -up- webui_interface
+  gui -down- backend_interface
+  api -up- backend_interface
+  api -down- planning_interface
 }
 
-Rel(agent, gui, "Uses")
-Rel(officer, gui, "Uses")
-Rel(operator, gui, "Uses")
-Rel(admin, gui, "Uses")
+Rel(agent, webui_interface, "Uses")
+Rel(officer, webui_interface, "Uses")
+Rel(operator, webui_interface, "Uses")
+Rel(admin, webui_interface, "Uses")
 
-Rel(gui, api, "REST")
-Rel(api, planning, "invokes planning APIs")
-Rel(api, mdv, "invokes VVN APIs")
-Rel(api, mdr, "invokes main data APIs")
+Rel(planning_interface, planning, "invokes")
 
-Rel(mdv, planning, "Provides approved VVNs and Cargo for scheduling")
-Rel(mdr, mdv, "Provides main data (Vessels, Docks, Agents)")
-
-Rel(mdv, API, "Stores/loads cargo manifests")
-Rel(mdr, API, "Stores main data")
+Rel(planning, API, "Stores/loads planning data", "HTTP/REST")
 @enduml

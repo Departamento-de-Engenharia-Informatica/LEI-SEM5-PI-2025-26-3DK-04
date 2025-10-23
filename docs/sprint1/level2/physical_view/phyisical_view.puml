@@ -25,14 +25,10 @@ node "server2" as WEB {
 
 node "server1" as APP {
   component "<<component>>\nBackend App" as API
-  component "<<component>>\nData Service" as DS
-  component "<<component>>\nVVN Service" as VVN
   component "<<component>>\nPlaneamento" as PLAN
 }
 
 WEBHTTP -[Hidden]-> UI
-API -down- DS
-API -down- VVN
 API -down- PLAN
 
 BROWSER -[#1b4b5a]-> WEBHTTP : http/s

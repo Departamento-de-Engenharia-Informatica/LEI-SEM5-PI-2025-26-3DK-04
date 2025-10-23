@@ -14,11 +14,11 @@ package "Port Management System" {
   package VVN_Service
   package Data_Service
 
-  UI --> Planning : uses Planning API
-  UI --> VVN_Service : uses VVN API
-  UI --> Data_Service : uses Data Service API
+  UI .down.> Planning 
+  UI .down.> VVN_Service 
+  UI .down.> Data_Service
 
-  Planning --> VVN_Service : obtains approved visits\n+ manifests
-  VVN_Service --> Data_Service : obtains maindata\n
+  Planning .down.> VVN_Service
+  VVN_Service .down.> Data_Service
 }
 @enduml
