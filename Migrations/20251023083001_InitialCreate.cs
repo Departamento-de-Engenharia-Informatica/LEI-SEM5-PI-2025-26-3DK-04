@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -15,9 +16,9 @@ namespace DDDNetCore.Migrations
                 name: "Categories",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    Active = table.Column<bool>(type: "INTEGER", nullable: false)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    Active = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -28,14 +29,14 @@ namespace DDDNetCore.Migrations
                 name: "Docks",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Length = table.Column<double>(type: "REAL", nullable: false),
-                    Depth = table.Column<double>(type: "REAL", nullable: false),
-                    MaxDraft = table.Column<int>(type: "INTEGER", nullable: false),
-                    Location_Coordinates = table.Column<string>(type: "TEXT", nullable: true),
-                    Location_Description = table.Column<string>(type: "TEXT", nullable: true),
-                    Active = table.Column<bool>(type: "INTEGER", nullable: false)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Length = table.Column<double>(type: "double precision", nullable: false),
+                    Depth = table.Column<double>(type: "double precision", nullable: false),
+                    MaxDraft = table.Column<int>(type: "integer", nullable: false),
+                    Location_Coordinates = table.Column<string>(type: "text", nullable: true),
+                    Location_Description = table.Column<string>(type: "text", nullable: true),
+                    Active = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -46,9 +47,9 @@ namespace DDDNetCore.Migrations
                 name: "Families",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    Active = table.Column<bool>(type: "INTEGER", nullable: false)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    Active = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -59,11 +60,11 @@ namespace DDDNetCore.Migrations
                 name: "Organizations",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", maxLength: 10, nullable: false),
-                    LegalName = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    AlternativeName = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
-                    Address = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
-                    TaxNumber = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false)
+                    Id = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    LegalName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    AlternativeName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    Address = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    TaxNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -74,13 +75,13 @@ namespace DDDNetCore.Migrations
                 name: "PhysicalResources",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: false),
-                    Type = table.Column<string>(type: "TEXT", nullable: false),
-                    Capacity = table.Column<double>(type: "REAL", nullable: false),
-                    AssignedArea = table.Column<string>(type: "TEXT", nullable: true),
-                    SetupTime = table.Column<int>(type: "INTEGER", nullable: true),
-                    Status = table.Column<string>(type: "TEXT", nullable: false)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false),
+                    Capacity = table.Column<double>(type: "double precision", nullable: false),
+                    AssignedArea = table.Column<string>(type: "text", nullable: true),
+                    SetupTime = table.Column<int>(type: "integer", nullable: true),
+                    Status = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -91,10 +92,10 @@ namespace DDDNetCore.Migrations
                 name: "Products",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    CategoryId = table.Column<string>(type: "TEXT", nullable: true),
-                    Active = table.Column<bool>(type: "INTEGER", nullable: false)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    CategoryId = table.Column<string>(type: "text", nullable: true),
+                    Active = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -105,8 +106,8 @@ namespace DDDNetCore.Migrations
                 name: "Qualifications",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 150, nullable: false)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -117,12 +118,12 @@ namespace DDDNetCore.Migrations
                 name: "StaffMembers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    PhoneNumber = table.Column<int>(type: "INTEGER", nullable: false),
-                    OperationalWindow = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
-                    Status = table.Column<string>(type: "TEXT", nullable: false)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    PhoneNumber = table.Column<int>(type: "integer", nullable: false),
+                    OperationalWindow = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    Status = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -133,11 +134,11 @@ namespace DDDNetCore.Migrations
                 name: "StorageAreas",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Type = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    Location = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    MaxCapacityTEUs = table.Column<int>(type: "INTEGER", nullable: false),
-                    CurrentOccupancyTEUs = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Location = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    MaxCapacityTEUs = table.Column<int>(type: "integer", nullable: false),
+                    CurrentOccupancyTEUs = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -148,13 +149,13 @@ namespace DDDNetCore.Migrations
                 name: "Vessels",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    ImoNumber = table.Column<string>(type: "TEXT", maxLength: 15, nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    VesselTypeId = table.Column<string>(type: "TEXT", nullable: false),
-                    Owner = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    Operator = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    Active = table.Column<bool>(type: "INTEGER", nullable: false)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    ImoNumber = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    VesselTypeId = table.Column<string>(type: "text", nullable: false),
+                    Owner = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Operator = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Active = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -165,14 +166,14 @@ namespace DDDNetCore.Migrations
                 name: "VesselTypes",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
-                    Capacity = table.Column<int>(type: "INTEGER", nullable: false),
-                    MaxRows = table.Column<int>(type: "INTEGER", nullable: false),
-                    MaxBays = table.Column<int>(type: "INTEGER", nullable: false),
-                    MaxTiers = table.Column<int>(type: "INTEGER", nullable: false),
-                    Active = table.Column<bool>(type: "INTEGER", nullable: false)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    Capacity = table.Column<int>(type: "integer", nullable: false),
+                    MaxRows = table.Column<int>(type: "integer", nullable: false),
+                    MaxBays = table.Column<int>(type: "integer", nullable: false),
+                    MaxTiers = table.Column<int>(type: "integer", nullable: false),
+                    Active = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -183,14 +184,14 @@ namespace DDDNetCore.Migrations
                 name: "Representatives",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 150, nullable: false),
-                    CitizenId = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    Nationality = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 150, nullable: false),
-                    PhoneNumber = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    OrganizationId = table.Column<string>(type: "TEXT", maxLength: 10, nullable: false),
-                    Status = table.Column<string>(type: "TEXT", nullable: false)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    CitizenId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Nationality = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    PhoneNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    OrganizationId = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -207,20 +208,20 @@ namespace DDDNetCore.Migrations
                 name: "PhysicalResourceQualifications",
                 columns: table => new
                 {
-                    PhysicalResourceId = table.Column<string>(type: "TEXT", nullable: false),
-                    QualificationId = table.Column<string>(type: "TEXT", nullable: false)
+                    PhysicalResourceId = table.Column<string>(type: "text", nullable: false),
+                    QualificationId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PhysicalResourceQualifications", x => new { x.PhysicalResourceId, x.QualificationId });
                     table.ForeignKey(
-                        name: "FK_PhysicalResourceQualifications_PhysicalResources_PhysicalResourceId",
+                        name: "FK_PhysicalResourceQualifications_PhysicalResources_PhysicalRe~",
                         column: x => x.PhysicalResourceId,
                         principalTable: "PhysicalResources",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PhysicalResourceQualifications_Qualifications_QualificationId",
+                        name: "FK_PhysicalResourceQualifications_Qualifications_Qualification~",
                         column: x => x.QualificationId,
                         principalTable: "Qualifications",
                         principalColumn: "Id",
@@ -231,8 +232,8 @@ namespace DDDNetCore.Migrations
                 name: "StaffMemberQualifications",
                 columns: table => new
                 {
-                    StaffMemberId = table.Column<string>(type: "TEXT", nullable: false),
-                    QualificationId = table.Column<string>(type: "TEXT", nullable: false)
+                    StaffMemberId = table.Column<string>(type: "text", nullable: false),
+                    QualificationId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -255,9 +256,9 @@ namespace DDDNetCore.Migrations
                 name: "StorageDockAssignment",
                 columns: table => new
                 {
-                    DockId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    StorageAreaId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    DistanceMeters = table.Column<double>(type: "REAL", nullable: false)
+                    DockId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StorageAreaId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DistanceMeters = table.Column<double>(type: "double precision", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -274,12 +275,12 @@ namespace DDDNetCore.Migrations
                 name: "CrewMember",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 150, nullable: false),
-                    CitizenId = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    Nationality = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    VesselId = table.Column<string>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    CitizenId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Nationality = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    VesselId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -296,16 +297,16 @@ namespace DDDNetCore.Migrations
                 name: "VesselVisitNotifications",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    VesselId = table.Column<string>(type: "TEXT", nullable: false),
-                    RejectedReason = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
-                    DecisionTimeStamp = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    DecisionOutcome = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
-                    Status = table.Column<string>(type: "TEXT", nullable: false),
-                    AssignedDock = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
-                    OfficerId = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
-                    RepresentativeId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    VesselId = table.Column<string>(type: "text", nullable: false),
+                    RejectedReason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    DecisionTimeStamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DecisionOutcome = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    AssignedDock = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    OfficerId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    RepresentativeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -322,8 +323,8 @@ namespace DDDNetCore.Migrations
                 name: "DockVesselTypes",
                 columns: table => new
                 {
-                    AllowedVesselTypesId = table.Column<string>(type: "TEXT", nullable: false),
-                    DockId = table.Column<string>(type: "TEXT", nullable: false)
+                    AllowedVesselTypesId = table.Column<string>(type: "text", nullable: false),
+                    DockId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {

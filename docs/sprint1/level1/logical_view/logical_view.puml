@@ -4,10 +4,10 @@
 title Level 1 - Logical View
 
 ' ==== Actors ====
-actor admin  as "Administrator UI"
-actor agent   as "Shipping Agent Representative UI"
-actor officer as "Port Authority Officer UI"
-actor operator as "Logistics Operator UI"
+interface admin  as "Administrator UI"
+interface agent   as "Shipping Agent Representative UI"
+interface officer as "Port Authority Officer UI"
+interface operator as "Logistics Operator UI"
 
 ' ==== System ====
 System(pms, "Port Management System")

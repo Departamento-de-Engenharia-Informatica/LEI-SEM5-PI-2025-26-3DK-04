@@ -4,6 +4,7 @@ using DDDSample1.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -15,18 +16,22 @@ namespace DDDNetCore.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "9.0.10")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("DDDSample1.Domain.Categories.Category", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<bool>("Active")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Description")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -36,24 +41,24 @@ namespace DDDNetCore.Migrations
             modelBuilder.Entity("DDDSample1.Domain.Docks.Dock", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<bool>("Active")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<double>("Depth")
-                        .HasColumnType("REAL");
+                        .HasColumnType("double precision");
 
                     b.Property<double>("Length")
-                        .HasColumnType("REAL");
+                        .HasColumnType("double precision");
 
                     b.Property<int>("MaxDraft")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -63,13 +68,13 @@ namespace DDDNetCore.Migrations
             modelBuilder.Entity("DDDSample1.Domain.Families.Family", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<bool>("Active")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Description")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -80,26 +85,26 @@ namespace DDDNetCore.Migrations
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(10)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(10)");
 
                     b.Property<string>("Address")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("AlternativeName")
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("LegalName")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("TaxNumber")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
@@ -109,41 +114,41 @@ namespace DDDNetCore.Migrations
             modelBuilder.Entity("DDDSample1.Domain.Organizations.Representative", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("CitizenId")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(150)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(150)");
 
                     b.Property<string>("Nationality")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("OrganizationId")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(10)");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -161,28 +166,28 @@ namespace DDDNetCore.Migrations
             modelBuilder.Entity("DDDSample1.Domain.PhysicalResources.PhysicalResource", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("AssignedArea")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<double>("Capacity")
-                        .HasColumnType("REAL");
+                        .HasColumnType("double precision");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<int?>("SetupTime")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -192,23 +197,23 @@ namespace DDDNetCore.Migrations
             modelBuilder.Entity("DDDSample1.Domain.PortInfrastructure.StorageArea.StorageArea", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<int>("CurrentOccupancyTEUs")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("MaxCapacityTEUs")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
@@ -218,16 +223,16 @@ namespace DDDNetCore.Migrations
             modelBuilder.Entity("DDDSample1.Domain.Products.Product", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<bool>("Active")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("CategoryId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Description")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -237,12 +242,12 @@ namespace DDDNetCore.Migrations
             modelBuilder.Entity("DDDSample1.Domain.Qualifications.Qualification", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(150)");
 
                     b.HasKey("Id");
 
@@ -252,28 +257,28 @@ namespace DDDNetCore.Migrations
             modelBuilder.Entity("DDDSample1.Domain.StaffMembers.StaffMember", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("OperationalWindow")
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("PhoneNumber")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -283,34 +288,34 @@ namespace DDDNetCore.Migrations
             modelBuilder.Entity("DDDSample1.Domain.Vessels.Vessel", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<bool>("Active")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("ImoNumber")
                         .IsRequired()
                         .HasMaxLength(15)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(15)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("Operator")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("Owner")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("VesselTypeId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -326,32 +331,32 @@ namespace DDDNetCore.Migrations
             modelBuilder.Entity("DDDSample1.Domain.Vessels.VesselType", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<bool>("Active")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("Capacity")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<int>("MaxBays")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("MaxRows")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("MaxTiers")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -363,40 +368,40 @@ namespace DDDNetCore.Migrations
             modelBuilder.Entity("DDDSample1.Domain.Vessels.VesselVisitNotification.VesselVisitNotification", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("AssignedDock")
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DecisionOutcome")
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTime?>("DecisionTimeStamp")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("OfficerId")
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("RejectedReason")
                         .HasMaxLength(500)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<Guid>("RepresentativeId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("VesselId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -408,10 +413,10 @@ namespace DDDNetCore.Migrations
             modelBuilder.Entity("DockVesselTypes", b =>
                 {
                     b.Property<string>("AllowedVesselTypesId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("DockId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("AllowedVesselTypesId", "DockId");
 
@@ -423,10 +428,10 @@ namespace DDDNetCore.Migrations
             modelBuilder.Entity("PhysicalResourceQualifications", b =>
                 {
                     b.Property<string>("PhysicalResourceId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("QualificationId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("PhysicalResourceId", "QualificationId");
 
@@ -438,10 +443,10 @@ namespace DDDNetCore.Migrations
             modelBuilder.Entity("StaffMemberQualifications", b =>
                 {
                     b.Property<string>("StaffMemberId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("QualificationId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("StaffMemberId", "QualificationId");
 
@@ -455,13 +460,13 @@ namespace DDDNetCore.Migrations
                     b.OwnsOne("DDDSample1.Domain.Shared.Location", "Location", b1 =>
                         {
                             b1.Property<string>("DockId")
-                                .HasColumnType("TEXT");
+                                .HasColumnType("text");
 
                             b1.Property<string>("Coordinates")
-                                .HasColumnType("TEXT");
+                                .HasColumnType("text");
 
                             b1.Property<string>("Description")
-                                .HasColumnType("TEXT");
+                                .HasColumnType("text");
 
                             b1.HasKey("DockId");
 
@@ -488,13 +493,13 @@ namespace DDDNetCore.Migrations
                     b.OwnsMany("DDDNetCore.Domain.PortInfrastructure.StorageArea.StorageDockAssignment", "DockAssignments", b1 =>
                         {
                             b1.Property<Guid>("StorageAreaId")
-                                .HasColumnType("TEXT");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("DockId")
-                                .HasColumnType("TEXT");
+                                .HasColumnType("uuid");
 
                             b1.Property<double>("DistanceMeters")
-                                .HasColumnType("REAL");
+                                .HasColumnType("double precision");
 
                             b1.HasKey("StorageAreaId", "DockId");
 
@@ -513,26 +518,28 @@ namespace DDDNetCore.Migrations
                         {
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("INTEGER");
+                                .HasColumnType("integer");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
 
                             b1.Property<string>("CitizenId")
                                 .IsRequired()
                                 .HasMaxLength(50)
-                                .HasColumnType("TEXT");
+                                .HasColumnType("character varying(50)");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(150)
-                                .HasColumnType("TEXT");
+                                .HasColumnType("character varying(150)");
 
                             b1.Property<string>("Nationality")
                                 .IsRequired()
                                 .HasMaxLength(50)
-                                .HasColumnType("TEXT");
+                                .HasColumnType("character varying(50)");
 
                             b1.Property<string>("VesselId")
                                 .IsRequired()
-                                .HasColumnType("TEXT");
+                                .HasColumnType("text");
 
                             b1.HasKey("Id");
 
@@ -558,7 +565,7 @@ namespace DDDNetCore.Migrations
                     b.OwnsOne("DDDSample1.Domain.Vessels.VesselInformation.LoadingCargoMaterial", "LoadingCargo", b1 =>
                         {
                             b1.Property<string>("VesselVisitNotificationId")
-                                .HasColumnType("TEXT");
+                                .HasColumnType("text");
 
                             b1.HasKey("VesselVisitNotificationId");
 
@@ -571,7 +578,7 @@ namespace DDDNetCore.Migrations
                     b.OwnsOne("DDDSample1.Domain.Vessels.VesselInformation.UnloadingCargoMaterial", "UnloadingCargo", b1 =>
                         {
                             b1.Property<string>("VesselVisitNotificationId")
-                                .HasColumnType("TEXT");
+                                .HasColumnType("text");
 
                             b1.HasKey("VesselVisitNotificationId");
 

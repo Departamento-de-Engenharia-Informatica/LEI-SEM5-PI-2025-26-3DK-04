@@ -50,7 +50,7 @@ namespace DDDSample1
             //     opt.UseInMemoryDatabase("DDDSample1DB")
             //     .ReplaceService<IValueConverterSelector, StronglyEntityIdValueConverterSelector>());
             services.AddDbContext<DDDSample1DbContext>(opt =>
-                opt.UseSqlite("Data Source=database.db")
+                opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"))
                     .ReplaceService<IValueConverterSelector, StronglyEntityIdValueConverterSelector>()
                     .EnableSensitiveDataLogging());
 
