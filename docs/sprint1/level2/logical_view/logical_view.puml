@@ -25,17 +25,17 @@ System_Boundary(pms, "Port Management System") {
   
   ' Ligação das interfaces aos containers
   gui -up- webui_interface
-  gui -down- backend_interface
+  gui -down-( backend_interface
   api -up- backend_interface
   api -down- planning_interface
 }
 
-Rel(agent, webui_interface, "Uses")
-Rel(officer, webui_interface, "Uses")
-Rel(operator, webui_interface, "Uses")
-Rel(admin, webui_interface, "Uses")
+agent -d-( webui_interface : Uses
+officer -d-( webui_interface : Uses
+operator -d-( webui_interface : Uses
+admin -d-( webui_interface : Uses
 
-Rel(planning_interface, planning, "invokes")
+planning_interface )-d- planning : invokes
 
-Rel(planning, API, "Stores/loads planning data", "HTTP/REST")
+planning -d-( API : Stores/loads planning data\nHTTP/REST
 @enduml

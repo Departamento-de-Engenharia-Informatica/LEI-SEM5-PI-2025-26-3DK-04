@@ -63,18 +63,18 @@ package "dotNetBackend" {
 
     RestAPI -down- Routing
     Routing -down- ControllerAPI
-    ControllerAPI -down- Controller
+    ControllerAPI )-down- Controller
     
-    Controller -down- AppServiceAPI
+    Controller -down-( AppServiceAPI
     AppServiceAPI -down- Service
     
-    Service -down- DomainAPI
+    Service -down-( DomainAPI
     DomainAPI -down- Domain
     
     Service -right- RepoAPI
-    RepoAPI -down- Repository
+    RepoAPI )-down- Repository
     
-    Repository -up- PersistenceAPI
+    Repository -up-( PersistenceAPI
     PersistenceAPI -up- Database
     
     DatabaseAPI -down- Database
