@@ -28,7 +28,12 @@ public class Dock : Entity<DockID>, IAggregateRoot
     {
         if (string.IsNullOrWhiteSpace(name)) throw new BusinessRuleValidationException("Dock name is required.");
         if (vesselTypes == null || !vesselTypes.Any()) throw new BusinessRuleValidationException("At least one vessel type must be assigned.");
-
+        if (length <= 0)
+            throw new BusinessRuleValidationException("Dock length must be greater than 0.");
+        if (depth <= 0)
+            throw new BusinessRuleValidationException("Dock depth must be greater than 0.");
+        if (maxDraft <= 0)
+            throw new BusinessRuleValidationException("Dock max draft must be greater than 0.");
         Id = new DockID(Guid.NewGuid());
         Name = name;
         Length = length;
@@ -40,6 +45,12 @@ public class Dock : Entity<DockID>, IAggregateRoot
 
     public void Update(string name, double length, double depth, int maxDraft, Location location, List<VesselType> vesselTypes)
     {
+        if (length <= 0)
+            throw new BusinessRuleValidationException("Dock length must be greater than 0.");
+        if (depth <= 0)
+            throw new BusinessRuleValidationException("Dock depth must be greater than 0.");
+        if (maxDraft <= 0)
+            throw new BusinessRuleValidationException("Dock max draft must be greater than 0.");
         Name = name;
         Length = length;
         Depth = depth;
