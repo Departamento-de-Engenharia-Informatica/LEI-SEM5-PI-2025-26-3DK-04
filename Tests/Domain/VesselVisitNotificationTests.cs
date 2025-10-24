@@ -54,7 +54,7 @@ namespace DDDNetCore.Tests.Domain
             var vessel = CreateValidVessel();
             var loading = new LoadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(1000) });
             var unloading = new UnloadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(500) });
-            var repId = new RepresentativeId(Guid.NewGuid());
+            var repId = new RepresentativeId("13232");
 
             var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
 
@@ -72,7 +72,7 @@ namespace DDDNetCore.Tests.Domain
         {
             var loading = new LoadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(1000) });
             var unloading = new UnloadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(500) });
-            var repId = new RepresentativeId(Guid.NewGuid());
+            var repId = new RepresentativeId("13232");
 
             Action act = () => new VesselVisitNotification(null, loading, unloading, repId);
 
@@ -99,7 +99,7 @@ namespace DDDNetCore.Tests.Domain
             var vessel = CreateValidVessel();
             var loading = new LoadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(1000) });
             var unloading = new UnloadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(500) });
-            var repId = new RepresentativeId(Guid.NewGuid());
+            var repId = new RepresentativeId("13232");
 
             var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
 
@@ -115,7 +115,7 @@ namespace DDDNetCore.Tests.Domain
             var vessel = CreateValidVessel();
             var loading = new LoadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(1000) });
             var unloading = new UnloadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(500) });
-            var repId = new RepresentativeId(Guid.NewGuid());
+            var repId = new RepresentativeId("13232");
 
             var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
 
@@ -134,7 +134,7 @@ namespace DDDNetCore.Tests.Domain
             var vessel = CreateValidVessel();
             var loading = new LoadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(1000) });
             var unloading = new UnloadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(500) });
-            var repId = new RepresentativeId(Guid.NewGuid());
+            var repId = new RepresentativeId("13232");
 
             var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
 
@@ -152,7 +152,7 @@ namespace DDDNetCore.Tests.Domain
             var vessel = CreateValidVessel();
             var loading = new LoadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(1000) });
             var unloading = new UnloadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(500) });
-            var repId = new RepresentativeId(Guid.NewGuid());
+            var repId = new RepresentativeId("13232");
 
             var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
 
@@ -170,7 +170,7 @@ namespace DDDNetCore.Tests.Domain
             var vessel = CreateValidVessel();
             var loading = new LoadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(1000) });
             var unloading = new UnloadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(500) });
-            var repId = new RepresentativeId(Guid.NewGuid());
+            var repId = new RepresentativeId("13232");
 
             var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
 
@@ -189,7 +189,7 @@ namespace DDDNetCore.Tests.Domain
             var vessel = CreateValidVessel();
             var loading = new LoadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer("m1", 1000) });
             var unloading = new UnloadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer("m2", 500) });
-            var repId = new RepresentativeId(Guid.NewGuid());
+            var repId = new RepresentativeId("13232");
 
             var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
 
@@ -246,7 +246,7 @@ namespace DDDNetCore.Tests.Domain
             var vessel = CreateValidVessel();
             var loading = new LoadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer("m1", 1000) });
             var unloading = new UnloadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer("m2", 500) });
-            var repId = new RepresentativeId(Guid.NewGuid());
+            var repId = new RepresentativeId("13232");
 
             var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
 
