@@ -155,8 +155,8 @@ namespace DDDSample1.Tests.System
             getAfterDelete.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
             // 13) Get by IMO should be NotFound
-            /*var getByImoAfterDelete = await client.GetAsync($"/api/Vessels/imo/{created.ImoNumber}");
-            getByImoAfterDelete.StatusCode.Should().Be(HttpStatusCode.NotFound);*/
+            var getByImoAfterDelete = await client.GetAsync($"/api/Vessels/imo/{created.ImoNumber}");
+            getByImoAfterDelete.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
         private class TestApplicationFactory : WebApplicationFactory<DDDSample1.Program>

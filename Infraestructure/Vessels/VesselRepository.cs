@@ -19,6 +19,7 @@ namespace DDDSample1.Infrastructure.Vessels
         public async Task<Vessel> GetByImoNumberAsync(string imoNumber)
         {
             return await _dbSet
+                .AsNoTracking()
                 .Where(v => v.ImoNumber == imoNumber)
                 .FirstOrDefaultAsync();
         }
