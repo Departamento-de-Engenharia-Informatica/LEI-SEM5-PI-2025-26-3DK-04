@@ -46,7 +46,7 @@ namespace DDDSample1.Infrastructure.Organizations
         }
         public async Task<bool> ExistsWithCidAsync(string cid)
         {
-            return await _objs.AnyAsync(r => r.CitizenId == cid);
+            return await _objs.AnyAsync(r => r.Id.Equals(cid));
         }
     }
 }

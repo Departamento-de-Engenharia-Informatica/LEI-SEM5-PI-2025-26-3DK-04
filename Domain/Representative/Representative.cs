@@ -6,7 +6,6 @@ namespace DDDSample1.Domain.Organizations
     public class Representative : Entity<RepresentativeId>, IAggregateRoot
     {
         public string Name { get; private set; }
-        public string CitizenId { get; private set; }
         public string Nationality { get; private set; }
         public string Email { get; private set; }
         public string PhoneNumber { get; private set; }
@@ -19,9 +18,11 @@ namespace DDDSample1.Domain.Organizations
         {
             if (string.IsNullOrEmpty(name))
                 throw new BusinessRuleValidationException("Name is required.");
+            
             if (string.IsNullOrWhiteSpace(citizenId))
                 throw new BusinessRuleValidationException("Citizen ID is required.");
-            Validators.ValidateCitizenId(citizenId);
+
+            // validações (email, phone, nationality)
             if (string.IsNullOrWhiteSpace(nationality))
                 throw new BusinessRuleValidationException("Nationality is required.");
             if (string.IsNullOrWhiteSpace(email))
@@ -31,9 +32,8 @@ namespace DDDSample1.Domain.Organizations
                 throw new BusinessRuleValidationException("Phone number is required.");
             Validators.ValidatePhoneNumber(phoneNumber);           
 
-            this.Id = new RepresentativeId(Guid.NewGuid());
+            this.Id = new RepresentativeId(citizenId);
             this.Name = name;
-            this.CitizenId = citizenId;
             this.Nationality = nationality;
             this.Email = email;
             this.PhoneNumber = phoneNumber;
@@ -62,7 +62,7 @@ namespace DDDSample1.Domain.Organizations
             if (!string.IsNullOrWhiteSpace(name))
                 Name = name;
             if (!string.IsNullOrWhiteSpace(citizenId))
-                CitizenId = citizenId;
+                Id = new RepresentativeId(citizenId);
             if (!string.IsNullOrWhiteSpace(nationality))
                 Nationality = nationality;
             if (!string.IsNullOrWhiteSpace(email))

@@ -184,9 +184,8 @@ namespace DDDNetCore.Migrations
                 name: "Representatives",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
-                    CitizenId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Nationality = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     PhoneNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
@@ -305,7 +304,7 @@ namespace DDDNetCore.Migrations
                     Status = table.Column<string>(type: "text", nullable: false),
                     AssignedDock = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     OfficerId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    RepresentativeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RepresentativeId = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>

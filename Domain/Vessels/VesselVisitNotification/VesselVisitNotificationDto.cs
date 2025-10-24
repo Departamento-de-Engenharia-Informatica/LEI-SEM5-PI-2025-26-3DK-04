@@ -21,7 +21,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         public string VesselName { get; set; }
         public string VesselCallsign { get; set; }
         
-        public Guid? RepresentativeId { get; set; }
+        public string? RepresentativeId { get; set; }
         public DateTime CreatedAt { get; set; }
 
         public VesselVisitNotificationDto(LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo)

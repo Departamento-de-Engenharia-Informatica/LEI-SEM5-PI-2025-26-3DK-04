@@ -88,7 +88,7 @@ namespace DDDSample1.Domain.Organizations
                 Representatives = org.Representatives.Select(r => new AddRepresentativeToOrgDto()
                 {
                     Name = r.Name,
-                    CitizenId = r.CitizenId,
+                    CitizenId = r.Id.AsString(),
                     Nationality = r.Nationality,
                     Email = r.Email,
                     PhoneNumber = r.PhoneNumber

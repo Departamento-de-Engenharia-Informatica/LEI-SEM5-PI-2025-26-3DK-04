@@ -30,7 +30,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         //Create new notification
         public async Task<VesselVisitNotificationDto> CreateAsync(
             Guid vesselId,
-            Guid representativeId,
+            string representativeId,
             List<CargoManifest> loadingManifests,
             List<CargoManifest> unloadingManifests,
             List<CrewMember>? crew)
@@ -148,7 +148,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 VesselId = notification.Vessel.Id.AsGuid(),
                 VesselName = notification.Vessel.Name,
                 VesselCallsign = notification.Vessel.ImoNumber.ToString(),
-                RepresentativeId = notification.RepresentativeId?.AsGuid(),
+                RepresentativeId = notification.RepresentativeId?.AsString(),
                 CreatedAt = notification.CreatedAt
             };
             return dto;
@@ -236,7 +236,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         public async Task<List<VesselVisitNotificationDto>> SearchNotificationsAsync(NotificationFilterDto filter)
         {
             VesselId vesselId = filter.VesselId.HasValue ? new VesselId(filter.VesselId.Value) : null;
-            RepresentativeId representativeId = filter.RepresentativeId.HasValue ? new RepresentativeId(filter.RepresentativeId.Value) : null;
+            RepresentativeId representativeId = !string.IsNullOrWhiteSpace(filter.RepresentativeId) ? new RepresentativeId(filter.RepresentativeId) : null;
             OrganizationId organizationId = filter.OrganizationId.HasValue ? new OrganizationId(filter.OrganizationId.Value.ToString()) : null;
             
             var notifications = await _repo.SearchNotificationsAsync(

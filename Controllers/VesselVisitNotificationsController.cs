@@ -180,7 +180,7 @@ namespace DDDSample1.Controllers
         public async Task<ActionResult<List<VesselVisitNotificationDto>>> SearchNotifications(
             [FromQuery] Guid? vesselId = null,
             [FromQuery] string status = null,
-            [FromQuery] Guid? representativeId = null,
+            [FromQuery] string? representativeId = null,
             [FromQuery] Guid? organizationId = null,
             [FromQuery] DateTime? startDate = null,
             [FromQuery] DateTime? endDate = null)

@@ -61,9 +61,9 @@ namespace DDDSample1.Domain.Organizations
         }
 
   
-        public async Task<RepresentativeDto> UpdateRepresentativeAsync(Guid representativeId, AddRepresentativeDto dto)
+        public async Task<RepresentativeDto> UpdateRepresentativeAsync(AddRepresentativeDto dto)
         {
-            var rep = await _repo.GetByIdAsync(new RepresentativeId(representativeId));
+            var rep = await _repo.GetByIdAsync(new RepresentativeId(dto.CitizenId));
             if (rep == null)
                 throw new BusinessRuleValidationException("Representative not found.");
             
@@ -87,7 +87,7 @@ namespace DDDSample1.Domain.Organizations
         }
 
 
-        public async Task<RepresentativeDto> DeactivateRepresentativeAsync(Guid representativeId)
+        public async Task<RepresentativeDto> DeactivateRepresentativeAsync(string representativeId)
         {
             var rep = await _repo.GetByIdAsync(new RepresentativeId(representativeId));
             if (rep == null)
@@ -99,7 +99,7 @@ namespace DDDSample1.Domain.Organizations
         }
 
 
-        public async Task<RepresentativeDto> ActivateRepresentativeAsync(Guid representativeId)
+        public async Task<RepresentativeDto> ActivateRepresentativeAsync(string representativeId)
         {
             var rep = await _repo.GetByIdAsync(new RepresentativeId(representativeId));
             if (rep == null)
@@ -117,7 +117,7 @@ namespace DDDSample1.Domain.Organizations
             return reps.Select(ToDto).ToList();
         }
 
-        public async Task<RepresentativeDto> GetByIdAsync(Guid id)
+        public async Task<RepresentativeDto> GetByIdAsync(string id)
         {
             var rep = await _repo.GetByIdAsync(new RepresentativeId(id));
             return rep == null ? null : ToDto(rep);
@@ -127,9 +127,9 @@ namespace DDDSample1.Domain.Organizations
         {
             return new RepresentativeDto
             {
-                Id = rep.Id.AsGuid(),
+                
                 Name = rep.Name,
-                CitizenId = rep.CitizenId,
+                CitizenId = rep.Id.AsString(),
                 Nationality = rep.Nationality,
                 Email = rep.Email,
                 PhoneNumber = rep.PhoneNumber,

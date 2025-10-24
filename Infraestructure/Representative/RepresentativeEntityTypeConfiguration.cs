@@ -15,15 +15,12 @@ namespace DDDSample1.Infrastructure.Organizations
                     id => id.AsString(),
                     value => new RepresentativeId(value))
                 .IsRequired()
+                .HasMaxLength(50)
                 .ValueGeneratedNever();
 
             builder.Property(r => r.Name)
                 .IsRequired()
                 .HasMaxLength(150);
-
-            builder.Property(r => r.CitizenId)
-                .IsRequired()
-                .HasMaxLength(50);
 
             builder.Property(r => r.Nationality)
                 .IsRequired()

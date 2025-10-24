@@ -19,9 +19,6 @@ namespace DDDSample1.Controllers
         }
 
         // POST: api/Representatives
-        /// <summary>
-        /// Cria um novo representante
-        /// </summary>
         [HttpPost]
         public async Task<ActionResult<RepresentativeDto>> AddRepresentative([FromBody] AddRepresentativeDto dto)
         {
@@ -36,16 +33,13 @@ namespace DDDSample1.Controllers
             }
         }
 
-        // PUT: api/Representatives/{id}
-        /// <summary>
-        /// Atualiza os dados de um representante existente
-        /// </summary>
+        // PUT: api/Representatives/{id}/update
         [HttpPut("{id}/update")]
-        public async Task<ActionResult<RepresentativeDto>> UpdateRepresentative(Guid id, [FromBody] AddRepresentativeDto dto)
+        public async Task<ActionResult<RepresentativeDto>> UpdateRepresentative([FromBody] AddRepresentativeDto dto)
         {
             try
             {
-                var rep = await _service.UpdateRepresentativeAsync(id, dto);
+                var rep = await _service.UpdateRepresentativeAsync(dto);
                 return Ok(rep);
             }
             catch (BusinessRuleValidationException ex)
@@ -55,11 +49,8 @@ namespace DDDSample1.Controllers
         }
 
         // PUT: api/Representatives/{id}/deactivate
-        /// <summary>
-        /// Desativa um representante
-        /// </summary>
         [HttpPut("{id}/deactivate")]
-        public async Task<ActionResult<RepresentativeDto>> DeactivateRepresentative(Guid id)
+        public async Task<ActionResult<RepresentativeDto>> DeactivateRepresentative(string id)
         {
             try
             {
@@ -73,11 +64,8 @@ namespace DDDSample1.Controllers
         }
 
         // PUT: api/Representatives/{id}/activate
-        /// <summary>
-        /// Ativa um representante previamente desativado
-        /// </summary>
         [HttpPut("{id}/activate")]
-        public async Task<ActionResult<RepresentativeDto>> ActivateRepresentative(Guid id)
+        public async Task<ActionResult<RepresentativeDto>> ActivateRepresentative(string id)
         {
             try
             {
@@ -91,9 +79,6 @@ namespace DDDSample1.Controllers
         }
 
         // GET: api/Representatives
-        /// <summary>
-        /// Obtém todos os representantes
-        /// </summary>
         [HttpGet]
         public async Task<ActionResult<List<RepresentativeDto>>> GetAll()
         {
@@ -102,11 +87,8 @@ namespace DDDSample1.Controllers
         }
 
         // GET: api/Representatives/{id}
-        /// <summary>
-        /// Obtém um representante específico por ID
-        /// </summary>
         [HttpGet("{id}")]
-        public async Task<ActionResult<RepresentativeDto>> GetById(Guid id)
+        public async Task<ActionResult<RepresentativeDto>> GetById(string id)
         {
             var rep = await _service.GetByIdAsync(id);
             if (rep == null)

@@ -34,9 +34,6 @@ namespace DDDSample1.Infrastructure.Vessels
             
             // Configure RepresentativeId as value object
             builder.Property(b => b.RepresentativeId)
-                .HasConversion(
-                    v => v.AsGuid(),
-                    v => new DDDSample1.Domain.Organizations.RepresentativeId(v))
                 .IsRequired();
             
             // Configurar relacionamento com Vessel (obrigatório)
