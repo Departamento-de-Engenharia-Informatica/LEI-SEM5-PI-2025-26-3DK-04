@@ -75,7 +75,7 @@ namespace DDDSample1.Domain.Organizations
             if (_representatives.Contains(rep))
             {
                 _representatives.Remove(rep);
-                rep.AssignToOrganization(null); // opcional: limpa o OrganizationId se quiseres
+                rep.UnassignFromOrganization(); 
             }
         }
 
