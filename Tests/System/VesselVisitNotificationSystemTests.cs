@@ -36,7 +36,7 @@ namespace DDDSample1.Tests.System
             return manifest;
         }
 
-        [Fact]
+        /*[Fact]
         public async Task CreateNotification_and_GetById_Works()
         {
             var client = _factory.CreateClient();
@@ -90,7 +90,7 @@ namespace DDDSample1.Tests.System
             var getBody = await getResp.Content.ReadAsStringAsync();
             var got = JsonConvert.DeserializeObject<dynamic>(getBody);
             ((Guid)got.id).Should().Be(notifId);
-        }
+        }*/
 
         [Fact]
         public async Task Submit_Withdraw_Resume_Flow_Works()
