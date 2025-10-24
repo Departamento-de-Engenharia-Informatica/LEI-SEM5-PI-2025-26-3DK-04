@@ -109,5 +109,26 @@ namespace DDDSample1.Infrastructure.Docks
             }
             return types;
         }
+        
+
+        public async Task<List<DockDetailsDto>> SearchByNameAsync(string name)
+        {
+            var docks = await _dockRepo.SearchByNameAsync(name);
+            return docks.Select(ToDetailsDto).ToList();
+        }
+
+        public async Task<List<DockDetailsDto>> FilterByVesselTypeAsync(Guid typeIdGuid)
+        {
+            var typeId = new VesselTypeId(typeIdGuid); // Convert the Guid to the strong ID
+            var docks = await _dockRepo.FilterByVesselTypeAsync(typeId);
+            return docks.Select(ToDetailsDto).ToList();
+        }
+
+        public async Task<List<DockDetailsDto>> FilterByLocationAsync(string query)
+        {
+            var docks = await _dockRepo.FilterByLocationAsync(query);
+            return docks.Select(ToDetailsDto).ToList();
+        }
+        
     }
 }

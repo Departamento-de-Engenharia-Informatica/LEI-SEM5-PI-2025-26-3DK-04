@@ -105,5 +105,39 @@ namespace DDDSample1.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
+        
+
+        // GET: api/Dock/search/by-name?name=...
+        [HttpGet("search/by-name")]
+        public async Task<ActionResult<IEnumerable<DockDetailsDto>>> SearchByName([FromQuery] string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return BadRequest("A 'name' query parameter is required.");
+            }
+            return await _service.SearchByNameAsync(name);
+        }
+
+        // GET: api/Dock/search/by-vessel-type?typeId=...
+        [HttpGet("search/by-vessel-type")]
+        public async Task<ActionResult<IEnumerable<DockDetailsDto>>> FilterByVesselType([FromQuery] Guid typeId)
+        {
+            if (typeId == Guid.Empty)
+            {
+                return BadRequest("A 'typeId' query parameter is required.");
+            }
+            return await _service.FilterByVesselTypeAsync(typeId);
+        }
+
+        // GET: api/Dock/search/by-location?query=...
+        [HttpGet("search/by-location")]
+        public async Task<ActionResult<IEnumerable<DockDetailsDto>>> FilterByLocation([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return BadRequest("A 'query' parameter is required.");
+            }
+            return await _service.FilterByLocationAsync(query);
+        }
     }
 }

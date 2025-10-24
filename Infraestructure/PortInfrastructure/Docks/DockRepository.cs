@@ -17,6 +17,7 @@ namespace DDDSample1.Infrastructure.Docks
         public async Task<List<Dock>> SearchByNameAsync(string name)
         {
             return await _objs
+                .Include(d => d.AllowedVesselTypes)
                 .Where(d => d.Name.ToLower().Contains(name.ToLower()))
                 .ToListAsync();
         }
@@ -26,6 +27,7 @@ namespace DDDSample1.Infrastructure.Docks
         public async Task<List<Dock>> FilterByVesselTypeAsync(VesselTypeId typeId)
         {
             return await _objs
+                .Include(d => d.AllowedVesselTypes)
                 .Where(d => d.AllowedVesselTypes.Any(v => v.Id.Equals(typeId)))
                 .ToListAsync();
         }
@@ -34,6 +36,7 @@ namespace DDDSample1.Infrastructure.Docks
         {
             var lowerLocationQuery = locationQuery.ToLower();
             return await _objs
+                .Include(d => d.AllowedVesselTypes)
                 .Where(d => d.Location.Description.ToLower().Contains(lowerLocationQuery) || 
                            d.Location.Coordinates.ToLower().Contains(lowerLocationQuery))
                 .ToListAsync();
@@ -45,7 +48,10 @@ namespace DDDSample1.Infrastructure.Docks
         }
         public async Task<List<Dock>> GetAllAsync()
         {
-            return await _objs.Where(d => d.Active).ToListAsync();
+            return await _objs
+                .Include(d => d.AllowedVesselTypes) // <-- Add this line
+                .Where(d => d.Active)
+                .ToListAsync();
         }
         
         public async Task<Dock> GetByIdAsync(DockID id)
