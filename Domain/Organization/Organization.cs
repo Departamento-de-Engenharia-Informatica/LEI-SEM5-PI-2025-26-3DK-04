@@ -54,7 +54,6 @@ namespace DDDSample1.Domain.Organizations
             if (_representatives.Any(r => r.PhoneNumber == rep.PhoneNumber))
                 throw new BusinessRuleValidationException("A representative with this phone number already exists in this organization.");
             
-            rep.AssignToOrganization(this.Id);
             _representatives.Add(rep);
         }
 

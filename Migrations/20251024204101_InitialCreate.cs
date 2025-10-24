@@ -13,23 +13,10 @@ namespace DDDNetCore.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Categories",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    Active = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Categories", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Docks",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Length = table.Column<double>(type: "double precision", nullable: false),
                     Depth = table.Column<double>(type: "double precision", nullable: false),
@@ -41,19 +28,6 @@ namespace DDDNetCore.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Docks", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Families",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    Active = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Families", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -75,7 +49,7 @@ namespace DDDNetCore.Migrations
                 name: "PhysicalResources",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
                     Type = table.Column<string>(type: "text", nullable: false),
                     Capacity = table.Column<double>(type: "double precision", nullable: false),
@@ -89,24 +63,10 @@ namespace DDDNetCore.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Products",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    CategoryId = table.Column<string>(type: "text", nullable: true),
-                    Active = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Products", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Qualifications",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false)
                 },
                 constraints: table =>
@@ -118,7 +78,7 @@ namespace DDDNetCore.Migrations
                 name: "StaffMembers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     PhoneNumber = table.Column<int>(type: "integer", nullable: false),
@@ -149,10 +109,10 @@ namespace DDDNetCore.Migrations
                 name: "Vessels",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ImoNumber = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    VesselTypeId = table.Column<string>(type: "text", nullable: false),
+                    VesselTypeId = table.Column<Guid>(type: "uuid", nullable: false),
                     Owner = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Operator = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Active = table.Column<bool>(type: "boolean", nullable: false)
@@ -166,7 +126,7 @@ namespace DDDNetCore.Migrations
                 name: "VesselTypes",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     Capacity = table.Column<int>(type: "integer", nullable: false),
@@ -207,8 +167,8 @@ namespace DDDNetCore.Migrations
                 name: "PhysicalResourceQualifications",
                 columns: table => new
                 {
-                    PhysicalResourceId = table.Column<string>(type: "text", nullable: false),
-                    QualificationId = table.Column<string>(type: "text", nullable: false)
+                    PhysicalResourceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    QualificationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -231,8 +191,8 @@ namespace DDDNetCore.Migrations
                 name: "StaffMemberQualifications",
                 columns: table => new
                 {
-                    StaffMemberId = table.Column<string>(type: "text", nullable: false),
-                    QualificationId = table.Column<string>(type: "text", nullable: false)
+                    StaffMemberId = table.Column<Guid>(type: "uuid", nullable: false),
+                    QualificationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -279,7 +239,7 @@ namespace DDDNetCore.Migrations
                     Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     CitizenId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Nationality = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    VesselId = table.Column<string>(type: "text", nullable: false)
+                    VesselId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -296,8 +256,8 @@ namespace DDDNetCore.Migrations
                 name: "VesselVisitNotifications",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    VesselId = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    VesselId = table.Column<Guid>(type: "uuid", nullable: false),
                     RejectedReason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     DecisionTimeStamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DecisionOutcome = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
@@ -322,8 +282,8 @@ namespace DDDNetCore.Migrations
                 name: "DockVesselTypes",
                 columns: table => new
                 {
-                    AllowedVesselTypesId = table.Column<string>(type: "text", nullable: false),
-                    DockId = table.Column<string>(type: "text", nullable: false)
+                    AllowedVesselTypesId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DockId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -409,22 +369,13 @@ namespace DDDNetCore.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Categories");
-
-            migrationBuilder.DropTable(
                 name: "CrewMember");
 
             migrationBuilder.DropTable(
                 name: "DockVesselTypes");
 
             migrationBuilder.DropTable(
-                name: "Families");
-
-            migrationBuilder.DropTable(
                 name: "PhysicalResourceQualifications");
-
-            migrationBuilder.DropTable(
-                name: "Products");
 
             migrationBuilder.DropTable(
                 name: "Representatives");

@@ -50,6 +50,7 @@ namespace DDDSample1.Domain.Organizations
                     var rep = new Representative(repDto.Name, repDto.CitizenId, repDto.Nationality, repDto.Email,
                         repDto.PhoneNumber);
                     org.AddRepresentative(rep);
+                    rep.AssignToOrganization(org.Id);
                 }
             }
 

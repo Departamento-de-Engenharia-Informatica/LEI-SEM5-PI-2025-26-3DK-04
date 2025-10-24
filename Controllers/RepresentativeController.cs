@@ -35,11 +35,11 @@ namespace DDDSample1.Controllers
 
         // PUT: api/Representatives/{id}/update
         [HttpPut("{id}/update")]
-        public async Task<ActionResult<RepresentativeDto>> UpdateRepresentative([FromBody] AddRepresentativeDto dto)
+        public async Task<ActionResult<RepresentativeDto>> UpdateRepresentative([FromRoute] string id, [FromBody] UpdateRepresentativeDto dto)
         {
             try
             {
-                var rep = await _service.UpdateRepresentativeAsync(dto);
+                var rep = await _service.UpdateRepresentativeAsync(id, dto);
                 return Ok(rep);
             }
             catch (BusinessRuleValidationException ex)

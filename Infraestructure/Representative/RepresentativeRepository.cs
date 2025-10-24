@@ -34,19 +34,40 @@ namespace DDDSample1.Infrastructure.Organizations
             return await _objs
                 .FirstOrDefaultAsync(r => r.Email == email);
         }
-        
+
+        public async Task<Representative> GetByCitizenIdAsync(string citizenId)
+        {
+            return await _objs
+                .FirstOrDefaultAsync(r =>r.Id.Equals(citizenId) );
+        }
+
         public async Task<bool> ExistsWithEmailAsync(string email)
         {
             return await _objs.AnyAsync(r => r.Email == email);
         }
-        
+
         public async Task<bool> ExistsWithPhoneAsync(string phoneNumber)
         {
             return await _objs.AnyAsync(r => r.PhoneNumber == phoneNumber);
         }
+
         public async Task<bool> ExistsWithCidAsync(string cid)
         {
             return await _objs.AnyAsync(r => r.Id.Equals(cid));
         }
+        
+        
+        public async Task UpdateAsync(Representative rep)
+        {
+            _context.Entry(rep).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(Representative rep)
+        {
+            _objs.Remove(rep);
+            await _context.SaveChangesAsync();
+        }
+        
     }
 }

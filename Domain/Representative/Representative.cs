@@ -92,6 +92,31 @@ namespace DDDSample1.Domain.Organizations
 
             this.OrganizationId = null;
         }
+        public void ChangeName(string newName)
+        {
+            if (string.IsNullOrWhiteSpace(newName))
+                throw new BusinessRuleValidationException("Name cannot be empty.");
+            Name = newName;
+        }
 
+        public void ChangeEmail(string newEmail)
+        {
+            if (string.IsNullOrWhiteSpace(newEmail))
+                throw new BusinessRuleValidationException("Email cannot be empty.");
+            Email = newEmail;
+        }
+
+        public void ChangePhoneNumber(string newPhone)
+        {
+            if (string.IsNullOrWhiteSpace(newPhone))
+                throw new BusinessRuleValidationException("Phone number cannot be empty.");
+            PhoneNumber = newPhone;
+        }
+        public void ChangeNationality(string newNationality)
+        {
+            if (string.IsNullOrWhiteSpace(newNationality))
+                throw new BusinessRuleValidationException("Nationality cannot be empty.");
+            Nationality = newNationality;
+        }
     }
 }

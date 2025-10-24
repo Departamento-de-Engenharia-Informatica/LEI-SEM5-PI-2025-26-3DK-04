@@ -25,22 +25,13 @@ namespace DDDSample1.Domain.Organizations
 
         public async Task<RepresentativeDto> AddRepresentativeAsync(AddRepresentativeDto dto)
         {
-            Organization org = null;
-
-            if (!string.IsNullOrWhiteSpace(dto.OrganizationId))
-            {
-                org = await _organizationRepo.GetByIdAsync(new OrganizationId(dto.OrganizationId));
-                if (org == null)
-                    throw new BusinessRuleValidationException("Organization not found.");
-            }
             if (await _repo.ExistsWithEmailAsync(dto.Email))
                 throw new BusinessRuleValidationException("Email already in use by another representative.");
-
             if (await _repo.ExistsWithPhoneAsync(dto.PhoneNumber))
                 throw new BusinessRuleValidationException("Phone number already in use by another representative.");
-            if(await _repo.ExistsWithCidAsync(dto.CitizenId))
+            if (await _repo.ExistsWithCidAsync(dto.CitizenId))
                 throw new BusinessRuleValidationException("Citizen Id already in use by another representative.");
-            
+
             var rep = new Representative(
                 dto.Name,
                 dto.CitizenId,
@@ -49,9 +40,21 @@ namespace DDDSample1.Domain.Organizations
                 dto.PhoneNumber
             );
 
-            if (org != null)
+            if (!string.IsNullOrWhiteSpace(dto.OrganizationId))
             {
+                var org = await _organizationRepo.GetByIdAsync(new OrganizationId(dto.OrganizationId));
+                if (org == null)
+                    throw new BusinessRuleValidationException("Organization not found.");
+
+                // 1. Atribuir OrganizationId imediatamente
+                rep.AssignToOrganization(org.Id);
+
+                // 2. Adicionar à organização
                 org.AddRepresentative(rep);
+            }
+            else
+            {
+                throw new BusinessRuleValidationException("Representative must be assigned to an organization.");
             }
 
             await _repo.AddAsync(rep);
@@ -59,32 +62,60 @@ namespace DDDSample1.Domain.Organizations
 
             return ToDto(rep);
         }
-
-  
-        public async Task<RepresentativeDto> UpdateRepresentativeAsync(AddRepresentativeDto dto)
+        
+        public async Task<RepresentativeDto> UpdateRepresentativeAsync(string currentCitizenId, UpdateRepresentativeDto dto)
         {
-            var rep = await _repo.GetByIdAsync(new RepresentativeId(dto.CitizenId));
+            // Obter o representante existente
+            var rep = await _repo.GetByIdAsync(new RepresentativeId(currentCitizenId));
             if (rep == null)
                 throw new BusinessRuleValidationException("Representative not found.");
-            
-            if (await _repo.ExistsWithEmailAsync(dto.Email))
-                throw new BusinessRuleValidationException("Email already in use by another representative.");
-            if (await _repo.ExistsWithPhoneAsync(dto.PhoneNumber))
-                throw new BusinessRuleValidationException("Phone number already in use by another representative.");
-            if(await _repo.ExistsWithCidAsync(dto.CitizenId))
-                throw new BusinessRuleValidationException("Citizen Id already in use by another representative.");
-            
-            rep.Update(
-                dto.Name,
-                dto.CitizenId,
-                dto.Nationality,
-                dto.Email,
-                dto.PhoneNumber
-            );
 
-            await _unitOfWork.CommitAsync();
-            return ToDto(rep);
+            // Se o CitizenId mudou
+            if (currentCitizenId != dto.CitizenId)
+            {
+                // Verifica se o novo CitizenId já existe
+                if (await _repo.ExistsWithCidAsync(dto.CitizenId))
+                    throw new BusinessRuleValidationException("The new CitizenId is already in use.");
+
+                // Criar novo representante usando a lógica de AddRepresentativeAsync
+                var newRepDto = new AddRepresentativeDto
+                {
+                    Name = dto.Name,
+                    CitizenId = dto.CitizenId,
+                    Nationality = dto.Nationality,
+                    Email = dto.Email,
+                    PhoneNumber = dto.PhoneNumber,
+                    OrganizationId = rep.OrganizationId.AsString()
+                };
+
+                var newRep = await AddRepresentativeAsync(newRepDto);
+
+                // Remover o representante antigo da organização e do repositório
+                var org = await _organizationRepo.GetByIdAsync(rep.OrganizationId);
+                if (org != null)
+                {
+                    org.RemoveRepresentative(rep);
+                    await _organizationRepo.UpdateAsync(org);
+                }
+
+                await _repo.DeleteAsync(rep);
+
+                // Retornar DTO do novo representante
+                return newRep;
+            }else {
+                // Apenas atualiza os campos do representante existente
+                rep.ChangeName(dto.Name);
+                rep.ChangeEmail(dto.Email);
+                rep.ChangePhoneNumber(dto.PhoneNumber);
+                rep.ChangeNationality(dto.Nationality);
+
+                await _repo.UpdateAsync(rep);
+                await _unitOfWork.CommitAsync();
+
+                return ToDto(rep);
+            }
         }
+
 
 
         public async Task<RepresentativeDto> DeactivateRepresentativeAsync(string representativeId)
