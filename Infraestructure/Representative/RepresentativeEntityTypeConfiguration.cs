@@ -39,8 +39,11 @@ namespace DDDSample1.Infrastructure.Organizations
                 .HasConversion<string>();
             
             builder.Property(r => r.OrganizationId)
-                .HasMaxLength(10) 
-                .IsRequired() 
+                .HasConversion(
+                    id => id.AsString(),
+                    value => new OrganizationId(value))
+                .HasMaxLength(10)
+                .IsRequired()
                 .ValueGeneratedNever();
             
             builder.HasIndex(r => r.Email).IsUnique();

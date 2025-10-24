@@ -15,6 +15,15 @@ namespace DDDSample1.Infrastructure.Vessels
         public VesselVisitNotificationRepository(DDDSample1DbContext context) : base(context.VesselVisitNotifications,context)
         {
         }
+
+        // Ensure GetByIdAsync includes navigation properties (Vessel) so service mapping won't get nulls
+        public new async Task<VesselVisitNotification> GetByIdAsync(VesselVisitNotificationID id)
+        {
+            return await _objs
+                .Include(n => n.Vessel)
+                .Where(x => id.Equals(x.Id))
+                .FirstOrDefaultAsync();
+        }
         
         public async Task<List<VesselVisitNotification>> GetCompletedNotificationsAsync()
         {

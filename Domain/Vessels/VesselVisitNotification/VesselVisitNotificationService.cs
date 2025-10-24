@@ -140,7 +140,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             {
                 Id = notification.Id.AsGuid(),
                 Status = notification.Status,
-                AssignedDock = null, // AssignedDock é string na entidade, mas Dock no DTO - precisa ser mapeado
+                AssignedDock = notification.AssignedDock,
                 RejectedReason = notification.RejectedReason,
                 DecisionTimeStamp = notification.DecisionTimeStamp,
                 DecisionOutcome = notification.DecisionOutcome,

@@ -8,7 +8,8 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
     {
         public Guid Id { get; set; }
         public NotificationStatus Status { get; set; }
-        public Dock AssignedDock { get; set; }
+    // Assigned dock id (string). Stored as string in the entity so expose as string in DTO
+    public string AssignedDock { get; set; }
         public string RejectedReason { get; set; }
         public DateTime? DecisionTimeStamp { get; set; }
         public string DecisionOutcome { get; set; }
