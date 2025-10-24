@@ -13,6 +13,7 @@ using DDDSample1.Infrastructure.Qualifications;
 using DDDSample1.Infrastructure.Shared;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using DDDSample1.Domain.Shared;
+using System;
 using DDDSample1.Domain.Docks;
 using DDDSample1.Domain.Organizations;
 using DDDSample1.Domain.PhysicalResources;
@@ -30,9 +31,12 @@ namespace DDDSample1
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IWebHostEnvironment _env;
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            _env = env;
         }
 
         public IConfiguration Configuration { get; }
@@ -43,10 +47,32 @@ namespace DDDSample1
             // services.AddDbContext<DDDSample1DbContext>(opt =>
             //     opt.UseInMemoryDatabase("DDDSample1DB")
             //     .ReplaceService<IValueConverterSelector, StronglyEntityIdValueConverterSelector>());
-            services.AddDbContext<DDDSample1DbContext>(opt =>
-                opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"))
-                    .ReplaceService<IValueConverterSelector, StronglyEntityIdValueConverterSelector>()
-                    .EnableSensitiveDataLogging());
+
+            // Conditionally register the ReplaceService used to plug the project's
+            // StronglyEntityIdValueConverterSelector. ReplaceService interacts with
+            // EF Core's internal service provider and can cause conflicts when the
+            // test host constructs its own provider (UseInternalServiceProvider).
+            // To avoid test-time issues we skip ReplaceService when running under
+            // the "Testing" environment (set by the test factory).
+            var connectionString = Configuration.GetConnectionString("DefaultConnection");
+
+            // Use InMemory provider during tests to avoid mixing relational providers
+            // in the same service provider. We detect the environment via the
+            // injected IWebHostEnvironment (set by the test factory with UseEnvironment).
+            if (_env != null && _env.IsEnvironment("Testing"))
+            {
+                services.AddDbContext<DDDSample1DbContext>(opt =>
+                    opt.UseInMemoryDatabase("DDDSample1TestDB")
+                        .ReplaceService<IValueConverterSelector, StronglyEntityIdValueConverterSelector>()
+                        .EnableSensitiveDataLogging());
+            }
+            else
+            {
+                services.AddDbContext<DDDSample1DbContext>(opt =>
+                    opt.UseNpgsql(connectionString)
+                        .ReplaceService<IValueConverterSelector, StronglyEntityIdValueConverterSelector>()
+                        .EnableSensitiveDataLogging());
+            }
 
             ConfigureMyServices(services);
             

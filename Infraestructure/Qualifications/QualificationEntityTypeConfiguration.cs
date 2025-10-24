@@ -10,6 +10,13 @@ namespace DDDSample1.Infrastructure.Qualifications
         {
             // Chave primária
             builder.HasKey(b => b.Id);
+
+            // Convert strong-typed ID to Guid for relational providers (SQLite/Postgres)
+            builder.Property(b => b.Id)
+                .HasConversion(
+                    id => id.AsGuid(),
+                    guid => new QualificationID(guid))
+                .ValueGeneratedNever();
             
             // Propriedade Name
             builder.Property(b => b.Name)

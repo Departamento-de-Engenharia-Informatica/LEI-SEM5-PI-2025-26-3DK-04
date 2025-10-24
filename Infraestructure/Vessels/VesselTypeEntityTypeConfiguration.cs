@@ -10,6 +10,13 @@ namespace DDDSample1.Infrastructure.Vessels
         {
             builder.HasKey(vt => vt.Id);
 
+            // Convert strong-typed ID to Guid for relational providers (SQLite/Postgres)
+            builder.Property(vt => vt.Id)
+                .HasConversion(
+                    id => id.AsGuid(),
+                    guid => new VesselTypeId(guid))
+                .ValueGeneratedNever();
+
             builder.Property(vt => vt.Name)
                 .IsRequired()
                 .HasMaxLength(100);

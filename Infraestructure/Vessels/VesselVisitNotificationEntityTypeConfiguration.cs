@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using DDDSample1.Domain.Vessels.VesselVisitNotification;
 using DDDSample1.Infrastructure;
+using DDDSample1.Domain.Organizations;
 
 namespace DDDSample1.Infrastructure.Vessels
 {
@@ -10,7 +11,14 @@ namespace DDDSample1.Infrastructure.Vessels
         public void Configure(EntityTypeBuilder<VesselVisitNotification> builder)
         {
             builder.HasKey(b => b.Id);
-            
+
+            // Convert strong-typed ID to Guid for relational providers (SQLite/Postgres)
+            builder.Property(b => b.Id)
+                .HasConversion(
+                    id => id.AsGuid(),
+                    guid => new VesselVisitNotificationID(guid))
+                .ValueGeneratedNever();
+
             builder.Property(b => b.Status)
                 .IsRequired()
                 .HasConversion<string>(); // Armazena enum como string
@@ -28,13 +36,22 @@ namespace DDDSample1.Infrastructure.Vessels
                 .HasMaxLength(100);
             
             builder.Property(b => b.DecisionTimeStamp);
-            
+
             builder.Property(b => b.CreatedAt)
                 .IsRequired();
             
             // Configure RepresentativeId as value object
             builder.Property(b => b.RepresentativeId)
                 .IsRequired();
+
+            // Configure RepresentativeId as value object (string-backed ID)
+            builder.Property(b => b.RepresentativeId)
+                .HasConversion(
+                    id => id.AsString(),
+                    str => new RepresentativeId(str))
+                .IsRequired()
+                .ValueGeneratedNever();
+                
             
             // Configurar relacionamento com Vessel (obrigatório)
             builder.HasOne(b => b.Vessel)
