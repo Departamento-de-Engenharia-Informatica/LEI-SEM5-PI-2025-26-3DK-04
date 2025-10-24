@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DDDSample1.Domain.PhysicalResources;
@@ -13,6 +13,14 @@ public class PhysicalResourceEntityTypeConfiguration : IEntityTypeConfiguration<
     public void Configure(EntityTypeBuilder<PhysicalResource> builder)
     {
         builder.HasKey(r => r.Id);
+
+        // Convert strong-typed ID to Guid for relational providers (SQLite/Postgres)
+        builder.Property(r => r.Id)
+            .HasConversion(
+                id => id.AsGuid(),
+                guid => new PhysicalResourceId(guid))
+            .ValueGeneratedNever();        
+        
         builder.Property(r => r.Description).IsRequired();
         builder.Property(r => r.Type).IsRequired();
         builder.Property(r => r.Capacity).IsRequired();

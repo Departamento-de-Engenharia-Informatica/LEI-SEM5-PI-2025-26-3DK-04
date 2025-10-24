@@ -10,6 +10,13 @@ namespace DDDSample1.Infrastructure.PortInfrastructure
         {
             builder.HasKey(d => d.Id);
 
+            // Convert strong-typed ID to Guid for relational providers (SQLite/Postgres)
+            builder.Property(d => d.Id)
+                .HasConversion(
+                    id => id.AsGuid(),
+                    guid => new DockID(guid))
+                .ValueGeneratedNever();
+
             builder.Property(d => d.Name)
                 .IsRequired()
                 .HasMaxLength(100);

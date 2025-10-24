@@ -10,6 +10,13 @@ namespace DDDSample1.Infrastructure.Vessels
         {
             builder.HasKey(v => v.Id);
 
+            // Convert strong-typed ID to Guid for relational providers (SQLite/Postgres)
+            builder.Property(v => v.Id)
+                .HasConversion(
+                    id => id.AsGuid(),
+                    guid => new VesselId(guid))
+                .ValueGeneratedNever();
+
             // Configure IMO Number as a simple string
             builder.Property(v => v.ImoNumber)
                 .IsRequired()
@@ -19,7 +26,11 @@ namespace DDDSample1.Infrastructure.Vessels
                 .IsRequired()
                 .HasMaxLength(200);
 
+            // Convert strong-typed VesselTypeId to Guid for relational providers
             builder.Property(v => v.VesselTypeId)
+                .HasConversion(
+                    id => id.AsGuid(),
+                    guid => new VesselTypeId(guid))
                 .IsRequired();
 
             builder.Property(v => v.Owner)
