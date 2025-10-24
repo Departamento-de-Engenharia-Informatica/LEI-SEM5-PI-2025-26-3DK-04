@@ -47,6 +47,7 @@ namespace DDDNetCore.Tests.Domain
             var rep = CreateRep();
 
             org.AddRepresentative(rep);
+            rep.AssignToOrganization(org.Id);
 
             org.Representatives.Should().ContainSingle()
                 .Which.Should().Be(rep);
