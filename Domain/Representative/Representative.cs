@@ -86,5 +86,12 @@ namespace DDDSample1.Domain.Organizations
 
             this.Status = RepresentativeStatus.Active;
         }
+        public void UnassignFromOrganization()
+        {
+            if (this.OrganizationId == null) return;
+
+            this.OrganizationId = null;
+        }
+
     }
 }
