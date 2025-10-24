@@ -47,6 +47,14 @@ namespace DDDSample1.Infrastructure.Docks
         {
             return await _objs.Where(d => d.Active).ToListAsync();
         }
+        
+        public async Task<Dock> GetByIdAsync(DockID id)
+        {
+            return await _objs
+                .Include(d => d.AllowedVesselTypes) // Fixed line
+                .Where(d => d.Id.Equals(id))
+                .FirstOrDefaultAsync();
+        }
 
     }
 }
