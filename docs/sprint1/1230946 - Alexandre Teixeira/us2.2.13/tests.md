@@ -1,106 +1,121 @@
 ## 4. Tests
 
-### 4.1. Unit Tests
+**User Story:** US2.2.13 - Qualifications (create, update, search, delete)
 
-#### 4.1.1. QualificationService Tests
-- **Test Create Qualification with Valid Data:**
-  - Validate that a qualification can be created with a unique code and descriptive name.
-  - Verify the qualification code is unique.
-  - Ensure both code and name are correctly stored.
-  
-- **Test Create Qualification with Duplicate Code:**
-  - Verify that creating a qualification with an existing code fails.
-  - System should display appropriate error message (e.g., "Qualification code already exists").
+---
 
-- **Test Create Qualification with Missing Required Fields:**
-  - Verify that creating a qualification without a code fails.
-  - Verify that creating a qualification without a name fails.
-  - System should validate all mandatory fields.
+#### **4.1 Unit Tests – `QualificationTests.cs`**
 
-- **Test Update Qualification Data:**
-  - Validate that qualification descriptive name can be updated.
-  - Verify the qualification code cannot be changed (immutable identifier).
-  - Ensure updated name is correctly persisted.
+**Purpose:**
+Validate domain invariants for `Qualification` (constructor validation, name rules, updates and identity).
 
-- **Test Update Qualification with Empty Name:**
-  - Verify that updating a qualification with an empty or null name fails.
-  - System should enforce name as a required field.
+**Test Descriptions:**
 
-#### 4.1.2. Qualification Entity Tests
-- **Test Qualification Entity Creation:**
-  - Validate that Qualification entity is created with valid code and name.
-  - Verify code format validation (e.g., no special characters, max length).
-  - Verify name format validation (e.g., non-empty, max length).
+* **WhenPassingCorrectData_ThenQualificationIsInstantiated:** valid names create an entity with a non-null Id.
 
-- **Test Qualification Code Immutability:**
-  - Ensure that once created, the qualification code cannot be modified.
-  - Code serves as the primary identifier.
+* **WhenPassingInvalidData_ThenBusinessRuleValidationExceptionIsThrown:** names that don't follow rules (single word, invalid chars) throw domain validation.
 
-#### 4.1.3. Authorization Tests
-- **Test Operator Authorization:**
-  - Verify only authenticated Logistics Operators can manage qualifications.
-  - Ensure other user roles cannot create/update qualifications.
+* **WhenPassingEmptyOrNullName_ThenThrowsException:** empty/null names produce the expected validation message.
 
-#### 4.1.4. Search and Filter Tests
-- **Test Search by Qualification Code:**
-  - Validate that qualifications can be searched by code.
-  - Verify exact match returns correct result.
+* **WhenPassingNameWithLessThanTwoWords_ThenThrowsException:** qualification name must contain at least two words.
 
-- **Test Filter by Name:**
-  - Validate that qualifications can be filtered by name.
-  - Verify partial matches are supported (e.g., searching "Crane" returns "STS Crane Operator").
+* **WhenPassingNameWithMoreThan150Characters_ThenThrowsException:** maximum length validation enforced on creation and change.
 
-- **Test Combined Search:**
-  - Validate that qualifications can be searched by code or name simultaneously.
-  - Verify correct results are returned.
+* **WhenChangingToValidName_ThenNameIsUpdated / WhenChangingToInvalidName_ThenThrows:** ChangeName enforces same rules as constructor.
 
-#### 4.1.5. Pre-existence Validation Tests
-- **Test Assignment to Staff Member:**
-  - Verify that only existing qualifications can be assigned to staff members.
-  - Attempting to assign a non-existent qualification should fail with appropriate error.
+* **WhenCreatingTwoQualifications_ShouldHaveDifferentIds:** identity uniqueness.
 
-- **Test Assignment to Resources:**
-  - Verify that only existing qualifications can be assigned to resources.
-  - System should validate qualification existence before assignment.
+**Validation Criteria:**
 
-### 4.2. Functional Tests
+* Domain rules throw `BusinessRuleValidationException` for invalid names and updates.
 
-- **Test Create Qualification via UI:**
-  - Operator logs in and navigates to qualification management.
-  - Operator enters qualification code and descriptive name (e.g., "STS_CRANE", "STS Crane Operator").
-  - System validates data and creates the qualification.
-  - System displays success message.
-  - Qualification appears in the list.
+**Expected Outcome:**
+Unit tests ensure `Qualification` domain enforces naming and identity invariants.
 
-- **Test Create Duplicate Qualification via UI:**
-  - Operator attempts to create a qualification with an existing code.
-  - System detects duplicate code.
-  - System displays error message: "Qualification code already exists".
-  - Qualification is not created.
+---
 
-- **Test Update Qualification via UI:**
-  - Operator selects an existing qualification.
-  - Operator updates the descriptive name (e.g., from "Truck Driver" to "Heavy Truck Driver").
-  - System validates and saves the changes.
-  - System displays success message.
-  - Updated name is reflected in the system.
-  - Qualification code remains unchanged.
+#### **4.2 Integration Tests – `QualificationIntegrationTests.cs`**
 
-- **Test Search Qualification by Code via UI:**
-  - Operator enters a qualification code in the search field.
-  - System displays the matching qualification.
-  - Search is case-insensitive.
+**Purpose:**
+Verify controller ↔ service ↔ repository interactions for Qualifications endpoints.
 
-- **Test Filter Qualifications by Name via UI:**
-  - Operator enters a partial name in the filter field (e.g., "Crane").
-  - System displays all qualifications containing "Crane" in the name.
-  - Filter supports partial matching.
+**Test Descriptions:**
 
-- **Test View All Qualifications via UI:**
-  - Operator navigates to qualification list.
-  - System displays all qualifications with code and name.
-  - List is sortable by code or name.
+* **GetAll_ReturnsInsertedQualification:** seed a Qualification in DB and GET `/api/Qualifications` returns it.
 
-- **Test Qualification Pre-existence Check:**
-  - When assigning qualifications to staff or resources, only existing qualifications are available in dropdown/selection.
-  - System prevents manual entry of non-existent qualification codes.
+* **GetById_ReturnsCorrectQualification:** seed and GET by id returns correct DTO.
+
+* **Create_AddsQualification:** POST `/api/Qualifications` returns 201 Created and the created DTO.
+
+* **Update_ChangesQualification:** PUT `/api/Qualifications/{id}` updates and persists the name.
+
+* **Delete_RemovesQualification:** DELETE removes the entity and subsequent GET returns NotFound.
+
+* **SearchByName_ReturnsMatches:** seed multiple qualifications and search endpoint filters by name.
+
+* **ExistsById_ReturnsTrueOrFalse:** GET `/api/Qualifications/exists/{id}` returns a boolean wrapper indicating existence.
+
+**Validation Criteria:**
+
+* Correct status codes (`200`, `201`, `204`, `404`).
+* Response DTOs reflect persisted data.
+
+**Expected Outcome:**
+Integration tests validate the HTTP API, persistence and search/existence behaviours.
+
+---
+
+#### **4.3 System Tests – `QualificationSystemTests.cs`**
+
+**Purpose:**
+End-to-end verification via the test host for Qualifications CRUD and listing workflows.
+
+**Test Descriptions:**
+
+* **Qualification_CRUD_Workflow_via_HttpApi:** create via POST, GET by id, update via PUT, GET all, DELETE and verify NotFound — all using real HTTP calls to the test server.
+
+**Validation Criteria:**
+
+* End-to-end HTTP flows return expected status codes and payloads.
+
+**Expected Outcome:**
+System tests provide high-confidence coverage of the Qualifications API surface.
+
+---
+
+#### **4.4 Application Tests – `QualificationApplicationTests.cs`**
+
+**Purpose:**
+Exercise service layer with in-memory repositories and a fake unit-of-work to validate creation, search, update and deletion logic and commit behaviour.
+
+**Test Descriptions:**
+
+* **CreateQualification_CreatesAndReturnsDto:** service creates entity, commits, and returns DTO.
+
+* **SearchByName_ReturnsMatches:** service search works against in-memory data.
+
+* **CreateQualification_InvalidName_ThrowsBusinessRule:** service rejects invalid names and avoids committing.
+
+* **UpdateQualification_ChangesName:** service updates name and commits.
+
+* **DeleteQualification_RemovesEntity:** service deletes entity and commits.
+
+**Validation Criteria:**
+
+* Service produces DTOs with expected state and in-memory UoW commit counts reflect operations.
+
+**Expected Outcome:**
+Application tests validate service logic, error handling and unit-of-work behaviour quickly and deterministically.
+
+---
+
+#### **4.5 Functional Tests**
+
+* **Qualification lifecycle:** create → update → list/search → delete (user-facing flows).
+
+---
+
+**Conclusion:**
+Combined unit, integration, application and system tests ensure Qualifications domain correctness, service orchestration and end-to-end API behaviour for US2.2.13.
+
+

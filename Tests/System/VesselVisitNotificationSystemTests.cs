@@ -262,9 +262,225 @@ namespace DDDSample1.Tests.System
             ((string)aDto.assignedDock).Should().Be("D1");
         }
         
+        [Fact]
+        public async Task RejectAfterCompleted_AllowsRejection_System()
+        {
+            var client = _factory.CreateClient();
+
+            var vtDto = new { Name = "SysTypeR", Description = "desc", Capacity = 2000, MaxRows = 1, MaxBays = 1, MaxTiers = 1 };
+            var vtResp = await client.PostAsync("/api/VesselTypes", new StringContent(JsonConvert.SerializeObject(vtDto), Encoding.UTF8, "application/json"));
+            vtResp.StatusCode.Should().Be(HttpStatusCode.Created);
+            var vtId = (Guid)JsonConvert.DeserializeObject<dynamic>(await vtResp.Content.ReadAsStringAsync()).id;
+
+            var vesselDto = new { ImoNumber = "IMO8888881", Name = "SysVR", VesselTypeId = vtId, Owner = "owner", Operator = "op" };
+            var vesselResp = await client.PostAsync("/api/Vessels", new StringContent(JsonConvert.SerializeObject(vesselDto), Encoding.UTF8, "application/json"));
+            vesselResp.StatusCode.Should().Be(HttpStatusCode.Created);
+            var vesselId = (Guid)JsonConvert.DeserializeObject<dynamic>(await vesselResp.Content.ReadAsStringAsync()).id;
+
+            string repId;
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
+                var org = new DDDSample1.Domain.Organizations.Organization("ORGSYSR", "Org Sys R", "OrgAltR", "Some Address R", "PT77777");
+                var rep = new DDDSample1.Domain.Organizations.Representative("Rep SysR", "repsysr", "PT", "rep.r.sys@gmail.com", "123123123");
+                org.AddRepresentative(rep);
+                db.Organizations.Add(org);
+                await db.SaveChangesAsync();
+                repId = rep.Id.AsString();
+            }
+
+            Guid notifId;
+            using (var scope2 = _factory.Services.CreateScope())
+            {
+                var db = scope2.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
+                var vesselEntity = await db.Vessels.FindAsync(new DDDSample1.Domain.Vessels.VesselId(vesselId));
+                var loading = new DDDSample1.Domain.Vessels.VesselInformation.LoadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(10) });
+                var unloading = new DDDSample1.Domain.Vessels.VesselInformation.UnloadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(5) });
+                var notif = new DDDSample1.Domain.Vessels.VesselVisitNotification.VesselVisitNotification(vesselEntity, loading, unloading, new DDDSample1.Domain.Organizations.RepresentativeId(repId));
+                db.VesselVisitNotifications.Add(notif);
+                await db.SaveChangesAsync();
+                notifId = notif.Id.AsGuid();
+            }
+
+            // Set to Completed
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
+                var notifEntity = await db.VesselVisitNotifications.FindAsync(new DDDSample1.Domain.Vessels.VesselVisitNotification.VesselVisitNotificationID(notifId));
+                var statusProp = notifEntity.GetType().GetProperty("Status");
+                statusProp.SetValue(notifEntity, DDDSample1.Domain.Vessels.VesselVisitNotification.NotificationStatus.Completed);
+                await db.SaveChangesAsync();
+            }
+
+            var rejectDto = new { Reason = "Bad cargo", OfficerId = "O2" };
+            var rejectResp = await client.PutAsync($"/api/VesselVisitNotifications/{notifId}/reject", new StringContent(JsonConvert.SerializeObject(rejectDto), Encoding.UTF8, "application/json"));
+            rejectResp.StatusCode.Should().Be(HttpStatusCode.OK);
+            var rDto = JsonConvert.DeserializeObject<dynamic>(await rejectResp.Content.ReadAsStringAsync());
+            ((string)rDto.status).Should().Be("Rejected");
+            ((string)rDto.rejectedReason).Should().Be("Bad cargo");
+        }
+
+        [Fact]
+        public async Task RejectWithoutReason_ReturnsBadRequest_System()
+        {
+            var client = _factory.CreateClient();
+
+            var vtDto = new { Name = "SysTypeRG", Description = "desc", Capacity = 2000, MaxRows = 1, MaxBays = 1, MaxTiers = 1 };
+            var vtResp = await client.PostAsync("/api/VesselTypes", new StringContent(JsonConvert.SerializeObject(vtDto), Encoding.UTF8, "application/json"));
+            vtResp.StatusCode.Should().Be(HttpStatusCode.Created);
+            var vtId = (Guid)JsonConvert.DeserializeObject<dynamic>(await vtResp.Content.ReadAsStringAsync()).id;
+
+            var vesselDto = new { ImoNumber = "IMO8888883", Name = "SysVRG", VesselTypeId = vtId, Owner = "owner", Operator = "op" };
+            var vesselResp = await client.PostAsync("/api/Vessels", new StringContent(JsonConvert.SerializeObject(vesselDto), Encoding.UTF8, "application/json"));
+            vesselResp.StatusCode.Should().Be(HttpStatusCode.Created);
+            var vesselId = (Guid)JsonConvert.DeserializeObject<dynamic>(await vesselResp.Content.ReadAsStringAsync()).id;
+
+            string repId;
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
+                var org = new DDDSample1.Domain.Organizations.Organization("ORGSYSRG", "Org Sys RG", "OrgAltRG", "Some Address RG", "PT66666");
+                var rep = new DDDSample1.Domain.Organizations.Representative("Rep SysRG", "repsysrg", "PT", "rep.rg.sys@gmail.com", "321321321");
+                org.AddRepresentative(rep);
+                db.Organizations.Add(org);
+                await db.SaveChangesAsync();
+                repId = rep.Id.AsString();
+            }
+
+            Guid notifId;
+            using (var scope2 = _factory.Services.CreateScope())
+            {
+                var db = scope2.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
+                var vesselEntity = await db.Vessels.FindAsync(new DDDSample1.Domain.Vessels.VesselId(vesselId));
+                var loading = new DDDSample1.Domain.Vessels.VesselInformation.LoadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(10) });
+                var unloading = new DDDSample1.Domain.Vessels.VesselInformation.UnloadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(5) });
+                var notif = new DDDSample1.Domain.Vessels.VesselVisitNotification.VesselVisitNotification(vesselEntity, loading, unloading, new DDDSample1.Domain.Organizations.RepresentativeId(repId));
+                db.VesselVisitNotifications.Add(notif);
+                await db.SaveChangesAsync();
+                notifId = notif.Id.AsGuid();
+
+                var notifEntity = await db.VesselVisitNotifications.FindAsync(new DDDSample1.Domain.Vessels.VesselVisitNotification.VesselVisitNotificationID(notifId));
+                var statusProp = notifEntity.GetType().GetProperty("Status");
+                statusProp.SetValue(notifEntity, DDDSample1.Domain.Vessels.VesselVisitNotification.NotificationStatus.Completed);
+                await db.SaveChangesAsync();
+            }
+
+            var rejectDto = new { Reason = "", OfficerId = "O3" };
+            var rejectResp = await client.PutAsync($"/api/VesselVisitNotifications/{notifId}/reject", new StringContent(JsonConvert.SerializeObject(rejectDto), Encoding.UTF8, "application/json"));
+            rejectResp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            var body = await rejectResp.Content.ReadAsStringAsync();
+            body.Should().Contain("A rejection reason must be provided.");
+        }
+
+        [Fact]
+        public async Task ApproveWithoutDock_ReturnsBadRequest_System()
+        {
+            var client = _factory.CreateClient();
+
+            var vtDto = new { Name = "SysTypeAD", Description = "desc", Capacity = 2000, MaxRows = 1, MaxBays = 1, MaxTiers = 1 };
+            var vtResp = await client.PostAsync("/api/VesselTypes", new StringContent(JsonConvert.SerializeObject(vtDto), Encoding.UTF8, "application/json"));
+            vtResp.StatusCode.Should().Be(HttpStatusCode.Created);
+            var vtId = (Guid)JsonConvert.DeserializeObject<dynamic>(await vtResp.Content.ReadAsStringAsync()).id;
+
+            var vesselDto = new { ImoNumber = "IMO8888884", Name = "SysVAD", VesselTypeId = vtId, Owner = "owner", Operator = "op" };
+            var vesselResp = await client.PostAsync("/api/Vessels", new StringContent(JsonConvert.SerializeObject(vesselDto), Encoding.UTF8, "application/json"));
+            vesselResp.StatusCode.Should().Be(HttpStatusCode.Created);
+            var vesselId = (Guid)JsonConvert.DeserializeObject<dynamic>(await vesselResp.Content.ReadAsStringAsync()).id;
+
+            string repId;
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
+                var org = new DDDSample1.Domain.Organizations.Organization("ORGSYSAD", "Org Sys AD", "OrgAltAD", "Some Address AD", "PT55555");
+                var rep = new DDDSample1.Domain.Organizations.Representative("Rep SysAD", "repsysad", "PT", "rep.ad.sys@gmail.com", "555666777");
+                org.AddRepresentative(rep);
+                db.Organizations.Add(org);
+                await db.SaveChangesAsync();
+                repId = rep.Id.AsString();
+            }
+
+            Guid notifId;
+            using (var scope2 = _factory.Services.CreateScope())
+            {
+                var db = scope2.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
+                var vesselEntity = await db.Vessels.FindAsync(new DDDSample1.Domain.Vessels.VesselId(vesselId));
+                var loading = new DDDSample1.Domain.Vessels.VesselInformation.LoadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(10) });
+                var unloading = new DDDSample1.Domain.Vessels.VesselInformation.UnloadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(5) });
+                var notif = new DDDSample1.Domain.Vessels.VesselVisitNotification.VesselVisitNotification(vesselEntity, loading, unloading, new DDDSample1.Domain.Organizations.RepresentativeId(repId));
+                db.VesselVisitNotifications.Add(notif);
+                await db.SaveChangesAsync();
+                notifId = notif.Id.AsGuid();
+
+                var notifEntity = await db.VesselVisitNotifications.FindAsync(new DDDSample1.Domain.Vessels.VesselVisitNotification.VesselVisitNotificationID(notifId));
+                var statusProp = notifEntity.GetType().GetProperty("Status");
+                statusProp.SetValue(notifEntity, DDDSample1.Domain.Vessels.VesselVisitNotification.NotificationStatus.Completed);
+                await db.SaveChangesAsync();
+            }
+
+            var approveDto = new { DockId = "", OfficerId = "O4" };
+            var approveResp = await client.PutAsync($"/api/VesselVisitNotifications/{notifId}/approve", new StringContent(JsonConvert.SerializeObject(approveDto), Encoding.UTF8, "application/json"));
+            approveResp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            var body = await approveResp.Content.ReadAsStringAsync();
+            body.Should().Contain("A dock must be assigned when approving a notification.");
+        }
+
+        [Fact]
+        public async Task DecisionOnAlreadyReviewed_PreventsDuplicateDecisions_System()
+        {
+            var client = _factory.CreateClient();
+
+            var vtDto = new { Name = "SysTypeDD", Description = "desc", Capacity = 2000, MaxRows = 1, MaxBays = 1, MaxTiers = 1 };
+            var vtResp = await client.PostAsync("/api/VesselTypes", new StringContent(JsonConvert.SerializeObject(vtDto), Encoding.UTF8, "application/json"));
+            vtResp.StatusCode.Should().Be(HttpStatusCode.Created);
+            var vtId = (Guid)JsonConvert.DeserializeObject<dynamic>(await vtResp.Content.ReadAsStringAsync()).id;
+
+            var vesselDto = new { ImoNumber = "IMO8888885", Name = "SysVDD", VesselTypeId = vtId, Owner = "owner", Operator = "op" };
+            var vesselResp = await client.PostAsync("/api/Vessels", new StringContent(JsonConvert.SerializeObject(vesselDto), Encoding.UTF8, "application/json"));
+            vesselResp.StatusCode.Should().Be(HttpStatusCode.Created);
+            var vesselId = (Guid)JsonConvert.DeserializeObject<dynamic>(await vesselResp.Content.ReadAsStringAsync()).id;
+
+            string repId;
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
+                var org = new DDDSample1.Domain.Organizations.Organization("ORGSYSDD", "Org Sys DD", "OrgAltDD", "Some Address DD", "PT44444");
+                var rep = new DDDSample1.Domain.Organizations.Representative("Rep SysDD", "repsysdd", "PT", "rep.dd.sys@gmail.com", "888999000");
+                org.AddRepresentative(rep);
+                db.Organizations.Add(org);
+                await db.SaveChangesAsync();
+                repId = rep.Id.AsString();
+            }
+
+            Guid notifId;
+            using (var scope2 = _factory.Services.CreateScope())
+            {
+                var db = scope2.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
+                var vesselEntity = await db.Vessels.FindAsync(new DDDSample1.Domain.Vessels.VesselId(vesselId));
+                var loading = new DDDSample1.Domain.Vessels.VesselInformation.LoadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(10) });
+                var unloading = new DDDSample1.Domain.Vessels.VesselInformation.UnloadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(5) });
+                var notif = new DDDSample1.Domain.Vessels.VesselVisitNotification.VesselVisitNotification(vesselEntity, loading, unloading, new DDDSample1.Domain.Organizations.RepresentativeId(repId));
+                db.VesselVisitNotifications.Add(notif);
+                await db.SaveChangesAsync();
+                notifId = notif.Id.AsGuid();
+
+                var notifEntity = await db.VesselVisitNotifications.FindAsync(new DDDSample1.Domain.Vessels.VesselVisitNotification.VesselVisitNotificationID(notifId));
+                var statusProp = notifEntity.GetType().GetProperty("Status");
+                statusProp.SetValue(notifEntity, DDDSample1.Domain.Vessels.VesselVisitNotification.NotificationStatus.Completed);
+                await db.SaveChangesAsync();
+            }
+
+            var approveDto = new { DockId = "D9", OfficerId = "O9" };
+            var approveResp = await client.PutAsync($"/api/VesselVisitNotifications/{notifId}/approve", new StringContent(JsonConvert.SerializeObject(approveDto), Encoding.UTF8, "application/json"));
+            approveResp.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var approveAgainResp = await client.PutAsync($"/api/VesselVisitNotifications/{notifId}/approve", new StringContent(JsonConvert.SerializeObject(approveDto), Encoding.UTF8, "application/json"));
+            approveAgainResp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+            var rejectDto = new { Reason = "some reason", OfficerId = "O10" };
+            var rejectResp = await client.PutAsync($"/api/VesselVisitNotifications/{notifId}/reject", new StringContent(JsonConvert.SerializeObject(rejectDto), Encoding.UTF8, "application/json"));
+            rejectResp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        }
         
-
-
         [Fact]
         public async Task UpdateInProgress_SystemTest_WorksEndToEnd()
         {

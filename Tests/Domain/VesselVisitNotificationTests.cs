@@ -241,6 +241,120 @@ namespace DDDNetCore.Tests.Domain
         }
 
         [Fact]
+        public void Approve_FromCompleted_Succeeds()
+        {
+            var vessel = CreateValidVessel();
+            var loading = new LoadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(100) });
+            var unloading = new UnloadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(50) });
+            var repId = new RepresentativeId("20001");
+
+            var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
+
+            // set to Completed
+            var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
+            statusProp.SetValue(notif, NotificationStatus.Completed);
+
+            notif.Approve("Dock-1", "Officer-1");
+
+            notif.Status.Should().Be(NotificationStatus.Approved);
+            notif.AssignedDock.Should().Be("Dock-1");
+            notif.OfficerId.Should().Be("Officer-1");
+            notif.DecisionOutcome.Should().Be("Approved");
+            notif.DecisionTimeStamp.Should().NotBeNull();
+        }
+
+        [Fact]
+        public void Reject_FromCompleted_Succeeds()
+        {
+            var vessel = CreateValidVessel();
+            var loading = new LoadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(100) });
+            var unloading = new UnloadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(50) });
+            var repId = new RepresentativeId("20002");
+
+            var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
+
+            // set to Completed
+            var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
+            statusProp.SetValue(notif, NotificationStatus.Completed);
+
+            notif.Reject("Not compliant", "Officer-2");
+
+            notif.Status.Should().Be(NotificationStatus.Rejected);
+            notif.RejectedReason.Should().Be("Not compliant");
+            notif.OfficerId.Should().Be("Officer-2");
+            notif.DecisionOutcome.Should().Be("Rejected");
+            notif.DecisionTimeStamp.Should().NotBeNull();
+        }
+
+        [Fact]
+        public void Approve_WithoutDock_Throws()
+        {
+            var vessel = CreateValidVessel();
+            var loading = new LoadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(100) });
+            var unloading = new UnloadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(50) });
+            var repId = new RepresentativeId("20003");
+
+            var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
+
+            // set to Completed
+            var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
+            statusProp.SetValue(notif, NotificationStatus.Completed);
+
+            Action act = () => notif.Approve("", "Officer-3");
+
+            act.Should().Throw<BusinessRuleValidationException>()
+                .WithMessage("A dock must be assigned when approving a notification.");
+        }
+
+        [Fact]
+        public void Reject_WithoutReason_Throws()
+        {
+            var vessel = CreateValidVessel();
+            var loading = new LoadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(100) });
+            var unloading = new UnloadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(50) });
+            var repId = new RepresentativeId("20004");
+
+            var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
+
+            // set to Completed
+            var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
+            statusProp.SetValue(notif, NotificationStatus.Completed);
+
+            Action act = () => notif.Reject("", "Officer-4");
+
+            act.Should().Throw<BusinessRuleValidationException>()
+                .WithMessage("A rejection reason must be provided.");
+        }
+
+        [Fact]
+        public void DuplicateDecision_AfterApproved_Throws()
+        {
+            var vessel = CreateValidVessel();
+            var loading = new LoadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(100) });
+            var unloading = new UnloadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(50) });
+            var repId = new RepresentativeId("20005");
+
+            var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
+
+            // set to Completed and approve
+            var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
+            statusProp.SetValue(notif, NotificationStatus.Completed);
+
+            notif.Approve("Dock-99", "Officer-99");
+            notif.Status.Should().Be(NotificationStatus.Approved);
+
+            // Trying to approve again should fail
+            Action actApproveAgain = () => notif.Approve("Dock-99", "Officer-99");
+            actApproveAgain.Should().Throw<BusinessRuleValidationException>()
+                .WithMessage("Only notifications marked as completed can be approved.");
+
+            // Trying to reject after approval should fail
+            Action actRejectAfter = () => notif.Reject("reason", "Officer-100");
+            actRejectAfter.Should().Throw<BusinessRuleValidationException>()
+                .WithMessage("Only notifications marked as completed can be rejected.");
+        }
+
+        [Fact]
         public void ResetToPending_OnlyFromRejected()
         {
             var vessel = CreateValidVessel();

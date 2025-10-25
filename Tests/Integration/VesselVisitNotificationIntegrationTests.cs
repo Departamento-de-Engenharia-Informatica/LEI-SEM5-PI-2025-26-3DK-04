@@ -210,6 +210,179 @@ namespace DDDNetCore.Tests.Integration
             ((string)aDto.assignedDock).Should().Be("D1");
         }
 
+        [Fact]
+        public async Task RejectAfterCompleted_AllowsRejection()
+        {
+            var client = _factory.CreateClient();
+
+            Guid notifId;
+
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
+
+                var vt = new VesselType("TypeR", "desc", 2000, 1, 1, 1);
+                db.VesselTypes.Add(vt);
+                var vessel = new Vessel("IMO1234571", "VR", vt.Id, "owner", "operator");
+                db.Vessels.Add(vessel);
+                var org = new Organization("ORGR", "Org R", "OrgAltR", "Some Address R", "PT00001");
+                var rep = new Representative("Rep R", "ASASAS", "PT", "repR@gmail.com", "000");
+                org.AddRepresentative(rep);
+                db.Organizations.Add(org);
+                await db.SaveChangesAsync();
+
+                var loading = new LoadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(10) });
+                var unloading = new UnloadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(5) });
+                var notif = new VesselVisitNotification(vessel, loading, unloading, rep.Id);
+                db.VesselVisitNotifications.Add(notif);
+                await db.SaveChangesAsync();
+                notifId = notif.Id.AsGuid();
+
+                // Set status to Completed via DbContext
+                var notifEntity = await db.VesselVisitNotifications.FindAsync(notif.Id);
+                var statusProp = notifEntity.GetType().GetProperty("Status");
+                statusProp.SetValue(notifEntity, NotificationStatus.Completed);
+                await db.SaveChangesAsync();
+            }
+
+            var rejectDto = new { Reason = "Bad cargo", OfficerId = "O2" };
+            var rejectResp = await client.PutAsJsonAsync($"/api/VesselVisitNotifications/{notifId}/reject", rejectDto);
+            rejectResp.StatusCode.Should().Be(HttpStatusCode.OK);
+            var rDto = JsonConvert.DeserializeObject<dynamic>(await rejectResp.Content.ReadAsStringAsync());
+            ((string)rDto.status).Should().Be("Rejected");
+            ((string)rDto.rejectedReason).Should().Be("Bad cargo");
+        }
+
+        [Fact]
+        public async Task RejectWithoutReason_ReturnsBadRequest()
+        {
+            var client = _factory.CreateClient();
+
+            Guid notifId;
+
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
+
+                var vt = new VesselType("TypeRG", "desc", 2000, 1, 1, 1);
+                db.VesselTypes.Add(vt);
+                var vessel = new Vessel("IMO1234573", "VRG", vt.Id, "owner", "operator");
+                db.Vessels.Add(vessel);
+                var org = new Organization("ORGRG", "Org RG", "OrgAltRG", "Some Address RG", "PT00002");
+                var rep = new Representative("Rep RG", "reprg", "PT", "repRG@gmail.com", "111");
+                org.AddRepresentative(rep);
+                db.Organizations.Add(org);
+                await db.SaveChangesAsync();
+
+                var loading = new LoadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(10) });
+                var unloading = new UnloadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(5) });
+                var notif = new VesselVisitNotification(vessel, loading, unloading, rep.Id);
+                db.VesselVisitNotifications.Add(notif);
+                await db.SaveChangesAsync();
+                notifId = notif.Id.AsGuid();
+
+                var notifEntity = await db.VesselVisitNotifications.FindAsync(notif.Id);
+                var statusProp = notifEntity.GetType().GetProperty("Status");
+                statusProp.SetValue(notifEntity, NotificationStatus.Completed);
+                await db.SaveChangesAsync();
+            }
+
+            var rejectDto = new { Reason = "", OfficerId = "O3" };
+            var rejectResp = await client.PutAsJsonAsync($"/api/VesselVisitNotifications/{notifId}/reject", rejectDto);
+            rejectResp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            var body = await rejectResp.Content.ReadAsStringAsync();
+            body.Should().Contain("A rejection reason must be provided.");
+        }
+
+        [Fact]
+        public async Task ApproveWithoutDock_ReturnsBadRequest()
+        {
+            var client = _factory.CreateClient();
+
+            Guid notifId;
+
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
+
+                var vt = new VesselType("TypeAD", "desc", 2000, 1, 1, 1);
+                db.VesselTypes.Add(vt);
+                var vessel = new Vessel("IMO1234574", "VAD", vt.Id, "owner", "operator");
+                db.Vessels.Add(vessel);
+                var org = new Organization("ORGAD", "Org AD", "OrgAltAD", "Some Address AD", "PT00003");
+                var rep = new Representative("Rep AD", "repad", "PT", "repAD@gmail.com", "222");
+                org.AddRepresentative(rep);
+                db.Organizations.Add(org);
+                await db.SaveChangesAsync();
+
+                var loading = new LoadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(10) });
+                var unloading = new UnloadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(5) });
+                var notif = new VesselVisitNotification(vessel, loading, unloading, rep.Id);
+                db.VesselVisitNotifications.Add(notif);
+                await db.SaveChangesAsync();
+                notifId = notif.Id.AsGuid();
+
+                var notifEntity = await db.VesselVisitNotifications.FindAsync(notif.Id);
+                var statusProp = notifEntity.GetType().GetProperty("Status");
+                statusProp.SetValue(notifEntity, NotificationStatus.Completed);
+                await db.SaveChangesAsync();
+            }
+
+            var approveDto = new { DockId = "", OfficerId = "O4" };
+            var approveResp = await client.PutAsJsonAsync($"/api/VesselVisitNotifications/{notifId}/approve", approveDto);
+            approveResp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            var body = await approveResp.Content.ReadAsStringAsync();
+            body.Should().Contain("A dock must be assigned when approving a notification.");
+        }
+
+        [Fact]
+        public async Task DecisionOnAlreadyReviewed_PreventsDuplicateDecisions()
+        {
+            var client = _factory.CreateClient();
+
+            Guid notifId;
+
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
+
+                var vt = new VesselType("TypeDD", "desc", 2000, 1, 1, 1);
+                db.VesselTypes.Add(vt);
+                var vessel = new Vessel("IMO1234575", "VDD", vt.Id, "owner", "operator");
+                db.Vessels.Add(vessel);
+                var org = new Organization("ORGDD", "Org DD", "OrgAltDD", "Some Address DD", "PT00004");
+                var rep = new Representative("Rep DD", "repdd", "PT", "repDD@gmail.com", "333");
+                org.AddRepresentative(rep);
+                db.Organizations.Add(org);
+                await db.SaveChangesAsync();
+
+                var loading = new LoadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(10) });
+                var unloading = new UnloadingCargoMaterial(new List<CargoManifest> { CreateManifestWithContainer(5) });
+                var notif = new VesselVisitNotification(vessel, loading, unloading, rep.Id);
+                db.VesselVisitNotifications.Add(notif);
+                await db.SaveChangesAsync();
+                notifId = notif.Id.AsGuid();
+
+                var notifEntity = await db.VesselVisitNotifications.FindAsync(notif.Id);
+                var statusProp = notifEntity.GetType().GetProperty("Status");
+                statusProp.SetValue(notifEntity, NotificationStatus.Completed);
+                await db.SaveChangesAsync();
+            }
+
+            var approveDto = new { DockId = "D9", OfficerId = "O9" };
+            var approveResp = await client.PutAsJsonAsync($"/api/VesselVisitNotifications/{notifId}/approve", approveDto);
+            approveResp.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            // Approve again -> BadRequest
+            var approveAgainResp = await client.PutAsJsonAsync($"/api/VesselVisitNotifications/{notifId}/approve", approveDto);
+            approveAgainResp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+            // Reject after approved -> BadRequest
+            var rejectDto = new { Reason = "some reason", OfficerId = "O10" };
+            var rejectResp = await client.PutAsJsonAsync($"/api/VesselVisitNotifications/{notifId}/reject", rejectDto);
+            rejectResp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        }
+
          [Fact]
         public async Task UpdateInProgress_UpdatesCargoSuccessfully()
         {
