@@ -29,14 +29,10 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         
         //Create new notification
         public async Task<VesselVisitNotificationDto> CreateAsync(
-            Guid vesselId,
-            string representativeId,
-            List<CargoManifest> loadingManifests,
-            List<CargoManifest> unloadingManifests,
-            List<CrewMember>? crew)
+            CreateNotificationDto dto)
         {
             // Procurar o vessel
-            var vessel = await _vesselRepo.GetByIdAsync(new VesselId(vesselId));
+            var vessel = await _vesselRepo.GetByIdAsync(new VesselId(dto.VesselId));
             if (vessel == null)
                 throw new BusinessRuleValidationException("Vessel not found.");
 
@@ -46,19 +42,52 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 throw new BusinessRuleValidationException("Vessel type not found.");
 
             // If controller passed a crew list, update the vessel’s crew
-            if (crew != null && crew.Any())
+            if (dto.Crew != null && dto.Crew.Any())
             {
-                vessel.setCrew(crew); // You need to add this method in Vessel aggregate
+                vessel.setCrew(dto.Crew); // You need to add this method in Vessel aggregate
                 await _vesselRepo.UpdateAsync(vessel);
             }
 
-            var loadingCargo = loadingManifests != null && loadingManifests.Any()
-                ? new LoadingCargoMaterial(loadingManifests)
-                : null;
+            // Process Loading Manifests from DTO
+            LoadingCargoMaterial? loadingCargo = null;
+            if (dto.LoadingManifests != null && dto.LoadingManifests.Any())
+            {
+                var manifests = new List<CargoManifest>();
+                // Loop through input manifest DTOs
+                foreach (var manifestDto in dto.LoadingManifests)
+                {
+                    // Create Container domain objects from ContainerInputDtos
+                    var containers = manifestDto.Containers.Select(containerDto =>
+                        new Container( // Assuming ContainerInputDto has Guid Id
+                            containerDto.PayloadWeight,
+                            containerDto.ContentsDescription)
+                    ).ToList();
 
-            var unloadingCargo = unloadingManifests != null && unloadingManifests.Any()
-                ? new UnloadingCargoMaterial(unloadingManifests)
-                : null;
+                    // Create CargoManifest using the new constructor with the list of containers
+                    var manifest = new CargoManifest(containers); // ID is generated inside
+                    manifests.Add(manifest);
+                }
+                loadingCargo = new LoadingCargoMaterial(manifests);
+            }
+
+            // Process Unloading Manifests from DTO (similar logic)
+            UnloadingCargoMaterial? unloadingCargo = null;
+            if (dto.UnloadingManifests != null && dto.UnloadingManifests.Any())
+            {
+                var manifests = new List<CargoManifest>();
+                foreach (var manifestDto in dto.UnloadingManifests)
+                {
+                    var containers = manifestDto.Containers.Select(containerDto =>
+                        new Container(
+                            containerDto.PayloadWeight,
+                            containerDto.ContentsDescription)
+                    ).ToList();
+
+                    var manifest = new CargoManifest(containers);
+                    manifests.Add(manifest);
+                }
+                unloadingCargo = new UnloadingCargoMaterial(manifests);
+            }
 
             // Create the vessel visit notification
             // Validar que o unloading cargo não excede a capacidade do vessel
@@ -72,7 +101,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                         $"Unloading cargo weight ({unloadingWeight} kg) cannot exceed vessel capacity ({vesselCapacity} kg).");
             }
 
-            var notification = new VesselVisitNotification(vessel, loadingCargo, unloadingCargo, new RepresentativeId(representativeId));
+            var notification = new VesselVisitNotification(vessel, loadingCargo, unloadingCargo, new RepresentativeId(dto.RepresentativeId));
 
             await _repo.AddAsync(notification);
             await _unitOfWork.CommitAsync();
@@ -168,7 +197,8 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
             if (notification.Status != NotificationStatus.InProgress)
                 throw new BusinessRuleValidationException("Only notifications with 'InProgress' status can be updated.");
-            
+
+            // --- Obter o vessel atual (ou o novo se for atualizado) ---
             Vessel vesselToUse = notification.Vessel;
             bool vesselChanged = false;
 
@@ -180,32 +210,38 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 vesselToUse = newVessel;
                 vesselChanged = true;
             }
-            
-            LoadingCargoMaterial loadingToUse = notification.LoadingCargo;
+
+            // --- Reconstruct LoadingCargo ---
+            LoadingCargoMaterial? loadingToUse = notification.LoadingCargo;
             if (dto.LoadingCargo != null)
             {
-                var manifests = dto.LoadingCargo.Manifests.Select(m =>
+                var manifests = new List<CargoManifest>();
+                foreach (var manifestDto in dto.LoadingCargo.Manifests)
                 {
-                    var manifest = CargoManifest.Create(m.Id);
-                    foreach (var container in m.Containers)
-                        manifest.AddContainer(Container.Create(container.Id, container.PayloadWeight, container.ContentsDescription));
-                    return manifest;
-                }).ToList();
+                    var containers = manifestDto.Containers.Select(containerDto =>
+                        new Container( containerDto.PayloadWeight, containerDto.ContentsDescription)
+                    ).ToList();
 
+                    var manifest = new CargoManifest(containers);
+                    manifests.Add(manifest);
+                }
                 loadingToUse = new LoadingCargoMaterial(manifests);
             }
             
-            UnloadingCargoMaterial unloadingToUse = notification.UnloadingCargo;
+            UnloadingCargoMaterial? unloadingToUse = notification.UnloadingCargo;
             if (dto.UnloadingCargo != null)
             {
-                var manifests = dto.UnloadingCargo.Manifests.Select(m =>
+                var manifests = new List<CargoManifest>();
+                foreach (var manifestDto in dto.UnloadingCargo.Manifests)
                 {
-                    var manifest = CargoManifest.Create(m.Id);
-                    foreach (var container in m.Containers)
-                        manifest.AddContainer(Container.Create(container.Id, container.PayloadWeight, container.ContentsDescription));
-                    return manifest;
-                }).ToList();
+                    var containers = manifestDto.Containers.Select(containerDto =>
+                       
+                         new Container( containerDto.PayloadWeight, containerDto.ContentsDescription)
+                    ).ToList();
 
+                    var manifest = new CargoManifest(containers);
+                    manifests.Add(manifest);
+                }
                 unloadingToUse = new UnloadingCargoMaterial(manifests);
             }
             

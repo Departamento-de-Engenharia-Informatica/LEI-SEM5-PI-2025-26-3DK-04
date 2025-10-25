@@ -34,7 +34,7 @@ namespace DDDNetCore.Tests.Integration
         private CargoManifest CreateManifestWithContainer(double weight)
         {
             // Use empty manifest in integration tests to avoid strict container ID validation here
-            var manifest = CargoManifest.Create(Guid.NewGuid().ToString());
+            var manifest = new CargoManifest( new List<Container>());
             return manifest;
         }
 

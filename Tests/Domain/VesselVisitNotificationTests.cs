@@ -22,7 +22,7 @@ namespace DDDNetCore.Tests.Domain
         private CargoManifest CreateManifestWithContainer(double weight)
         {
             // CargoManifest expects a GUID string as id
-            var manifest = CargoManifest.Create(Guid.NewGuid().ToString());
+            var manifest = new CargoManifest(new List<Container>());
 
             // Generate a valid-ish container id (4 letters + 6 digits + check digit)
             string baseId = "ABCD" + new Random().Next(0, 999999).ToString("D6");
@@ -36,7 +36,7 @@ namespace DDDNetCore.Tests.Domain
             int checkDigit = (sum % 11) % 10;
             string containerId = baseId + checkDigit.ToString();
 
-            var container = Container.Create(containerId, weight, "contents");
+            var container = new Container( weight, "contents");
             manifest.AddContainer(container);
             return manifest;
         }

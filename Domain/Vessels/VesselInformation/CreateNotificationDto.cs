@@ -10,7 +10,7 @@ namespace DDDSample1.Domain.Vessels
         public string RepresentativeId { get; set; }
         public List<CargoManifest> LoadingManifests { get; set; }
         public List<CargoManifest> UnloadingManifests { get; set; }
-        public List<CrewMemberDto> Crew { get; set; } // Optional
+        public List<CrewMember> Crew { get; set; } // Optional
     }
 
     

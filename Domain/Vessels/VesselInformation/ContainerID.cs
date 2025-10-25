@@ -5,7 +5,7 @@ namespace DDDSample1.Domain.Vessels.VesselInformation;
 
 public class ContainerID : EntityId
 {
-    public ContainerID(string value) : base(value)
+    public ContainerID(Guid value) : base(value)
     {
     }
 

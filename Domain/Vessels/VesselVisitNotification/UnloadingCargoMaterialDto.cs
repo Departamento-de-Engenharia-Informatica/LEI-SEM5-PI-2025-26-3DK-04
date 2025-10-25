@@ -4,6 +4,6 @@ namespace DDDSample1.Domain.Vessels.VesselInformation
 {
     public class UnloadingCargoMaterialDTO
     {
-        public List<CargoManifestDTO> Manifests { get; set; }
+        public List<CargoManifestDto> Manifests { get; set; }
     }
 }

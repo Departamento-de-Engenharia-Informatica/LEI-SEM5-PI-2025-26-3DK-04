@@ -28,24 +28,7 @@ namespace DDDSample1.Controllers
         {
             try
             {
-                List<CrewMember> crew = null;
-
-                if (dto.Crew != null && dto.Crew.Count > 0)
-                {
-                    crew = new List<CrewMember>();
-                    foreach (var c in dto.Crew)
-                    {
-                        crew.Add(new CrewMember(c.Name, c.CitizenId, c.Nationality));
-                    }
-                }
-
-                var result = await _service.CreateAsync(
-                    dto.VesselId,
-                    dto.RepresentativeId,
-                    dto.LoadingManifests,
-                    dto.UnloadingManifests,
-                    crew);
-
+                var result = await _service.CreateAsync(dto);
                 return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
             }
             catch (BusinessRuleValidationException ex)

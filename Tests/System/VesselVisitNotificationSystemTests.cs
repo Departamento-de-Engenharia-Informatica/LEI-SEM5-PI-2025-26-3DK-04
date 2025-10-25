@@ -35,7 +35,7 @@ namespace DDDSample1.Tests.System
 
         private CargoManifest CreateManifestWithContainer(double weight)
         {
-            var manifest = CargoManifest.Create(Guid.NewGuid().ToString());
+            var manifest = new CargoManifest( new List<Container>());
             // For system tests we can use an empty manifest (skip adding containers) to avoid strict container ID validation here
             return manifest;
         }
@@ -299,8 +299,8 @@ namespace DDDSample1.Tests.System
         {
             var db = scope2.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
             var vesselEntity = await db.Vessels.FindAsync(new VesselId(vesselId));
-            var loading = new LoadingCargoMaterial(new List<CargoManifest> { CargoManifest.Create(Guid.NewGuid().ToString()) });
-            var unloading = new UnloadingCargoMaterial(new List<CargoManifest> { CargoManifest.Create(Guid.NewGuid().ToString()) });
+            var loading = new LoadingCargoMaterial(new List<CargoManifest> { new CargoManifest(new List<Container>()) });
+            var unloading = new UnloadingCargoMaterial(new List<CargoManifest> { new CargoManifest(new List<Container>()) });
             var notif = new VesselVisitNotification(vesselEntity, loading, unloading, new RepresentativeId(repId));
             db.VesselVisitNotifications.Add(notif);
             await db.SaveChangesAsync();
