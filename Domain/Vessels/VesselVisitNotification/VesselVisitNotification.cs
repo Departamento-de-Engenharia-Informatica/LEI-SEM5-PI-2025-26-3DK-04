@@ -158,6 +158,35 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
             Status = NotificationStatus.InProgress;
         }
+        
+        public void UpdateVessel(Vessel vessel)
+        {   
+            if (this.Status != NotificationStatus.InProgress)
+                throw new BusinessRuleValidationException("Only notifications in progress can be updated by a representative.");
+            
+            if (vessel == null)
+                throw new BusinessRuleValidationException("Vessel cannot be null.");
+            this.Vessel = vessel;
+        }
+
+        public void UpdateLoadingCargo(LoadingCargoMaterial cargo)
+        {
+            if (this.Status != NotificationStatus.InProgress)
+                throw new BusinessRuleValidationException("Only notifications in progress can be updated by a representative.");
+            
+            if (cargo == null)
+                throw new BusinessRuleValidationException("Loading cargo cannot be null.");
+            this.LoadingCargo = cargo;
+        }
+
+        public void UpdateUnloadingCargo(UnloadingCargoMaterial cargo)
+        {
+            if (this.Status != NotificationStatus.InProgress)
+                throw new BusinessRuleValidationException("Only notifications in progress can be updated by a representative.");
+            if (cargo == null)
+                throw new BusinessRuleValidationException("Unloading cargo cannot be null.");
+            this.UnloadingCargo = cargo;
+        }
 
         
     }

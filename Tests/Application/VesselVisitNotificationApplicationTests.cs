@@ -308,37 +308,67 @@ namespace DDDNetCore.Tests.Application
             approved.AssignedDock.Should().Be("D1");
             uow.CommitCallCount.Should().Be(2); // one from Create, one from Approve
         }
-
+        
+        
         [Fact]
-        public async Task UpdateInProgress_UnloadingExceedsCapacity_Throws()
+        public async Task UpdateInProgress_TotalWeightExceedsCapacity_Throws()
         {
-            var vesselRepo = new InMemoryVesselRepository();
-            var vesselTypeRepo = new InMemoryVesselTypeRepository();
-            var notifRepo = new InMemoryVesselVisitNotificationRepository();
-            var uow = new InMemoryUnitOfWork();
+        var vesselRepo = new InMemoryVesselRepository();
+        var vesselTypeRepo = new InMemoryVesselTypeRepository();
+        var notifRepo = new InMemoryVesselVisitNotificationRepository();
+        var uow = new InMemoryUnitOfWork();
 
-            var vesselType = new VesselType("TypeC", "desc", 200, 1, 1, 1);
-            await vesselTypeRepo.AddAsync(vesselType);
-            var vessel = new Vessel("IMO3333333", "Update Vessel", vesselType.Id, "Owner", "Operator");
-            await vesselRepo.AddAsync(vessel);
+        // VesselType com capacidade pequena (200 kg)
+        var vesselType = new VesselType("TypeC", "desc", 200, 1, 1, 1);
+        await vesselTypeRepo.AddAsync(vesselType);
 
-            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+        var vessel = new Vessel("IMO3333333", "Update Vessel", vesselType.Id, "Owner", "Operator");
+        await vesselRepo.AddAsync(vessel);
 
-            var loading = new List<CargoManifest>{ CreateManifestWithContainer(10) };
-            var unloading = new List<CargoManifest>{ CreateManifestWithContainer(20) };
+        var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
 
-            var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP004", loading, unloading, null);
-            var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
+        // Cria notificação inicial
+        var loading = new List<CargoManifest> { CreateManifestWithContainer(10) };
+        var unloading = new List<CargoManifest> { CreateManifestWithContainer(20) };
 
-            // Now try to update in progress with unloading heavier than capacity
-            var heavyUnloading = new UnloadingCargoMaterial(new List<CargoManifest>{ CreateManifestWithContainer(1000) });
+        var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP004", loading, unloading, null);
+        var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
 
-            Func<Task> act = async () => await service.UpdateInProgressAsync(stored.Id.AsGuid(), null, heavyUnloading);
+        // DTO de atualização com peso que excede capacidade (usa IDs válidos ISO 6346)
+        var updateDto = new UpdateNotificationDto
+        {
+            VesselId = vessel.Id.AsString(),
+            UnloadingCargo = new UnloadingCargoMaterialDTO
+            {
+                Manifests = new List<CargoManifestDTO>
+                {
+                    new CargoManifestDTO
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Containers = new List<ContainerDTO>
+                        {
+                            new ContainerDTO
+                            {
+                                Id = "ABCD1234567", // ID válido ISO 6346
+                                PayloadWeight = 1000, // Excede a capacidade
+                                ContentsDescription = "Too Heavy"
+                            }
+                        }
+                    }
+                }
+            }
+        };
 
-            await Assert.ThrowsAsync<BusinessRuleValidationException>(act);
-            // commit should not increment for failed update
-            uow.CommitCallCount.Should().Be(1);
+        // Act
+        Func<Task> act = async () => await service.UpdateInProgressAsync(stored.Id.AsGuid().ToString(), updateDto);
+
+        // Assert → deve lançar exceção porque ultrapassa capacidade
+        await Assert.ThrowsAsync<BusinessRuleValidationException>(act);
+
+        // Commit não deve ser chamado novamente (update falhou)
+        uow.CommitCallCount.Should().Be(1);
         }
+        
 
         [Fact]
         public async Task SearchNotifications_FilterByVessel_ReturnsMatch()

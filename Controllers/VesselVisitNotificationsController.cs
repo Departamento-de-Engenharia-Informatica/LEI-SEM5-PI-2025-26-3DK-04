@@ -100,11 +100,11 @@ namespace DDDSample1.Controllers
         }
 
         [HttpPut("{id}/update")]
-        public async Task<ActionResult<VesselVisitNotificationDto>> UpdateInProgress(Guid id, [FromBody] UpdateNotificationDto dto)
+        public async Task<ActionResult<VesselVisitNotificationDto>> UpdateInProgress(string id, [FromBody] UpdateNotificationDto dto)
         {
             try
             {
-                var updated = await _service.UpdateInProgressAsync(id, dto.LoadingCargo, dto.UnloadingCargo);
+                var updated = await _service.UpdateInProgressAsync(id, dto);
                 return Ok(updated);
             }
             catch (BusinessRuleValidationException ex)
