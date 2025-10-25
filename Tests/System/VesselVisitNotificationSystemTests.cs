@@ -345,10 +345,7 @@ namespace DDDSample1.Tests.System
             new StringContent(JsonConvert.SerializeObject(updateDto), Encoding.UTF8, "application/json")
         );
 
-        if (updateResp.StatusCode == HttpStatusCode.BadRequest)
-        {
-            _testOutputHelper.WriteLine("⚠️ DEBUG ERROR RESPONSE: " + await updateResp.Content.ReadAsStringAsync());
-        }
+        
 
         updateResp.StatusCode.Should().Be(HttpStatusCode.OK);
 

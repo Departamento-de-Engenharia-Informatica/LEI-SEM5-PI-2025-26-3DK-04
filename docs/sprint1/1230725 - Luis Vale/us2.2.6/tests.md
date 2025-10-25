@@ -104,7 +104,7 @@ The system successfully completes the full representative lifecycle, enforcing i
 ---
 
 **Conclusion:**
-The unit, integration, and system tests ensure full coverage of **US2.3.1 - Register and Manage Representatives**, confirming that the domain, application, and API layers work together coherently and reliably.
+The unit, integration, and system tests ensure full coverage of **US2.3.1—Register and Manage Representatives**, confirming that the domain, application, and API layers work together coherently and reliably.
 
     - 
 
