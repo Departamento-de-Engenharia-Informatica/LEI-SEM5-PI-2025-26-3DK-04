@@ -6,35 +6,122 @@
 
 ### 5.2. Description
 
-As a Port Authority Officer, I want to review pending Vessel Visit Notifications and approve or reject them, so that docking schedules remain under port control.Story Implementation Report
+As a Port Authority Officer, I want to review pending Vessel Visit Notifications and approve or reject them, so that docking schedules remain under port control.
 
 ---
-
 ### 5.3. Implementation Details
 
-- **User Interaction & Flow Control**  
-  A new UI (`ReviewVesselVisitNotificationUI`) was developed to allow Port Authority Officers to view pending notifications and make approval/rejection decisions.
+- User interaction & endpoints
+  - GET /api/VesselVisitNotifications/completed — list notifications ready for review.
+  - PUT /api/VesselVisitNotifications/{id}/approve — approve a notification and assign a dock.
+  - PUT /api/VesselVisitNotifications/{id}/reject — reject a notification and record a reason.
 
-- **Business Logic Coordination**  
-  The `ReviewVesselVisitNotificationController` manages the review process and delegates validation, decision processing, and persistence to the application service.
+- Business logic
+  - `VesselVisitNotificationService` implements application orchestration: loads the aggregate from the repository, enforces business rules, invokes aggregate methods (`Approve` / `Reject`), and commits via Unit of Work.
 
-- **Domain Entity Construction**  
-  The `VesselVisitNotification` entity encapsulates notification data, status management, dock assignment (for approved notifications), and rejection reason storage (for rejected notifications). The `DecisionAuditLog` entity records all decisions with timestamp, officer ID, and decision outcome for auditing purposes.
+- Domain entity
+  - `VesselVisitNotification` is the aggregate root and encapsulates state transitions (approved/rejected), assigned dock, rejection reason, and decision metadata (timestamp, officerId, outcome).
 
-- **Persistence**  
-  The `IVesselVisitNotificationRepository` interface and its implementation persist notification updates and audit logs in the database. The repository includes methods to retrieve pending notifications and save decision records.
+- Persistence
+  - `IVesselVisitNotificationRepository` provides retrieval and update methods; changes are persisted through `UnitOfWork.CommitAsync()`.
 
-- **Notifications**  
-  The `NotificationService` sends alerts to shipping agent representatives when their notifications are rejected, allowing them to review and update the notification for re-submission (US 2.2.9).
-
-- **Authorization & Security**  
-  Role-based access control ensures that only authenticated users with the "Port Authority Officer" role can review and make decisions on pending notifications.
-
-- **Audit Trail**  
-  Every approval or rejection decision is automatically logged with:
-  - Timestamp (date and time of decision)
-  - Officer ID (who made the decision)
-  - Decision outcome (approved or rejected)
-  - Additional details (assigned dock or rejection reason)
+- Security
+  - Controller endpoints are intended to be protected by role-based authorization (Port Authority Officer). The actual middleware/attributes are defined in the controller (see code snippets below).
 
 ---
+
+### Key Code Snippets
+
+#### Controller: `VesselVisitNotificationsController` (review endpoints)
+
+```csharp
+[HttpGet("completed")]
+public async Task<ActionResult<IEnumerable<VesselVisitNotificationDto>>> GetCompletedNotifications()
+{
+    var dtos = await _service.GetCompletedNotificationsAsync();
+    return Ok(dtos);
+}
+
+[HttpPut("{id}/approve")]
+public async Task<IActionResult> Approve(Guid id, [FromBody] ApproveNotificationDto dto)
+{
+    try
+    {
+        var result = await _service.ApproveAsync(id, dto.OfficerId, dto.AssignedDock);
+        return Ok(result);
+    }
+    catch (BusinessRuleValidationException ex)
+    {
+        return BadRequest(new { Message = ex.Message });
+    }
+}
+
+[HttpPut("{id}/reject")]
+public async Task<IActionResult> Reject(Guid id, [FromBody] RejectNotificationDto dto)
+{
+    try
+    {
+        var result = await _service.RejectAsync(id, dto.OfficerId, dto.Reason);
+        return Ok(result);
+    }
+    catch (BusinessRuleValidationException ex)
+    {
+        return BadRequest(new { Message = ex.Message });
+    }
+}
+```
+
+#### Service: `VesselVisitNotificationService` (simplified)
+
+```csharp
+public async Task<VesselVisitNotificationDto> ApproveAsync(Guid id, Guid officerId, string assignedDock)
+{
+    var notification = await _repo.GetByIdAsync(new VesselVisitNotificationID(id));
+    if (notification == null)
+        throw new BusinessRuleValidationException("Notification not found.");
+
+    // domain validation lives inside the aggregate
+    notification.Approve(officerId, assignedDock);
+
+    await _unitOfWork.CommitAsync();
+    return MapToDto(notification);
+}
+
+public async Task<VesselVisitNotificationDto> RejectAsync(Guid id, Guid officerId, string reason)
+{
+    var notification = await _repo.GetByIdAsync(new VesselVisitNotificationID(id));
+    if (notification == null)
+        throw new BusinessRuleValidationException("Notification not found.");
+
+    notification.Reject(officerId, reason);
+
+    await _unitOfWork.CommitAsync();
+    return MapToDto(notification);
+}
+```
+
+#### Aggregate: `VesselVisitNotification` (concept)
+
+```csharp
+public void Approve(Guid officerId, string assignedDock)
+{
+    if (Status != NotificationStatus.Completed)
+        throw new BusinessRuleValidationException("Only completed notifications can be approved.");
+
+    AssignedDock = assignedDock;
+    Status = NotificationStatus.Approved;
+    DecisionTimestamp = DateTime.UtcNow;
+    DecisionOfficerId = officerId;
+}
+
+public void Reject(Guid officerId, string reason)
+{
+    if (Status != NotificationStatus.Completed)
+        throw new BusinessRuleValidationException("Only completed notifications can be rejected.");
+
+    RejectionReason = reason;
+    Status = NotificationStatus.Rejected;
+    DecisionTimestamp = DateTime.UtcNow;
+    DecisionOfficerId = officerId;
+}
+```

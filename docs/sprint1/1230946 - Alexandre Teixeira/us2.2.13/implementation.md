@@ -1,3 +1,5 @@
+### 5.2. Description
+### 5.3. Implementation Details
 # 5. User Story Implementation Report
 
 ---
@@ -6,60 +8,121 @@
 
 ### 5.2. Description
 
-As a Logistics Operator, I want to register and manage qualifications (create, update), so that staff members and resources can be consistently associated with the correct skills and certifications required for port operations.
+As a Logistics Operator, I want to register and manage qualifications (create, update, list, delete) so staff and resources can reference valid certifications required for operations.
 
 ### 5.3. Implementation Details
 
-- **User Interaction & Flow Control**  
-  A new UI (`ManageQualificationUI`) was developed to allow Logistics Operators to create and update qualifications. The interface provides forms for entering qualification code and descriptive name, and displays qualifications with search and filter capabilities.
+- User interaction & endpoints
+  - REST API in `QualificationsController` provides: POST /api/Qualifications, GET /api/Qualifications, GET /api/Qualifications/{id}, PUT /api/Qualifications/{id}, DELETE /api/Qualifications/{id}, GET /api/Qualifications/search?name={name}, GET /api/Qualifications/exists/{id}.
 
-- **Business Logic Coordination**  
-  The `QualificationController` manages the qualification management process and delegates validation, business rule enforcement, and persistence to the application service.
+- Business logic
+  - `QualificationService` orchestrates operations: validates DTOs, constructs `Qualification` aggregates, calls `IQualificationRepository` and commits via `IUnitOfWork.CommitAsync()`.
 
-- **Domain Entity Construction**  
-  The `Qualification` entity encapsulates qualification data including:
-  - Unique qualification code (immutable identifier)
-  - Descriptive name (e.g., "STS Crane Operator", "Truck Driver")
-  
-  The qualification code serves as the primary identifier and cannot be changed after creation. Only the descriptive name can be updated.
+- Domain
+  - `Qualification` is the aggregate root. It enforces name validation rules (required, at least two words, max length 150). The aggregate exposes methods to change the name and to validate its invariants.
 
-- **Persistence**  
-  The `IQualificationRepository` interface and its implementation handle qualification data persistence. The repository includes methods to:
-  - Save new qualifications (create)
-  - Update existing qualification names
-  - Find qualifications by code
-  - Search and filter by code or name
-  - List all qualifications
+- Persistence
+  - `IQualificationRepository` / `QualificationRepository` expose: `AddAsync`, `GetByIdAsync`, `UpdateAsync`, `Remove`, `GetAllAsync`, `GetByNameAsync`, and `ExistsAsync` (used by service and tests).
 
-- **Code Uniqueness Validation**  
-  The system enforces unique qualification codes to prevent duplicates. Before creating a new qualification, the repository checks if a qualification with the same code already exists. If found, the operation fails with an appropriate error message.
+- Validation & business rules
+  - Qualification name is validated on creation and update (see domain tests). Invalid names raise BusinessRuleValidationException.
+  - Qualifications must exist before they are assigned to other aggregates (e.g., `StaffMemberService` checks `IQualificationRepository.GetByIdAsync`).
 
-- **Pre-existence Validation**  
-  A critical business rule ensures that qualifications must exist before they can be assigned to staff members or resources. The system validates qualification existence during:
-  - Staff member creation/update (when assigning qualifications)
-  - Resource creation/update (when assigning required qualifications)
-  - This prevents orphaned references and maintains data integrity
+- Search & filter
+  - Search supports partial name matching (used by integration tests: `/api/Qualifications/search?name=...`).
 
-- **Authorization & Security**  
-  Role-based access control ensures that only authenticated users with the "Logistics Operator" role can create or update qualifications.
+- Security
+  - Endpoints intended for Logistics Operator role. Controller actions should be protected with `[Authorize(Roles = "LogisticsOperator")]` (the project registers `IQualificationRepository` and `QualificationService` in `Startup.cs`; authentication scheme should be configured for runtime/tests as needed).
 
-- **Validation & Business Rules**  
-  The system enforces:
-  - Unique qualification code validation (prevents duplicates)
-  - Code format validation (non-empty, valid characters)
-  - Name validation (required field, non-empty)
-  - Code immutability (cannot be changed after creation)
-
-- **Search & Filter Capabilities**  
-  Qualifications can be searched and filtered by:
-  - Qualification code - exact match, case-insensitive
-  - Name - partial match supported (e.g., searching "Crane" returns "STS Crane Operator")
-  - Combined search by code or name
-
-- **Integration with Other Entities**  
-  Qualifications are referenced by:
-  - `OperatingStaffMember` entities (staff can have multiple qualifications)
-  - `Resource` entities (resources can require specific qualifications)
-  - The system maintains referential integrity by validating qualification existence before assignment
+- Integration with other entities
+  - Qualifications are referenced by `StaffMember` (via `AddQualificationAsync` flow) and by resource entities. Referential integrity is enforced at service level before assignment.
 
 ---
+
+### Key Code Snippets (representative)
+
+#### Controller: selected endpoints
+
+```csharp
+[HttpPost]
+public async Task<ActionResult<QualificationDto>> Create([FromBody] CreateQualificationDto dto)
+{
+    try
+    {
+        var created = await _service.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+    }
+    catch (BusinessRuleValidationException ex)
+    {
+        return BadRequest(new { Message = ex.Message });
+    }
+}
+
+[HttpPut("{id}")]
+public async Task<ActionResult<QualificationDto>> Update(Guid id, [FromBody] UpdateQualificationDto dto)
+{
+    try
+    {
+        var updated = await _service.UpdateAsync(id, dto);
+        return Ok(updated);
+    }
+    catch (BusinessRuleValidationException ex)
+    {
+        return BadRequest(new { Message = ex.Message });
+    }
+}
+
+[HttpGet("search")]
+public async Task<ActionResult<IEnumerable<QualificationDto>>> Search([FromQuery] string name)
+{
+    var results = await _service.SearchByNameAsync(name);
+    return Ok(results);
+}
+```
+
+#### Service: representative methods (simplified)
+
+```csharp
+public async Task<QualificationDto> CreateAsync(CreateQualificationDto dto)
+{
+    var qual = new Qualification(dto.Name);
+    await _repo.AddAsync(qual);
+    await _unitOfWork.CommitAsync();
+    return MapToDto(qual);
+}
+
+public async Task<QualificationDto> UpdateAsync(Guid id, UpdateQualificationDto dto)
+{
+    var qual = await _repo.GetByIdAsync(new QualificationID(id));
+    if (qual == null) throw new BusinessRuleValidationException("Qualification not found.");
+    qual.ChangeName(dto.Name);
+    await _unitOfWork.CommitAsync();
+    return MapToDto(qual);
+}
+
+public async Task<List<QualificationDto>> SearchByNameAsync(string name)
+{
+    var list = await _repo.GetByNameAsync(name);
+    return list.Select(MapToDto).ToList();
+}
+```
+
+#### Aggregate: `Qualification` (representative)
+
+```csharp
+public Qualification(string name)
+{
+    if (string.IsNullOrWhiteSpace(name)) throw new BusinessRuleValidationException("Qualification name is required.");
+    if (name.Split(' ').Length < 2) throw new BusinessRuleValidationException("Qualification name must contain at least two words.");
+    if (name.Length > 150) throw new BusinessRuleValidationException("Qualification name must have a maximum length of 150 characters.");
+
+    Id = QualificationID.Generate();
+    Name = name;
+}
+
+public void ChangeName(string newName)
+{
+    // same validations as constructor
+    Name = newName;
+}
+```
