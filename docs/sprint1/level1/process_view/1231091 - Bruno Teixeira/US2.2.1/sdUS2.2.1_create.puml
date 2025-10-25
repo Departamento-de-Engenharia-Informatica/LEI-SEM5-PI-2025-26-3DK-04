@@ -1,0 +1,17 @@
+@startuml SD_US2.2.1_CREATE
+autonumber
+
+actor "Port Authority Officer" as Officer
+participant "<<system>>\nPort Operations\nSystem" as System
+
+Officer -> System : create vessel type
+activate System
+System --> Officer : insert vessel type data
+deactivate System
+
+Officer -> System : vessel type data
+activate System
+System --> Officer : vessel type created / error
+deactivate System
+
+@enduml

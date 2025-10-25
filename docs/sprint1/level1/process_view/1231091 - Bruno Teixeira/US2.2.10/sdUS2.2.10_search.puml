@@ -1,0 +1,17 @@
+@startuml SD_US2.2.10_SEARCH
+autonumber
+
+actor "Shipping Agent\nRepresentative" as Representative
+participant "<<system>>\nPort Operations\nSystem" as System
+
+Representative -> System : search vessel visit notifications
+activate System
+System --> Representative : request filters (vessel, status, representative, dates)
+deactivate System
+
+Representative -> System : filter criteria
+activate System
+System --> Representative : notifications with status / error
+deactivate System
+
+@enduml

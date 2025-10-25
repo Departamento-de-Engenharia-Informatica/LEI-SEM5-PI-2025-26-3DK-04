@@ -1,0 +1,17 @@
+@startuml SD_US2.2.1_UPDATE
+autonumber
+
+actor "Port Authority Officer" as Officer
+participant "<<system>>\nPort Operations\nSystem" as System
+
+Officer -> System : update vessel type
+activate System
+System --> Officer : show current vessel type data
+deactivate System
+
+Officer -> System : updated vessel type data
+activate System
+System --> Officer : vessel type updated / error
+deactivate System
+
+@enduml
