@@ -16,16 +16,20 @@ using Xunit;
 using DDDSample1.Domain.Vessels.VesselInformation;
 using DDDSample1.Domain.Vessels;
 using DDDSample1.Domain.Organizations;
+using DDDSample1.Domain.Vessels.VesselVisitNotification;
 using DDDSample1.Infrastructure;
+using Xunit.Abstractions;
 
 namespace DDDSample1.Tests.System
 {
     public class VesselVisitNotificationSystemTests : IClassFixture<WebApplicationFactory<DDDSample1.Program>>
     {
+        private readonly ITestOutputHelper _testOutputHelper;
         private readonly WebApplicationFactory<DDDSample1.Program> _factory;
 
-        public VesselVisitNotificationSystemTests()
+        public VesselVisitNotificationSystemTests(ITestOutputHelper testOutputHelper)
         {
+            _testOutputHelper = testOutputHelper;
             _factory = new TestApplicationFactory();
         }
 
@@ -257,6 +261,104 @@ namespace DDDSample1.Tests.System
             ((string)aDto.status).Should().Be("Approved");
             ((string)aDto.assignedDock).Should().Be("D1");
         }
+        
+        
+
+
+        [Fact]
+        public async Task UpdateInProgress_SystemTest_WorksEndToEnd()
+        {
+        var client = _factory.CreateClient();
+
+        var vtDto = new { Name = "SysTypeE", Description = "desc", Capacity = 2000, MaxRows = 1, MaxBays = 1, MaxTiers = 1 };
+        var vtResp = await client.PostAsync("/api/VesselTypes",
+            new StringContent(JsonConvert.SerializeObject(vtDto), Encoding.UTF8, "application/json"));
+        vtResp.StatusCode.Should().Be(HttpStatusCode.Created);
+        var vtId = (Guid)JsonConvert.DeserializeObject<dynamic>(await vtResp.Content.ReadAsStringAsync()).id;
+
+        var vesselDto = new { ImoNumber = "IMO9999995", Name = "SysV5", VesselTypeId = vtId, Owner = "owner", Operator = "op" };
+        var vesselResp = await client.PostAsync("/api/Vessels",
+            new StringContent(JsonConvert.SerializeObject(vesselDto), Encoding.UTF8, "application/json"));
+        vesselResp.StatusCode.Should().Be(HttpStatusCode.Created);
+        var vesselId = (Guid)JsonConvert.DeserializeObject<dynamic>(await vesselResp.Content.ReadAsStringAsync()).id;
+
+        string repId;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
+            var org = new Organization("ORGSYS5", "Org Sys 5", "OrgAlt5", "Some Address 5", "PT12345");
+            var rep = new Representative("Rep Sys5", "repsys5", "PT", "rep5.sys@gmail.com", "999888777");
+            org.AddRepresentative(rep);
+            db.Organizations.Add(org);
+            await db.SaveChangesAsync();
+            repId = rep.Id.AsString();
+        }
+
+        Guid notifId;
+        using (var scope2 = _factory.Services.CreateScope())
+        {
+            var db = scope2.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
+            var vesselEntity = await db.Vessels.FindAsync(new VesselId(vesselId));
+            var loading = new LoadingCargoMaterial(new List<CargoManifest> { CargoManifest.Create(Guid.NewGuid().ToString()) });
+            var unloading = new UnloadingCargoMaterial(new List<CargoManifest> { CargoManifest.Create(Guid.NewGuid().ToString()) });
+            var notif = new VesselVisitNotification(vesselEntity, loading, unloading, new RepresentativeId(repId));
+            db.VesselVisitNotifications.Add(notif);
+            await db.SaveChangesAsync();
+            notifId = notif.Id.AsGuid();
+        }
+
+        var updateDto = new
+        {
+            VesselId = vesselId.ToString(),
+            LoadingCargo = new
+            {
+                Manifests = new[]
+                {
+                    new
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Containers = new[]
+                        {
+                            new { Id = "ABCD1234567", PayloadWeight = 100, ContentsDescription = "Updated cargo" }
+                        }
+                    }
+                }
+            },
+            UnloadingCargo = new
+            {
+                Manifests = new[]
+                {
+                    new
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Containers = new[]
+                        {
+                            new { Id = "EFGH8901250", PayloadWeight = 200, ContentsDescription = "Updated cargo" }
+                        }
+                    }
+                }
+            }
+        };
+
+        var updateResp = await client.PutAsync(
+            $"/api/VesselVisitNotifications/{notifId}/update",
+            new StringContent(JsonConvert.SerializeObject(updateDto), Encoding.UTF8, "application/json")
+        );
+
+        if (updateResp.StatusCode == HttpStatusCode.BadRequest)
+        {
+            _testOutputHelper.WriteLine("⚠️ DEBUG ERROR RESPONSE: " + await updateResp.Content.ReadAsStringAsync());
+        }
+
+        updateResp.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var body = await updateResp.Content.ReadAsStringAsync();
+        var dto = JsonConvert.DeserializeObject<dynamic>(body);
+        ((Guid)dto.id).Should().Be(notifId);
+        ((string)dto.status).Should().Be("InProgress");
+        }
+
+
 
         private class TestApplicationFactory : WebApplicationFactory<DDDSample1.Program>
         {

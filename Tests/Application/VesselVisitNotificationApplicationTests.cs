@@ -309,62 +309,66 @@ namespace DDDNetCore.Tests.Application
             uow.CommitCallCount.Should().Be(2); // one from Create, one from Approve
         }
         
-        /*
+        
         [Fact]
         public async Task UpdateInProgress_TotalWeightExceedsCapacity_Throws()
         {
-            var vesselRepo = new InMemoryVesselRepository();
-            var vesselTypeRepo = new InMemoryVesselTypeRepository();
-            var notifRepo = new InMemoryVesselVisitNotificationRepository();
-            var uow = new InMemoryUnitOfWork();
+        var vesselRepo = new InMemoryVesselRepository();
+        var vesselTypeRepo = new InMemoryVesselTypeRepository();
+        var notifRepo = new InMemoryVesselVisitNotificationRepository();
+        var uow = new InMemoryUnitOfWork();
 
-            var vesselType = new VesselType("TypeC", "desc", 200, 1, 1, 1);
-            await vesselTypeRepo.AddAsync(vesselType);
+        // VesselType com capacidade pequena (200 kg)
+        var vesselType = new VesselType("TypeC", "desc", 200, 1, 1, 1);
+        await vesselTypeRepo.AddAsync(vesselType);
 
-            var vessel = new Vessel("IMO3333333", "Update Vessel", vesselType.Id, "Owner", "Operator");
-            await vesselRepo.AddAsync(vessel);
+        var vessel = new Vessel("IMO3333333", "Update Vessel", vesselType.Id, "Owner", "Operator");
+        await vesselRepo.AddAsync(vessel);
 
-            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+        var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
 
-            var loading = new List<CargoManifest> { CreateManifestWithContainer(10) };
-            var unloading = new List<CargoManifest> { CreateManifestWithContainer(20) };
+        // Cria notificação inicial
+        var loading = new List<CargoManifest> { CreateManifestWithContainer(10) };
+        var unloading = new List<CargoManifest> { CreateManifestWithContainer(20) };
 
-            var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP004", loading, unloading, null);
-            var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
+        var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP004", loading, unloading, null);
+        var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
 
-            // Novo DTO com excesso de peso (usa UnloadingCargoMaterialDto!)
-            var updateDto = new UpdateNotificationDto
+        // DTO de atualização com peso que excede capacidade (usa IDs válidos ISO 6346)
+        var updateDto = new UpdateNotificationDto
+        {
+            VesselId = vessel.Id.AsString(),
+            UnloadingCargo = new UnloadingCargoMaterialDTO
             {
-                UnloadingCargo = new UnloadingCargoMaterialDto
+                Manifests = new List<CargoManifestDTO>
                 {
-                    Manifests = new List<CargoManifestDto>
+                    new CargoManifestDTO
                     {
-                        new CargoManifestDto
+                        Id = Guid.NewGuid().ToString(),
+                        Containers = new List<ContainerDTO>
                         {
-                            Id = Guid.NewGuid().ToString(),
-                            Containers = new List<ContainerDto>
+                            new ContainerDTO
                             {
-                                new ContainerDto
-                                {
-                                    Id = Guid.NewGuid().ToString(),
-                                    PayloadWeight = 1000, // peso excede a capacidade
-                                    ContentsDescription = "Too Heavy"
-                                }
+                                Id = "ABCD1234567", // ID válido ISO 6346
+                                PayloadWeight = 1000, // Excede a capacidade
+                                ContentsDescription = "Too Heavy"
                             }
                         }
                     }
                 }
-            };
-            
+            }
+        };
 
-            Func<Task> act = async () => await service.UpdateInProgressAsync(stored.Id.AsGuid().ToString(), updateDto);
+        // Act
+        Func<Task> act = async () => await service.UpdateInProgressAsync(stored.Id.AsGuid().ToString(), updateDto);
 
-            await Assert.ThrowsAsync<BusinessRuleValidationException>(act);
+        // Assert → deve lançar exceção porque ultrapassa capacidade
+        await Assert.ThrowsAsync<BusinessRuleValidationException>(act);
 
-            // Commit não deve ser chamado novamente, pois o update falhou
-            uow.CommitCallCount.Should().Be(1);
+        // Commit não deve ser chamado novamente (update falhou)
+        uow.CommitCallCount.Should().Be(1);
         }
-        */
+        
 
         [Fact]
         public async Task SearchNotifications_FilterByVessel_ReturnsMatch()
