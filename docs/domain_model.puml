@@ -168,7 +168,7 @@ VesselVisitNotification "1" --> "0..1" UnloadingCargoManifest : has
 VesselVisitNotification "*" --> "1" NotificationState : has
 Vessel "1" --> "1" Crew : has
 Crew "1" --> "*" CrewMember : has
-OrganizationRepresentative "1" --> "*" VesselVisitNotification : submits
+ShippingAgentOrganization "1" --> "*" VesselVisitNotification : submits
 StaffMember "*" --> "*" PhysicalResource : uses
 StaffMember "*" --> "*" Dock : works
 StaffMember "*" --> "*" Qualification : has
