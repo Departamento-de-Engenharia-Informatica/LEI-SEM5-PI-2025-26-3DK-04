@@ -45,9 +45,19 @@ namespace DDDSample1.Controllers
         [HttpPost]
         public async Task<ActionResult<DockDetailsDto>> Create(DockDto dto)
         {
-            var dock = await _service.AddAsync(dto);
+            try{
+                
+                var dock = await _service.AddAsync(dto);
+                
+                return CreatedAtAction(nameof(GetById), new { id = dock.Id }, dock);
+            }
+            catch (BusinessRuleValidationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            //var dock = await _service.AddAsync(dto);
 
-            return CreatedAtAction(nameof(GetById), new { id = dock.Id }, dock);
+            //return CreatedAtAction(nameof(GetById), new { id = dock.Id }, dock);
         }
 
         // PUT: api/Dock/{id}

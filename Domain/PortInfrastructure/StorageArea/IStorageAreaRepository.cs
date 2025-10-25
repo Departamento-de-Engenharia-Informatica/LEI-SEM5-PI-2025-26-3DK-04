@@ -12,5 +12,6 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
         Task<StorageArea> AddAsync(StorageArea area);
         Task<StorageArea> UpdateAsync(StorageArea area);
         void Remove(StorageArea area);
+        Task<StorageArea?> GetByCodeAsync(string code);
     }
 }

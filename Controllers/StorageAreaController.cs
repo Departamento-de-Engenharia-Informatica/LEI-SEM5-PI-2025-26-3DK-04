@@ -1,42 +1,182 @@
 ﻿using System;
+using System.Collections.Generic; // Added for List<>
 using System.Threading.Tasks;
-using DDDNetCore.Domain.PortInfrastructure.StorageArea;
-using DDDNetCore.Infraestructure.PortInfrastructure.DTOs;
-using DDDSample1.Domain.Docks;
+using DDDNetCore.Domain.PortInfrastructure.StorageArea.DTOs;
+// Correct DTO namespaces
+using DDDNetCore.Infraestructure.PortInfrastructure.DTOs; // For StorageAreaDto, DockAssignmentDto
+using DDDSample1.Domain.PortInfrastructure.StorageArea; // For Create/Update/Assign DTOs
+using DDDSample1.Domain.Docks; // For DockID
+using DDDSample1.Domain.Shared; // For BusinessRuleValidationException
+// Correct Service/Entity namespaces
+using DDDSample1.Domain.PortInfrastructure.StorageArea;
+using DDDSample1.Domain.StorageAreas.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DDDSample1.Controllers;
-
-[Route("api/[controller]")]
-[ApiController]
-public class StorageAreaController : ControllerBase
+namespace DDDSample1.Controllers // Your controller namespace
 {
-    private readonly StorageAreaService _service;
-
-    public StorageAreaController(StorageAreaService service)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class StorageAreaController : ControllerBase
     {
-        _service = service;
-    }
+        private readonly StorageAreaService _service;
 
-    [HttpPost]
-    public async Task<ActionResult<StorageAreaDto>> Create(StorageAreaDto dto)
-    {
-        var result = await _service.RegisterAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-    }
+        public StorageAreaController(StorageAreaService service)
+        {
+            _service = service;
+        }
 
-    [HttpPut("{id}")]
-    public async Task<ActionResult<StorageAreaDto>> Update(Guid id, StorageAreaDto dto)
-    {
-        if (id != dto.Id) return BadRequest("ID mismatch.");
-        var result = await _service.UpdateAsync(id, dto);
-        return result == null ? NotFound() : Ok(result);
-    }
+        // GET: api/StorageArea
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<StorageAreaDto>>> GetAll()
+        {
+            // Assuming GetAllAsync returns only active ones or you filter in service
+            return await _service.GetAllAsync();
+        }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<StorageAreaDto>> GetById(Guid id)
-    {
-        var result = await _service.GetByIdAsync(new StorageAreaID(id));
-        return result == null ? NotFound() : Ok(result);
+        // GET: api/StorageArea/{id}
+        [HttpGet("{id:guid}")] // Specify GUID constraint
+        public async Task<ActionResult<StorageAreaDto>> GetById(Guid id)
+        {
+            var result = await _service.GetByIdAsync(new StorageAreaID(id));
+            if (result == null)
+            {
+                return NotFound(new { Message = $"Storage Area with ID {id} not found or inactive." });
+            }
+            return Ok(result);
+        }
+
+        // POST: api/StorageArea
+        [HttpPost]
+        public async Task<ActionResult<StorageAreaDto>> Create(CreateStorageAreaDto dto) // Use Create DTO
+        {
+            try
+            {
+                var result = await _service.AddAsync(dto);
+                // Use the Id from the returned DTO for the location header
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            }
+            catch (BusinessRuleValidationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        // PUT: api/StorageArea/{id}
+        [HttpPut("{id:guid}")] // Specify GUID constraint
+        public async Task<ActionResult<StorageAreaDto>> Update(Guid id, UpdateStorageAreaDto dto) // Use Update DTO
+        {
+            // ID comes from the route, no need to check dto.Id if UpdateStorageAreaDto doesn't have it
+            try
+            {
+                var result = await _service.UpdateAsync(new StorageAreaID(id), dto);
+                if (result == null)
+                {
+                     return NotFound(new { Message = $"Storage Area with ID {id} not found or inactive." });
+                }
+                return Ok(result);
+            }
+            catch (BusinessRuleValidationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        // --- New Endpoints ---
+
+        // POST: api/StorageArea/{id}/assignDock
+        [HttpPost("{id:guid}/assignDock")]
+        public async Task<ActionResult<StorageAreaDto>> AssignDock(Guid id, AssignDockDto dto)
+        {
+             try
+            {
+                var result = await _service.AssignDockAsync(new StorageAreaID(id), dto);
+                 if (result == null) // Should not happen if service throws exceptions correctly
+                {
+                     return NotFound(new { Message = $"Storage Area with ID {id} not found or inactive." });
+                }
+                return Ok(result);
+            }
+            catch (BusinessRuleValidationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        // DELETE: api/StorageArea/{id}/unassignDock/{dockId}
+        [HttpDelete("{id:guid}/unassignDock/{dockId:guid}")]
+        public async Task<ActionResult<StorageAreaDto>> UnassignDock(Guid id, Guid dockId)
+        {
+             try
+            {
+                var result = await _service.UnassignDockAsync(new StorageAreaID(id), new DockID(dockId));
+                 if (result == null) // Should not happen
+                {
+                     return NotFound(new { Message = $"Storage Area with ID {id} not found or inactive." });
+                }
+                return Ok(result); // Return updated area without the assignment
+            }
+            catch (BusinessRuleValidationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+
+        // PATCH: api/StorageArea/{id}/inactivate
+        [HttpPatch("{id:guid}/inactivate")]
+        public async Task<ActionResult<StorageAreaDto>> Inactivate(Guid id)
+        {
+             try
+            {
+                var result = await _service.InactivateAsync(new StorageAreaID(id));
+                if (result == null)
+                {
+                    return NotFound(new { Message = $"Storage Area with ID {id} not found." });
+                }
+                return Ok(result); // Return the inactive area DTO
+            }
+            catch (BusinessRuleValidationException ex) // Catch if already inactive
+            {
+                 return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+         // PATCH: api/StorageArea/{id}/activate
+        [HttpPatch("{id:guid}/activate")]
+        public async Task<ActionResult<StorageAreaDto>> Activate(Guid id)
+        {
+             try
+            {
+                var result = await _service.ActivateAsync(new StorageAreaID(id));
+                if (result == null)
+                {
+                    return NotFound(new { Message = $"Storage Area with ID {id} not found." });
+                }
+                return Ok(result); // Return the active area DTO
+            }
+            catch (BusinessRuleValidationException ex) // Catch if already active
+            {
+                 return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        // Optional: Hard Delete (use cautiously)
+        // [HttpDelete("{id:guid}")]
+        // public async Task<ActionResult<StorageAreaDto>> Delete(Guid id)
+        // {
+        //     try
+        //     {
+        //         var result = await _service.DeleteAsync(new StorageAreaID(id)); // Assuming DeleteAsync exists
+        //         if (result == null)
+        //         {
+        //             return NotFound();
+        //         }
+        //         return Ok(result); // Return the DTO of the deleted item
+        //     }
+        //     catch (BusinessRuleValidationException ex)
+        //     {
+        //          return BadRequest(new { Message = ex.Message });
+        //     }
+        // }
     }
 }
