@@ -1,60 +1,55 @@
 ## 3. Design
 
 ### 3.1. System Sequence Diagram (SSD)
-
-
-
----
-
-### 3.2. Class Diagram 
-
+![alt text](<../../level1/process_view/1230946 - Alexandre Texeira/US2.2.11/SD_US2.2.11_CREATE.svg>)
+![alt text](<../../level1/process_view/1230946 - Alexandre Texeira/US2.2.11/SD_US2.2.11_DEACTIVATE.svg>)
+![alt text](<../../level1/process_view/1230946 - Alexandre Texeira/US2.2.11/SD_US2.2.11_UPDATE.svg>)
 
 
 ---
 
-### 3.3. Interaction Responsibility Assignment
+### 3.2. Interaction Responsibility Assignment
 
-| Interaction Step                                                  | Question: Which class is responsible for…      | Class                                    | Justification (with patterns)                                              |
-|-------------------------------------------------------------------|------------------------------------------------|------------------------------------------|----------------------------------------------------------------------------|
-| Step 1: Operator requests to create/update/deactivate staff      | Handling user input and triggering the process | `ManageStaffMemberUI`                    | **Pure Fabrication:** Handles interaction and delegates to controller.     |
-| Step 2: UI forwards the management request                        | Coordinating business logic                    | `StaffMemberController`                  | **Controller:** Coordinates actions and delegates to application services. |
-| Step 3: Validate staff data and business rules                    | Validating input and executing business rules  | `StaffMemberService`                     | **Information Expert:** Centralizes the business logic.                    |
-| Step 4: Check for unique mecanographic number                     | Verifying uniqueness of staff ID               | `StaffMemberRepository`                 | **Repository Pattern:** Handles data queries.                              |
-| Step 5: Create/update staff member entity                         | Managing staff member data and status          | `OperatingStaffMember`                   | **Information Expert:** Domain entity holds relevant knowledge.            |
-| Step 6: Persist staff member data                                 | Saving staff member (create/update/deactivate) | `StaffMemberRepository`                 | **Repository Pattern:** Handles data persistence logic.                    |
-| Step 7: Search/filter staff members                               | Querying staff by criteria                     | `StaffMemberRepository`                 | **Repository Pattern:** Provides search and filter operations.             |
-| Step 8: Feedback to operator                                      | Showing success/error message                  | `ManageStaffMemberUI`                    | **Pure Fabrication:** Manages user interaction and result display.         |
-
----
-
-### 3.4. Sequence Diagram
-
-
-
-### 3.5. SOLID Principles
-
-| Principle                                     | Application in US_2.2.11                                                                                         | Explanation                                         |
-|-----------------------------------------------|------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------|
-| **S – Single Responsibility Principle (SRP)** | `StaffMemberController` handles only coordination of business logic.                                             | Keeps UI, logic, and persistence separated.         |
-|                                               | `StaffMemberService` validates and processes business rules for staff management operations.                     | Focused solely on staff management logic.           |
-|                                               | `OperatingStaffMember` encapsulates domain logic for staff data, qualifications, and status.                     | Isolate business entities from infrastructure.      |
-| **O – Open/Closed Principle (OCP)**           | Services and domain classes can be extended with new qualifications or status types without changing logic.      | Allows extensibility with minimal modification.     |
-| **L – Liskov Substitution Principle (LSP)**   | `StaffMemberRepository` can be replaced by any implementation (e.g., SQL, in-memory, NoSQL).                    | Promotes interchangeable components.                |
-| **I – Interface Segregation Principle (ISP)** | Interfaces like `StaffMemberRepository` are focused on essential operations (`save`, `findById`, `search`).     | Prevents unnecessary dependencies.                  |
-| **D – Dependency Inversion Principle (DIP)**  | The controller depends on abstractions (`StaffMemberRepository`, `StaffMemberService`).                         | Promotes decoupling and enables testing with mocks. |
+| Interaction Step | Question: Which class is responsible for… | Class / Method | Justification (with patterns) |
+|------------------|-------------------------------------------|----------------|------------------------------|
+| Step 1: Operator requests create/update/deactivate staff | Which class handles the HTTP request? | `StaffMembersController` | Controller — HTTP entry point; delegates to service. |
+| Step 2: Controller forwards the request | Which class coordinates business rules and orchestration? | `StaffMemberService` | Service — coordinates repository calls and domain operations. |
+| Step 3: Validate uniqueness (mecanographic number) | Which class verifies data constraints against storage? | `IStaffMemberRepository` / `StaffMemberRepository` | Repository — performs data queries and uniqueness checks. |
+| Step 4: Create/update staff entity | Which class owns staff data and behavior? | `StaffMember` (aggregate) | Aggregate root / Information Expert — enforces invariants and state changes. |
+| Step 5: Add / remove qualifications | Which class updates qualifications and enforces rules? | `StaffMemberService` + `StaffMember.AddQualification()` / `RemoveQualification()` | Service orchestrates; aggregate mutates and validates (Service + Information Expert). |
+| Step 6: Persist changes | Which classes commit data to the DB? | `IStaffMemberRepository` + `UnitOfWork.CommitAsync()` | Repository + Unit of Work — encapsulate persistence and transactions. |
+| Step 7: Query / search staff members | Which class exposes filtering and search? | `StaffMemberRepository` | Repository — provides search/filter operations. |
+| Step 8: Feedback to operator | Which class returns HTTP responses? | `StaffMembersController` | Controller — maps service results to HTTP responses. |
 
 ---
 
-### 3.6. GoF Patterns
+### 3.3. Sequence Diagram
+![alt text](../../level3/process_view/createObject/CreateObject.svg)
+![alt text](../../level3/process_view/deactivateObject/DeactivateObject.svg)
+![alt text](../../level3/process_view/updateObject/UpdateObject.svg)
 
-| Pattern                          | Usage in US_2.2.11                                                                                               | Explanation                                       |
-|----------------------------------|------------------------------------------------------------------------------------------------------------------|---------------------------------------------------|
-| **Controller**                   | `StaffMemberController` coordinates the flow between UI, domain, and persistence.                                | Acts as mediator between layers.                  |
-| **Repository**                   | `StaffMemberRepository` encapsulates persistence operations for staff members.                                  | Abstracts database access.                        |
-| **Information Expert**           | `OperatingStaffMember` contains its own validation logic for staff data, qualifications, and status.             | Domain entities hold relevant knowledge.          |
-| **Pure Fabrication**             | `ManageStaffMemberUI` and `StaffMemberService` exist for technical separation of concerns.                       | Improves maintainability and testability.         |
-| **State Pattern** (optional)     | `OperatingStaffMember` status transitions (available ↔ unavailable) can be modeled using state pattern.          | Manages different staff status states cleanly.    |
-| **Strategy Pattern** (optional)  | Different search/filter strategies can be applied for querying staff members.                                    | Enables flexible search criteria.                 |
-| **Low Coupling / High Cohesion** | Clear separation between layers and well-defined responsibilities.                                               | Reduces interdependencies and increases cohesion. |
+
+### 3.4. SOLID Principles
+
+| Principle | Application in US_2.2.11 | Explanation |
+|-----------|-------------------------|-------------|
+| S – Single Responsibility Principle (SRP) | `StaffMembersController` — HTTP layer; `StaffMemberService` — application logic; `StaffMember` — domain rules; `IStaffMemberRepository` — persistence | Each type has one clear responsibility. |
+| O – Open/Closed Principle (OCP) | `StaffMemberService` and `StaffMember` are open for extension (new rules/qualifications) without modifying callers | Add behavior via new methods or subclasses without changing existing code. |
+| L – Liskov Substitution Principle (LSP) | `IStaffMemberRepository` implementations (EF Core, in-memory) are interchangeable in tests and runtime | Repositories can be swapped without breaking clients. |
+| I – Interface Segregation Principle (ISP) | Small interfaces (`IStaffMemberRepository`, DTOs for create/update) keep clients focused | Consumers depend only on required methods. |
+| D – Dependency Inversion Principle (DIP) | High-level modules depend on abstractions (`IStaffMemberRepository`, `IQualificationRepository`) injected in `StaffMemberService` | Enables decoupling and easier testing (mocks/stubs). |
+
+---
+
+### 3.5. GoF Patterns
+
+| Pattern | Usage in US_2.2.11 | Explanation |
+|---------|-------------------|-------------|
+| Controller | `StaffMembersController` — exposes REST endpoints and delegates to service | Separates transport concerns from business logic. |
+| Repository | `StaffMemberRepository` / `IStaffMemberRepository` — encapsulate data access and queries | Hides persistence details; provides collection-like API to domain. |
+| Information Expert | `StaffMember` aggregate — implements validation and qualification management | Behavior placed next to the data that owns it. |
+| State Pattern (optional) | `MemberStatus` (Available / Unavailable) models lifecycle; state pattern can further isolate per-state behavior | Useful if per-state behavior grows complex. |
+| Strategy (optional) | Search and filter logic (search by name/status/qualification) can be extracted as strategies | Enables pluggable query strategies for flexibility. |
+| Low Coupling / High Cohesion | Controller → Service → Repository separation with DI and focused interfaces | Keeps modules focused and easy to test/change. |
 
 ---

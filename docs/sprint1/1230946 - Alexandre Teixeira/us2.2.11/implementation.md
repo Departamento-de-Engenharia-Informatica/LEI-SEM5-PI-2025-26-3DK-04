@@ -6,54 +6,127 @@
 
 ### 5.2. Description
 
-As a Logistics Operator, I want to register and manage operating staff members (create, update, deactivate), so that the system can accurately reflect staff availability and ensure that only qualified personnel are assigned to resources during scheduling.
+As a Logistics Operator, I want to create, update and deactivate operating staff members so the system can track availability and qualifications.
+
+---
 
 ### 5.3. Implementation Details
 
-- **User Interaction & Flow Control**  
-  A new UI (`ManageStaffMemberUI`) was developed to allow Logistics Operators to create, update, and deactivate operating staff members. The interface provides forms for data entry and displays staff members with search and filter capabilities.
+- User interaction & endpoints
+  - REST API in `StaffMembersController` provides: POST /api/StaffMembers, GET /api/StaffMembers/{id}, PUT /api/StaffMembers/{id}, DELETE /api/StaffMembers/{id}, PUT /api/StaffMembers/{id}/reactivate, POST /api/StaffMembers/{id}/qualifications, DELETE /api/StaffMembers/{staffId}/qualifications/{qualificationId}, and search endpoints.
 
-- **Business Logic Coordination**  
-  The `StaffMemberController` manages the staff management process and delegates validation, business rule enforcement, and persistence to the application service.
+- Business logic
+  - `StaffMemberService` orchestrates repository calls, uses `IQualificationRepository` for qualification lookups, and commits via `IUnitOfWork.CommitAsync()`.
 
-- **Domain Entity Construction**  
-  The `OperatingStaffMember` entity encapsulates all staff member data including:
-  - Unique mecanographic number (ID)
-  - Short name
-  - Contact details (email and phone with format validation)
-  - Qualifications
-  - Operational window (availability schedule)
-  - Current status (available, unavailable, etc.)
-  
-  Value objects such as `MecanographicNumber`, `ContactDetails`, `Qualifications`, `OperationalWindow`, and `StaffStatus` ensure data integrity and encapsulation.
+- Domain
+  - `StaffMember` is the aggregate root. It validates email/phone, manages qualifications, and implements `Change*`, `AddQualification`, `RemoveQualification`, `Deactivate` and `Reactivate` methods.
 
-- **Persistence**  
-  The `IStaffMemberRepository` interface and its implementation handle staff member data persistence. The repository includes methods to:
-  - Save new staff members (create)
-  - Update existing staff member data
-  - Deactivate staff members (soft delete - preserves data)
-  - Reactivate staff members
-  - Search and filter by mecanographic number, name, status, and qualifications
+- Persistence
+  - `IStaffMemberRepository` / `StaffMemberRepository` expose methods: `AddAsync`, `GetByIdAsync`, `GetActiveStaffAsync`, `GetAllForAuditAsync`, `GetByNameAsync`, `GetByStatusAsync`, `GetByQualificationAsync`, `SearchAsync`.
 
-- **Data Preservation**  
-  Deactivation does not delete staff data from the database. Instead, it updates the status field to "inactive" or "unavailable", preserving all information for audit and historical planning purposes. Reactivation simply updates the status back to "available" without any data loss.
-
-- **Authorization & Security**  
-  Role-based access control ensures that only authenticated users with the "Logistics Operator" role can create, update, or deactivate staff members.
-
-- **Validation & Business Rules**  
-  The system enforces:
-  - Unique mecanographic number validation (prevents duplicates)
-  - Email format validation
-  - Phone number format validation
-  - Required fields validation (all mandatory fields must be provided)
-  - Qualification validation (from predefined set)
-
-- **Search & Filter Capabilities**  
-  Staff members can be searched and filtered by:
-  - Mecanographic number (ID) - exact match
-  - Name - partial match supported
-  - Status - filter by available/unavailable
-  - Qualifications - filter by specific qualifications
+- Security
+  - Controller endpoints are intended to be protected by role-based authorization (Logistics Operator). The actual middleware/attributes are defined in the controller (see code snippets below).
 
 ---
+
+### Key Code Snippets
+
+#### Controller: representative endpoints
+
+```csharp
+[HttpPost]
+public async Task<ActionResult<StaffMemberDto>> Create([FromBody] CreateStaffMemberDto dto)
+{
+    try
+    {
+        var staff = await _service.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = staff.Id }, staff);
+    }
+    catch (BusinessRuleValidationException ex)
+    {
+        return BadRequest(new { Message = ex.Message });
+    }
+}
+
+[HttpPut("{id}")]
+public async Task<ActionResult<StaffMemberDto>> Update(Guid id, [FromBody] UpdateStaffMemberDto dto)
+{
+    try
+    {
+        var updated = await _service.UpdateAsync(id, dto);
+        return Ok(updated);
+    }
+    catch (BusinessRuleValidationException ex)
+    {
+        return BadRequest(new { Message = ex.Message });
+    }
+}
+
+[HttpDelete("{id}")]
+public async Task<ActionResult<StaffMemberDto>> Deactivate(Guid id)
+{
+    try
+    {
+        var result = await _service.DeactivateAsync(id);
+        return Ok(result);
+    }
+    catch (BusinessRuleValidationException ex)
+    {
+        return BadRequest(new { Message = ex.Message });
+    }
+}
+```
+
+#### Service: selected methods (simplified)
+
+```csharp
+public async Task<StaffMemberDto> CreateAsync(CreateStaffMemberDto dto)
+{
+    var staff = new StaffMember(dto.Name, dto.Email, dto.PhoneNumber, dto.OperationalWindow);
+    await _repo.AddAsync(staff);
+    await _unitOfWork.CommitAsync();
+    return MapToDto(staff);
+}
+
+public async Task<StaffMemberDto> UpdateAsync(Guid id, UpdateStaffMemberDto dto)
+{
+    var staff = await _repo.GetByIdAsync(new StaffMemberID(id));
+    if (staff == null) throw new BusinessRuleValidationException("Staff member not found.");
+
+    if (!string.IsNullOrWhiteSpace(dto.Name)) staff.ChangeName(dto.Name);
+    if (!string.IsNullOrWhiteSpace(dto.Email)) staff.ChangeEmail(dto.Email);
+    if (dto.PhoneNumber.HasValue) staff.ChangePhoneNumber(dto.PhoneNumber.Value);
+
+    await _unitOfWork.CommitAsync();
+    return MapToDto(staff);
+}
+
+public async Task<StaffMemberDto> AddQualificationAsync(Guid staffId, Guid qualificationId)
+{
+    var staff = await _repo.GetByIdAsync(new StaffMemberID(staffId));
+    var qual = await _qualificationRepo.GetByIdAsync(new QualificationID(qualificationId));
+    if (qual == null) throw new BusinessRuleValidationException("Qualification not found.");
+    staff.AddQualification(qual);
+    await _unitOfWork.CommitAsync();
+    return MapToDto(staff);
+}
+```
+
+#### Aggregate: representative methods
+
+```csharp
+public void AddQualification(Qualification qualification)
+{
+    if (qualification == null) throw new BusinessRuleValidationException("Qualification cannot be null.");
+    if (Qualifications.Exists(q => q.Id == qualification.Id))
+        throw new BusinessRuleValidationException("Qualification already exists.");
+    Qualifications.Add(qualification);
+}
+
+public void Deactivate()
+{
+    if (Status == MemberStatus.Unavailable)
+        throw new BusinessRuleValidationException("Staff member is already inactive.");
+    Status = MemberStatus.Unavailable;
+}
+```
