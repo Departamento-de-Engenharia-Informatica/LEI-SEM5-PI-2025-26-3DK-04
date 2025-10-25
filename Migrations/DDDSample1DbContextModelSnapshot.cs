@@ -358,6 +358,8 @@ namespace DDDNetCore.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Status");
+
                     b.HasIndex("VesselId");
 
                     b.ToTable("VesselVisitNotifications");
@@ -548,6 +550,52 @@ namespace DDDNetCore.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("VesselVisitNotificationId");
+
+                            b1.OwnsMany("DDDSample1.Domain.Vessels.VesselInformation.CargoManifest", "Manifests", b2 =>
+                                {
+                                    b2.Property<Guid>("Id")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<Guid>("VesselVisitNotificationId")
+                                        .HasColumnType("uuid");
+
+                                    b2.HasKey("Id");
+
+                                    b2.HasIndex("VesselVisitNotificationId");
+
+                                    b2.ToTable("LoadingCargoManifests", (string)null);
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("VesselVisitNotificationId");
+
+                                    b2.OwnsMany("DDDSample1.Domain.Vessels.VesselInformation.Container", "Containers", b3 =>
+                                        {
+                                            b3.Property<Guid>("Id")
+                                                .HasColumnType("uuid");
+
+                                            b3.Property<Guid>("CargoManifestId")
+                                                .HasColumnType("uuid");
+
+                                            b3.Property<string>("ContentsDescription")
+                                                .HasColumnType("text");
+
+                                            b3.Property<double>("PayloadWeight")
+                                                .HasColumnType("double precision");
+
+                                            b3.HasKey("Id");
+
+                                            b3.HasIndex("CargoManifestId");
+
+                                            b3.ToTable("LoadingManifestContainers", (string)null);
+
+                                            b3.WithOwner()
+                                                .HasForeignKey("CargoManifestId");
+                                        });
+
+                                    b2.Navigation("Containers");
+                                });
+
+                            b1.Navigation("Manifests");
                         });
 
                     b.OwnsOne("DDDSample1.Domain.Vessels.VesselInformation.UnloadingCargoMaterial", "UnloadingCargo", b1 =>
@@ -561,6 +609,52 @@ namespace DDDNetCore.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("VesselVisitNotificationId");
+
+                            b1.OwnsMany("DDDSample1.Domain.Vessels.VesselInformation.CargoManifest", "Manifests", b2 =>
+                                {
+                                    b2.Property<Guid>("Id")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<Guid?>("VesselVisitNotificationId")
+                                        .HasColumnType("uuid");
+
+                                    b2.HasKey("Id");
+
+                                    b2.HasIndex("VesselVisitNotificationId");
+
+                                    b2.ToTable("UnloadingCargoManifests", (string)null);
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("VesselVisitNotificationId");
+
+                                    b2.OwnsMany("DDDSample1.Domain.Vessels.VesselInformation.Container", "Containers", b3 =>
+                                        {
+                                            b3.Property<Guid>("Id")
+                                                .HasColumnType("uuid");
+
+                                            b3.Property<Guid>("CargoManifestId")
+                                                .HasColumnType("uuid");
+
+                                            b3.Property<string>("ContentsDescription")
+                                                .HasColumnType("text");
+
+                                            b3.Property<double>("PayloadWeight")
+                                                .HasColumnType("double precision");
+
+                                            b3.HasKey("Id");
+
+                                            b3.HasIndex("CargoManifestId");
+
+                                            b3.ToTable("UnloadingManifestContainers", (string)null);
+
+                                            b3.WithOwner()
+                                                .HasForeignKey("CargoManifestId");
+                                        });
+
+                                    b2.Navigation("Containers");
+                                });
+
+                            b1.Navigation("Manifests");
                         });
 
                     b.Navigation("LoadingCargo");

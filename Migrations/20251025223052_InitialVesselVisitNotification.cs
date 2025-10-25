@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DDDNetCore.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialVesselVisitNotification : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -95,10 +95,14 @@ namespace DDDNetCore.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Location = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    StorageAreaType = table.Column<int>(type: "integer", nullable: false),
+                    Location_Coordinates = table.Column<string>(type: "text", nullable: true),
+                    Location_Description = table.Column<string>(type: "text", nullable: true),
+                    Code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Designation = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     MaxCapacityTEUs = table.Column<int>(type: "integer", nullable: false),
-                    CurrentOccupancyTEUs = table.Column<int>(type: "integer", nullable: false)
+                    CurrentOccupancyTEUs = table.Column<int>(type: "integer", nullable: false),
+                    Active = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -212,7 +216,7 @@ namespace DDDNetCore.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "StorageDockAssignment",
+                name: "StorageDockAssignments",
                 columns: table => new
                 {
                     DockId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -221,9 +225,9 @@ namespace DDDNetCore.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StorageDockAssignment", x => new { x.StorageAreaId, x.DockId });
+                    table.PrimaryKey("PK_StorageDockAssignments", x => new { x.StorageAreaId, x.DockId });
                     table.ForeignKey(
-                        name: "FK_StorageDockAssignment_StorageAreas_StorageAreaId",
+                        name: "FK_StorageDockAssignments_StorageAreas_StorageAreaId",
                         column: x => x.StorageAreaId,
                         principalTable: "StorageAreas",
                         principalColumn: "Id",
@@ -302,6 +306,82 @@ namespace DDDNetCore.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "LoadingCargoManifests",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    VesselVisitNotificationId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LoadingCargoManifests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LoadingCargoManifests_VesselVisitNotifications_VesselVisitN~",
+                        column: x => x.VesselVisitNotificationId,
+                        principalTable: "VesselVisitNotifications",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UnloadingCargoManifests",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    VesselVisitNotificationId = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UnloadingCargoManifests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UnloadingCargoManifests_VesselVisitNotifications_VesselVisi~",
+                        column: x => x.VesselVisitNotificationId,
+                        principalTable: "VesselVisitNotifications",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LoadingManifestContainers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PayloadWeight = table.Column<double>(type: "double precision", nullable: false),
+                    ContentsDescription = table.Column<string>(type: "text", nullable: true),
+                    CargoManifestId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LoadingManifestContainers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LoadingManifestContainers_LoadingCargoManifests_CargoManife~",
+                        column: x => x.CargoManifestId,
+                        principalTable: "LoadingCargoManifests",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UnloadingManifestContainers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PayloadWeight = table.Column<double>(type: "double precision", nullable: false),
+                    ContentsDescription = table.Column<string>(type: "text", nullable: true),
+                    CargoManifestId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UnloadingManifestContainers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UnloadingManifestContainers_UnloadingCargoManifests_CargoMa~",
+                        column: x => x.CargoManifestId,
+                        principalTable: "UnloadingCargoManifests",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_CrewMember_VesselId",
                 table: "CrewMember",
@@ -311,6 +391,16 @@ namespace DDDNetCore.Migrations
                 name: "IX_DockVesselTypes_DockId",
                 table: "DockVesselTypes",
                 column: "DockId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LoadingCargoManifests_VesselVisitNotificationId",
+                table: "LoadingCargoManifests",
+                column: "VesselVisitNotificationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LoadingManifestContainers_CargoManifestId",
+                table: "LoadingManifestContainers",
+                column: "CargoManifestId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PhysicalResourceQualifications_QualificationId",
@@ -340,6 +430,22 @@ namespace DDDNetCore.Migrations
                 column: "QualificationId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_StorageAreas_Code",
+                table: "StorageAreas",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UnloadingCargoManifests_VesselVisitNotificationId",
+                table: "UnloadingCargoManifests",
+                column: "VesselVisitNotificationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UnloadingManifestContainers_CargoManifestId",
+                table: "UnloadingManifestContainers",
+                column: "CargoManifestId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Vessels_Name",
                 table: "Vessels",
                 column: "Name");
@@ -360,6 +466,11 @@ namespace DDDNetCore.Migrations
                 column: "Name");
 
             migrationBuilder.CreateIndex(
+                name: "IX_VesselVisitNotifications_Status",
+                table: "VesselVisitNotifications",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_VesselVisitNotifications_VesselId",
                 table: "VesselVisitNotifications",
                 column: "VesselId");
@@ -375,6 +486,9 @@ namespace DDDNetCore.Migrations
                 name: "DockVesselTypes");
 
             migrationBuilder.DropTable(
+                name: "LoadingManifestContainers");
+
+            migrationBuilder.DropTable(
                 name: "PhysicalResourceQualifications");
 
             migrationBuilder.DropTable(
@@ -384,16 +498,19 @@ namespace DDDNetCore.Migrations
                 name: "StaffMemberQualifications");
 
             migrationBuilder.DropTable(
-                name: "StorageDockAssignment");
+                name: "StorageDockAssignments");
 
             migrationBuilder.DropTable(
-                name: "VesselVisitNotifications");
+                name: "UnloadingManifestContainers");
 
             migrationBuilder.DropTable(
                 name: "Docks");
 
             migrationBuilder.DropTable(
                 name: "VesselTypes");
+
+            migrationBuilder.DropTable(
+                name: "LoadingCargoManifests");
 
             migrationBuilder.DropTable(
                 name: "PhysicalResources");
@@ -409,6 +526,12 @@ namespace DDDNetCore.Migrations
 
             migrationBuilder.DropTable(
                 name: "StorageAreas");
+
+            migrationBuilder.DropTable(
+                name: "UnloadingCargoManifests");
+
+            migrationBuilder.DropTable(
+                name: "VesselVisitNotifications");
 
             migrationBuilder.DropTable(
                 name: "Vessels");

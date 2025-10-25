@@ -8,6 +8,9 @@ public class ContainerID : EntityId
     public ContainerID(Guid value) : base(value)
     {
     }
+    public ContainerID(string value) : base(value)
+    {
+    }
 
     protected override object createFromString(string text)
     {
@@ -55,5 +58,10 @@ public class ContainerID : EntityId
         }
         int checkDigit = sum % 11 % 10;
         return (value[10] - '0') == checkDigit;
+    }
+
+    public Guid AsGuid()
+    {
+        return (Guid)base.ObjValue;
     }
 }

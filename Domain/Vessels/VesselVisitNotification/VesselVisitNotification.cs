@@ -48,8 +48,8 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 
             this.Id = new VesselVisitNotificationID(Guid.NewGuid());
             this.Vessel = vessel;
-            this.LoadingCargo = loadingCargo;
-            this.UnloadingCargo = unloadingCargo;
+            this.LoadingCargo = loadingCargo ?? new LoadingCargoMaterial(new List<CargoManifest>());
+            this.UnloadingCargo = unloadingCargo ?? new UnloadingCargoMaterial(new List<CargoManifest>());
             this.RepresentativeId = representativeId;
             this.Status = NotificationStatus.InProgress;
             this.CreatedAt = DateTime.UtcNow;
@@ -165,16 +165,12 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
         public void UpdateLoadingCargo(LoadingCargoMaterial cargo)
         {
-            if (cargo == null)
-                throw new BusinessRuleValidationException("Loading cargo cannot be null.");
-            this.LoadingCargo = cargo;
+            this.LoadingCargo = cargo ?? new LoadingCargoMaterial(new List<CargoManifest>());
         }
 
         public void UpdateUnloadingCargo(UnloadingCargoMaterial cargo)
         {
-            if (cargo == null)
-                throw new BusinessRuleValidationException("Unloading cargo cannot be null.");
-            this.UnloadingCargo = cargo;
+            this.UnloadingCargo = cargo ?? new UnloadingCargoMaterial(new List<CargoManifest>());
         }
 
         

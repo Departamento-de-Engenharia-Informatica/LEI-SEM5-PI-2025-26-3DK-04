@@ -21,6 +21,12 @@ namespace DDDSample1.Infrastructure.Vessels
         {
             return await _objs
                 .Include(n => n.Vessel)
+                .Include(n => n.LoadingCargo)
+                .ThenInclude(lc => lc.Manifests)
+                .ThenInclude(m => m.Containers)
+                .Include(n => n.UnloadingCargo)
+                .ThenInclude(uc => uc.Manifests)
+                .ThenInclude(m => m.Containers)
                 .Where(x => id.Equals(x.Id))
                 .FirstOrDefaultAsync();
         }

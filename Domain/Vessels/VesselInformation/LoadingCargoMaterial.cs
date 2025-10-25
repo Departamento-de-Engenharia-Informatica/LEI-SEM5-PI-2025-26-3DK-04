@@ -16,8 +16,8 @@ public class LoadingCargoMaterial : ValueObject
 
     public LoadingCargoMaterial(IEnumerable<CargoManifest> manifests)
     {
-        if (manifests == null || !manifests.Any())
-            throw new BusinessRuleValidationException("Loading cargo must include at least one manifest.");
+        //if (manifests == null || !manifests.Any())
+           // throw new BusinessRuleValidationException("Loading cargo must include at least one manifest.");
 
         _manifests.AddRange(manifests);
     }
@@ -32,4 +32,5 @@ public class LoadingCargoMaterial : ValueObject
         foreach (var manifest in _manifests)
             yield return manifest;
     }
+
 }

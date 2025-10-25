@@ -16,8 +16,8 @@ public class UnloadingCargoMaterial : ValueObject
 
     public UnloadingCargoMaterial(IEnumerable<CargoManifest> manifests)
     {
-        if (manifests == null || !manifests.Any())
-            throw new BusinessRuleValidationException("Unloading cargo must include at least one manifest.");
+        //if (manifests == null || !manifests.Any())
+            //throw new BusinessRuleValidationException("Unloading cargo must include at least one manifest.");
 
         _manifests.AddRange(manifests);
     }

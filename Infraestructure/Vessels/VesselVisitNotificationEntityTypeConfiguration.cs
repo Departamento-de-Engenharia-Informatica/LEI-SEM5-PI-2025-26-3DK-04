@@ -1,8 +1,9 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using DDDSample1.Domain.Vessels.VesselVisitNotification;
-using DDDSample1.Infrastructure;
 using DDDSample1.Domain.Organizations;
+using DDDSample1.Domain.Vessels.VesselInformation;
 
 namespace DDDSample1.Infrastructure.Vessels
 {
@@ -12,7 +13,6 @@ namespace DDDSample1.Infrastructure.Vessels
         {
             builder.HasKey(b => b.Id);
 
-            // Convert strong-typed ID to Guid for relational providers (SQLite/Postgres)
             builder.Property(b => b.Id)
                 .HasConversion(
                     id => id.AsGuid(),
@@ -21,55 +21,125 @@ namespace DDDSample1.Infrastructure.Vessels
 
             builder.Property(b => b.Status)
                 .IsRequired()
-                .HasConversion<string>(); // Armazena enum como string
-            
+                .HasConversion<string>();
+
             builder.Property(b => b.AssignedDock)
                 .HasMaxLength(50);
-            
+
             builder.Property(b => b.RejectedReason)
                 .HasMaxLength(500);
-            
+
             builder.Property(b => b.DecisionOutcome)
                 .HasMaxLength(50);
-            
+
             builder.Property(b => b.OfficerId)
                 .HasMaxLength(100);
-            
+
             builder.Property(b => b.DecisionTimeStamp);
 
             builder.Property(b => b.CreatedAt)
                 .IsRequired();
-            
-            // Configure RepresentativeId as value object
-            builder.Property(b => b.RepresentativeId)
-                .IsRequired();
 
-            // Configure RepresentativeId as value object (string-backed ID)
             builder.Property(b => b.RepresentativeId)
                 .HasConversion(
                     id => id.AsString(),
                     str => new RepresentativeId(str))
                 .IsRequired()
                 .ValueGeneratedNever();
-                
-            
-            // Configurar relacionamento com Vessel (obrigatório)
+
             builder.HasOne(b => b.Vessel)
                 .WithMany()
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
-            
-            // Configurar LoadingCargo como Value Object (owned entity)
+
+            // ---------------------- LOADING CARGO ----------------------
             builder.OwnsOne(b => b.LoadingCargo, cargo =>
             {
-                cargo.Ignore(c => c.Manifests); // Ignore navigation property for now
+                cargo.WithOwner().HasForeignKey("VesselVisitNotificationId");
+
+                cargo.OwnsMany(lc => lc.Manifests, manifest =>
+                {
+                    manifest.ToTable("LoadingCargoManifests");
+
+                    manifest.WithOwner().HasForeignKey("VesselVisitNotificationId");
+
+                    manifest.HasKey(m => m.Id);
+
+                    manifest.Property(m => m.Id)
+                        .HasConversion(
+                            id => id.AsGuid(),
+                            guid => new CargoManifestID(guid))
+                        .HasColumnType("uuid")
+                        .ValueGeneratedNever();
+
+                    // ---- Containers ----
+                    manifest.OwnsMany(m => m.Containers, container =>
+                    {
+                        container.ToTable("LoadingManifestContainers");
+
+                        container.HasKey(c => c.Id);
+
+                        container.Property(c => c.Id)
+                            .HasConversion(
+                                id => id.AsGuid(),
+                                guid => new ContainerID(guid))
+                            .HasColumnType("uuid")
+                            .ValueGeneratedNever();
+
+                        container.Property(c => c.PayloadWeight).IsRequired();
+                        container.Property(c => c.ContentsDescription).IsRequired(false);
+
+                        // ⚙️ Cada Container pertence a um Manifest — a FK é criada automaticamente pelo EF
+                        container.WithOwner().HasForeignKey("CargoManifestId");
+                    });
+                });
             });
-            
-            // Configurar UnloadingCargo como Value Object (owned entity)
+
+            // ---------------------- UNLOADING CARGO ----------------------
             builder.OwnsOne(b => b.UnloadingCargo, cargo =>
             {
-                cargo.Ignore(c => c.Manifests); // Ignore navigation property for now
+                cargo.WithOwner().HasForeignKey("VesselVisitNotificationId");
+
+                cargo.OwnsMany(lc => lc.Manifests, manifest =>
+                {
+                    manifest.ToTable("UnloadingCargoManifests");
+
+                    manifest.WithOwner().HasForeignKey("VesselVisitNotificationId");
+
+                    manifest.HasKey(m => m.Id);
+
+                    manifest.Property(m => m.Id)
+                        .HasConversion(
+                            id => id.AsGuid(),
+                            guid => new CargoManifestID(guid))
+                        .HasColumnType("uuid")
+                        .ValueGeneratedNever();
+
+                    // ---- Containers ----
+                    manifest.OwnsMany(m => m.Containers, container =>
+                    {
+                        container.ToTable("UnloadingManifestContainers");
+
+                        container.HasKey(c => c.Id);
+
+                        container.Property(c => c.Id)
+                            .HasConversion(
+                                id => id.AsGuid(),
+                                guid => new ContainerID(guid))
+                            .HasColumnType("uuid")
+                            .ValueGeneratedNever();
+
+                        container.Property(c => c.PayloadWeight).IsRequired();
+                        container.Property(c => c.ContentsDescription).IsRequired(false);
+
+                        // ⚙️ Relação com CargoManifest automática (sem precisar de ManifestId na entidade)
+                        container.WithOwner().HasForeignKey("CargoManifestId");
+                    });
+                });
             });
+
+            builder.HasIndex("VesselId");
+            builder.HasIndex(vn => vn.Status);
         }
     }
 }
