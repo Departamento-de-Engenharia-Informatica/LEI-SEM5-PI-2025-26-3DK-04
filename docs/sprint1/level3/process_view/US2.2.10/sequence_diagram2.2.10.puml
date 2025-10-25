@@ -1,4 +1,4 @@
-@startuml SearchNotifications
+@startuml sequence_diagram2.2.10
 autonumber
 
 actor "Shipping Agent Representative" as User
