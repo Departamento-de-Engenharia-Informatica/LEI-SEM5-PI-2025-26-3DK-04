@@ -168,8 +168,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
             if (notification.Status != NotificationStatus.InProgress)
                 throw new BusinessRuleValidationException("Only notifications with 'InProgress' status can be updated.");
-
-            // --- Obter o vessel atual (ou o novo se for atualizado) ---
+            
             Vessel vesselToUse = notification.Vessel;
             bool vesselChanged = false;
 
@@ -181,8 +180,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 vesselToUse = newVessel;
                 vesselChanged = true;
             }
-
-            // --- Calcular novo LoadingCargo ---
+            
             LoadingCargoMaterial loadingToUse = notification.LoadingCargo;
             if (dto.LoadingCargo != null)
             {
@@ -196,8 +194,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
                 loadingToUse = new LoadingCargoMaterial(manifests);
             }
-
-            // --- Calcular novo UnloadingCargo ---
+            
             UnloadingCargoMaterial unloadingToUse = notification.UnloadingCargo;
             if (dto.UnloadingCargo != null)
             {
@@ -211,8 +208,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
                 unloadingToUse = new UnloadingCargoMaterial(manifests);
             }
-
-            // --- Verificar capacidade do vessel ---
+            
             var vesselType = await _vesselTypeRepo.GetByIdAsync(vesselToUse.VesselTypeId);
             if (vesselType == null)
                 throw new BusinessRuleValidationException("Vessel type not found for the specified vessel.");
@@ -222,8 +218,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             if (totalWeight > vesselType.Capacity)
                 throw new BusinessRuleValidationException(
                     $"Total cargo weight ({totalWeight} kg) exceeds vessel capacity ({vesselType.Capacity} kg).");
-
-            // --- Aplicar as atualizações ---
+            
             if (vesselChanged)
                 notification.UpdateVessel(vesselToUse);
 
