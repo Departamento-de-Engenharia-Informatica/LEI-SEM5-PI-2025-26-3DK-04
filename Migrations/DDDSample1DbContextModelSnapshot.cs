@@ -163,10 +163,18 @@ namespace DDDNetCore.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<int>("CurrentOccupancyTEUs")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Location")
+                    b.Property<string>("Designation")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
@@ -174,12 +182,13 @@ namespace DDDNetCore.Migrations
                     b.Property<int>("MaxCapacityTEUs")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                    b.Property<int>("StorageAreaType")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
 
                     b.ToTable("StorageAreas");
                 });
@@ -447,13 +456,36 @@ namespace DDDNetCore.Migrations
 
                             b1.HasKey("StorageAreaId", "DockId");
 
-                            b1.ToTable("StorageDockAssignment");
+                            b1.ToTable("StorageDockAssignments", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("StorageAreaId");
+                        });
+
+                    b.OwnsOne("DDDSample1.Domain.Shared.Location", "Location", b1 =>
+                        {
+                            b1.Property<Guid>("StorageAreaId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Coordinates")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Description")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.HasKey("StorageAreaId");
+
+                            b1.ToTable("StorageAreas");
 
                             b1.WithOwner()
                                 .HasForeignKey("StorageAreaId");
                         });
 
                     b.Navigation("DockAssignments");
+
+                    b.Navigation("Location");
                 });
 
             modelBuilder.Entity("DDDSample1.Domain.Vessels.Vessel", b =>
