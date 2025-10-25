@@ -1,8 +1,9 @@
-﻿using DDDSample1.Domain.Docks;
-using DDDSample1.Domain.PortInfrastructure.StorageArea;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-//using DDDSample1.Domain.PortInfrastructure.StorageArea;
+using DDDSample1.Domain.PortInfrastructure.StorageArea;
+using DDDSample1.Domain.Docks;
+using DDDSample1.Domain.Shared;
+using DDDSample1.Infrastructure;
 
 namespace DDDSample1.Infrastructure.StorageAreas
 {
@@ -10,42 +11,55 @@ namespace DDDSample1.Infrastructure.StorageAreas
     {
         public void Configure(EntityTypeBuilder<StorageArea> builder)
         {
-            //builder.ToTable("StorageAreas", SchemaNames.DDDSample1);
-
             builder.HasKey(sa => sa.Id);
+
             builder.Property(sa => sa.Id)
-                .HasConversion(id => id.AsGuid(), guid => new StorageAreaID(guid))
-                .IsRequired();
+                   .HasConversion(id => id.AsGuid(), guid => new StorageAreaID(guid))
+                   .ValueGeneratedNever();
 
-            builder.Property(sa => sa.Type)
-                .IsRequired()
-                .HasMaxLength(50);
+            builder.Property(sa => sa.StorageAreaType)
+                   .IsRequired();
 
-            builder.Property(sa => sa.Location)
-                .IsRequired()
-                .HasMaxLength(100);
+            builder.OwnsOne(sa => sa.Location, loc =>
+            {
+                 loc.Property(p => p.Coordinates).IsRequired();
+                 loc.Property(p => p.Description).IsRequired();
+            });
+
+            builder.Property(sa => sa.Code)
+                   .IsRequired()
+                   .HasMaxLength(50);
+
+            builder.Property(sa => sa.Designation)
+                   .IsRequired()
+                   .HasMaxLength(100);
 
             builder.Property(sa => sa.MaxCapacityTEUs)
-                .IsRequired();
+                   .IsRequired();
 
             builder.Property(sa => sa.CurrentOccupancyTEUs)
-                .IsRequired();
+                   .IsRequired();
 
-            builder.OwnsMany(sa => sa.DockAssignments, da =>
-            {
-                //da.ToTable("StorageDockAssignments", SchemaNames.DDDSample1);
-                
-                da.WithOwner().HasForeignKey("StorageAreaId");
+             builder.Property(sa => sa.Active)
+                   .IsRequired();
 
-                da.Property(d => d.DockId)
-                    .HasConversion(id => id.AsGuid(), guid => new DockID(guid))
-                    .IsRequired();
+             builder.OwnsMany(sa => sa.DockAssignments, da =>
+             {
+                 da.ToTable("StorageDockAssignments");
 
-                da.Property(d => d.DistanceMeters)
-                    .IsRequired();
+                 da.WithOwner().HasForeignKey("StorageAreaId");
 
-                da.HasKey("StorageAreaId", "DockId");
-            });
+                 da.Property(d => d.DockId)
+                     .HasConversion(id => id.AsGuid(), guid => new DockID(guid))
+                     .IsRequired();
+
+                 da.Property(d => d.DistanceMeters)
+                     .IsRequired();
+
+                 da.HasKey("StorageAreaId", "DockId");
+             });
+
+            builder.HasIndex(sa => sa.Code).IsUnique();
         }
     }
 }

@@ -16,36 +16,47 @@ namespace DDDSample1.Infrastructure.StorageAreas
         {
             _context = context;
         }
+        public async Task<StorageArea?> GetByCodeAsync(string code)
+        {
+            // Use _objs from BaseRepository
+            return await _objs
+                .Include(sa => sa.DockAssignments) // Include assignments if needed when fetching by code
+                .FirstOrDefaultAsync(sa => sa.Code == code);
+        }
 
         public async Task<List<StorageArea>> GetAllAsync()
         {
-            return await _context.StorageAreas.ToListAsync();
+            return await _objs
+                .Include(sa => sa.DockAssignments) // Eager load assignments
+                // Optionally add .Where(sa => sa.Active)  if want only active ones
+                .ToListAsync();
         }
 
         public async Task<StorageArea> GetByIdAsync(StorageAreaID id)
         {
-            return await _context.StorageAreas
+            return await _objs
+                .Include(sa => sa.DockAssignments) // Eager load assignments
                 .FirstOrDefaultAsync(sa => sa.Id.Equals(id));
         }
 
         public async Task<StorageArea> AddAsync(StorageArea area)
         {
-            var result = await _context.StorageAreas.AddAsync(area);
-            await _context.SaveChangesAsync();
+            var result = await _objs.AddAsync(area);
+            //await _context.SaveChangesAsync();
             return result.Entity;
         }
 
         public async Task<StorageArea> UpdateAsync(StorageArea area)
         {
-            _context.StorageAreas.Update(area);
-            await _context.SaveChangesAsync();
+            _objs.Update(area);
+            //await _context.SaveChangesAsync();
             return area;
         }
 
         public void Remove(StorageArea area)
         {
-            _context.StorageAreas.Remove(area);
-            _context.SaveChanges();
+            _objs.Remove(area);
+            // NO SaveChanges here - UnitOfWork handles it
         }
     }
 }

@@ -1,0 +1,37 @@
+@startuml SearchNotifications
+autonumber
+
+actor "Shipping Agent Representative" as User
+participant "VesselVisitNotificationsController" as Controller
+participant "VesselVisitNotificationService" as Service
+participant "VesselVisitNotification" as Notification
+participant "IVesselVisitNotificationRepository" as Repository
+participant "UnitOfWork" as UoW
+database "Database" as DB
+
+activate User
+
+User -> Controller : GET /api/VesselVisitNotifications/search\n?vessel&status&representative&dates
+activate Controller
+
+Controller -> Service : SearchNotificationsAsync(filters)
+activate Service
+
+Service -> Repository : SearchNotificationsAsync(filters, organizationId)
+activate Repository
+Repository -> DB : query with filters\n(vessel, status, representative, dates)
+activate DB
+DB --> Repository : notification records
+deactivate DB
+Repository --> Service : List<VesselVisitNotification>
+deactivate Repository
+
+Service -> Service : MapToDto(notifications)
+Service --> Controller : List<VesselVisitNotificationDto>
+deactivate Service
+
+Controller --> User : 200 OK\n{notifications with status}
+deactivate Controller
+deactivate User
+
+@enduml
