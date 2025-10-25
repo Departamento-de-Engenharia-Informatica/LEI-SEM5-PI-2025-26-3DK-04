@@ -5,6 +5,7 @@
     {
         Yard,          
         Warehouse,     
-        Refrigerated
+        Refrigerated,
+        Other
     }
 }

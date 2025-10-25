@@ -110,6 +110,13 @@ package "Port Infrastructure Aggregate" {
         coordinates: String
         description: String
     }
+    enum StorageAreaType {
+            Yard,          
+            Warehouse,     
+            Refrigerated,
+            Other
+        }
+
 }    
 
 package "Staff Management Aggregate" {
@@ -175,5 +182,5 @@ StaffMember "*" --> "*" Qualification : has
 StaffMember "*" --> "1" MemberStatus : has
 PhysicalResource "*" --> "*" Qualification : has
 PhysicalResource "*" --> "1" ResourceStatus : has
-
+StorageArea "1" --> "1" StorageAreaType : type
 @enduml
