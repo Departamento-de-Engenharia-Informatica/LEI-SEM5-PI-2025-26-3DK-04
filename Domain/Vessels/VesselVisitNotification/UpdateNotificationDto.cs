@@ -4,7 +4,9 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 {
     public class UpdateNotificationDto
     {
-        public LoadingCargoMaterial LoadingCargo { get; set; }
-        public UnloadingCargoMaterial UnloadingCargo { get; set; }
+        public string? VesselId { get; set; } 
+        public LoadingCargoMaterialDto? LoadingCargo { get; set; }
+        public UnloadingCargoMaterialDTO? UnloadingCargo { get; set; }
     }
+
 }

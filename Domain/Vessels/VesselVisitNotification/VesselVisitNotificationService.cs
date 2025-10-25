@@ -154,31 +154,87 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             return dto;
         }
         
-        public async Task<VesselVisitNotificationDto> UpdateInProgressAsync(Guid id, LoadingCargoMaterial newLoading, UnloadingCargoMaterial newUnloading)
+         public async Task<VesselVisitNotificationDto> UpdateInProgressAsync(string Id,UpdateNotificationDto dto)
         {
-            var notification = await _repo.GetByIdAsync(new VesselVisitNotificationID(id));
+            if (string.IsNullOrWhiteSpace(dto.VesselId) && dto.LoadingCargo == null && dto.UnloadingCargo == null)
+            {
+                throw new BusinessRuleValidationException("At least one field (VesselId, LoadingCargo, or UnloadingCargo) must be provided for update.");
+            }
+            var notificationId = new VesselVisitNotificationID(Guid.Parse(Id));
+            var notification = await _repo.GetByIdAsync(notificationId);
 
             if (notification == null)
                 throw new BusinessRuleValidationException("Vessel Visit Notification not found.");
 
-            // Se está a atualizar unloading cargo, validar capacidade
-            if (newUnloading != null)
-            {
-                var vesselType = await _vesselTypeRepo.GetByIdAsync(notification.Vessel.VesselTypeId);
-                if (vesselType == null)
-                    throw new BusinessRuleValidationException("Vessel type not found.");
+            if (notification.Status != NotificationStatus.InProgress)
+                throw new BusinessRuleValidationException("Only notifications with 'InProgress' status can be updated.");
 
-                var unloadingWeight = newUnloading.TotalWeightKg();
-                var vesselCapacity = vesselType.Capacity;
-                
-                if (unloadingWeight > vesselCapacity)
-                    throw new BusinessRuleValidationException(
-                        $"Unloading cargo weight ({unloadingWeight} kg) cannot exceed vessel capacity ({vesselCapacity} kg).");
+            // --- Obter o vessel atual (ou o novo se for atualizado) ---
+            Vessel vesselToUse = notification.Vessel;
+            bool vesselChanged = false;
+
+            if (!string.IsNullOrWhiteSpace(dto.VesselId))
+            {
+                var newVessel = await _vesselRepo.GetByIdAsync(new VesselId(Guid.Parse(dto.VesselId)));
+                if (newVessel == null)
+                    throw new BusinessRuleValidationException("Vessel not found.");
+                vesselToUse = newVessel;
+                vesselChanged = true;
             }
 
-            notification.UpdateInProgress(newLoading, newUnloading);
+            // --- Calcular novo LoadingCargo ---
+            LoadingCargoMaterial loadingToUse = notification.LoadingCargo;
+            if (dto.LoadingCargo != null)
+            {
+                var manifests = dto.LoadingCargo.Manifests.Select(m =>
+                {
+                    var manifest = CargoManifest.Create(m.Id);
+                    foreach (var container in m.Containers)
+                        manifest.AddContainer(Container.Create(container.Id, container.PayloadWeight, container.ContentsDescription));
+                    return manifest;
+                }).ToList();
+
+                loadingToUse = new LoadingCargoMaterial(manifests);
+            }
+
+            // --- Calcular novo UnloadingCargo ---
+            UnloadingCargoMaterial unloadingToUse = notification.UnloadingCargo;
+            if (dto.UnloadingCargo != null)
+            {
+                var manifests = dto.UnloadingCargo.Manifests.Select(m =>
+                {
+                    var manifest = CargoManifest.Create(m.Id);
+                    foreach (var container in m.Containers)
+                        manifest.AddContainer(Container.Create(container.Id, container.PayloadWeight, container.ContentsDescription));
+                    return manifest;
+                }).ToList();
+
+                unloadingToUse = new UnloadingCargoMaterial(manifests);
+            }
+
+            // --- Verificar capacidade do vessel ---
+            var vesselType = await _vesselTypeRepo.GetByIdAsync(vesselToUse.VesselTypeId);
+            if (vesselType == null)
+                throw new BusinessRuleValidationException("Vessel type not found for the specified vessel.");
+
+            double totalWeight = loadingToUse.TotalWeightKg() + unloadingToUse.TotalWeightKg();
+
+            if (totalWeight > vesselType.Capacity)
+                throw new BusinessRuleValidationException(
+                    $"Total cargo weight ({totalWeight} kg) exceeds vessel capacity ({vesselType.Capacity} kg).");
+
+            // --- Aplicar as atualizações ---
+            if (vesselChanged)
+                notification.UpdateVessel(vesselToUse);
+
+            if (dto.LoadingCargo != null)
+                notification.UpdateLoadingCargo(loadingToUse);
+
+            if (dto.UnloadingCargo != null)
+                notification.UpdateUnloadingCargo(unloadingToUse);
 
             await _unitOfWork.CommitAsync();
+
             return MapToDto(notification);
         }
 
