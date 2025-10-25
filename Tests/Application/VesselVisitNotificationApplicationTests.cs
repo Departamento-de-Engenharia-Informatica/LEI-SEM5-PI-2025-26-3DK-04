@@ -338,6 +338,171 @@ namespace DDDNetCore.Tests.Application
             approved.AssignedDock.Should().Be("D1");
             uow.CommitCallCount.Should().Be(2); // one from Create, one from Approve
         }
+
+        [Fact]
+        public async Task ApproveWithValidDockAssignment_ChangesStatusAndStoresDock()
+        {
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+
+            var vesselType = new VesselType("TypeE", "desc", 5000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel = new Vessel("IMO7777777", "Dock Assign Vessel", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(100) };
+            var unloading = new List<CargoManifest>{ CreateManifestWithContainer(50) };
+
+            var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP010", loading, unloading, null);
+            var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
+
+            // set to Completed to allow approval
+            var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
+            statusProp.SetValue(stored, NotificationStatus.Completed);
+
+            var approved = await service.ApproveAsync(stored.Id.AsGuid(), "Dock42", "OfficerA");
+            approved.Status.Should().Be(NotificationStatus.Approved);
+            approved.AssignedDock.Should().Be("Dock42");
+            approved.DecisionOutcome.Should().Be("Approved");
+            uow.CommitCallCount.Should().Be(2);
+        }
+
+        [Fact]
+        public async Task RejectWithValidReason_ChangesStatusAndStoresReason()
+        {
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+
+            var vesselType = new VesselType("TypeF", "desc", 5000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel = new Vessel("IMO8888888", "Reject Vessel", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(100) };
+            var unloading = new List<CargoManifest>{ CreateManifestWithContainer(50) };
+
+            var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP011", loading, unloading, null);
+            var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
+
+            // set to Completed to allow rejection
+            var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
+            statusProp.SetValue(stored, NotificationStatus.Completed);
+
+            var rejected = await service.RejectAsync(stored.Id.AsGuid(), "Invalid cargo", "OfficerB");
+            rejected.Status.Should().Be(NotificationStatus.Rejected);
+            rejected.RejectedReason.Should().Be("Invalid cargo");
+            rejected.DecisionOutcome.Should().Be("Rejected");
+            uow.CommitCallCount.Should().Be(2);
+        }
+
+        [Fact]
+        public async Task RejectWithoutReason_ThrowsValidationException()
+        {
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+
+            var vesselType = new VesselType("TypeG", "desc", 5000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel = new Vessel("IMO9999999", "Reject No Reason", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(100) };
+            var unloading = new List<CargoManifest>{ CreateManifestWithContainer(50) };
+
+            var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP012", loading, unloading, null);
+            var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
+
+            // set to Completed to allow rejection
+            var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
+            statusProp.SetValue(stored, NotificationStatus.Completed);
+
+            Func<Task> act = async () => await service.RejectAsync(stored.Id.AsGuid(), "", "OfficerC");
+
+            await Assert.ThrowsAsync<BusinessRuleValidationException>(act);
+            uow.CommitCallCount.Should().Be(1); // only Create committed
+        }
+
+        [Fact]
+        public async Task ApproveWithoutDockAssignment_ThrowsValidationException()
+        {
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+
+            var vesselType = new VesselType("TypeH", "desc", 5000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel = new Vessel("IMO1010101", "Approve No Dock", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(100) };
+            var unloading = new List<CargoManifest>{ CreateManifestWithContainer(50) };
+
+            var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP013", loading, unloading, null);
+            var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
+
+            // set to Completed to allow approval
+            var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
+            statusProp.SetValue(stored, NotificationStatus.Completed);
+
+            Func<Task> act = async () => await service.ApproveAsync(stored.Id.AsGuid(), "", "OfficerD");
+
+            await Assert.ThrowsAsync<BusinessRuleValidationException>(act);
+            uow.CommitCallCount.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task DecisionOnAlreadyReviewedNotification_PreventsDuplicateDecisions()
+        {
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+
+            var vesselType = new VesselType("TypeI", "desc", 5000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel = new Vessel("IMO1212121", "Already Reviewed", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(100) };
+            var unloading = new List<CargoManifest>{ CreateManifestWithContainer(50) };
+
+            var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP014", loading, unloading, null);
+            var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
+
+            // set to Completed and approve
+            var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
+            statusProp.SetValue(stored, NotificationStatus.Completed);
+
+            var approved = await service.ApproveAsync(stored.Id.AsGuid(), "D9", "OfficerE");
+            approved.Status.Should().Be(NotificationStatus.Approved);
+
+            // Attempting to approve again should fail because status is no longer Completed
+            Func<Task> actApproveAgain = async () => await service.ApproveAsync(stored.Id.AsGuid(), "D9", "OfficerE");
+            await Assert.ThrowsAsync<BusinessRuleValidationException>(actApproveAgain);
+
+            // Attempting to reject after approval should also fail
+            Func<Task> actRejectAfter = async () => await service.RejectAsync(stored.Id.AsGuid(), "some reason", "OfficerF");
+            await Assert.ThrowsAsync<BusinessRuleValidationException>(actRejectAfter);
+
+            uow.CommitCallCount.Should().Be(2);
+        }
         
         
         [Fact]
