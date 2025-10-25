@@ -26,7 +26,7 @@ deactivate) so that only authorized users can operate on behalf of their organiz
 #### Class: `RepresentativeController`
 
 ```c#
-[HttpPost]
+ [HttpPost]
         public async Task<ActionResult<RepresentativeDto>> AddRepresentative([FromBody] AddRepresentativeDto dto)
         {
             try
@@ -40,12 +40,9 @@ deactivate) so that only authorized users can operate on behalf of their organiz
             }
         }
 
-        // PUT: api/Representatives/{id}
-        /// <summary>
-        /// Atualiza os dados de um representante existente
-        /// </summary>
+        // PUT: api/Representatives/{id}/update
         [HttpPut("{id}/update")]
-        public async Task<ActionResult<RepresentativeDto>> UpdateRepresentative(Guid id, [FromBody] AddRepresentativeDto dto)
+        public async Task<ActionResult<RepresentativeDto>> UpdateRepresentative([FromRoute] string id, [FromBody] UpdateRepresentativeDto dto)
         {
             try
             {
@@ -63,11 +60,13 @@ deactivate) so that only authorized users can operate on behalf of their organiz
 ```c#
  public Representative(string name, string citizenId, string nationality, string email, string phoneNumber)
         {
-            if (string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrEmpty(name))
                 throw new BusinessRuleValidationException("Name is required.");
+            
             if (string.IsNullOrWhiteSpace(citizenId))
                 throw new BusinessRuleValidationException("Citizen ID is required.");
-            Validators.ValidateCitizenId(citizenId);
+
+            // validações (email, phone, nationality)
             if (string.IsNullOrWhiteSpace(nationality))
                 throw new BusinessRuleValidationException("Nationality is required.");
             if (string.IsNullOrWhiteSpace(email))
@@ -77,38 +76,27 @@ deactivate) so that only authorized users can operate on behalf of their organiz
                 throw new BusinessRuleValidationException("Phone number is required.");
             Validators.ValidatePhoneNumber(phoneNumber);           
 
-            this.Id = new RepresentativeId(Guid.NewGuid());
+            this.Id = new RepresentativeId(citizenId);
             this.Name = name;
-            this.CitizenId = citizenId;
             this.Nationality = nationality;
             this.Email = email;
             this.PhoneNumber = phoneNumber;
             this.Status = RepresentativeStatus.Active; // default
         }
-
 ```
 
 #### Class: `RepresentativeService`
 
 ```c#
- public async Task<RepresentativeDto> AddRepresentativeAsync(AddRepresentativeDto dto)
+  public async Task<RepresentativeDto> AddRepresentativeAsync(AddRepresentativeDto dto)
         {
-            Organization org = null;
-
-            if (!string.IsNullOrWhiteSpace(dto.OrganizationId))
-            {
-                org = await _organizationRepo.GetByIdAsync(new OrganizationId(dto.OrganizationId));
-                if (org == null)
-                    throw new BusinessRuleValidationException("Organization not found.");
-            }
             if (await _repo.ExistsWithEmailAsync(dto.Email))
                 throw new BusinessRuleValidationException("Email already in use by another representative.");
-
             if (await _repo.ExistsWithPhoneAsync(dto.PhoneNumber))
                 throw new BusinessRuleValidationException("Phone number already in use by another representative.");
-            if(await _repo.ExistsWithCidAsync(dto.CitizenId))
+            if (await _repo.ExistsWithCidAsync(dto.CitizenId))
                 throw new BusinessRuleValidationException("Citizen Id already in use by another representative.");
-            
+
             var rep = new Representative(
                 dto.Name,
                 dto.CitizenId,
@@ -117,9 +105,21 @@ deactivate) so that only authorized users can operate on behalf of their organiz
                 dto.PhoneNumber
             );
 
-            if (org != null)
+            if (!string.IsNullOrWhiteSpace(dto.OrganizationId))
             {
+                var org = await _organizationRepo.GetByIdAsync(new OrganizationId(dto.OrganizationId));
+                if (org == null)
+                    throw new BusinessRuleValidationException("Organization not found.");
+
+                // 1. Atribuir OrganizationId imediatamente
+                rep.AssignToOrganization(org.Id);
+
+                // 2. Adicionar à organização
                 org.AddRepresentative(rep);
+            }
+            else
+            {
+                throw new BusinessRuleValidationException("Representative must be assigned to an organization.");
             }
 
             await _repo.AddAsync(rep);
@@ -143,9 +143,9 @@ public async Task<List<Representative>> GetActiveRepresentativesAsync()
 
 #### Class: `RepresentativeDto`
 ```c#
-public class RepresentativeDto
+ public class RepresentativeDto
     {
-        public Guid Id { get; set; }
+      
         public string Name { get; set; }
         public string CitizenId { get; set; }
         public string Nationality { get; set; }

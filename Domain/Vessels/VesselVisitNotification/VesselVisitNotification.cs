@@ -120,19 +120,16 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             this.DecisionOutcome = null;
             this.AssignedDock = null;
         }
-        public void UpdateInProgress(LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo)
+        public void UpdateInProgress(Vessel vessel,LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo)
         {
             if (this.Status != NotificationStatus.InProgress)
                 throw new BusinessRuleValidationException("Only notifications in progress can be updated by a representative.");
-
-            if (loadingCargo == null && unloadingCargo == null)
-                throw new BusinessRuleValidationException("At least one cargo section must be provided to update.");
             
-            if (loadingCargo != null)
-                this.LoadingCargo = loadingCargo;
-
-            if (unloadingCargo != null)
-                this.UnloadingCargo = unloadingCargo;
+            if (vessel == null && loadingCargo == null && unloadingCargo == null)
+                throw new BusinessRuleValidationException("At least one field (Vessel, LoadingCargo, or UnloadingCargo) must be provided for update.");
+            UpdateLoadingCargo(loadingCargo);
+            UpdateVessel(vessel);
+            UpdateUnloadingCargo(unloadingCargo);
         }
 
         public void SubmitForApproval()
@@ -161,9 +158,6 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         
         public void UpdateVessel(Vessel vessel)
         {   
-            if (this.Status != NotificationStatus.InProgress)
-                throw new BusinessRuleValidationException("Only notifications in progress can be updated by a representative.");
-            
             if (vessel == null)
                 throw new BusinessRuleValidationException("Vessel cannot be null.");
             this.Vessel = vessel;
@@ -171,9 +165,6 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
         public void UpdateLoadingCargo(LoadingCargoMaterial cargo)
         {
-            if (this.Status != NotificationStatus.InProgress)
-                throw new BusinessRuleValidationException("Only notifications in progress can be updated by a representative.");
-            
             if (cargo == null)
                 throw new BusinessRuleValidationException("Loading cargo cannot be null.");
             this.LoadingCargo = cargo;
@@ -181,8 +172,6 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
         public void UpdateUnloadingCargo(UnloadingCargoMaterial cargo)
         {
-            if (this.Status != NotificationStatus.InProgress)
-                throw new BusinessRuleValidationException("Only notifications in progress can be updated by a representative.");
             if (cargo == null)
                 throw new BusinessRuleValidationException("Unloading cargo cannot be null.");
             this.UnloadingCargo = cargo;

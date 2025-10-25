@@ -103,10 +103,10 @@ namespace DDDNetCore.Tests.Domain
 
             var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
 
-            Action act = () => notif.UpdateInProgress(null, null);
+            Action act = () => notif.UpdateInProgress(null, null,null);
 
             act.Should().Throw<BusinessRuleValidationException>()
-                .WithMessage("At least one cargo section must be provided to update.");
+                .WithMessage("At least one field (Vessel, LoadingCargo, or UnloadingCargo) must be provided for update.");
         }
 
         [Fact]
@@ -122,7 +122,7 @@ namespace DDDNetCore.Tests.Domain
             // change status to Submitted using SubmitForApproval
             notif.SubmitForApproval();
 
-            Action act = () => notif.UpdateInProgress(loading, null);
+            Action act = () => notif.UpdateInProgress(null,loading, null);
 
             act.Should().Throw<BusinessRuleValidationException>()
                 .WithMessage("Only notifications in progress can be updated by a representative.");

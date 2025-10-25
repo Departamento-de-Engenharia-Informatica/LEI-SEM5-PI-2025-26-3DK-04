@@ -53,7 +53,7 @@ port’s digital system.
 #### Class: `Organization`
 
 ```c#
-public Organization(string id, string legalName, string alternativeName, string address, string taxNumber)
+ public Organization(string id, string legalName, string alternativeName, string address, string taxNumber)
         {
             if (string.IsNullOrWhiteSpace(id))
                 throw new BusinessRuleValidationException("Organization identifier is required.");
@@ -73,13 +73,12 @@ public Organization(string id, string legalName, string alternativeName, string 
             this.Address = address;
             this.TaxNumber = taxNumber;
         }
-
 ```
 
 #### Class: `OrganizationService`
 
 ```c#
-public async Task<OrganizationDto> RegisterOrganizationAsync(OrganizationDto dto)
+        public async Task<OrganizationDto> RegisterOrganizationAsync(OrganizationDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Id))
                 throw new BusinessRuleValidationException("Organization ID is required.");
@@ -109,6 +108,7 @@ public async Task<OrganizationDto> RegisterOrganizationAsync(OrganizationDto dto
                     var rep = new Representative(repDto.Name, repDto.CitizenId, repDto.Nationality, repDto.Email,
                         repDto.PhoneNumber);
                     org.AddRepresentative(rep);
+                    rep.AssignToOrganization(org.Id);
                 }
             }
 
@@ -135,7 +135,7 @@ public async Task<Organization> GetByIdAsync(OrganizationId id)
 
 #### Class: `OrganizationDto`
 ```c#
-public class OrganizationDto
+ public class OrganizationDto
     {
         public string Id { get; set; }
         public string LegalName { get; set; }
