@@ -104,11 +104,11 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
 
 
-        
-        // Listar notificações completadas (prontas para review)
-        public async Task<List<VesselVisitNotificationDto>> GetCompletedNotificationsAsync()
+
+        // Listar notificações submetidas (prontas para review)
+        public async Task<List<VesselVisitNotificationDto>> GetSubmittedNotificationsAsync()
         {
-            var notifications = await _repo.GetCompletedNotificationsAsync();
+            var notifications = await _repo.GetSubmittedNotificationsAsync();
             
             return notifications.Select(n => MapToDto(n)).ToList();
         }

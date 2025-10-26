@@ -163,10 +163,10 @@ namespace DDDNetCore.Tests.Application
                 return Task.FromResult(found);
             }
 
-            public Task<List<VesselVisitNotification>> GetCompletedNotificationsAsync()
+            public Task<List<VesselVisitNotification>> GetSubmittedNotificationsAsync()
             {
-                // Tests expect completed notifications collection; in current domain 'submitted' is the pre-review state,
-                // so treat Submitted as the equivalent for tests that query completed notifications.
+                // Tests expect completed/ready-for-review notifications collection; current domain uses 'Submitted' as that state,
+                // so return items with NotificationStatus.Submitted.
                 var found = _items.Where(x => x.Status == NotificationStatus.Submitted).ToList();
                 return Task.FromResult(found);
             }

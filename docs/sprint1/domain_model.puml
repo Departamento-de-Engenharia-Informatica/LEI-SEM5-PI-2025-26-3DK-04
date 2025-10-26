@@ -141,10 +141,14 @@ package "Staff Management Aggregate" {
         name: String
         email: String
         phoneNumber: int
-        operationalWindow: String
     }
 
     class StaffMemberID <<EntityId>> {
+    }
+
+    class OperationalWindow <<ValueObject>> {
+        startTime: TimeSpan
+        endTime: TimeSpan
     }
 
     enum MemberStatus{
@@ -207,6 +211,7 @@ VesselType "1" --> "1" VesselTypeID : has
 Crew "1" --> "*" CrewMember : has
 ShippingAgentOrganization "1" --> "*" VesselVisitNotification : submits
 StaffMember "1" --> "1" StaffMemberID : has
+StaffMember "1" --> "1" OperationalWindow : has
 StaffMember "*" --> "*" PhysicalResource : uses
 StaffMember "*" --> "*" Dock : works
 StaffMember "*" --> "*" Qualification : has

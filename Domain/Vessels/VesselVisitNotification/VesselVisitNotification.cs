@@ -57,10 +57,10 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
         public void Approve(string dockId, string officerId)
         {
-            // Validação: só pode aprovar se estiver Completed
-            if (this.Status != NotificationStatus.Completed)
+            // Validação: só pode aprovar se estiver Submitted
+            if (this.Status != NotificationStatus.Submitted)
                 throw new BusinessRuleValidationException(
-                    "Only notifications marked as completed can be approved.");
+                    "Only notifications marked as submitted can be approved.");
 
             // Validação: dock é obrigatório
             if (string.IsNullOrWhiteSpace(dockId))
@@ -83,10 +83,10 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
         public void Reject(string reason, string officerId)
         {
-            // Validação: só pode rejeitar se estiver Completed
-            if (this.Status != NotificationStatus.Completed)
+            // Validação: só pode rejeitar se estiver Submitted
+            if (this.Status != NotificationStatus.Submitted)
                 throw new BusinessRuleValidationException(
-                    "Only notifications marked as completed can be rejected.");
+                    "Only notifications marked as submitted can be rejected.");
 
             // Validação: razão é obrigatória
             if (string.IsNullOrWhiteSpace(reason))

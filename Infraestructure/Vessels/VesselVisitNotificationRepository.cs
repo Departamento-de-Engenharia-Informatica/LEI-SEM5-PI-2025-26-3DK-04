@@ -31,7 +31,7 @@ namespace DDDSample1.Infrastructure.Vessels
                 .FirstOrDefaultAsync();
         }
         
-        public async Task<List<VesselVisitNotification>> GetCompletedNotificationsAsync()
+        public async Task<List<VesselVisitNotification>> GetSubmittedNotificationsAsync()
         {
             // Procurar notificações submetidas (prontas para aprovação/rejeição)
             return await _objs
