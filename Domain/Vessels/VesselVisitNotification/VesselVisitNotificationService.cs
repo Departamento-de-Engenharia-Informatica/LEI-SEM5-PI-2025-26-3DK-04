@@ -181,10 +181,13 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         
          public async Task<VesselVisitNotificationDto> UpdateInProgressAsync(Guid Id,UpdateNotificationDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.VesselId) && dto.LoadingCargo == null && dto.UnloadingCargo == null)
+            if (string.IsNullOrWhiteSpace(dto.VesselId)
+                && (dto.LoadingCargo == null || !dto.LoadingCargo.Manifests?.Any() == true)
+                && (dto.UnloadingCargo == null || !dto.UnloadingCargo.Manifests?.Any() == true))
             {
-                throw new BusinessRuleValidationException("At least one field (VesselId, LoadingCargo, or UnloadingCargo) must be provided for update.");
+                throw new BusinessRuleValidationException("At least one field must be provided for update.");
             }
+
             var notificationId = new VesselVisitNotificationID(Id);
             var notification = await _repo.GetByIdAsync(notificationId);
 
@@ -198,7 +201,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             Vessel vesselToUse = notification.Vessel;
             bool vesselChanged = false;
 
-            if (!string.IsNullOrWhiteSpace(dto.VesselId) || dto.VesselId != vesselToUse.Id.AsString())
+            if (!string.IsNullOrWhiteSpace(dto.VesselId) && dto.VesselId != vesselToUse.Id.AsString())
             {
                 var newVessel = await _vesselRepo.GetByIdAsync(new VesselId(Guid.Parse(dto.VesselId)));
                 if (newVessel == null)
@@ -209,7 +212,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
             // --- Reconstruct LoadingCargo ---
             LoadingCargoMaterial? loadingToUse = notification.LoadingCargo;
-            if (dto.LoadingCargo != null)
+            if (dto.LoadingCargo != null && dto.LoadingCargo.Manifests != null)
             {
                 var manifests = new List<CargoManifest>();
                 foreach (var manifestDto in dto.LoadingCargo.Manifests)
@@ -225,7 +228,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             }
             
             UnloadingCargoMaterial? unloadingToUse = notification.UnloadingCargo;
-            if (dto.UnloadingCargo != null)
+            if (dto.UnloadingCargo != null && dto.UnloadingCargo.Manifests != null)
             {
                 var manifests = new List<CargoManifest>();
                 foreach (var manifestDto in dto.UnloadingCargo.Manifests)
