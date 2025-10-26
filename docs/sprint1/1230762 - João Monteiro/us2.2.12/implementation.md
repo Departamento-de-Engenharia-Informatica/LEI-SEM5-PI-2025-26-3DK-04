@@ -1,43 +1,170 @@
 ﻿# 5. User Story Implementation Report
 
----
-
-## 5.1. US_2.2.12 – Register Physical Resources
-
-### 5.2. Description
-
-As a Logistics Operator, I want to register and manage physical resources so that they can be accurately considered during planning, scheduling, and operational execution within the port environment.
+## 5.1 US_2.2.12 – Manage Physical Resources
 
 ---
 
-### 5.3. Implementation Details
+## 5.2 Description
 
-- **User Interaction & Flow Control**  
-  A new UI (`RegisterResourceUI`) was developed to allow Logistics Operators to create and update physical resources. The interface enables users to input details such as resource code, name, type, qualification requirements, setup time, and operational status.
-
-- **Business Logic Coordination**  
-  The `RegisterResourceController` orchestrates the registration and update workflow. It validates user input via the `RegisterResourceService`, ensuring that business rules — such as unique resource codes, valid qualification requirements, and non-negative setup times — are enforced before persistence.
-
-- **Domain Entity Construction**  
-  The `PhysicalResource` entity encapsulates the main attributes of a resource, including code, name, type, qualification requirements, setup time, and operational status. It defines the core validation logic for data integrity and supports controlled state transitions (e.g., activation/deactivation).
-
-- **Persistence**  
-  The `IResourceRepository` interface and its implementation (`ResourceRepositorySQL`) handle persistence of physical resource data. This includes saving new resources, updating existing records, and managing associations with relevant operational data in the database.
-
-- **Validation & Error Handling**  
-  Validation rules ensure:
-    - Unique resource codes across the system.
-    - Presence of required qualification data for each resource type.
-    - Correct handling of setup time values (must be greater than or equal to zero).  
-      In case of validation failures, the system prevents persistence and displays descriptive error messages to guide the user.
-
-- **Authorization & Security**  
-  Role-based access control ensures that only authenticated users with the “Logistics Operator” role can register, modify, or deactivate physical resources. Unauthorized users are restricted from performing these actions.
-
-- **Status Management & Historical Retention**  
-  Each resource maintains an operational status (Active/Inactive). When a resource is deactivated, its historical data — including setup times, qualification info, and past operation references — is preserved to ensure traceability and auditability.
-
-- **Data Consistency**  
-  All resource registration and modification operations are performed within transactional boundaries to maintain database integrity. In case of validation or persistence errors, the transaction is rolled back to avoid inconsistent states.
+As a Port Authority Officer, I want to create, update, assign qualifications, change status, and search physical resources, so that resources can be managed efficiently with proper capacity, type, and qualifications.
 
 ---
+
+## 5.3 Implementation Details
+
+### User Interaction & Endpoints
+
+- **POST /api/PhysicalResources** — create a new physical resource.
+- **PUT /api/PhysicalResources/{id}** — update an existing resource.
+- **PATCH /api/PhysicalResources/{id}/status** — change the status (Active/Inactive).
+- **GET /api/PhysicalResources** — list resources with optional filters.
+- **GET /api/PhysicalResources/{id}** — retrieve resource details.
+
+### Business Logic
+
+`PhysicalResourceService` handles:
+
+- Validation of incoming DTOs.
+- Resolves Qualification references.
+- Enforces business rules in the aggregate (`PhysicalResource`).
+- Commits changes via `UnitOfWork`.
+
+### Domain Entity
+
+`PhysicalResource` is the aggregate root and encapsulates:
+
+- Description, type, capacity, assigned area.
+- Setup time and status (Active/Inactive).
+- Associated qualifications.
+- Business rules for creation, updates, qualification assignment, and status changes.
+
+### Persistence
+
+- `IPhysicalResourceRepository` provides retrieval, update, and delete methods.
+- Changes are persisted via `UnitOfWork.CommitAsync()`.
+
+### Security
+
+Controller endpoints are intended to be protected by role-based authorization (Port Authority Officer).
+
+---
+
+## Key Code Snippets
+
+### Controller: PhysicalResourceController (create/update/status endpoints)
+
+```csharp
+[HttpPost]
+public async Task<ActionResult<PhysicalResourceDto>> Create(CreatePhysicalResourceDto dto)
+{
+    var resource = await _service.AddAsync(dto);
+    return CreatedAtAction(nameof(GetById), new { id = resource.Id }, resource);
+}
+
+[HttpPut("{id}")]
+public async Task<ActionResult<PhysicalResourceDto>> Update(Guid id, UpdatePhysicalResourceDto dto)
+{
+    var resource = await _service.UpdateAsync(id, dto);
+    if (resource == null) return NotFound();
+    return Ok(resource);
+}
+
+[HttpPatch("{id}/status")]
+public async Task<ActionResult<PhysicalResourceDto>> ChangeStatus(Guid id, ChangeStatusDto dto)
+{
+    var resource = await _service.ChangeStatusAsync(id, dto.NewStatus);
+    if (resource == null) return NotFound();
+    return Ok(resource);
+}
+
+```
+
+#### Service: `PhysicalResourceService` (simplified)
+
+```csharp
+public async Task<PhysicalResourceDto> AddAsync(CreatePhysicalResourceDto dto)
+{
+    var qualifications = await _qualificationRepo.GetByIdsAsync(dto.QualificationIds);
+    var resource = new PhysicalResource(dto.Description, dto.Type, dto.Capacity, dto.AssignedArea, dto.SetupTime, dto.Status, qualifications);
+
+    await _repo.AddAsync(resource);
+    await _unitOfWork.CommitAsync();
+
+    return MapToDto(resource);
+}
+
+public async Task<PhysicalResourceDto> UpdateAsync(Guid id, UpdatePhysicalResourceDto dto)
+{
+    var resource = await _repo.GetByIdAsync(id);
+    if (resource == null) return null;
+
+    var qualifications = await _qualificationRepo.GetByIdsAsync(dto.QualificationIds);
+    resource.Update(dto.Description, dto.Type, dto.Capacity, dto.AssignedArea, dto.SetupTime, qualifications);
+
+    await _unitOfWork.CommitAsync();
+    return MapToDto(resource);
+}
+
+public async Task<PhysicalResourceDto> ChangeStatusAsync(Guid id, ResourceStatus status)
+{
+    var resource = await _repo.GetByIdAsync(id);
+    if (resource == null) return null;
+
+    resource.ChangeStatus(status);
+    await _unitOfWork.CommitAsync();
+    return MapToDto(resource);
+}
+
+
+```
+
+#### Aggregate: `PhysicalResource` (concept)
+
+```csharp
+public PhysicalResource(
+    string description, 
+    string type, 
+    double capacity, 
+    string? assignedArea, 
+    int setupTime, 
+    ResourceStatus status, 
+    List<Qualification> qualifications)
+{
+    if (string.IsNullOrWhiteSpace(description)) throw new BusinessRuleValidationException("Description is required.");
+    if (capacity <= 0) throw new BusinessRuleValidationException("Capacity must be greater than 0.");
+    
+    Id = new PhysicalResourceID(Guid.NewGuid());
+    Description = description;
+    Type = type;
+    Capacity = capacity;
+    AssignedArea = assignedArea;
+    SetupTime = setupTime;
+    Status = status;
+    Qualifications = qualifications ?? new List<Qualification>();
+}
+
+public void Update(
+    string description, 
+    string type, 
+    double capacity, 
+    string? assignedArea, 
+    int setupTime, 
+    List<Qualification> qualifications)
+{
+    if (capacity <= 0) throw new BusinessRuleValidationException("Capacity must be greater than 0.");
+    
+    Description = description;
+    Type = type;
+    Capacity = capacity;
+    AssignedArea = assignedArea;
+    SetupTime = setupTime;
+    Qualifications = qualifications;
+}
+
+public void ChangeStatus(ResourceStatus newStatus)
+{
+    Status = newStatus;
+}
+
+
+```
