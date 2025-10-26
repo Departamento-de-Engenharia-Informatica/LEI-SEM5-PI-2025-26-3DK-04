@@ -15,7 +15,7 @@ using CargoManifestDto = DDDSample1.Domain.Vessels.VesselInformation.CargoManife
 
 namespace DDDNetCore.Tests.Application
 {
-    /*
+    
     public class VesselVisitNotificationApplicationTests
     {
         // In-memory vessel repository
@@ -192,7 +192,50 @@ namespace DDDNetCore.Tests.Application
                 return Task.FromResult(query.ToList());
             }
         }
+        
+        private class InMemoryRepresentativeRepository : IRepresentativeRepository
+        {
+            private readonly List<Representative> _items = new();
 
+            public Task<Representative> AddAsync(Representative obj)
+            {
+                _items.Add(obj);
+                return Task.FromResult(obj);
+            }
+
+            public void Remove(Representative obj) => _items.Remove(obj);
+            public Task UpdateAsync(Representative obj) => Task.CompletedTask;
+            public Task<List<Representative>> GetAllAsync() => Task.FromResult(_items.ToList());
+            public Task<Representative> GetByIdAsync(RepresentativeId id)
+            {
+                var found = _items.FirstOrDefault(r => r.Id.AsString() == id.AsString());
+                return Task.FromResult(found);
+            }
+            public Task<List<Representative>> GetByIdsAsync(List<RepresentativeId> ids)
+            {
+                var set = ids.Select(i => i.AsString()).ToHashSet();
+                var found = _items.Where(r => set.Contains(r.Id.AsString())).ToList();
+                return Task.FromResult(found);
+            }
+            public Task<List<Representative>> GetActiveRepresentativesAsync() =>
+                Task.FromResult(_items.Where(r => r.Status == RepresentativeStatus.Active).ToList());
+            public Task<List<Representative>> GetByOrganizationAsync(OrganizationId organizationId) =>
+                Task.FromResult(_items.Where(r => r.OrganizationId.AsString() == organizationId.AsString()).ToList());
+            public Task<Representative> GetByEmailAsync(string email) =>
+                Task.FromResult(_items.FirstOrDefault(r => r.Email == email));
+            public Task<bool> ExistsWithEmailAsync(string email) =>
+                Task.FromResult(_items.Any(r => r.Email == email));
+            public Task<bool> ExistsWithPhoneAsync(string phone) =>
+                Task.FromResult(_items.Any(r => r.PhoneNumber == phone));
+            public Task<bool> ExistsWithCidAsync(string cid) =>
+                Task.FromResult(_items.Any(r => r.Id.AsString() == cid));
+            public Task DeleteAsync(Representative rep)
+            {
+                _items.Remove(rep);
+                return Task.CompletedTask;
+            }
+        }
+        
         // In-memory unit of work
         private class InMemoryUnitOfWork : IUnitOfWork
         {
@@ -234,6 +277,7 @@ namespace DDDNetCore.Tests.Application
             var vesselTypeRepo = new InMemoryVesselTypeRepository();
             var notifRepo = new InMemoryVesselVisitNotificationRepository();
             var uow = new InMemoryUnitOfWork();
+            var rep = new InMemoryRepresentativeRepository();
 
             var vesselType = new VesselType("TypeA", "desc", 10000, 1, 1, 1);
             await vesselTypeRepo.AddAsync(vesselType);
@@ -241,38 +285,30 @@ namespace DDDNetCore.Tests.Application
             var vessel = new Vessel("IMO1234567", "Test Vessel", vesselType.Id, "Owner", "Operator");
             await vesselRepo.AddAsync(vessel);
 
-            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo,rep);
 
             var loading = new List<CargoManifest>{ CreateManifestWithContainer(1000) };
             var unloading = new List<CargoManifest>{ CreateManifestWithContainer(500) };
-
-            // 1. Prepare the input DTO
-            var createDto = new CreateNotificationDto
+            var representative = new Representative(
+                "John Doe",
+                "REP001",
+                "PT",
+                "john1231.doe@gmail.com",
+                "+351923888777"
+            );
+           
+            await rep.AddAsync(representative);
+            var createDto = new CreateNotificationDto()
             {
-                VesselId = vessel.Id.AsGuid(), // Assuming 'vessel' is your Vessel test object
+                VesselId = vessel.Id.AsGuid(),
                 RepresentativeId = "REP001",
-                LoadingManifests = loading?.Select(manifest => new DDDSample1.Domain.Vessels.CargoManifestDto() // Convert loading manifests
-                {
-                    Containers = manifest.Containers.Select(container => new ContainerInputDto
-                    {
-                        Id = container.Id.AsGuid(), // Get Guid from ContainerID
-                        PayloadWeight = container.PayloadWeight,
-                        ContentsDescription = container.ContentsDescription
-                    }).ToList()
-                }).ToList(),
-                UnloadingManifests = unloading?.Select(manifest => new DDDSample1.Domain.Vessels.CargoManifestDto() // Convert unloading manifests
-                {
-                    Containers = manifest.Containers.Select(container => new ContainerInputDto
-                    {
-                        Id = container.Id.AsGuid(), // Get Guid from ContainerID
-                        PayloadWeight = container.PayloadWeight,
-                        ContentsDescription = container.ContentsDescription
-                    }).ToList()
-                }).ToList(),
-                Crew = null // Pass null for crew as before
+                LoadingManifests = loading,
+                UnloadingManifests = unloading,
+                Crew = null
             };
+            
 
-// 2. Call the service with the DTO
+            // 2. Call the service with the DTO
             var result = await service.CreateAsync(createDto);
 
             result.Should().NotBeNull();
@@ -289,20 +325,29 @@ namespace DDDNetCore.Tests.Application
             var vesselTypeRepo = new InMemoryVesselTypeRepository();
             var notifRepo = new InMemoryVesselVisitNotificationRepository();
             var uow = new InMemoryUnitOfWork();
-
+            var rep = new InMemoryRepresentativeRepository();
+            
             var vesselType = new VesselType("Small", "desc", 100, 1, 1, 1);
             await vesselTypeRepo.AddAsync(vesselType);
 
             var vessel = new Vessel("IMO7654321", "Small Vessel", vesselType.Id, "Owner", "Operator");
             await vesselRepo.AddAsync(vessel);
 
-            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo,rep);
 
             // create unloading manifest whose weight exceeds capacity
             var heavyManifest = CreateManifestWithContainer(1000);
             var unloading = new List<CargoManifest>{ heavyManifest };
-
-            Func<Task> act = async () => await service.CreateAsync(vessel.Id.AsGuid(), "REP002", null, unloading, null);
+            
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP002",
+                LoadingManifests = null,
+                UnloadingManifests = unloading,
+                Crew = null
+            };
+            Func<Task> act = async () => await service.CreateAsync(createDto);
 
             await Assert.ThrowsAsync<BusinessRuleValidationException>(act);
             uow.CommitCallCount.Should().Be(0);
@@ -315,18 +360,38 @@ namespace DDDNetCore.Tests.Application
             var vesselTypeRepo = new InMemoryVesselTypeRepository();
             var notifRepo = new InMemoryVesselVisitNotificationRepository();
             var uow = new InMemoryUnitOfWork();
-
+            var rep = new InMemoryRepresentativeRepository();
+            
             var vesselType = new VesselType("TypeB", "desc", 5000, 1, 1, 1);
             await vesselTypeRepo.AddAsync(vesselType);
             var vessel = new Vessel("IMO2222222", "Approve Vessel", vesselType.Id, "Owner", "Operator");
             await vesselRepo.AddAsync(vessel);
 
-            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo,rep);
 
             var loading = new List<CargoManifest>{ CreateManifestWithContainer(100) };
             var unloading = new List<CargoManifest>{ CreateManifestWithContainer(50) };
-
-            var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP003", loading, unloading, null);
+            
+            // Criar representante associado à organização
+            var representative = new Representative(
+                "John Doe",
+                "REP003",
+                "PT",
+                "john123.doe@gmail.com",
+                "+351921888777"
+            );
+           
+            await rep.AddAsync(representative);
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP003",
+                LoadingManifests = loading,
+                UnloadingManifests = unloading,
+                Crew = null
+            };
+            
+            var dto = await service.CreateAsync(createDto);
             var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
 
             // set status to Completed via reflection (domain tests do the same)
@@ -346,18 +411,37 @@ namespace DDDNetCore.Tests.Application
             var vesselTypeRepo = new InMemoryVesselTypeRepository();
             var notifRepo = new InMemoryVesselVisitNotificationRepository();
             var uow = new InMemoryUnitOfWork();
-
+            var rep = new InMemoryRepresentativeRepository();
+            
             var vesselType = new VesselType("TypeE", "desc", 5000, 1, 1, 1);
             await vesselTypeRepo.AddAsync(vesselType);
             var vessel = new Vessel("IMO7777777", "Dock Assign Vessel", vesselType.Id, "Owner", "Operator");
             await vesselRepo.AddAsync(vessel);
 
-            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo,rep);
 
             var loading = new List<CargoManifest>{ CreateManifestWithContainer(100) };
             var unloading = new List<CargoManifest>{ CreateManifestWithContainer(50) };
-
-            var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP010", loading, unloading, null);
+            
+            // Criar representante associado à organização
+            var representative = new Representative(
+                "John Doe",
+                "REP010",
+                "PT",
+                "john12.doe@gmail.com",
+                "+351911888777"
+            );
+            await rep.AddAsync(representative);
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP010",
+                LoadingManifests = loading,
+                UnloadingManifests = unloading,
+                Crew = null
+            };
+            
+            var dto = await service.CreateAsync(createDto);
             var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
 
             // set to Completed to allow approval
@@ -378,18 +462,37 @@ namespace DDDNetCore.Tests.Application
             var vesselTypeRepo = new InMemoryVesselTypeRepository();
             var notifRepo = new InMemoryVesselVisitNotificationRepository();
             var uow = new InMemoryUnitOfWork();
-
+            var rep = new InMemoryRepresentativeRepository();
+            
             var vesselType = new VesselType("TypeF", "desc", 5000, 1, 1, 1);
             await vesselTypeRepo.AddAsync(vesselType);
             var vessel = new Vessel("IMO8888888", "Reject Vessel", vesselType.Id, "Owner", "Operator");
             await vesselRepo.AddAsync(vessel);
-
-            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+            
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo,rep);
 
             var loading = new List<CargoManifest>{ CreateManifestWithContainer(100) };
             var unloading = new List<CargoManifest>{ CreateManifestWithContainer(50) };
-
-            var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP011", loading, unloading, null);
+            
+            // Criar representante associado à organização
+            var representative = new Representative(
+                "John Doe",
+                "REP011",
+                "PT",
+                "john1.doe@gmail.com",
+                "+351991888777"
+            );
+            await rep.AddAsync(representative);
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP011",
+                LoadingManifests = loading,
+                UnloadingManifests = unloading,
+                Crew = null
+            };
+            
+            var dto = await service.CreateAsync(createDto);
             var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
 
             // set to Completed to allow rejection
@@ -410,18 +513,39 @@ namespace DDDNetCore.Tests.Application
             var vesselTypeRepo = new InMemoryVesselTypeRepository();
             var notifRepo = new InMemoryVesselVisitNotificationRepository();
             var uow = new InMemoryUnitOfWork();
-
+            var rep = new InMemoryRepresentativeRepository();
+            
             var vesselType = new VesselType("TypeG", "desc", 5000, 1, 1, 1);
             await vesselTypeRepo.AddAsync(vesselType);
             var vessel = new Vessel("IMO9999999", "Reject No Reason", vesselType.Id, "Owner", "Operator");
             await vesselRepo.AddAsync(vessel);
-
-            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
-
+    
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo,rep);
+            var rep1 = new Representative("Atum","REP012","PT","atum@gmail.com","1234567890");
+            
             var loading = new List<CargoManifest>{ CreateManifestWithContainer(100) };
             var unloading = new List<CargoManifest>{ CreateManifestWithContainer(50) };
-
-            var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP012", loading, unloading, null);
+            
+            var representative = new Representative(
+                "John Doe",
+                "REP012",
+                "PT",
+                "johnA.doe@gmail.com",
+                "+351911111111"
+            );
+            
+            await rep.AddAsync(representative);
+            
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP012",
+                LoadingManifests = loading,
+                UnloadingManifests = unloading,
+                Crew = null
+            };
+            
+            var dto = await service.CreateAsync(createDto);
             var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
 
             // set to Completed to allow rejection
@@ -434,28 +558,50 @@ namespace DDDNetCore.Tests.Application
             uow.CommitCallCount.Should().Be(1); // only Create committed
         }
 
-        [Fact]
+       [Fact]
         public async Task ApproveWithoutDockAssignment_ThrowsValidationException()
         {
             var vesselRepo = new InMemoryVesselRepository();
             var vesselTypeRepo = new InMemoryVesselTypeRepository();
             var notifRepo = new InMemoryVesselVisitNotificationRepository();
             var uow = new InMemoryUnitOfWork();
+            var rep = new InMemoryRepresentativeRepository();
+            
+            // Criar representante associado à organização
+            var representative = new Representative(
+                "John Doe",
+                "REP013",
+                    "PT",
+                "john.doe@gmail.com",
+                "+351999888777"
+            );
+            
+            await rep.AddAsync(representative);
 
             var vesselType = new VesselType("TypeH", "desc", 5000, 1, 1, 1);
             await vesselTypeRepo.AddAsync(vesselType);
+
             var vessel = new Vessel("IMO1010101", "Approve No Dock", vesselType.Id, "Owner", "Operator");
             await vesselRepo.AddAsync(vessel);
 
-            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo, rep);
 
-            var loading = new List<CargoManifest>{ CreateManifestWithContainer(100) };
-            var unloading = new List<CargoManifest>{ CreateManifestWithContainer(50) };
+            var loading = new List<CargoManifest> { CreateManifestWithContainer(100) };
+            var unloading = new List<CargoManifest> { CreateManifestWithContainer(50) };
 
-            var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP013", loading, unloading, null);
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP013",
+                LoadingManifests = loading,
+                UnloadingManifests = unloading,
+                Crew = null
+            };
+
+            var dto = await service.CreateAsync(createDto);
             var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
 
-            // set to Completed to allow approval
+            // Forçar estado Completed
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
             statusProp.SetValue(stored, NotificationStatus.Completed);
 
@@ -465,6 +611,7 @@ namespace DDDNetCore.Tests.Application
             uow.CommitCallCount.Should().Be(1);
         }
 
+
         [Fact]
         public async Task DecisionOnAlreadyReviewedNotification_PreventsDuplicateDecisions()
         {
@@ -472,18 +619,38 @@ namespace DDDNetCore.Tests.Application
             var vesselTypeRepo = new InMemoryVesselTypeRepository();
             var notifRepo = new InMemoryVesselVisitNotificationRepository();
             var uow = new InMemoryUnitOfWork();
-
+            var rep = new InMemoryRepresentativeRepository();
+            
             var vesselType = new VesselType("TypeI", "desc", 5000, 1, 1, 1);
             await vesselTypeRepo.AddAsync(vesselType);
             var vessel = new Vessel("IMO1212121", "Already Reviewed", vesselType.Id, "Owner", "Operator");
             await vesselRepo.AddAsync(vessel);
 
-            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo,rep);
 
             var loading = new List<CargoManifest>{ CreateManifestWithContainer(100) };
             var unloading = new List<CargoManifest>{ CreateManifestWithContainer(50) };
-
-            var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP014", loading, unloading, null);
+            
+            var representative = new Representative(
+                "John Doe",
+                "REP014",
+                "PT",
+                "john12311.doe@gmail.com",
+                "+351923818777"
+            );
+           
+            await rep.AddAsync(representative);
+            
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP014",
+                LoadingManifests = loading,
+                UnloadingManifests = unloading,
+                Crew = null
+            };
+            
+            var dto = await service.CreateAsync(createDto);
             var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
 
             // set to Completed and approve
@@ -512,7 +679,8 @@ namespace DDDNetCore.Tests.Application
         var vesselTypeRepo = new InMemoryVesselTypeRepository();
         var notifRepo = new InMemoryVesselVisitNotificationRepository();
         var uow = new InMemoryUnitOfWork();
-
+        var rep = new InMemoryRepresentativeRepository();
+        
         // VesselType com capacidade pequena (200 kg)
         var vesselType = new VesselType("TypeC", "desc", 200, 1, 1, 1);
         await vesselTypeRepo.AddAsync(vesselType);
@@ -520,13 +688,32 @@ namespace DDDNetCore.Tests.Application
         var vessel = new Vessel("IMO3333333", "Update Vessel", vesselType.Id, "Owner", "Operator");
         await vesselRepo.AddAsync(vessel);
 
-        var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+        var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo,rep);
 
         // Cria notificação inicial
         var loading = new List<CargoManifest> { CreateManifestWithContainer(10) };
         var unloading = new List<CargoManifest> { CreateManifestWithContainer(20) };
-
-        var dto = await service.CreateAsync(vessel.Id.AsGuid(), "REP004", loading, unloading, null);
+        
+        var representative = new Representative(
+            "John Doe",
+            "REP004",
+            "PT",
+            "john123111.doe@gmail.com",
+            "+351923818177"
+        );
+           
+        await rep.AddAsync(representative);
+        
+        var createDto = new CreateNotificationDto()
+        {
+            VesselId = vessel.Id.AsGuid(),
+            RepresentativeId = "REP004",
+            LoadingManifests = loading,
+            UnloadingManifests = unloading,
+            Crew = null
+        };
+        
+        var dto = await service.CreateAsync(createDto);
         var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
 
         // DTO de atualização com peso que excede capacidade (usa IDs válidos ISO 6346)
@@ -554,7 +741,7 @@ namespace DDDNetCore.Tests.Application
         };
 
         // Act
-        Func<Task> act = async () => await service.UpdateInProgressAsync(stored.Id.AsGuid().ToString(), updateDto);
+        Func<Task> act = async () => await service.UpdateInProgressAsync(stored.Id.AsGuid(), updateDto);
 
         // Assert → deve lançar exceção porque ultrapassa capacidade
         await Assert.ThrowsAsync<BusinessRuleValidationException>(act);
@@ -571,7 +758,8 @@ namespace DDDNetCore.Tests.Application
             var vesselTypeRepo = new InMemoryVesselTypeRepository();
             var notifRepo = new InMemoryVesselVisitNotificationRepository();
             var uow = new InMemoryUnitOfWork();
-
+            var rep = new InMemoryRepresentativeRepository();
+            
             var vesselType = new VesselType("TypeD", "desc", 10000, 1, 1, 1);
             await vesselTypeRepo.AddAsync(vesselType);
             var vessel1 = new Vessel("IMO4444444", "Search Vessel A", vesselType.Id, "Owner", "Operator");
@@ -579,13 +767,46 @@ namespace DDDNetCore.Tests.Application
             await vesselRepo.AddAsync(vessel1);
             await vesselRepo.AddAsync(vessel2);
 
-            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo);
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo,rep);
 
             var loading = new List<CargoManifest>{ CreateManifestWithContainer(10) };
             var unloading = new List<CargoManifest>{ CreateManifestWithContainer(5) };
-
-            var dto1 = await service.CreateAsync(vessel1.Id.AsGuid(), "REP005", loading, unloading, null);
-            var dto2 = await service.CreateAsync(vessel2.Id.AsGuid(), "REP006", loading, unloading, null);
+            var representative = new Representative(
+                "John Doe",
+                "REP005",
+                "PT",
+                "john1231111.doe@gmail.com",
+                "+351923818117"
+            );
+            
+            await rep.AddAsync(representative);
+            var representative2 = new Representative(
+                "John Doe",
+                "REP006",
+                "PT",
+                "john1231112.doe@gmail.com",
+                "+351923818171"
+            );
+           
+            await rep.AddAsync(representative2);
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel1.Id.AsGuid(),
+                RepresentativeId = "REP005",
+                LoadingManifests = loading,
+                UnloadingManifests = unloading,
+                Crew = null
+            };
+            var createDto2 = new CreateNotificationDto()
+            {
+                VesselId = vessel2.Id.AsGuid(),
+                RepresentativeId = "REP006",
+                LoadingManifests = loading,
+                UnloadingManifests = unloading,
+                Crew = null
+            };
+            var dto1 = await service.CreateAsync(createDto);
+            var dto2 = await service.CreateAsync(createDto2);
 
             var filter = new NotificationFilterDto { VesselId = vessel1.Id.AsGuid() };
             var results = await service.SearchNotificationsAsync(filter);
@@ -593,5 +814,5 @@ namespace DDDNetCore.Tests.Application
             results.Should().ContainSingle(r => r.VesselId == vessel1.Id.AsGuid());
         }
     }
-    */
+    
 }
