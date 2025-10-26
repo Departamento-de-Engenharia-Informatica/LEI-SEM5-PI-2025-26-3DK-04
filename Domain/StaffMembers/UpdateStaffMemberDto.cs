@@ -12,7 +12,7 @@ namespace DDDSample1.Domain.StaffMembers
         public string Name { get; set; }
         public string Email { get; set; }
         public int? PhoneNumber { get; set; }
-        public string OperationalWindow { get; set; }
+        public OperationalWindowDto OperationalWindow { get; set; }
         public MemberStatus? Status { get; set; }
         
         // Qualifications não são atualizadas por aqui, usar endpoints específicos

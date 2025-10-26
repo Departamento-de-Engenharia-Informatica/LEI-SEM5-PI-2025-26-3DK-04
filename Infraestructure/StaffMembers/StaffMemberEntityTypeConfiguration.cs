@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -34,8 +35,11 @@ namespace DDDSample1.Infrastructure.StaffMembers
             builder.Property(b => b.PhoneNumber)
                 .IsRequired();
             
-            // Propriedade OperationalWindow
+            // Propriedade OperationalWindow (convert OperationalWindow value object to string)
             builder.Property(b => b.OperationalWindow)
+                .HasConversion(
+                    v => v == null ? null : v.ToString(),
+                    s => s == null ? new DDDSample1.Domain.StaffMembers.OperationalWindow(TimeSpan.Zero, TimeSpan.Zero) : new DDDSample1.Domain.StaffMembers.OperationalWindow(s))
                 .HasMaxLength(100);
             
             // Propriedade Status (enum armazenado como string)

@@ -12,7 +12,7 @@ namespace DDDSample1.Domain.StaffMembers
 
         public int PhoneNumber { get; private set; }
 
-        public string OperationalWindow { get; private set; }
+        public OperationalWindow OperationalWindow { get; private set; }
 
         public MemberStatus Status { get; private set; }
 
@@ -39,9 +39,33 @@ namespace DDDSample1.Domain.StaffMembers
                 throw new BusinessRuleValidationException("Phone number needs to have 9 numbers.");
             
             this.PhoneNumber = phoneNumber;
-            this.OperationalWindow = operationalWindow;
+            this.OperationalWindow = new OperationalWindow(operationalWindow);
             this.Status = MemberStatus.Available; // Status inicia sempre como Available
             this.Qualifications = new List<Qualification>(); // Lista vazia
+        }
+
+        // Overload accepting OperationalWindow directly
+        public StaffMember(string name, string email, int phoneNumber, OperationalWindow operationalWindow)
+        {
+            this.Id = new StaffMemberID(Guid.NewGuid());
+            this.Name = name;
+
+            if (string.IsNullOrWhiteSpace(email))
+                throw new BusinessRuleValidationException("Email cannot be empty.");
+            if (!email.Contains("@"))
+                throw new BusinessRuleValidationException("Invalid email format.");
+
+            this.Email = email;
+
+            if (phoneNumber <= 0)
+                throw new BusinessRuleValidationException("Invalid phone number.");
+            if (phoneNumber.ToString().Length != 9)
+                throw new BusinessRuleValidationException("Phone number needs to have 9 numbers.");
+
+            this.PhoneNumber = phoneNumber;
+            this.OperationalWindow = operationalWindow ?? new OperationalWindow(TimeSpan.Zero, TimeSpan.Zero);
+            this.Status = MemberStatus.Available;
+            this.Qualifications = new List<Qualification>();
         }
 
         // Construtor que aceita uma lista de qualificações
@@ -65,8 +89,32 @@ namespace DDDSample1.Domain.StaffMembers
                 throw new BusinessRuleValidationException("Phone number needs to have 9 numbers.");
             
             this.PhoneNumber = phoneNumber;
-            this.OperationalWindow = operationalWindow;
+            this.OperationalWindow = new OperationalWindow(operationalWindow);
             this.Status = MemberStatus.Available; // Status sempre inicia como Available
+            this.Qualifications = qualifications;
+        }
+
+        // Overload accepting OperationalWindow directly with qualifications
+        public StaffMember(string name, string email, int phoneNumber, OperationalWindow operationalWindow, List<Qualification> qualifications)
+        {
+            this.Id = new StaffMemberID(Guid.NewGuid());
+            this.Name = name;
+
+            if (string.IsNullOrWhiteSpace(email))
+                throw new BusinessRuleValidationException("Email cannot be empty.");
+            if (!email.Contains("@"))
+                throw new BusinessRuleValidationException("Invalid email format.");
+
+            this.Email = email;
+
+            if (phoneNumber <= 0)
+                throw new BusinessRuleValidationException("Invalid phone number.");
+            if (phoneNumber.ToString().Length != 9)
+                throw new BusinessRuleValidationException("Phone number needs to have 9 numbers.");
+
+            this.PhoneNumber = phoneNumber;
+            this.OperationalWindow = operationalWindow ?? new OperationalWindow(TimeSpan.Zero, TimeSpan.Zero);
+            this.Status = MemberStatus.Available;
             this.Qualifications = qualifications;
         }
 
@@ -74,6 +122,7 @@ namespace DDDSample1.Domain.StaffMembers
         private StaffMember() 
         {
             this.Qualifications = new List<Qualification>(); // Inicializar lista vazia para evitar NullReferenceException
+            this.OperationalWindow = new OperationalWindow(TimeSpan.Zero, TimeSpan.Zero);
         }
 
         public void ChangeName(string name)
@@ -110,6 +159,14 @@ namespace DDDSample1.Domain.StaffMembers
 
         public void ChangeOperationalWindow(string operationalWindow)
         {
+            this.OperationalWindow = new OperationalWindow(operationalWindow);
+        }
+
+        public void ChangeOperationalWindow(OperationalWindow operationalWindow)
+        {
+            if (operationalWindow == null)
+                throw new BusinessRuleValidationException("Operational window cannot be null.");
+
             this.OperationalWindow = operationalWindow;
         }
 
