@@ -96,6 +96,7 @@ package "ShippingAgentOrganization Aggregate" {
         nationality: String
         email: String
         phoneNumber: int
+        citizenId : string
     }
 
     class OrganizationRepresentativeID <<EntityId>>{
