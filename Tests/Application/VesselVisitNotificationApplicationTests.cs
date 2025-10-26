@@ -813,6 +813,561 @@ namespace DDDNetCore.Tests.Application
 
             results.Should().ContainSingle(r => r.VesselId == vessel1.Id.AsGuid());
         }
+
+        // ===== US 2.2.10 Tests: Search and Filter Notifications =====
+        
+        [Fact]
+        public async Task SearchNotifications_WithoutFilters_ReturnsAllNotifications()
+        {
+            // Arrange
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+            var rep = new InMemoryRepresentativeRepository();
+            
+            var vesselType = new VesselType("TypeSearch1", "desc", 10000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel = new Vessel("IMO1111111", "Search Test Vessel", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel);
+
+            var representative = new Representative("Rep Name", "REP100", "PT", "rep100@gmail.com", "+351911111100");
+            await rep.AddAsync(representative);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo, rep);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(10) };
+            var createDto1 = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP100",
+                LoadingManifests = loading,
+                UnloadingManifests = null,
+                Crew = null
+            };
+            var createDto2 = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP100",
+                LoadingManifests = loading,
+                UnloadingManifests = null,
+                Crew = null
+            };
+            
+            await service.CreateAsync(createDto1);
+            await service.CreateAsync(createDto2);
+
+            // Act
+            var filter = new NotificationFilterDto(); // No filters
+            var results = await service.SearchNotificationsAsync(filter);
+
+            // Assert
+            results.Should().HaveCount(2);
+            results.Should().OnlyContain(n => n.RepresentativeId == "REP100");
+        }
+
+        [Fact]
+        public async Task SearchNotifications_FilterByStatus_ReturnsMatchingNotifications()
+        {
+            // Arrange
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+            var rep = new InMemoryRepresentativeRepository();
+            
+            var vesselType = new VesselType("TypeSearch2", "desc", 10000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel = new Vessel("IMO2222222", "Status Test Vessel", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel);
+
+            var representative = new Representative("Rep Name", "REP101", "PT", "rep101@gmail.com", "+351911111101");
+            await rep.AddAsync(representative);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo, rep);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(10) };
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP101",
+                LoadingManifests = loading,
+                UnloadingManifests = null,
+                Crew = null
+            };
+            
+            var dto1 = await service.CreateAsync(createDto);
+            var notification1 = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto1.Id));
+            
+            // Set one to Completed using reflection
+            var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
+            statusProp.SetValue(notification1, NotificationStatus.Completed);
+
+            // Create another that stays InProgress
+            var dto2 = await service.CreateAsync(createDto);
+
+            // Act
+            var filter = new NotificationFilterDto { Status = NotificationStatus.Completed };
+            var results = await service.SearchNotificationsAsync(filter);
+
+            // Assert
+            results.Should().ContainSingle();
+            results.First().Id.Should().Be(dto1.Id);
+            results.First().Status.Should().Be(NotificationStatus.Completed);
+        }
+
+        [Fact]
+        public async Task SearchNotifications_FilterByRepresentative_ReturnsOnlyTheirNotifications()
+        {
+            // Arrange
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+            var rep = new InMemoryRepresentativeRepository();
+            
+            var vesselType = new VesselType("TypeSearch3", "desc", 10000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel = new Vessel("IMO3333334", "Rep Filter Vessel", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel);
+
+            var representative1 = new Representative("Rep One", "REP102", "PT", "rep102@gmail.com", "+351911111102");
+            var representative2 = new Representative("Rep Two", "REP103", "PT", "rep103@gmail.com", "+351911111103");
+            await rep.AddAsync(representative1);
+            await rep.AddAsync(representative2);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo, rep);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(10) };
+            var createDto1 = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP102",
+                LoadingManifests = loading,
+                UnloadingManifests = null,
+                Crew = null
+            };
+            var createDto2 = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP103",
+                LoadingManifests = loading,
+                UnloadingManifests = null,
+                Crew = null
+            };
+            
+            await service.CreateAsync(createDto1);
+            await service.CreateAsync(createDto2);
+
+            // Act
+            var filter = new NotificationFilterDto { RepresentativeId = "REP102" };
+            var results = await service.SearchNotificationsAsync(filter);
+
+            // Assert
+            results.Should().ContainSingle();
+            results.First().RepresentativeId.Should().Be("REP102");
+        }
+
+        [Fact]
+        public async Task SearchNotifications_FilterByDateRange_ReturnsNotificationsInRange()
+        {
+            // Arrange
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+            var rep = new InMemoryRepresentativeRepository();
+            
+            var vesselType = new VesselType("TypeSearch4", "desc", 10000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel = new Vessel("IMO4444445", "Date Filter Vessel", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel);
+
+            var representative = new Representative("Rep Name", "REP104", "PT", "rep104@gmail.com", "+351911111104");
+            await rep.AddAsync(representative);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo, rep);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(10) };
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP104",
+                LoadingManifests = loading,
+                UnloadingManifests = null,
+                Crew = null
+            };
+            
+            // Create notifications
+            var dto1 = await service.CreateAsync(createDto);
+            await Task.Delay(100); // Small delay to ensure different timestamps
+            var dto2 = await service.CreateAsync(createDto);
+
+            // Act - Search for notifications created today
+            var filter = new NotificationFilterDto 
+            { 
+                StartDate = DateTime.UtcNow.Date,
+                EndDate = DateTime.UtcNow.Date.AddDays(1)
+            };
+            var results = await service.SearchNotificationsAsync(filter);
+
+            // Assert
+            results.Should().HaveCount(2);
+            results.Should().Contain(n => n.Id == dto1.Id);
+            results.Should().Contain(n => n.Id == dto2.Id);
+        }
+
+        [Fact]
+        public async Task SearchNotifications_CombinedFilters_ReturnsMatchingNotifications()
+        {
+            // Arrange
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+            var rep = new InMemoryRepresentativeRepository();
+            
+            var vesselType = new VesselType("TypeSearch5", "desc", 10000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel1 = new Vessel("IMO5555556", "Combined Filter Vessel 1", vesselType.Id, "Owner", "Operator");
+            var vessel2 = new Vessel("IMO6666666", "Combined Filter Vessel 2", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel1);
+            await vesselRepo.AddAsync(vessel2);
+
+            var representative = new Representative("Rep Name", "REP105", "PT", "rep105@gmail.com", "+351911111105");
+            await rep.AddAsync(representative);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo, rep);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(10) };
+            
+            // Create notification for vessel1 with status InProgress
+            var createDto1 = new CreateNotificationDto()
+            {
+                VesselId = vessel1.Id.AsGuid(),
+                RepresentativeId = "REP105",
+                LoadingManifests = loading,
+                UnloadingManifests = null,
+                Crew = null
+            };
+            var dto1 = await service.CreateAsync(createDto1);
+            
+            // Create notification for vessel2 with status Completed
+            var createDto2 = new CreateNotificationDto()
+            {
+                VesselId = vessel2.Id.AsGuid(),
+                RepresentativeId = "REP105",
+                LoadingManifests = loading,
+                UnloadingManifests = null,
+                Crew = null
+            };
+            var dto2 = await service.CreateAsync(createDto2);
+            var notification2 = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto2.Id));
+            
+            // Set notification2 to Completed
+            var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
+            statusProp.SetValue(notification2, NotificationStatus.Completed);
+
+            // Act - Search for vessel1 AND InProgress status
+            var filter = new NotificationFilterDto 
+            { 
+                VesselId = vessel1.Id.AsGuid(),
+                Status = NotificationStatus.InProgress
+            };
+            var results = await service.SearchNotificationsAsync(filter);
+
+            // Assert - Should only return the notification for vessel1 with InProgress status
+            results.Should().ContainSingle();
+            results.First().Id.Should().Be(dto1.Id);
+            results.First().VesselId.Should().Be(vessel1.Id.AsGuid());
+            results.First().Status.Should().Be(NotificationStatus.InProgress);
+        }
+
+        [Fact]
+        public async Task SearchNotifications_NoMatchingFilters_ReturnsEmptyList()
+        {
+            // Arrange
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+            var rep = new InMemoryRepresentativeRepository();
+            
+            var vesselType = new VesselType("TypeSearch6", "desc", 10000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel = new Vessel("IMO7777778", "Empty Search Vessel", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel);
+
+            var representative = new Representative("Rep Name", "REP106", "PT", "rep106@gmail.com", "+351911111106");
+            await rep.AddAsync(representative);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo, rep);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(10) };
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP106",
+                LoadingManifests = loading,
+                UnloadingManifests = null,
+                Crew = null
+            };
+            
+            await service.CreateAsync(createDto);
+
+            // Act - Search for notifications with status Approved (none exist)
+            var filter = new NotificationFilterDto { Status = NotificationStatus.Approved };
+            var results = await service.SearchNotificationsAsync(filter);
+
+            // Assert
+            results.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task SearchNotifications_FilterByStartDateOnly_ReturnsNotificationsAfterDate()
+        {
+            // Arrange
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+            var rep = new InMemoryRepresentativeRepository();
+            
+            var vesselType = new VesselType("TypeSearch8", "desc", 10000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel = new Vessel("IMO9999990", "Start Date Vessel", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel);
+
+            var representative = new Representative("Rep Name", "REP108", "PT", "rep108@gmail.com", "+351911111108");
+            await rep.AddAsync(representative);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo, rep);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(10) };
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP108",
+                LoadingManifests = loading,
+                UnloadingManifests = null,
+                Crew = null
+            };
+            
+            var dto1 = await service.CreateAsync(createDto);
+
+            // Act - Search for notifications created from today onwards
+            var filter = new NotificationFilterDto { StartDate = DateTime.UtcNow.Date };
+            var results = await service.SearchNotificationsAsync(filter);
+
+            // Assert
+            results.Should().NotBeEmpty();
+            results.Should().Contain(n => n.Id == dto1.Id);
+            results.Should().OnlyContain(n => n.CreatedAt >= DateTime.UtcNow.Date);
+        }
+
+        [Fact]
+        public async Task SearchNotifications_FilterByEndDateOnly_ReturnsNotificationsBeforeDate()
+        {
+            // Arrange
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+            var rep = new InMemoryRepresentativeRepository();
+            
+            var vesselType = new VesselType("TypeSearch9", "desc", 10000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel = new Vessel("IMO0000001", "End Date Vessel", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel);
+
+            var representative = new Representative("Rep Name", "REP109", "PT", "rep109@gmail.com", "+351911111109");
+            await rep.AddAsync(representative);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo, rep);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(10) };
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP109",
+                LoadingManifests = loading,
+                UnloadingManifests = null,
+                Crew = null
+            };
+            
+            var dto1 = await service.CreateAsync(createDto);
+
+            // Act - Search for notifications created up to tomorrow
+            var filter = new NotificationFilterDto { EndDate = DateTime.UtcNow.Date.AddDays(2) };
+            var results = await service.SearchNotificationsAsync(filter);
+
+            // Assert
+            results.Should().NotBeEmpty();
+            results.Should().Contain(n => n.Id == dto1.Id);
+            results.Should().OnlyContain(n => n.CreatedAt <= DateTime.UtcNow.Date.AddDays(2));
+        }
+
+        [Fact]
+        public async Task SearchNotifications_FilterByMultipleStatuses_ReturnsMatchingNotifications()
+        {
+            // Arrange
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+            var rep = new InMemoryRepresentativeRepository();
+            
+            var vesselType = new VesselType("TypeSearch10", "desc", 10000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel = new Vessel("IMO1010102", "Multi Status Vessel", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel);
+
+            var representative = new Representative("Rep Name", "REP110", "PT", "rep110@gmail.com", "+351911111110");
+            await rep.AddAsync(representative);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo, rep);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(10) };
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP110",
+                LoadingManifests = loading,
+                UnloadingManifests = null,
+                Crew = null
+            };
+            
+            // Create InProgress notification
+            var dto1 = await service.CreateAsync(createDto);
+            
+            // Create and set to Completed
+            var dto2 = await service.CreateAsync(createDto);
+            var notification2 = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto2.Id));
+            var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
+            statusProp.SetValue(notification2, NotificationStatus.Completed);
+            
+            // Create and set to Approved
+            var dto3 = await service.CreateAsync(createDto);
+            var notification3 = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto3.Id));
+            statusProp.SetValue(notification3, NotificationStatus.Completed);
+            await service.ApproveAsync(dto3.Id, "Dock1", "Officer1");
+
+            // Act - Search for InProgress notifications
+            var filterInProgress = new NotificationFilterDto { Status = NotificationStatus.InProgress };
+            var resultsInProgress = await service.SearchNotificationsAsync(filterInProgress);
+
+            // Assert
+            resultsInProgress.Should().ContainSingle();
+            resultsInProgress.First().Status.Should().Be(NotificationStatus.InProgress);
+
+            // Act - Search for Approved notifications
+            var filterApproved = new NotificationFilterDto { Status = NotificationStatus.Approved };
+            var resultsApproved = await service.SearchNotificationsAsync(filterApproved);
+
+            // Assert
+            resultsApproved.Should().ContainSingle();
+            resultsApproved.First().Status.Should().Be(NotificationStatus.Approved);
+        }
+
+        [Fact]
+        public async Task SearchNotifications_ApprovedStatus_IncludesDockAssignment()
+        {
+            // Arrange
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+            var rep = new InMemoryRepresentativeRepository();
+            
+            var vesselType = new VesselType("TypeSearch11", "desc", 10000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel = new Vessel("IMO1111103", "Approved Dock Vessel", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel);
+
+            var representative = new Representative("Rep Name", "REP111", "PT", "rep111@gmail.com", "+351911111111");
+            await rep.AddAsync(representative);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo, rep);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(10) };
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP111",
+                LoadingManifests = loading,
+                UnloadingManifests = null,
+                Crew = null
+            };
+            
+            var dto = await service.CreateAsync(createDto);
+            var notification = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
+            
+            // Set to Completed and approve
+            var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
+            statusProp.SetValue(notification, NotificationStatus.Completed);
+            await service.ApproveAsync(dto.Id, "DockA", "OfficerX");
+
+            // Act
+            var filter = new NotificationFilterDto { Status = NotificationStatus.Approved };
+            var results = await service.SearchNotificationsAsync(filter);
+
+            // Assert
+            results.Should().ContainSingle();
+            results.First().Status.Should().Be(NotificationStatus.Approved);
+            results.First().AssignedDock.Should().Be("DockA");
+            results.First().OfficerId.Should().Be("OfficerX");
+            results.First().DecisionOutcome.Should().Be("Approved");
+        }
+
+        [Fact]
+        public async Task SearchNotifications_RejectedStatus_IncludesRejectionReason()
+        {
+            // Arrange
+            var vesselRepo = new InMemoryVesselRepository();
+            var vesselTypeRepo = new InMemoryVesselTypeRepository();
+            var notifRepo = new InMemoryVesselVisitNotificationRepository();
+            var uow = new InMemoryUnitOfWork();
+            var rep = new InMemoryRepresentativeRepository();
+            
+            var vesselType = new VesselType("TypeSearch12", "desc", 10000, 1, 1, 1);
+            await vesselTypeRepo.AddAsync(vesselType);
+            var vessel = new Vessel("IMO1212104", "Rejected Reason Vessel", vesselType.Id, "Owner", "Operator");
+            await vesselRepo.AddAsync(vessel);
+
+            var representative = new Representative("Rep Name", "REP112", "PT", "rep112@gmail.com", "+351911111112");
+            await rep.AddAsync(representative);
+
+            var service = new VesselVisitNotificationService(uow, notifRepo, vesselRepo, vesselTypeRepo, rep);
+
+            var loading = new List<CargoManifest>{ CreateManifestWithContainer(10) };
+            var createDto = new CreateNotificationDto()
+            {
+                VesselId = vessel.Id.AsGuid(),
+                RepresentativeId = "REP112",
+                LoadingManifests = loading,
+                UnloadingManifests = null,
+                Crew = null
+            };
+            
+            var dto = await service.CreateAsync(createDto);
+            var notification = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
+            
+            // Set to Completed and reject
+            var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
+            statusProp.SetValue(notification, NotificationStatus.Completed);
+            await service.RejectAsync(dto.Id, "Insufficient documentation", "OfficerY");
+
+            // Act
+            var filter = new NotificationFilterDto { Status = NotificationStatus.Rejected };
+            var results = await service.SearchNotificationsAsync(filter);
+
+            // Assert
+            results.Should().ContainSingle();
+            results.First().Status.Should().Be(NotificationStatus.Rejected);
+            results.First().RejectedReason.Should().Be("Insufficient documentation");
+            results.First().OfficerId.Should().Be("OfficerY");
+            results.First().DecisionOutcome.Should().Be("Rejected");
+        }
     }
     
 }
