@@ -19,12 +19,13 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             IUnitOfWork unitOfWork,
             IVesselVisitNotificationRepository repo,
             IVesselRepository vesselRepo,
-            IVesselTypeRepository vesselTypeRepo)
+            IVesselTypeRepository vesselTypeRepo,IRepresentativeRepository representativeRepo)
         {
             _unitOfWork = unitOfWork;
             _repo = repo;
             _vesselRepo = vesselRepo;
             _vesselTypeRepo = vesselTypeRepo;
+            _representativeRepo = representativeRepo;
         }
         
         //Create new notification
