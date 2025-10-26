@@ -1246,12 +1246,12 @@ namespace DDDNetCore.Tests.Application
             var dto2 = await service.CreateAsync(createDto);
             var notification2 = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto2.Id));
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
-            statusProp.SetValue(notification2, NotificationStatus.Completed);
+            statusProp.SetValue(notification2, NotificationStatus.Submitted);
             
             // Create and set to Approved
             var dto3 = await service.CreateAsync(createDto);
             var notification3 = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto3.Id));
-            statusProp.SetValue(notification3, NotificationStatus.Completed);
+            statusProp.SetValue(notification3, NotificationStatus.Submitted);
             await service.ApproveAsync(dto3.Id, "Dock1", "Officer1");
 
             // Act - Search for InProgress notifications
@@ -1306,7 +1306,7 @@ namespace DDDNetCore.Tests.Application
             
             // Set to Completed and approve
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
-            statusProp.SetValue(notification, NotificationStatus.Completed);
+            statusProp.SetValue(notification, NotificationStatus.Submitted);
             await service.ApproveAsync(dto.Id, "DockA", "OfficerX");
 
             // Act
@@ -1356,7 +1356,7 @@ namespace DDDNetCore.Tests.Application
             
             // Set to Completed and reject
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
-            statusProp.SetValue(notification, NotificationStatus.Completed);
+            statusProp.SetValue(notification, NotificationStatus.Submitted);
             await service.RejectAsync(dto.Id, "Insufficient documentation", "OfficerY");
 
             // Act
