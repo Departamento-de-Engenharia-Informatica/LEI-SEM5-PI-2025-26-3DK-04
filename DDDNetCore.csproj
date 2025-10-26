@@ -33,5 +33,9 @@
     <Folder Include="Migrations\" />
     <Folder Include="out\" />
   </ItemGroup>
+ 
+  <ItemGroup>
+    <Compile Remove="Migrations\DDDSample1DbContextModelSnapshot.cs" />
+  </ItemGroup>
 
 </Project>
