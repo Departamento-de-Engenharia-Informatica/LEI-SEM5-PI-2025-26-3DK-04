@@ -83,7 +83,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpPut("{id}/update")]
-        public async Task<ActionResult<VesselVisitNotificationDto>> UpdateInProgress(string id, [FromBody] UpdateNotificationDto dto)
+        public async Task<ActionResult<VesselVisitNotificationDto>> UpdateInProgress(Guid id, [FromBody] UpdateNotificationDto dto)
         {
             try
             {

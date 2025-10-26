@@ -178,13 +178,13 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             return dto;
         }
         
-         public async Task<VesselVisitNotificationDto> UpdateInProgressAsync(string Id,UpdateNotificationDto dto)
+         public async Task<VesselVisitNotificationDto> UpdateInProgressAsync(Guid Id,UpdateNotificationDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.VesselId) && dto.LoadingCargo == null && dto.UnloadingCargo == null)
             {
                 throw new BusinessRuleValidationException("At least one field (VesselId, LoadingCargo, or UnloadingCargo) must be provided for update.");
             }
-            var notificationId = new VesselVisitNotificationID(Guid.Parse(Id));
+            var notificationId = new VesselVisitNotificationID(Id);
             var notification = await _repo.GetByIdAsync(notificationId);
 
             if (notification == null)
