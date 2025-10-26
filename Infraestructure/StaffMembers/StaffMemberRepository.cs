@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using DDDSample1.Domain.StaffMembers;
+using DDDSample1.Domain.Qualifications;
 using DDDSample1.Infrastructure.Shared;
 
 namespace DDDSample1.Infrastructure.StaffMembers
@@ -46,7 +47,8 @@ namespace DDDSample1.Infrastructure.StaffMembers
         {
             return await _objs
                 .Include(s => s.Qualifications)  // Carregar qualificações
-                .Where(s => s.Qualifications.Any(q => q.Id.AsGuid() == qualificationId))
+                // Compare using a QualificationID value so EF Core can apply the configured HasConversion
+                .Where(s => s.Qualifications.Any(q => q.Id == new QualificationID(qualificationId)))
                 .ToListAsync();
         }
         
@@ -66,7 +68,8 @@ namespace DDDSample1.Infrastructure.StaffMembers
                 query = query.Where(s => s.Status == status.Value);
 
             if (qualificationId.HasValue)
-                query = query.Where(s => s.Qualifications.Any(q => q.Id.AsGuid() == qualificationId.Value));
+                // Compare using a QualificationID value so EF Core can apply the configured HasConversion
+                query = query.Where(s => s.Qualifications.Any(q => q.Id == new QualificationID(qualificationId.Value)));
 
             return await query.ToListAsync();
         }

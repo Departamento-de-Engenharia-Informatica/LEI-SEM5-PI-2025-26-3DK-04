@@ -13,11 +13,11 @@ namespace DDDSample1.Domain.StaffMembers
         public string Name { get; set; }
         public string Email { get; set; }
         public int PhoneNumber { get; set; }
-        public string OperationalWindow { get; set; }
+        public OperationalWindowDto OperationalWindow { get; set; }
         public MemberStatus Status { get; set; }
         public List<QualificationDto> Qualifications { get; set; }
 
-        public StaffMemberDto(string name, string email, int phoneNumber, string operationalWindow)
+        public StaffMemberDto(string name, string email, int phoneNumber, OperationalWindowDto operationalWindow)
         {
             this.Id = Guid.NewGuid();
             this.Name = name;

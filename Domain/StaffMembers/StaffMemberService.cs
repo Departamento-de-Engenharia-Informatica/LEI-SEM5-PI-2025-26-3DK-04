@@ -27,11 +27,21 @@ namespace DDDSample1.Domain.StaffMembers
         public async Task<StaffMemberDto> CreateAsync(CreateStaffMemberDto dto)
         {
             // Criar entidade de domínio (sem qualificações inicialmente)
+            // Deferir conversão de OperationalWindowDto para domínio: passar string ao construtor
+            // para que a validação dentro do domínio (email -> phone -> operationalWindow) ocorra na ordem do construtor
+            string operationalWindowString = null;
+            if (dto.OperationalWindow != null)
+            {
+                var start = dto.OperationalWindow.StartTime?.Trim();
+                var end = dto.OperationalWindow.EndTime?.Trim();
+                operationalWindowString = $"{start}-{end}";
+            }
+
             var staffMember = new StaffMember(
                 dto.Name,
                 dto.Email,
                 dto.PhoneNumber,
-                dto.OperationalWindow
+                operationalWindowString
             );
             
             // Adicionar ao repositório
@@ -72,8 +82,8 @@ namespace DDDSample1.Domain.StaffMembers
             if (dto.PhoneNumber.HasValue)
                 staffMember.ChangePhoneNumber(dto.PhoneNumber.Value);
             
-            if (!string.IsNullOrWhiteSpace(dto.OperationalWindow))
-                staffMember.ChangeOperationalWindow(dto.OperationalWindow);
+            if (dto.OperationalWindow != null)
+                staffMember.ChangeOperationalWindow(dto.OperationalWindow.ToDomain());
             
             if (dto.Status.HasValue)
                 staffMember.ChangeStatus(dto.Status.Value);
@@ -206,7 +216,7 @@ namespace DDDSample1.Domain.StaffMembers
                 staffMember.Name,
                 staffMember.Email,
                 staffMember.PhoneNumber,
-                staffMember.OperationalWindow
+                OperationalWindowDto.FromDomain(staffMember.OperationalWindow)
             )
             {
                 Id = staffMember.Id.AsGuid(),

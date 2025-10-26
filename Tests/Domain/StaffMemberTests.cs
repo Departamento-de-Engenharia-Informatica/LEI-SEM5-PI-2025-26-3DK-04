@@ -18,7 +18,7 @@ namespace DDDNetCore.Tests.Domain
 			staff.Name.Should().Be("John Doe");
 			staff.Email.Should().Be("john@example.com");
 			staff.PhoneNumber.Should().Be(912345678);
-			staff.OperationalWindow.Should().Be("08:00-17:00");
+			staff.OperationalWindow.ToString().Should().Be("08:00-17:00");
 			staff.Status.Should().Be(MemberStatus.Available);
 			staff.Qualifications.Should().NotBeNull();
 			staff.Qualifications.Should().BeEmpty();
@@ -217,8 +217,8 @@ namespace DDDNetCore.Tests.Domain
 		[Fact]
 		public void WhenCreatingTwoStaffMembers_ShouldHaveDifferentIds()
 		{
-			var s1 = new StaffMember("A","a@a.com",912345678,"ow");
-			var s2 = new StaffMember("B","b@b.com",912345679,"ow");
+			var s1 = new StaffMember("A","a@a.com",912345678,"08:00-17:00");
+			var s2 = new StaffMember("B","b@b.com",912345679,"08:00-17:00");
 
 			s1.Id.Should().NotBe(s2.Id);
 		}
