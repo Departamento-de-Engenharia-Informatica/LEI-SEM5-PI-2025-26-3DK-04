@@ -14,7 +14,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         private readonly IVesselVisitNotificationRepository _repo;
         private readonly IVesselRepository _vesselRepo;
         private readonly IVesselTypeRepository _vesselTypeRepo;
-        
+        private readonly IRepresentativeRepository _representativeRepo;
         public VesselVisitNotificationService(
             IUnitOfWork unitOfWork,
             IVesselVisitNotificationRepository repo,
@@ -30,24 +30,29 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         //Create new notification
         public async Task<VesselVisitNotificationDto> CreateAsync(CreateNotificationDto dto)
         {
-            // 1️⃣ Obter o vessel
+            //  Obter o vessel
             var vessel = await _vesselRepo.GetByIdAsync(new VesselId(dto.VesselId));
             if (vessel == null)
                 throw new BusinessRuleValidationException("Vessel not found.");
 
-            // 2️⃣ Obter o vessel type
+            //  Obter o vessel type
             var vesselType = await _vesselTypeRepo.GetByIdAsync(vessel.VesselTypeId);
             if (vesselType == null)
                 throw new BusinessRuleValidationException("Vessel type not found.");
 
-            // 3️⃣ Atualizar crew se vier no DTO
+            //  Verificar se o representante existe
+            var representative = await _representativeRepo.GetByIdAsync(new RepresentativeId(dto.RepresentativeId));
+            if (representative == null)
+                throw new BusinessRuleValidationException("Representative not found.");
+
+            //  Atualizar crew se vier no DTO
             if (dto.Crew != null && dto.Crew.Any())
             {
                 vessel.setCrew(dto.Crew);
                 await _vesselRepo.UpdateAsync(vessel);
             }
 
-            // 4️⃣ Criar LoadingCargoMaterial
+            // Criar LoadingCargoMaterial (opcional)
             LoadingCargoMaterial loadingCargo = null;
             if (dto.LoadingManifests != null && dto.LoadingManifests.Any())
             {
@@ -60,7 +65,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 loadingCargo = new LoadingCargoMaterial(manifests);
             }
 
-// Unloading cargo
+            //  Criar UnloadingCargoMaterial (opcional)
             UnloadingCargoMaterial unloadingCargo = null;
             if (dto.UnloadingManifests != null && dto.UnloadingManifests.Any())
             {
@@ -73,8 +78,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 unloadingCargo = new UnloadingCargoMaterial(manifests);
             }
 
-
-            // 6️⃣ Validar capacidade do vessel (apenas unloading)
+            //  Validar capacidade do vessel (apenas unloading)
             if (unloadingCargo != null)
             {
                 var totalUnloadWeight = unloadingCargo.TotalWeightKg();
@@ -82,8 +86,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                     throw new BusinessRuleValidationException(
                         $"Unloading cargo weight ({totalUnloadWeight} kg) cannot exceed vessel capacity ({vesselType.Capacity} kg).");
             }
-
-            // 7️⃣ Criar a notificação
+            
             var notification = new VesselVisitNotification(
                 vessel,
                 loadingCargo,
@@ -96,6 +99,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
             return MapToDto(notification);
         }
+
 
 
 
@@ -189,11 +193,11 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             if (notification.Status != NotificationStatus.InProgress)
                 throw new BusinessRuleValidationException("Only notifications with 'InProgress' status can be updated.");
 
-            // --- Obter o vessel atual (ou o novo se for atualizado) ---
+            
             Vessel vesselToUse = notification.Vessel;
             bool vesselChanged = false;
 
-            if (!string.IsNullOrWhiteSpace(dto.VesselId))
+            if (!string.IsNullOrWhiteSpace(dto.VesselId) || dto.VesselId != vesselToUse.Id.AsString())
             {
                 var newVessel = await _vesselRepo.GetByIdAsync(new VesselId(Guid.Parse(dto.VesselId)));
                 if (newVessel == null)
