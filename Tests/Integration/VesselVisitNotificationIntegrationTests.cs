@@ -193,10 +193,10 @@ namespace DDDNetCore.Tests.Integration
                 await db.SaveChangesAsync();
                 notifId = notif.Id.AsGuid();
 
-                // Set status to Completed via DbContext (reflection since setter is private)
+                // Set status to Submitted via DbContext (reflection since setter is private)
                 var notifEntity = await db.VesselVisitNotifications.FindAsync(notif.Id);
                 var statusProp = notifEntity.GetType().GetProperty("Status");
-                statusProp.SetValue(notifEntity, NotificationStatus.Completed);
+                statusProp.SetValue(notifEntity, NotificationStatus.Submitted);
                 await db.SaveChangesAsync();
             }
 
@@ -238,10 +238,10 @@ namespace DDDNetCore.Tests.Integration
                 await db.SaveChangesAsync();
                 notifId = notif.Id.AsGuid();
 
-                // Set status to Completed via DbContext
+                // Set status to Submitted via DbContext
                 var notifEntity = await db.VesselVisitNotifications.FindAsync(notif.Id);
                 var statusProp = notifEntity.GetType().GetProperty("Status");
-                statusProp.SetValue(notifEntity, NotificationStatus.Completed);
+                statusProp.SetValue(notifEntity, NotificationStatus.Submitted);
                 await db.SaveChangesAsync();
             }
 
@@ -283,7 +283,7 @@ namespace DDDNetCore.Tests.Integration
 
                 var notifEntity = await db.VesselVisitNotifications.FindAsync(notif.Id);
                 var statusProp = notifEntity.GetType().GetProperty("Status");
-                statusProp.SetValue(notifEntity, NotificationStatus.Completed);
+                statusProp.SetValue(notifEntity, NotificationStatus.Submitted);
                 await db.SaveChangesAsync();
             }
 
@@ -324,7 +324,7 @@ namespace DDDNetCore.Tests.Integration
 
                 var notifEntity = await db.VesselVisitNotifications.FindAsync(notif.Id);
                 var statusProp = notifEntity.GetType().GetProperty("Status");
-                statusProp.SetValue(notifEntity, NotificationStatus.Completed);
+                statusProp.SetValue(notifEntity, NotificationStatus.Submitted);
                 await db.SaveChangesAsync();
             }
 
@@ -365,7 +365,7 @@ namespace DDDNetCore.Tests.Integration
 
                 var notifEntity = await db.VesselVisitNotifications.FindAsync(notif.Id);
                 var statusProp = notifEntity.GetType().GetProperty("Status");
-                statusProp.SetValue(notifEntity, NotificationStatus.Completed);
+                statusProp.SetValue(notifEntity, NotificationStatus.Submitted);
                 await db.SaveChangesAsync();
             }
 

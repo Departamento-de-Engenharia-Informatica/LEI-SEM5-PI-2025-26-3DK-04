@@ -249,7 +249,7 @@ namespace DDDSample1.Tests.System
                 // Load the notification including tracking so we can modify
                 var notifEntity = await db.VesselVisitNotifications.FindAsync(new DDDSample1.Domain.Vessels.VesselVisitNotification.VesselVisitNotificationID(notifId));
                 var statusProp = notifEntity.GetType().GetProperty("Status");
-                statusProp.SetValue(notifEntity, DDDSample1.Domain.Vessels.VesselVisitNotification.NotificationStatus.Completed);
+                statusProp.SetValue(notifEntity, DDDSample1.Domain.Vessels.VesselVisitNotification.NotificationStatus.Submitted);
                 await db.SaveChangesAsync();
             }
 
@@ -308,7 +308,7 @@ namespace DDDSample1.Tests.System
                 var db = scope.ServiceProvider.GetRequiredService<DDDSample1DbContext>();
                 var notifEntity = await db.VesselVisitNotifications.FindAsync(new DDDSample1.Domain.Vessels.VesselVisitNotification.VesselVisitNotificationID(notifId));
                 var statusProp = notifEntity.GetType().GetProperty("Status");
-                statusProp.SetValue(notifEntity, DDDSample1.Domain.Vessels.VesselVisitNotification.NotificationStatus.Completed);
+                statusProp.SetValue(notifEntity, DDDSample1.Domain.Vessels.VesselVisitNotification.NotificationStatus.Submitted);
                 await db.SaveChangesAsync();
             }
 
@@ -361,7 +361,7 @@ namespace DDDSample1.Tests.System
 
                 var notifEntity = await db.VesselVisitNotifications.FindAsync(new DDDSample1.Domain.Vessels.VesselVisitNotification.VesselVisitNotificationID(notifId));
                 var statusProp = notifEntity.GetType().GetProperty("Status");
-                statusProp.SetValue(notifEntity, DDDSample1.Domain.Vessels.VesselVisitNotification.NotificationStatus.Completed);
+                statusProp.SetValue(notifEntity, DDDSample1.Domain.Vessels.VesselVisitNotification.NotificationStatus.Submitted);
                 await db.SaveChangesAsync();
             }
 
@@ -413,7 +413,7 @@ namespace DDDSample1.Tests.System
 
                 var notifEntity = await db.VesselVisitNotifications.FindAsync(new DDDSample1.Domain.Vessels.VesselVisitNotification.VesselVisitNotificationID(notifId));
                 var statusProp = notifEntity.GetType().GetProperty("Status");
-                statusProp.SetValue(notifEntity, DDDSample1.Domain.Vessels.VesselVisitNotification.NotificationStatus.Completed);
+                statusProp.SetValue(notifEntity, DDDSample1.Domain.Vessels.VesselVisitNotification.NotificationStatus.Submitted);
                 await db.SaveChangesAsync();
             }
 
@@ -465,7 +465,7 @@ namespace DDDSample1.Tests.System
 
                 var notifEntity = await db.VesselVisitNotifications.FindAsync(new DDDSample1.Domain.Vessels.VesselVisitNotification.VesselVisitNotificationID(notifId));
                 var statusProp = notifEntity.GetType().GetProperty("Status");
-                statusProp.SetValue(notifEntity, DDDSample1.Domain.Vessels.VesselVisitNotification.NotificationStatus.Completed);
+                statusProp.SetValue(notifEntity, DDDSample1.Domain.Vessels.VesselVisitNotification.NotificationStatus.Submitted);
                 await db.SaveChangesAsync();
             }
 

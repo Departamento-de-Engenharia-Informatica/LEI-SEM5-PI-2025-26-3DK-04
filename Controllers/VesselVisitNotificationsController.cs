@@ -37,10 +37,10 @@ namespace DDDSample1.Controllers
             }
         }
 
-        [HttpGet("completed")]
-        public async Task<ActionResult<List<VesselVisitNotificationDto>>> GetCompletedNotifications()
+        [HttpGet("submitted")]
+        public async Task<ActionResult<List<VesselVisitNotificationDto>>> GetSubmittedNotifications()
         {
-            var notifications = await _service.GetCompletedNotificationsAsync();
+            var notifications = await _service.GetSubmittedNotificationsAsync();
             return Ok(notifications);
         }
 

@@ -193,19 +193,19 @@ namespace DDDNetCore.Tests.Domain
 
             var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
 
-            // Trying to approve when not Completed
+            // Trying to approve when not Submitted
             Action actApprove = () => notif.Approve("D1", "O1");
             actApprove.Should().Throw<BusinessRuleValidationException>()
-                .WithMessage("Only notifications marked as completed can be approved.");
+                .WithMessage("Only notifications marked as submitted can be approved.");
 
-            // Trying to reject when not Completed
+            // Trying to reject when not Submitted
             Action actReject = () => notif.Reject("reason", "O1");
             actReject.Should().Throw<BusinessRuleValidationException>()
-                .WithMessage("Only notifications marked as completed can be rejected.");
+                .WithMessage("Only notifications marked as submitted can be rejected.");
 
-            // set status to Completed via reflection so we can test parameter validation and transitions
+            // set status to Submitted via reflection so we can test parameter validation and transitions
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
-            statusProp.SetValue(notif, NotificationStatus.Completed);
+            statusProp.SetValue(notif, NotificationStatus.Submitted);
 
             // Approve with missing dock/officer should throw
             Action actApproveMissingDock = () => notif.Approve("", "O1");
@@ -223,8 +223,8 @@ namespace DDDNetCore.Tests.Domain
             notif.OfficerId.Should().Be("O1");
             notif.DecisionOutcome.Should().Be("Approved");
 
-            // Reset to Completed and test Reject
-            statusProp.SetValue(notif, NotificationStatus.Completed);
+            // Reset to Submitted and test Reject
+            statusProp.SetValue(notif, NotificationStatus.Submitted);
 
             Action actRejectMissingReason = () => notif.Reject("", "O2");
             actRejectMissingReason.Should().Throw<BusinessRuleValidationException>()
@@ -250,9 +250,9 @@ namespace DDDNetCore.Tests.Domain
 
             var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
 
-            // set to Completed
+            // set to Submitted
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
-            statusProp.SetValue(notif, NotificationStatus.Completed);
+            statusProp.SetValue(notif, NotificationStatus.Submitted);
 
             notif.Approve("Dock-1", "Officer-1");
 
@@ -273,9 +273,9 @@ namespace DDDNetCore.Tests.Domain
 
             var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
 
-            // set to Completed
+            // set to Submitted
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
-            statusProp.SetValue(notif, NotificationStatus.Completed);
+            statusProp.SetValue(notif, NotificationStatus.Submitted);
 
             notif.Reject("Not compliant", "Officer-2");
 
@@ -296,9 +296,9 @@ namespace DDDNetCore.Tests.Domain
 
             var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
 
-            // set to Completed
+            // set to Submitted
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
-            statusProp.SetValue(notif, NotificationStatus.Completed);
+            statusProp.SetValue(notif, NotificationStatus.Submitted);
 
             Action act = () => notif.Approve("", "Officer-3");
 
@@ -316,9 +316,9 @@ namespace DDDNetCore.Tests.Domain
 
             var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
 
-            // set to Completed
+            // set to Submitted
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
-            statusProp.SetValue(notif, NotificationStatus.Completed);
+            statusProp.SetValue(notif, NotificationStatus.Submitted);
 
             Action act = () => notif.Reject("", "Officer-4");
 
@@ -336,9 +336,9 @@ namespace DDDNetCore.Tests.Domain
 
             var notif = new VesselVisitNotification(vessel, loading, unloading, repId);
 
-            // set to Completed and approve
+            // set to Submitted and approve
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
-            statusProp.SetValue(notif, NotificationStatus.Completed);
+            statusProp.SetValue(notif, NotificationStatus.Submitted);
 
             notif.Approve("Dock-99", "Officer-99");
             notif.Status.Should().Be(NotificationStatus.Approved);
@@ -346,12 +346,12 @@ namespace DDDNetCore.Tests.Domain
             // Trying to approve again should fail
             Action actApproveAgain = () => notif.Approve("Dock-99", "Officer-99");
             actApproveAgain.Should().Throw<BusinessRuleValidationException>()
-                .WithMessage("Only notifications marked as completed can be approved.");
+                .WithMessage("Only notifications marked as submitted can be approved.");
 
             // Trying to reject after approval should fail
             Action actRejectAfter = () => notif.Reject("reason", "Officer-100");
             actRejectAfter.Should().Throw<BusinessRuleValidationException>()
-                .WithMessage("Only notifications marked as completed can be rejected.");
+                .WithMessage("Only notifications marked as submitted can be rejected.");
         }
 
         [Fact]

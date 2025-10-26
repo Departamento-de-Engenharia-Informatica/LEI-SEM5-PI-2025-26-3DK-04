@@ -12,7 +12,7 @@ As a Port Authority Officer, I want to review pending Vessel Visit Notifications
 ### 5.3. Implementation Details
 
 - User interaction & endpoints
-  - GET /api/VesselVisitNotifications/completed — list notifications ready for review.
+    - GET /api/VesselVisitNotifications/submitted — list notifications ready for review.
   - PUT /api/VesselVisitNotifications/{id}/approve — approve a notification and assign a dock.
   - PUT /api/VesselVisitNotifications/{id}/reject — reject a notification and record a reason.
 
@@ -35,8 +35,8 @@ As a Port Authority Officer, I want to review pending Vessel Visit Notifications
 #### Controller: `VesselVisitNotificationsController` (review endpoints)
 
 ```csharp
-[HttpGet("completed")]
-public async Task<ActionResult<IEnumerable<VesselVisitNotificationDto>>> GetCompletedNotifications()
+[HttpGet("submitted")]
+public async Task<ActionResult<IEnumerable<VesselVisitNotificationDto>>> GetSubmittedNotifications()
 {
     var dtos = await _service.GetCompletedNotificationsAsync();
     return Ok(dtos);

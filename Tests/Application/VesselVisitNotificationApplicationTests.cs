@@ -163,9 +163,11 @@ namespace DDDNetCore.Tests.Application
                 return Task.FromResult(found);
             }
 
-            public Task<List<VesselVisitNotification>> GetCompletedNotificationsAsync()
+            public Task<List<VesselVisitNotification>> GetSubmittedNotificationsAsync()
             {
-                var found = _items.Where(x => x.Status == NotificationStatus.Completed).ToList();
+                // Tests expect completed/ready-for-review notifications collection; current domain uses 'Submitted' as that state,
+                // so return items with NotificationStatus.Submitted.
+                var found = _items.Where(x => x.Status == NotificationStatus.Submitted).ToList();
                 return Task.FromResult(found);
             }
 
@@ -394,9 +396,9 @@ namespace DDDNetCore.Tests.Application
             var dto = await service.CreateAsync(createDto);
             var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
 
-            // set status to Completed via reflection (domain tests do the same)
+            // set status to Submitted via reflection (domain tests do the same)
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
-            statusProp.SetValue(stored, NotificationStatus.Completed);
+            statusProp.SetValue(stored, NotificationStatus.Submitted);
 
             var approved = await service.ApproveAsync(stored.Id.AsGuid(), "D1", "O1");
             approved.Status.Should().Be(NotificationStatus.Approved);
@@ -444,9 +446,9 @@ namespace DDDNetCore.Tests.Application
             var dto = await service.CreateAsync(createDto);
             var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
 
-            // set to Completed to allow approval
+            // set to Submitted to allow approval
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
-            statusProp.SetValue(stored, NotificationStatus.Completed);
+            statusProp.SetValue(stored, NotificationStatus.Submitted);
 
             var approved = await service.ApproveAsync(stored.Id.AsGuid(), "Dock42", "OfficerA");
             approved.Status.Should().Be(NotificationStatus.Approved);
@@ -495,9 +497,9 @@ namespace DDDNetCore.Tests.Application
             var dto = await service.CreateAsync(createDto);
             var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
 
-            // set to Completed to allow rejection
+            // set to Submitted to allow rejection
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
-            statusProp.SetValue(stored, NotificationStatus.Completed);
+            statusProp.SetValue(stored, NotificationStatus.Submitted);
 
             var rejected = await service.RejectAsync(stored.Id.AsGuid(), "Invalid cargo", "OfficerB");
             rejected.Status.Should().Be(NotificationStatus.Rejected);
@@ -548,9 +550,9 @@ namespace DDDNetCore.Tests.Application
             var dto = await service.CreateAsync(createDto);
             var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
 
-            // set to Completed to allow rejection
+            // set to Submitted to allow rejection
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
-            statusProp.SetValue(stored, NotificationStatus.Completed);
+            statusProp.SetValue(stored, NotificationStatus.Submitted);
 
             Func<Task> act = async () => await service.RejectAsync(stored.Id.AsGuid(), "", "OfficerC");
 
@@ -603,7 +605,7 @@ namespace DDDNetCore.Tests.Application
 
             // Forçar estado Completed
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
-            statusProp.SetValue(stored, NotificationStatus.Completed);
+            statusProp.SetValue(stored, NotificationStatus.Submitted);
 
             Func<Task> act = async () => await service.ApproveAsync(stored.Id.AsGuid(), "", "OfficerD");
 
@@ -653,9 +655,9 @@ namespace DDDNetCore.Tests.Application
             var dto = await service.CreateAsync(createDto);
             var stored = await notifRepo.GetByIdAsync(new VesselVisitNotificationID(dto.Id));
 
-            // set to Completed and approve
+            // set to Submitted and approve
             var statusProp = typeof(VesselVisitNotification).GetProperty("Status", BindingFlags.Instance | BindingFlags.Public);
-            statusProp.SetValue(stored, NotificationStatus.Completed);
+            statusProp.SetValue(stored, NotificationStatus.Submitted);
 
             var approved = await service.ApproveAsync(stored.Id.AsGuid(), "D9", "OfficerE");
             approved.Status.Should().Be(NotificationStatus.Approved);
