@@ -1,7 +1,9 @@
 ﻿## 3. Design
 
 ### 3.1. System Sequence Diagram (SSD)
+![alt text](<../../level1/process_view/1230762%20-%20João%20Monteiro/US%202.2.4/SD_US2_2_4_CREATE.svg>)
 
+![alt text](<../../level1/process_view/1230762%20-%20João%20Monteiro/US%202.2.4/SD_US2_2_4_UPDATE.svg>)
 
 
 ---
@@ -40,7 +42,8 @@
 
 ### 3.4. Sequence Diagram
 
-
+![alt text](../../level3/process_view/createObject/CreateObject.svg)
+![alt text](../../level3/process_view/updateObject/UpdateObject.svg)
 
 ---
 
