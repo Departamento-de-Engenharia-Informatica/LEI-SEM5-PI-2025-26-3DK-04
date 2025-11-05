@@ -1,0 +1,6 @@
+@IartiApi_HostAddress = http://localhost:5116
+
+GET {{IartiApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
