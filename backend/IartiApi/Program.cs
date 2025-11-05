@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace DDDSample1.IartiApi.Properties
+namespace IartiApi
 {
     public class Program
     {

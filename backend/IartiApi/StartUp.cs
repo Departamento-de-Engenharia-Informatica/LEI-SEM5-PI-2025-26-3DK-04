@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace DDDSample1.IartiApi.Properties
+namespace IartiApi
 {
     public class Startup
     {
