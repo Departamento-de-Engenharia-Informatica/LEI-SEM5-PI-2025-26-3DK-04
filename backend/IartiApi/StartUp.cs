@@ -63,7 +63,9 @@ namespace IartiApi
 
         public void ConfigureMyServices(IServiceCollection services)
         {
-            // Regista os teus serviços de planeamento aqui
+            // Regista o HttpClient e o PrologService
+            services.AddHttpClient<IartiApi.Services.PrologService>();
+            services.AddScoped<IartiApi.Services.PrologService>();
         }
     }
 }
