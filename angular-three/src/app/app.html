@@ -1,106 +1,77 @@
-<header class="site-header" role="banner" aria-label="Main header">
+<header class="site-header">
   <div class="header-left">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Port_of_Amsterdam_logo.svg" alt="Port of Amsterdam logo" class="logo">
+    <img src="assets/Port-Of-Amsterdam-Logo.png" alt="Logo" class="logo">
+
     <div class="brand">
       <div class="brand-title">{{ t('appTitle') }}</div>
       <div class="brand-subtitle">{{ t('appSubtitle') }}</div>
     </div>
   </div>
 
-  <nav class="primary-nav" role="navigation" aria-label="Primary navigation">
-    <ul>
-      <li *ngFor="let m of menuItems"><a href="{{ '#' + m.anchor }}">{{ t(m.label) }}</a></li>
-    </ul>
+  <!-- ✅ NAVIGATION WITH ACTIVE STATE, LANG SWITCH & LOGIN -->
+  <nav class="nav-menu">
+    <a
+      *ngFor="let item of menuItems"
+      href="#"
+      (click)="onNavClick($event, item.anchor)"
+      [class.active]="currentAnchor === item.anchor"
+    >{{ t(item.label) }}</a
+    >
+
+    <!-- 🌍 LANGUAGE SWITCH -->
+    <a
+      href="#"
+      (click)="onLangClick($event, 'en')"
+      [class.active]="currentLang === 'en'"
+      aria-label="Switch to English"
+    >EN</a
+    >
+    <a
+      href="#"
+      (click)="onLangClick($event, 'pt')"
+      [class.active]="currentLang === 'pt'"
+      aria-label="Switch to Portuguese"
+    >PT</a
+    >
+
+    <!-- 🔐 LOGIN / LOGOUT STATE -->
+    <ng-container *ngIf="!isLoggedIn; else loggedInBlock">
+      <a href="#" (click)="login()">{{ t('login') }}</a>
+    </ng-container>
+
+    <ng-template #loggedInBlock>
+      <span class="welcome">{{ userName }}</span>
+      <a href="#" (click)="logout()">{{ t('logout') }}</a>
+    </ng-template>
   </nav>
-
-  <div class="header-actions">
-    <div class="lang">
-      <button (click)="switchLanguage('en')" [class.active]="currentLang === 'en'">EN</button>
-      <button (click)="switchLanguage('pt')" [class.active]="currentLang === 'pt'">PT</button>
-    </div>
-
-    <!-- LOGIN BUTTON -->
-    <button *ngIf="!isLoggedIn" class="login" (click)="login()" aria-label="Login button">
-      {{ t('login') }}
-    </button>
-
-    <!-- USER GREETING + LOGOUT -->
-    <div *ngIf="isLoggedIn" class="user-info">
-      <span class="welcome">Olá, {{ userName }}</span>
-      <button class="logout" (click)="logout()" aria-label="Logout button">
-        {{ t('logout') }}
-      </button>
-    </div>
-  </div>
-
 </header>
 
-<div class="breadcrumb" aria-hidden="false">
-  <span>{{ t('breadcrumbHome') }}</span>
-  <span aria-hidden="true">›</span>
-  <span>{{ t('breadcrumbLanding') }}</span>
-</div>
+<!-- ✅ HERO -->
+<section id="home" class="hero" style="background-image: url('assets/Port-Of-Amsterdam.jpg')">
+  <div class="hero-overlay">
+    <h1 class="hero-title">{{ t('heroTitle') }}</h1>
+    <p class="hero-sub">{{ t('heroSubtitle') }}</p>
+  </div>
+</section>
 
-<main class="page">
-  <section id="home" class="hero" role="region" aria-label="Home">
-    <div class="hero-overlay">
-      <h1>{{ t('heroTitle') }}</h1>
-      <p class="lead">{{ t('heroSubtitle') }}</p>
-    </div>
-  </section>
+<!-- ✅ ABOUT -->
+<section id="about" class="section">
+  <div class="container">
+    <h2>{{ t('aboutTitle') }}</h2>
+    <p>{{ t('aboutText') }}</p>
+  </div>
+</section>
 
-  <section id="about" class="section about" role="region" aria-label="About">
-    <div class="container">
-      <h2>{{ t('aboutTitle') }}</h2>
-      <p>{{ t('aboutText') }}</p>
-    </div>
-  </section>
+<!-- ✅ GROUP MEMBERS -->
+<section id="GroupMembers" class="section">
+  <div class="container">
+    <h2>{{ t('groupMembersTitle') }}</h2>
 
-  <section id="operations" class="section operations" role="region" aria-label="Operations">
-    <div class="container">
-      <h2>{{ t('operationsTitle') }}</h2>
-      <div class="cards">
-        <article class="card">
-          <h3>{{ t('op1Title') }}</h3>
-          <p>{{ t('op1Text') }}</p>
-        </article>
-        <article class="card">
-          <h3>{{ t('op2Title') }}</h3>
-          <p>{{ t('op2Text') }}</p>
-        </article>
-        <article class="card">
-          <h3>{{ t('op3Title') }}</h3>
-          <p>{{ t('op3Text') }}</p>
-        </article>
+    <div class="cards">
+      <div class="card" *ngFor="let m of t('members')">
+        <h3>{{ m.name }}</h3>
+        <p>{{ m.number }}</p>
       </div>
     </div>
-  </section>
-
-  <section id="sustainability" class="section sustainability" role="region" aria-label="Sustainability">
-    <div class="container">
-      <h2>{{ t('sustainTitle') }}</h2>
-      <p>{{ t('sustainText') }}</p>
-    </div>
-  </section>
-
-  <section id="news" class="section news" role="region" aria-label="News">
-    <div class="container">
-      <h2>{{ t('newsTitle') }}</h2>
-      <p>{{ t('newsText') }}</p>
-    </div>
-  </section>
-
-  <section id="contact" class="section contact" role="region" aria-label="Contact">
-    <div class="container contact-grid">
-      <div class="contact-card">
-        <h2>{{ t('contactTitle') }}</h2>
-        <p>{{ t('contactText') }}</p>
-      </div>
-    </div>
-  </section>
-</main>
-
-<footer class="site-footer" role="contentinfo">
-  <div class="container footer-grid"></div>
-  <div class="copyright">{{ t('footerCopy') }}</div>
-</footer>
+  </div>
+</section>

@@ -1,373 +1,249 @@
-
-@use "sass:color";
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap'); /* Roboto como fallback */
-
-$accent: #0d6efd;
-$poa-blue-dark: #0A1C41;
+/* ========================
+   1. VARIÁVEIS E BASE
+======================== */
+$accent: #26327C;
+$dark: #0A1C41;
 $white: #ffffff;
-$poa-text-dark: #333333;
-$poa-link-dark: #000000;
+$text-dark: #333;
 $muted: #6c757d;
+$panel: #f8f9fa;
 $shadow: 0 1px 3px rgba(0,0,0,0.08);
 
-// Mixins
-@mixin transition {
-  transition: all 0.2s ease;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-
-:root{
-  --bg: #{$white};
-  --panel: #f8f9fa;
-  --muted: #{$muted};
-  --accent: #{$accent};
-  --white: #{$white};
-  --poa-blue-dark: #{$poa-blue-dark};
-  --poa-text-dark: #{$poa-text-dark};
-  --poa-link-dark: #{$poa-link-dark};
-  --accent-2:#6610f2;
-  --glass: rgba(0,0,0,0.03);
-}
-
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-
-body{
+body {
   font-family: Arial, sans-serif;
-  background: var(--bg);
-  color: var(--poa-text-dark);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background: $white;
+  color: $text-dark;
   line-height: 1.5;
 }
 
-.site-header{
-  position:fixed;
-  top:0;left:0;right:0;
-  height:80px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 28px;
-  background: $white;
-  box-shadow: $shadow;
-  z-index:1100;
-  border-bottom: 1px solid #e0e0e0;
+html {
+  scroll-behavior: smooth;
 }
 
-.header-left{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-.logo{
-  height: 48px;
-  width: auto;
-}
-.brand-title{
-  font-weight:700;
-  font-size:1.15rem;
-  color: $poa-link-dark;
-  line-height: 1.2;
-}
-.brand-subtitle{
-  font-size:0.75rem;
-  color: $muted;
-  margin-top:0;
-}
-
-/* Primary nav */
-.primary-nav {
-  flex-grow: 1;
-  margin-left: 60px;
-}
-.primary-nav ul{
-  list-style:none;
-  display:flex;
-  gap:30px;
-  align-items:center;
-}
-.primary-nav a{
-  color: $poa-link-dark;
-  text-decoration:none;
-  font-weight:500;
-  padding:8px 0;
-  border-radius:0;
-  @include transition;
-}
-.primary-nav a:hover,
-.primary-nav a:focus{
-  color: $accent;
-}
-
-
-.header-actions{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
-
-.lang button{
-  background:transparent;
-  border:1px solid #ddd;
-  color: $poa-link-dark;
-  padding:8px 12px;
-  border-radius:4px;
-  cursor:pointer;
-  font-weight: 500;
-  @include transition;
-}
-.lang button.active{
-  background: $white;
-  color: $poa-link-dark;
-  border-color: $poa-link-dark;
-}
-
-
-.login{
-  background: $white;
-  color: $poa-link-dark;
-  border:1px solid #ddd;
-  padding:8px 12px;
-  border-radius:4px;
-  cursor:pointer;
-  font-weight: 500;
-  @include transition;
-}
-.login:hover {
-  border-color: $poa-link-dark;
-}
-
-
-.breadcrumb{
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 12px 28px;
-  color: $white;
-  font-size: 0.85rem;
-  z-index: 1000;
-  margin-top: 0;
-}
-
-.hero{
-  min-height: 500px;
-  background-image: none;
-  display:block;
-  padding:0;
-  margin-top: 80px;
-  position:relative;
-}
-
-.hero-content {
-  position: relative;
-  height: 100%;
-}
-
-.hero-image-container {
-  min-height: 500px;
-  background-image: url('https://upload.wikimedia.org/wikipedia/commons/6/6c/Port_of_Amsterdam_aerial.jpg');
-  background-size: cover;
-  background-position: center 30%;
-}
-
-.hero-overlay{
-  position: absolute;
+/* ========================
+   2. HEADER FIXO
+======================== */
+.site-header {
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
+  height: 80px;
+  background: $white;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: $shadow;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  z-index: 1000;
+}
+
+/* LEFT SIDE: LOGO + TITLE */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  height: 48px;
+  width: auto;
+}
+
+.brand-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: $accent;
+}
+
+.brand-subtitle {
+  font-size: 0.75rem;
+  color: $muted;
+}
+
+/* CENTER NAVIGATION (MENU + LANGUAGE + LOGIN) */
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* unify spacing and clickable area for links */
+.nav-menu a {
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $dark;
+  transition: color 0.18s ease, transform 0.12s ease;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* hover + active state */
+.nav-menu a:hover {
+  transform: translateY(-1px);
+}
+
+.nav-menu a:hover,
+.nav-menu a.active {
+  color: $accent;
+  background: rgba(38,50,124,0.05);
+}
+
+/* small indicator dot for active (optional) */
+.nav-menu a.active::after {
+  content: "";
+  display: block;
+  margin: 6px auto 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: $accent;
+}
+
+/* ========================
+   3. HERO BANNER
+======================== */
+.hero {
+  width: 100%;
+  height: 360px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin-top: 80px; /* compensar header */
+  position: relative;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 28, 65, 0.55);
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  max-width:none;
-  text-align:left;
+  justify-content: center;
+  padding-left: 48px;
+}
+
+.hero-title {
+  font-size: 42px;
+  font-weight: 700;
   color: $white;
-  padding: 0 28px 80px;
-
-  background: linear-gradient(
-      to top,
-      $poa-blue-dark 0%,
-      rgba(10, 28, 65, 0.85) 50%,
-      rgba(10, 28, 65, 0.0) 100%
-  );
+  margin-bottom: 6px;
 }
 
-.hero h1{
-  font-family: Georgia, "Times New Roman", Times, serif;
-  font-size:52px;
-  line-height:1.1;
-  margin-bottom:8px;
-  font-weight:700;
+.hero-sub {
+  font-size: 20px;
   color: $white;
-  padding:0;
-  z-index: 2;
-}
-.hero .lead{
-  color: $white;
-  font-size:1.125rem;
-  font-weight: 300;
-  padding: 0;
-  margin-top: 0;
-  z-index: 1;
 }
 
-.hero-nav-links {
-  display: none;
+/* ========================
+   4. MAIN PAGE LAYOUT
+======================== */
+.page {
+  margin-top: 80px;
 }
 
-
-.cta{
-  display:inline-block;
-  background: $accent;
-  color: $white;
-  padding:12px 20px;
-  border-radius:6px;
-  text-decoration:none;
-  font-weight:700;
-  @include transition;
-}
-.cta:hover {
-
-  background: color.adjust($accent, $lightness: -10%);
-}
-
-.section{
-  padding:72px 28px;
+.section {
+  padding: 72px 28px;
   background: $white;
-}
-.container{
-  max-width:1100px;
-  margin:0 auto;
-}
-.section h2{
-  font-family: Georgia, "Times New Roman", Times, serif;
-  font-size:36px;
-  margin-bottom:12px;
-  font-weight:700;
-  color: $poa-link-dark;
-}
-.section p{
-  color: $poa-text-dark;
-  max-width:900px;
-  font-size: 1.125rem;
+  scroll-margin-top: 92px; /* offset when scrolling to anchor to avoid header overlap */
 }
 
-.section .cta.complaint {
-  background: $white;
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 36px;
+  margin-bottom: 12px;
+  font-weight: 700;
   color: $accent;
-  border: 2px solid $accent;
-  padding: 10px 20px;
-  font-size: 1rem;
-  font-weight: 500;
-  border-radius: 4px;
-  @include transition;
-}
-.section .cta.complaint:hover {
-  background: $accent;
-  color: $white;
 }
 
-.complaint-content {
-  display: flex;
-  gap: 40px;
-  align-items: center;
+.section p {
+  font-size: 1.125rem;
+  max-width: 850px;
+}
+
+/* ========================
+   5. CARDS (ABOUT + MEMBERS)
+======================== */
+
+.cards {
   margin-top: 24px;
-}
-.complaint-text {
-  flex: 1;
-  max-width: 450px;
-}
-.complaint-image {
-  flex: 1;
-  max-width: 600px;
-}
-.complaint-image img {
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
 }
 
-
-.cards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:18px;
-  margin-top:20px;
-}
-.card{
-  background:var(--panel);
-  padding:18px;
-  border-radius:0;
-  border:1px solid #e9ecef;
+.card {
+  background: $panel;
+  padding: 18px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
 }
 
-.contact-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:18px;
-  align-items:start;
+.card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: $accent;
 }
-.contact-card{
-  background:var(--panel);
-  padding:18px;
-  border-radius:0;
+
+.card p {
+  margin-top: 6px;
+  font-size: 1rem;
+  color: $text-dark;
 }
-.contact-form input,
-.contact-form textarea{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
+
+/* ========================
+   6. FOOTER
+======================== */
+.site-footer {
   background: $white;
-  border:1px solid #ced4da;
-  color: $poa-text-dark;
-  border-radius:4px;
-}
-.contact-form textarea{
-  min-height:100px;
-  resize:vertical;
-}
-.contact-form .cta{
-  display:block;
-  margin-top:12px;
+  padding: 26px 28px;
+  text-align: center;
+  border-top: 1px solid #e9ecef;
+  margin-top: 60px;
 }
 
-.site-footer{
-  background: $white;
-  padding:26px 28px;
-  margin-top:60px;
-  border-top:1px solid #e9ecef;
-}
-.muted{
+.site-footer .copyright {
   color: $muted;
-  font-size:0.9rem;
+  font-size: 0.9rem;
 }
 
+/* ========================
+   7. RESPONSIVE
+======================== */
+@media (max-width: 900px) {
 
-@media (max-width:900px){
-  .brand-title, .brand-subtitle {display:block;}
-  .site-header{height: auto; flex-wrap: wrap; padding: 10px 16px;}
-  .primary-nav {order: 3; flex-basis: 100%; margin-top: 10px; margin-left: 0;}
-  .primary-nav ul{flex-wrap: wrap; gap: 10px 20px;}
-  .header-actions {order: 2;}
+  .nav-menu {
+    display: none; /* menu simplificado em mobile; implement mobile menu later if needed */
+  }
 
-  .hero {margin-top: 80px; min-height: 400px;}
-  .hero-overlay {padding: 0 16px 40px;}
-  .hero-image-container {min-height: 400px;}
-  .breadcrumb{top: 0; padding: 12px 16px;}
-  .hero h1{font-size:36px;}
-  .hero .lead{font-size: 1rem;}
+  .section h2 {
+    font-size: 28px;
+  }
 
-  .contact-grid{grid-template-columns:1fr}
-  .breadcrumb{padding:10px 16px}
-  .contact-grid{grid-template-columns:1fr}
-  .complaint-content {flex-direction: column; gap: 24px;}
-  .section h2 {font-size: 28px;}
-  .section p {font-size: 1rem;}
-}
+  .section p {
+    font-size: 1rem;
+  }
 
-@media print{
-  .site-header, .primary-nav{position:static}
+  .hero-title {
+    font-size: 32px;
+  }
+
+  .hero-sub {
+    font-size: 16px;
+  }
 }
