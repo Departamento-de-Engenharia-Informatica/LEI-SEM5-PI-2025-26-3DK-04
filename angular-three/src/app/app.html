@@ -15,11 +15,24 @@
 
   <div class="header-actions">
     <div class="lang">
-      <button (click)="switchLanguage('en')" [class.active]="currentLang==='en'">EN</button>
-      <button (click)="switchLanguage('pt')" [class.active]="currentLang==='pt'">PT</button>
+      <button (click)="switchLanguage('en')" [class.active]="currentLang === 'en'">EN</button>
+      <button (click)="switchLanguage('pt')" [class.active]="currentLang === 'pt'">PT</button>
     </div>
-    <button class="login" aria-label="Login button">{{ t('login') }}</button>
+
+    <!-- LOGIN BUTTON -->
+    <button *ngIf="!isLoggedIn" class="login" (click)="login()" aria-label="Login button">
+      {{ t('login') }}
+    </button>
+
+    <!-- USER GREETING + LOGOUT -->
+    <div *ngIf="isLoggedIn" class="user-info">
+      <span class="welcome">Olá, {{ userName }}</span>
+      <button class="logout" (click)="logout()" aria-label="Logout button">
+        {{ t('logout') }}
+      </button>
+    </div>
   </div>
+
 </header>
 
 <div class="breadcrumb" aria-hidden="false">
