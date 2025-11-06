@@ -1,12 +1,37 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { TranslationService } from "./translation.service";
 
 @Component({
-  selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.scss'
+  selector: "app-root",
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: "./app.html",
+  styleUrls: ["./app.scss"]
 })
 export class App {
-  protected readonly title = signal('angular-three');
+  currentLang = 'en';
+
+  // menu item objects: label = translation key, anchor = section id
+  menuItems = [
+    { label: 'menuHome', anchor: 'home' },
+    { label: 'menuAbout', anchor: 'about' },
+    { label: 'menuOperations', anchor: 'operations' },
+    { label: 'menuSustainability', anchor: 'sustainability' },
+    { label: 'menuNews', anchor: 'news' },
+    { label: 'menuContact', anchor: 'contact' }
+  ];
+
+  constructor(private translation: TranslationService) {
+    this.currentLang = this.translation.getLang();
+  }
+
+  t(key: string): string {
+    return this.translation.translate(key);
+  }
+
+  switchLanguage(lang: string): void {
+    this.translation.setLanguage(lang);
+    this.currentLang = this.translation.getLang();
+  }
 }
