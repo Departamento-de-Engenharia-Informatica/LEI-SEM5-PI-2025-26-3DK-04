@@ -8,15 +8,13 @@
     </div>
   </div>
 
-  <!-- ✅ NAVIGATION WITH ACTIVE STATE, LANG SWITCH & LOGIN -->
   <nav class="nav-menu">
     <a
       *ngFor="let item of menuItems"
       href="#"
       (click)="onNavClick($event, item.anchor)"
       [class.active]="currentAnchor === item.anchor"
-    >{{ t(item.label) }}</a
-    >
+    >{{ t(item.label) }}</a>
 
     <!-- 🌍 LANGUAGE SWITCH -->
     <a
@@ -24,29 +22,36 @@
       (click)="onLangClick($event, 'en')"
       [class.active]="currentLang === 'en'"
       aria-label="Switch to English"
-    >EN</a
-    >
+    >EN</a>
+
     <a
       href="#"
       (click)="onLangClick($event, 'pt')"
       [class.active]="currentLang === 'pt'"
       aria-label="Switch to Portuguese"
-    >PT</a
+    >PT</a>
+
+
+    <button
+      *ngIf="!isLoggedIn"
+      class="login"
+      (click)="login()"
+      aria-label="Login button"
     >
+      {{ t('login') }}
+    </button>
 
-    <!-- 🔐 LOGIN / LOGOUT STATE -->
-    <ng-container *ngIf="!isLoggedIn; else loggedInBlock">
-      <a href="#" (click)="login()">{{ t('login') }}</a>
-    </ng-container>
 
-    <ng-template #loggedInBlock>
-      <span class="welcome">{{ userName }}</span>
-      <a href="#" (click)="logout()">{{ t('logout') }}</a>
-    </ng-template>
+    <div *ngIf="isLoggedIn" class="user-info">
+      <span class="welcome">Olá, {{ userName }}</span>
+      <button class="logout" (click)="logout()" aria-label="Logout button">
+        {{ t('logout') }}
+      </button>
+    </div>
   </nav>
 </header>
 
-<!-- ✅ HERO -->
+
 <section id="home" class="hero" style="background-image: url('assets/Port-Of-Amsterdam.jpg')">
   <div class="hero-overlay">
     <h1 class="hero-title">{{ t('heroTitle') }}</h1>
@@ -54,7 +59,7 @@
   </div>
 </section>
 
-<!-- ✅ ABOUT -->
+
 <section id="about" class="section">
   <div class="container">
     <h2>{{ t('aboutTitle') }}</h2>
