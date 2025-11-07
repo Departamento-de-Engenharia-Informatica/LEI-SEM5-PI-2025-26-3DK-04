@@ -100,7 +100,11 @@ namespace DDDSample1
                 app.UseDeveloperExceptionPage();
                 // Add Swagger middleware
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "DDDNetCore API V1");
+                    c.RoutePrefix = string.Empty;
+                });
             }
             else
             {
