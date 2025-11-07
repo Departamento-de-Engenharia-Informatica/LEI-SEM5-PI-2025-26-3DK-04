@@ -31,8 +31,9 @@ export class App implements OnInit, OnDestroy {
     this.currentLang = this.translation.getLang();
 
     // Só inicializa OAuth no browser
-    if (this.isBrowser) {
-      this.authService.initOAuth();
+    // Detecta o retorno do Google
+    if (typeof window !== 'undefined') {
+      this.handleGoogleCallback();
     }
   }
 
@@ -115,7 +116,11 @@ export class App implements OnInit, OnDestroy {
   }
 
   login() {
-    this.authService.login();
+    const clientId = '440853175141-2kp1hrvoe78b8pn597p8oc2b316dibq5.apps.googleusercontent.com';
+    const redirectUri = 'http://localhost:4200/';
+    const scope = 'openid profile email';
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&prompt=consent`;
+    window.location.href = authUrl;
   }
 
   logout() {
@@ -127,7 +132,40 @@ export class App implements OnInit, OnDestroy {
   }
 
   get userName(): string | null {
-    const claims = this.authService['oauthService']?.getIdentityClaims() as any;
-    return claims ? claims.name : null;
+    return this.authService.userName;
+  }
+  async handleGoogleCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    console.log("meu parametro code é:", code);
+    if (code) {
+      try {
+        const res = await fetch('https://localhost:5001/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code })
+        });
+        console.log("depois do fetch");
+        console.log(res.status, res.headers.get('content-type'));
+        const data = await res.json();
+        console.log('data', data);
+        const idToken = data.idToken || '';
+        console.log('idToken', idToken);
+        const userName = this.parseUserNameFromIdToken(idToken);
+        this.authService.setToken(idToken, userName);
+        console.log('Login feito com sucesso:', userName);
+        window.history.replaceState({}, document.title, '/');
+      } catch (err) {
+        console.error('Erro ao trocar code por token', err);
+      }
+    }
+
+  }
+
+// Função para extrair nome do id_token JWT
+  parseUserNameFromIdToken(idToken: string): string | null {
+    if (!idToken) return null;
+    const payload = JSON.parse(atob(idToken.split('.')[1]));
+    return payload.name || null;
   }
 }

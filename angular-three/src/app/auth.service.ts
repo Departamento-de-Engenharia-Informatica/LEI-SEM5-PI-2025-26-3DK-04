@@ -1,70 +1,31 @@
-﻿import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
-import { OAuthService, AuthConfig } from 'angular-oauth2-oidc';
-import { Router } from '@angular/router';
+﻿import { Injectable } from '@angular/core';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
+  private _token: string | null = null;
+  private _userName: string | null = null;
 
-  private isBrowser: boolean;
+  constructor() {}
 
-  constructor(
-    private oauthService: OAuthService,
-    private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) {
-    this.isBrowser = isPlatformBrowser(this.platformId);
-  }
-
-  initOAuth(): void {
-    if (!this.isBrowser) return;
-
-    console.log("⚙️ [Auth] Initializing OAuth setup...");
-
-    const authConfig: AuthConfig = {
-      issuer: 'https://accounts.google.com',
-      redirectUri: window.location.origin + '/',
-      clientId: '440853175141-2kp1hrvoe78b8pn597p8oc2b316dibq5.apps.googleusercontent.com',
-      responseType: 'code',
-      disablePKCE: false,
-      scope: 'openid profile email',
-      showDebugInformation: true,
-      strictDiscoveryDocumentValidation: false,
-    };
-
-    this.oauthService.configure(authConfig as AuthConfig);
-
-    this.oauthService.loadDiscoveryDocumentAndTryLogin().then(() => {
-      console.log("🔐 Logged in:", this.isLoggedIn);
-      console.log("🔑 access token:", this.oauthService.getAccessToken());
-      console.log("🪪 identity claims:", this.oauthService.getIdentityClaims());
-    });
-  }
-
-  login(): void {
-    console.log("🔵 [Auth] Login() called — redirecting to auth provider...");
-    if (this.isBrowser) this.oauthService.initCodeFlow();
-  }
-
-  logout(): void {
-    console.log("🟠 [Auth] Logout() called — clearing tokens...");
-    if (this.isBrowser) this.oauthService.logOut();
+  setToken(token: string, userName: string | null) {
+    this._token = token;
+    this._userName = userName;
   }
 
   get token(): string | null {
-    return this.isBrowser ? this.oauthService.getAccessToken() : null;
+    return this._token;
   }
 
   get isLoggedIn(): boolean {
-    const logged = !!this.oauthService.getAccessToken();
-    console.log("👀 [Auth] Checking login state:", logged);
-    return logged;
+    return !!this._token;
   }
 
-  getClaims(): any {
-    if (!this.isBrowser) return null;
-    return this.oauthService.getIdentityClaims() as any;
+  get userName(): string | null {
+    return this._userName;
+  }
+
+  logout() {
+    this._token = null;
+    this._userName = null;
   }
 }

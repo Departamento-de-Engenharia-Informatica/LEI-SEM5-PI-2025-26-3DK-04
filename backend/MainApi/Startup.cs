@@ -14,6 +14,7 @@ using DDDSample1.Infrastructure.Shared;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using DDDSample1.Domain.Shared;
 using System;
+using DDDSample1.Domain.Authentication;
 using DDDSample1.Domain.Docks;
 using DDDSample1.Domain.Organizations;
 using DDDSample1.Domain.PhysicalResources;
@@ -90,6 +91,15 @@ namespace DDDSample1
                 // Configurar serialização de enums como strings em vez de números
                 options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
             });
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.WithOrigins("http://localhost:4200") 
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -111,11 +121,10 @@ namespace DDDSample1
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
-            app.UseHttpsRedirection();
-
+            
+            app.UseHttpsRedirection(); // Movido para depois do UseCors
+            app.UseCors();    // <-- Mova UseCors() para ANTES
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -157,6 +166,8 @@ namespace DDDSample1
             
             services.AddTransient<IPhysicalResourceRepository,PhysicalResourcesRepository>();
             services.AddTransient<PhysicalResourceService>();
+            
+            services.AddSingleton<GoogleAuthService>();
         }
     }
 }
