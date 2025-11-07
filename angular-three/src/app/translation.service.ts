@@ -4,9 +4,11 @@
   providedIn: "root"
 })
 export class TranslationService {
+
   private currentLang = 'en';
 
   private translations: any = {
+
     en: {
       appTitle: "Project",
       appSubtitle: "Group Work Portal",
@@ -16,6 +18,7 @@ export class TranslationService {
       menuGroupMembers: "Group Members",
 
       login: "Login",
+      logout: "Logout",
 
       heroTitle: "The port of Amsterdam",
       heroSubtitle: "On our way to a climate-neutral port",
@@ -41,6 +44,7 @@ export class TranslationService {
       menuGroupMembers: "Membros do Grupo",
 
       login: "Entrar",
+      logout: "Sair",
 
       heroTitle: "O porto de Amesterdão",
       heroSubtitle: "A caminho de um porto neutro em carbono",
@@ -56,6 +60,7 @@ export class TranslationService {
         { name: "Aluno Cinco", number: "Número 5" }
       ]
     }
+
   };
 
   setLanguage(lang: string) {

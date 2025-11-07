@@ -32,22 +32,24 @@
     >PT</a>
 
 
-    <button
-      *ngIf="!isLoggedIn"
-      class="login"
-      (click)="login()"
-      aria-label="Login button"
-    >
+    <a *ngIf="!isLoggedIn"
+       class="login-btn"
+       (click)="login()"
+       aria-label="Login link">
       {{ t('login') }}
-    </button>
-
+    </a>
 
     <div *ngIf="isLoggedIn" class="user-info">
       <span class="welcome">Olá, {{ userName }}</span>
-      <button class="logout" (click)="logout()" aria-label="Logout button">
+
+      <a class="login-btn logout-btn"
+         (click)="logout()"
+         aria-label="Logout link">
         {{ t('logout') }}
-      </button>
+      </a>
     </div>
+
+
   </nav>
 </header>
 

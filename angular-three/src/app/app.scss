@@ -68,38 +68,46 @@ html {
   color: $muted;
 }
 
-/* CENTER NAVIGATION (MENU + LANGUAGE + LOGIN) */
+/* ========================
+   NAVIGATION + BUTTONS
+======================== */
 .nav-menu {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
-/* unify spacing and clickable area for links */
-.nav-menu a {
+/* base estilo para links e botões */
+.nav-menu a,
+.login-btn,
+.logout-btn {
   text-decoration: none;
   font-size: 1rem;
   font-weight: 600;
   color: $dark;
-  transition: color 0.18s ease, transform 0.12s ease;
+  transition: color 0.18s ease, transform 0.12s ease, background 0.18s ease;
   cursor: pointer;
   padding: 6px 8px;
   border-radius: 4px;
   display: inline-block;
+  border: none;
+  background: transparent;
 }
 
-/* hover + active state */
-.nav-menu a:hover {
-  transform: translateY(-1px);
-}
-
+/* hover + active states */
 .nav-menu a:hover,
+.login-btn:hover,
+.logout-btn:hover {
+  transform: translateY(-1px);
+  color: $accent;
+  background: rgba(38,50,124,0.05);
+}
+
 .nav-menu a.active {
   color: $accent;
   background: rgba(38,50,124,0.05);
 }
 
-/* small indicator dot for active (optional) */
 .nav-menu a.active::after {
   content: "";
   display: block;
@@ -108,6 +116,18 @@ html {
   height: 6px;
   border-radius: 50%;
   background: $accent;
+}
+
+/* user info container */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .welcome {
+    font-weight: 600;
+    color: $text-dark;
+  }
 }
 
 /* ========================
@@ -119,7 +139,7 @@ html {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  margin-top: 80px; /* compensar header */
+  margin-top: 80px;
   position: relative;
 }
 
@@ -155,7 +175,7 @@ html {
 .section {
   padding: 72px 28px;
   background: $white;
-  scroll-margin-top: 92px; /* offset when scrolling to anchor to avoid header overlap */
+  scroll-margin-top: 92px;
 }
 
 .container {
@@ -177,9 +197,8 @@ html {
 }
 
 /* ========================
-   5. CARDS (ABOUT + MEMBERS)
+   5. CARDS
 ======================== */
-
 .cards {
   margin-top: 24px;
   display: grid;
@@ -227,10 +246,9 @@ html {
 ======================== */
 @media (max-width: 900px) {
 
-  /* NÃO ESCONDER O MENU — DEIXAR SEMPRE VISÍVEL */
   .nav-menu {
     display: flex !important;
-    flex-direction: row; /* se quiseres vertical no mobile */
+    flex-direction: row;
     gap: 12px;
   }
 
