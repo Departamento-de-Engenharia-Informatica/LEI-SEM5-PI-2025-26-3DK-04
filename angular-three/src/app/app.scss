@@ -227,8 +227,11 @@ html {
 ======================== */
 @media (max-width: 900px) {
 
+  /* NÃO ESCONDER O MENU — DEIXAR SEMPRE VISÍVEL */
   .nav-menu {
-    display: none; /* menu simplificado em mobile; implement mobile menu later if needed */
+    display: flex !important;
+    flex-direction: row; /* se quiseres vertical no mobile */
+    gap: 12px;
   }
 
   .section h2 {
