@@ -167,7 +167,7 @@ namespace DDDSample1
             services.AddTransient<IPhysicalResourceRepository,PhysicalResourcesRepository>();
             services.AddTransient<PhysicalResourceService>();
             
-            services.AddSingleton<GoogleAuthService>();
+            services.AddTransient<GoogleAuthService>();
         }
     }
 }
