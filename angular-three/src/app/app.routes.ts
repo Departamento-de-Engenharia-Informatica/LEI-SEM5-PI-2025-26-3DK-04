@@ -10,6 +10,6 @@ export const routes: Routes = [
   { 
     path: 'dock', 
     component: DockView,
-    canActivate: [authGuard]  // Temporariamente desativado para desenvolvimento
+    // canActivate: [authGuard]  // Temporariamente desativado para desenvolvimento
   },
 ];

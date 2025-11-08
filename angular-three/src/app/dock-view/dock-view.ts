@@ -1,5 +1,6 @@
-import { Component, AfterViewInit, ElementRef, ViewChild, Input } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, ViewChild, Input, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 @Component({
   selector: 'app-dock-view',
@@ -8,7 +9,7 @@ import * as THREE from 'three';
   templateUrl: './dock-view.html',
   styleUrl: './dock-view.scss',
 })
-export class DockView implements AfterViewInit {
+export class DockView implements AfterViewInit, OnDestroy {
   @ViewChild('myCanvas') private canvasRef!: ElementRef;
 
   //* Stage Properties
@@ -25,9 +26,11 @@ export class DockView implements AfterViewInit {
   private renderer!: THREE.WebGLRenderer;
   private scene: THREE.Scene = new THREE.Scene();
   private camera!: THREE.PerspectiveCamera;
+  private controls!: OrbitControls;
 
   private dock!: THREE.Mesh;
   private water!: THREE.Mesh;
+  private resizeObserver!: ResizeObserver;
 
   private getAspectRatio(): number {
     return this.canvas.clientWidth / this.canvas.clientHeight;
@@ -69,14 +72,55 @@ export class DockView implements AfterViewInit {
 
   private animateScene(): void {
     requestAnimationFrame(() => this.animateScene());
+    this.controls.update();
     this.renderer.render(this.scene, this.camera);
+  }
+
+  private onWindowResize(): void {
+    const width = this.canvas.clientWidth;
+    const height = this.canvas.clientHeight;
+    
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(width, height, false);
   }
 
   ngAfterViewInit(): void {
     this.createScene();
-    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas });
-    this.renderer.setPixelRatio(devicePixelRatio);
-    this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
+    this.renderer = new THREE.WebGLRenderer({ 
+      canvas: this.canvas,
+      antialias: true 
+    });
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight, false);
+
+    // Setup OrbitControls
+    this.controls = new OrbitControls(this.camera, this.canvas);
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.05;
+    this.controls.screenSpacePanning = false;
+    this.controls.minDistance = 5;
+    this.controls.maxDistance = 50;
+    this.controls.maxPolarAngle = Math.PI / 2;
+
+    // Setup ResizeObserver to handle zoom and window resize
+    this.resizeObserver = new ResizeObserver(() => {
+      this.onWindowResize();
+    });
+    this.resizeObserver.observe(this.canvas);
+
     this.animateScene();
+  }
+
+  ngOnDestroy(): void {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
+    if (this.controls) {
+      this.controls.dispose();
+    }
+    if (this.renderer) {
+      this.renderer.dispose();
+    }
   }
 }
