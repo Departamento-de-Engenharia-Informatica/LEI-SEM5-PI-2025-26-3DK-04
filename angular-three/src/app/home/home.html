@@ -1,0 +1,28 @@
+<section id="home" class="hero" style="background-image: url('assets/Port-Of-Amsterdam.jpg')">
+  <div class="hero-overlay">
+    <h1 class="hero-title">{{ t('heroTitle') }}</h1>
+    <p class="hero-sub">{{ t('heroSubtitle') }}</p>
+  </div>
+</section>
+
+
+<section id="about" class="section">
+  <div class="container">
+    <h2>{{ t('aboutTitle') }}</h2>
+    <p>{{ t('aboutText') }}</p>
+  </div>
+</section>
+
+<!-- ✅ GROUP MEMBERS -->
+<section id="GroupMembers" class="section">
+  <div class="container">
+    <h2>{{ t('groupMembersTitle') }}</h2>
+
+    <div class="cards">
+      <div class="card" *ngFor="let m of t('members')">
+        <h3>{{ m.name }}</h3>
+        <p>{{ m.number }}</p>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,12 +1,13 @@
 import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from "@angular/core";
 import { CommonModule, isPlatformBrowser } from "@angular/common";
+import { RouterOutlet } from "@angular/router";
 import { TranslationService } from "./translation.service";
 import { AuthService } from "./auth.service";
 
 @Component({
   selector: "app-root",
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterOutlet],
   templateUrl: "./app.html",
   styleUrls: ["./app.scss"]
 })

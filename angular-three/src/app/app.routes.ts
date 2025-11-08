@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
+import { Home } from './home/home';
 import { Cube } from './cube/cube';
-import { App } from './app';
+import { DockView } from './dock-view/dock-view';
+
 export const routes: Routes = [
-// Redirect to the cube component on app load
-  { path: '', component: App },
-// Route for the cube component
+  { path: '', component: Home },
   { path: 'cube', component: Cube },
+  { path: 'dock', component: DockView },
 ];
