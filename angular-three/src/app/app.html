@@ -9,12 +9,9 @@
   </div>
 
   <nav class="nav-menu">
-    <a
-      *ngFor="let item of menuItems"
-      href="#"
-      (click)="onNavClick($event, item.anchor)"
-      [class.active]="currentAnchor === item.anchor"
-    >{{ t(item.label) }}</a>
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
+    <a routerLink="/cube" routerLinkActive="active">Cube</a>
+    <a routerLink="/dock" routerLinkActive="active">Dock</a>
 
     <!-- 🌍 LANGUAGE SWITCH -->
     <a
