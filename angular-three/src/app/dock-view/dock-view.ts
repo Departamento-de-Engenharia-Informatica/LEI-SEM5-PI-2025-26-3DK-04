@@ -30,30 +30,119 @@ export class DockView implements AfterViewInit, OnDestroy {
 
   private dock!: THREE.Mesh;
   private water!: THREE.Mesh;
+  private waterMaterial!: THREE.MeshStandardMaterial;
   private resizeObserver!: ResizeObserver;
+  private textureLoader: THREE.TextureLoader = new THREE.TextureLoader();
 
   private getAspectRatio(): number {
     return this.canvas.clientWidth / this.canvas.clientHeight;
   }
 
+  private createPortStructure(): void {
+    const dockMaterial = new THREE.MeshStandardMaterial({ color: 0x8B7355 });
+    const storageMaterial = new THREE.MeshStandardMaterial({ color: 0xFFD700 }); // Yellow storage areas
+    const greenMaterial = new THREE.MeshStandardMaterial({ color: 0x90EE90 }); // Green areas
+    
+    // Main central dock area
+    const mainDock = new THREE.BoxGeometry(50, 0.5, 30);
+    const mainDockMesh = new THREE.Mesh(mainDock, dockMaterial);
+    mainDockMesh.position.set(0, 0, 0);
+    this.scene.add(mainDockMesh);
+
+    // Upper left peninsula
+    const upperLeftPeninsula = new THREE.BoxGeometry(25, 0.5, 20);
+    const upperLeftMesh = new THREE.Mesh(upperLeftPeninsula, dockMaterial);
+    upperLeftMesh.position.set(-30, 0, 20);
+    this.scene.add(upperLeftMesh);
+
+    // Upper right peninsula
+    const upperRightPeninsula = new THREE.BoxGeometry(20, 0.5, 15);
+    const upperRightMesh = new THREE.Mesh(upperRightPeninsula, dockMaterial);
+    upperRightMesh.position.set(30, 0, 22);
+    this.scene.add(upperRightMesh);
+
+    // Lower left area
+    const lowerLeftArea = new THREE.BoxGeometry(30, 0.5, 25);
+    const lowerLeftMesh = new THREE.Mesh(lowerLeftArea, dockMaterial);
+    lowerLeftMesh.position.set(-35, 0, -20);
+    this.scene.add(lowerLeftMesh);
+
+    // Lower right area
+    const lowerRightArea = new THREE.BoxGeometry(25, 0.5, 20);
+    const lowerRightMesh = new THREE.Mesh(lowerRightArea, dockMaterial);
+    lowerRightMesh.position.set(32, 0, -18);
+    this.scene.add(lowerRightMesh);
+
+    // Storage areas (yellow)
+    this.createStorageArea(storageMaterial, -10, 0, 5, 8, 0.6, 6);
+    this.createStorageArea(storageMaterial, 10, 0, -5, 10, 0.6, 8);
+    this.createStorageArea(storageMaterial, -30, 0, 18, 12, 0.6, 10);
+    this.createStorageArea(storageMaterial, 28, 0, 20, 8, 0.6, 7);
+
+    // Green perimeter areas
+    this.createStorageArea(greenMaterial, -45, 0, 20, 10, 0.4, 15);
+    this.createStorageArea(greenMaterial, 40, 0, 22, 8, 0.4, 12);
+    this.createStorageArea(greenMaterial, -50, 0, -20, 12, 0.4, 20);
+    this.createStorageArea(greenMaterial, 42, 0, -18, 10, 0.4, 15);
+
+    // Connecting piers
+    this.createPier(dockMaterial, -15, 0, 10, 3, 0.3, 8);
+    this.createPier(dockMaterial, 15, 0, 12, 3, 0.3, 10);
+    this.createPier(dockMaterial, -20, 0, -10, 3, 0.3, 6);
+    this.createPier(dockMaterial, 18, 0, -8, 3, 0.3, 7);
+  }
+
+  private createStorageArea(material: THREE.Material, x: number, y: number, z: number, 
+                           width: number, height: number, depth: number): void {
+    const geometry = new THREE.BoxGeometry(width, height, depth);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y, z);
+    this.scene.add(mesh);
+  }
+
+  private createPier(material: THREE.Material, x: number, y: number, z: number, 
+                    width: number, height: number, depth: number): void {
+    const geometry = new THREE.BoxGeometry(width, height, depth);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y, z);
+    this.scene.add(mesh);
+  }
+
   private createScene(): void {
     // Scene setup
-    this.scene.background = new THREE.Color(0x87CEEB); // Sky blue
+    this.scene.background = new THREE.Color(0xFFFFFF);
 
-    // Dock platform
-    const dockGeometry = new THREE.BoxGeometry(10, 0.5, 5);
-    const dockMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
-    this.dock = new THREE.Mesh(dockGeometry, dockMaterial);
-    this.dock.position.y = 0;
-    this.scene.add(this.dock);
+    // Add lights for the water material
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    this.scene.add(ambientLight);
 
-    // Water plane
-    const waterGeometry = new THREE.PlaneGeometry(50, 50);
-    const waterMaterial = new THREE.MeshBasicMaterial({ 
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    directionalLight.position.set(10, 10, 5);
+    this.scene.add(directionalLight);
+
+    // Create Amsterdam Port layout
+    this.createPortStructure();
+
+    // Water plane with normal map
+    const waterGeometry = new THREE.PlaneGeometry(500, 500);
+    
+    // Load water normal texture
+    const waterNormals = this.textureLoader.load('assets/textures/water/waternormals.jpg');
+    waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
+    waterNormals.repeat.set(50, 50);
+
+    this.waterMaterial = new THREE.MeshStandardMaterial({ 
       color: 0x1E90FF,
+      normalMap: waterNormals,
+      normalScale: new THREE.Vector2(0.5, 0.5),
+      roughness: 0.4,
+      metalness: 0.1,
+      transparent: true,
+      opacity: 0.7,
       side: THREE.DoubleSide 
     });
-    this.water = new THREE.Mesh(waterGeometry, waterMaterial);
+    
+    this.water = new THREE.Mesh(waterGeometry, this.waterMaterial);
     this.water.rotation.x = -Math.PI / 2;
     this.water.position.y = -0.5;
     this.scene.add(this.water);
@@ -72,6 +161,13 @@ export class DockView implements AfterViewInit, OnDestroy {
 
   private animateScene(): void {
     requestAnimationFrame(() => this.animateScene());
+    
+    // Animate water normal map
+    if (this.waterMaterial.normalMap) {
+      this.waterMaterial.normalMap.offset.x += 0.0009;
+      this.waterMaterial.normalMap.offset.y += 0.0006;
+    }
+    
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   }
@@ -89,7 +185,8 @@ export class DockView implements AfterViewInit, OnDestroy {
     this.createScene();
     this.renderer = new THREE.WebGLRenderer({ 
       canvas: this.canvas,
-      antialias: true 
+      antialias: true,
+      alpha: true
     });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight, false);
