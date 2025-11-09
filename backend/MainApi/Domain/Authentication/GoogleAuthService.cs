@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -10,10 +13,13 @@ namespace DDDSample1.Domain.Authentication
     public class GoogleAuthService
     {
         private readonly IConfiguration _configuration;
-
-        public GoogleAuthService(IConfiguration configuration)
+        
+        private readonly IUserRepository _repo;
+        
+        public GoogleAuthService(IConfiguration configuration,IUserRepository repo)
         {
             _configuration = configuration;
+            _repo = repo;
         }
 
         public async Task<TokenResponse> ExchangeCodeForToken(string code)
@@ -36,6 +42,27 @@ namespace DDDSample1.Domain.Authentication
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<TokenResponse>(json);
+        }
+        
+        public async Task<User> GetUser(TokenResponse tokenResponse)
+        {
+            
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(tokenResponse.IdToken);
+            
+            var email = token.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
+
+            if (string.IsNullOrEmpty(email))
+                throw new Exception("Couldn't  to obtain an email from token");
+            
+            var user = await _repo.GetByEmailAsync(email);
+            
+            if (user == null)
+            {
+                throw new Exception("User not on database");
+            }
+
+            return user;
         }
     }
 

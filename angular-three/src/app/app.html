@@ -13,7 +13,12 @@
     <a routerLink="/cube" routerLinkActive="active">Cube</a>
     <a routerLink="/dock" routerLinkActive="active">Dock</a>
 
-    <!-- 🌍 LANGUAGE SWITCH -->
+
+    <!-- <a *ngIf="isLoggedIn" (click)="scrollToAnchor('user-info')">
+     {{ 'userInfo'}}
+   </a>-->
+
+   <!-- 🌍 LANGUAGE SWITCH -->
     <a
       href="#"
       (click)="onLangClick($event, 'en')"
@@ -45,7 +50,6 @@
         {{ t('logout') }}
       </a>
     </div>
-
 
   </nav>
 </header>

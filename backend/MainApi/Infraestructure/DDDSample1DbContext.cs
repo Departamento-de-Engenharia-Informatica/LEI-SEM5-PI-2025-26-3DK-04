@@ -1,3 +1,4 @@
+using DDDSample1.Domain.Authentication;
 using Microsoft.EntityFrameworkCore;
 using DDDSample1.Domain.Organizations;
 using DDDSample1.Domain.Vessels;
@@ -7,6 +8,7 @@ using DDDSample1.Domain.PhysicalResources;
 using DDDSample1.Domain.PortInfrastructure.StorageArea;
 using DDDSample1.Domain.Qualifications;
 using DDDSample1.Domain.StaffMembers;
+using DDDSample1.Infrastructure.Authentication;
 using DDDSample1.Infrastructure.Organizations;
 using DDDSample1.Infrastructure.Vessels;
 using DDDSample1.Infrastructure.Docks;
@@ -31,7 +33,7 @@ namespace DDDSample1.Infrastructure
         public DbSet<Qualification> Qualifications { get; set; }
         public DbSet<StaffMember> StaffMembers { get; set; }
         public DbSet<PhysicalResource> PhysicalResources { get; set; }
-
+        public DbSet<User> Users { get; set; }
         public DDDSample1DbContext(DbContextOptions options) : base(options)
         {
         }
@@ -48,6 +50,7 @@ namespace DDDSample1.Infrastructure
             modelBuilder.ApplyConfiguration(new QualificationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StaffMemberEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PhysicalResourceEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UserEntityTypeConfiguration());
 
             // modelBuilder.Ignore<QualificationID>();
         }

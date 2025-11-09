@@ -25,3 +25,17 @@
     </div>
   </div>
 </section>
+
+<section id="user-info" class="section-slide user-section" *ngIf="isLoggedIn">
+  <div class="section-inner">
+    <h2>{{ t('userSection').title }}</h2>
+    <p><strong>{{ t('userSection').name }}:</strong> {{ userName }}</p>
+    <p><strong>{{ t('userSection').email }}:</strong> {{ email }}</p>
+    <p><strong>{{ t('userSection').role }}:</strong> {{ role }}</p>
+
+    <div *ngIf="picture" class="user-photo-wrapper">
+      <p><strong>{{ t('userSection').picture }}:</strong></p>
+      <img [src]="picture" alt="User Photo" class="user-photo">
+    </div>
+  </div>
+</section>

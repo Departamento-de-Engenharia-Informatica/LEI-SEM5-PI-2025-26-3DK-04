@@ -135,6 +135,15 @@ export class App implements OnInit, OnDestroy {
   get userName(): string | null {
     return this.authService.userName;
   }
+  get email(): string | null {
+    return this.authService.email;
+  }
+  get role(): string | null {
+    return this.authService.role;
+  }
+  get picture(): string | null {
+    return this.authService.picture;
+  }
   async handleGoogleCallback() {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
@@ -146,15 +155,31 @@ export class App implements OnInit, OnDestroy {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code })
         });
-        console.log("depois do fetch");
-        console.log(res.status, res.headers.get('content-type'));
+
         const data = await res.json();
-        console.log('data', data);
         const idToken = data.idToken || '';
-        console.log('idToken', idToken);
+
+        const userRes = await fetch('https://localhost:5001/auth/google/user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        });
+
+        if (!userRes.ok) {
+          const errorData = await userRes.json();
+          alert(errorData.error);
+          return;
+        }
+
+        const user = await userRes.json();
+
         const userName = this.parseUserNameFromIdToken(idToken);
-        this.authService.setToken(idToken, userName);
-        console.log('Login feito com sucesso:', userName);
+
+        this.authService.setToken(idToken, user.name,user.email,user.picture,user.role);
+
+        console.log('Login feito com sucesso:', user.name);
+        console.log('Email', user.email);
+        console.log('Role', user.role);
         window.history.replaceState({}, document.title, '/');
       } catch (err) {
         console.error('Erro ao trocar code por token', err);

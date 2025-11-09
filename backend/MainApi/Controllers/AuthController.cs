@@ -33,10 +33,45 @@ namespace DDDSample1.Controllers
                 return StatusCode(500, new { error = "Error changing code to token" });
             }
         }
+        
+        [HttpPost("user")]
+        public async Task<IActionResult> GetUser([FromBody] TokenRequest request)
+        {
+            if (string.IsNullOrEmpty(request.IdToken))
+                return BadRequest(new { error = "IdToken is required" });
+
+            try
+            {
+                var tokenResponse = new TokenResponse
+                {
+                    IdToken = request.IdToken
+                };
+
+                var user = await _googleAuthService.GetUser(tokenResponse);
+
+                return Ok(new
+                {
+                    email = user.GetEmail().AsString(),
+                    name = user.GetName(),
+                    foto = user.GetPicture(),
+                    role = user.GetRole().ToString()
+                });
+            }
+            catch (System.Exception ex)
+            {
+                return NotFound(new { error = "User not found" });
+            }
+        }
     }
+    
+    
 
     public class AuthCodeRequest
     {
         public string Code { get; set; } = "";
+    }
+    public class TokenRequest
+    {
+        public string IdToken { get; set; } = "";
     }
 }
