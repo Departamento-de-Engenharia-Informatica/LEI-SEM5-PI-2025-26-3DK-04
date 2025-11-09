@@ -144,6 +144,9 @@ export class App implements OnInit, OnDestroy {
   get picture(): string | null {
     return this.authService.picture;
   }
+  get status(): string | null {
+    return this.authService.status;
+  }
   async handleGoogleCallback() {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
@@ -175,11 +178,12 @@ export class App implements OnInit, OnDestroy {
 
         const userName = this.parseUserNameFromIdToken(idToken);
 
-        this.authService.setToken(idToken, user.name,user.email,user.picture,user.role);
+        this.authService.setToken(idToken, user.name,user.email,user.picture,user.role,user.status);
 
         console.log('Login feito com sucesso:', user.name);
         console.log('Email', user.email);
         console.log('Role', user.role);
+        console.log('Status', user.status);
         window.history.replaceState({}, document.title, '/');
       } catch (err) {
         console.error('Erro ao trocar code por token', err);

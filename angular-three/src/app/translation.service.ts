@@ -43,6 +43,7 @@ export class TranslationService {
         name: "Name",
         email: "Email",
         role: "Role",
+        status: "Status",
         picture: "Picture"
       }
     },
@@ -81,7 +82,9 @@ export class TranslationService {
         name: "Nome",
         email: "Email",
         role: "Função",
+        status: "Estado",
         picture: "Foto"
+
       }
     }
 

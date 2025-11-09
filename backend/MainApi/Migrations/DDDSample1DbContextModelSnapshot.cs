@@ -36,6 +36,9 @@ namespace DDDNetCore.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("integer");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.ToTable("Users");

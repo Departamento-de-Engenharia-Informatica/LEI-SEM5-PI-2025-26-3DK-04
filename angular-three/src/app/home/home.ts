@@ -31,4 +31,7 @@ export class Home {
   get isLoggedIn(): boolean {
     return this.authService.isLoggedIn;
   }
+  get status(): string | null {
+    return this.authService.status;
+  }
 }

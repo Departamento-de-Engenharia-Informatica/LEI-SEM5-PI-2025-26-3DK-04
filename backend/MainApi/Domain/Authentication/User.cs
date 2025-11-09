@@ -7,13 +7,15 @@ namespace DDDSample1.Domain.Authentication
         public string Name { get; private set; }
         public string Picture { get; private set; }
         public Roles Role { get; set; }
+        public Status Status { get; set; }
 
-        public User(string email, string name, string picture, Roles role) 
+        public User(string email, string name, string picture, Roles role,Status status)  
         {
             this.Id = new UserID(email);
             this.Name = name;
             this.Picture = picture;
             this.Role = role;
+            this.Status = status;
         }
 
         public User(string email, string name, string picture) 
@@ -22,6 +24,7 @@ namespace DDDSample1.Domain.Authentication
             this.Name = name;
             this.Picture = picture;
             Role = Roles.Unknown;
+            Status = Status.Active;
         }
 
         private User() { }
@@ -50,11 +53,26 @@ namespace DDDSample1.Domain.Authentication
         {
             this.Role = role;
         }
+        public Status GetStatus()
+        {
+            return Status;
+        }
+        public void SetStatus(Status status)
+        {
+            this.Status = status;
+        }
     }
 }
 
 public enum Roles
 {
     Unknown,
-    Admin
+    Admin,
+    NoRole
+}
+
+public enum Status
+{
+    Active,
+    Inactive
 }

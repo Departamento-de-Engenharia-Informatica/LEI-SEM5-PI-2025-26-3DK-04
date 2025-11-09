@@ -116,7 +116,8 @@ namespace DDDNetCore.Migrations
                     Id = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
                     Picture = table.Column<string>(type: "text", nullable: true),
-                    Role = table.Column<int>(type: "integer", nullable: false)
+                    Role = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

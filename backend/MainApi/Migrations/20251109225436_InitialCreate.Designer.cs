@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DDDNetCore.Migrations
 {
     [DbContext(typeof(DDDSample1DbContext))]
-    [Migration("20251109163040_InitialCreate")]
+    [Migration("20251109225436_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -37,6 +37,9 @@ namespace DDDNetCore.Migrations
                         .HasColumnType("text");
 
                     b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
