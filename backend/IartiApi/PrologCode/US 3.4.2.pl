@@ -27,3 +27,38 @@ sum_delays([(V,_,TEndLoad)|LV],S):-
     ((TPossibleDep>TDep,!,SV is TPossibleDep-TDep);SV is 0),
     sum_delays(LV,SLV),
     S is SV+SLV.
+    
+    
+#  ?- obtain_seq_shortest_delay(SeqBetterTriplets, SLowestDelay). retorna a sequencia de vessels com o menor atraso
+
+:- dynamic shortest_delay/2.
+
+obtain_seq_shortest_delay(SeqBetterTriplets, SShortestDelay) :-
+    (obtain_seq_shortest_delay1; true), 
+    # Executa busca por todas as permutações
+    retract(shortest_delay(SeqBetterTriplets, SShortestDelay)), !.
+
+# Gera todas as permutações de navios e calcula atrasos
+obtain_seq_shortest_delay1 :-
+    asserta(shortest_delay(_, 100000)),  
+    # valor inicial muito alto
+    findall(V, vessel(V, _, _, _, _), LV), 
+    # Lista todos os navios
+    permutation(LV, SeqV), 
+    # Gera permutação
+    sequence_temporization(SeqV, SeqTriplets), 
+    # Calcula tempos
+    sum_delays(SeqTriplets, S), 
+    # Soma atrasos
+    compare_shortest_delay(SeqTriplets, S), 
+    # Compara com o menor até agora
+    fail. 
+    # força backtracking para testar todas as permutações
+
+# Atualiza o menor atraso encontrado
+compare_shortest_delay(SeqTriplets, S) :-
+    shortest_delay(_, SLower),
+    (S < SLower ->
+        retract(shortest_delay(_, _)),
+        asserta(shortest_delay(SeqTriplets, S))        
+    ; true).    
