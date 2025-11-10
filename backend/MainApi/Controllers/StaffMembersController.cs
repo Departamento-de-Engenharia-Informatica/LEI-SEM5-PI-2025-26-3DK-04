@@ -24,7 +24,7 @@ namespace DDDSample1.Controllers
         /// Cria um novo staff member
         /// </summary>
         [HttpPost]
-        [AuthorizeRole(Roles.Admin)]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<StaffMemberDto>> Create([FromBody] CreateStaffMemberDto dto)
         {
             try
@@ -43,7 +43,7 @@ namespace DDDSample1.Controllers
         /// Obtém um staff member específico por ID
         /// </summary>
         [HttpGet("{id}")]
-        [AuthorizeRole(Roles.Admin)]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<StaffMemberDto>> GetById(Guid id)
         {
             var staffMember = await _service.GetByIdAsync(id);
@@ -59,7 +59,7 @@ namespace DDDSample1.Controllers
         /// Atualiza um staff member existente (atualização parcial)
         /// </summary>
         [HttpPut("{id}")]
-        [AuthorizeRole(Roles.Admin)]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<StaffMemberDto>> Update(
             Guid id,
             [FromBody] UpdateStaffMemberDto dto)
@@ -80,7 +80,7 @@ namespace DDDSample1.Controllers
         /// Desativa um staff member (soft delete - preserva dados para auditoria)
         /// </summary>
         [HttpDelete("{id}")]
-        [AuthorizeRole(Roles.Admin)]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<StaffMemberDto>> Deactivate(Guid id)
         {
             try
@@ -99,7 +99,7 @@ namespace DDDSample1.Controllers
         /// Reativa um staff member previamente desativado
         /// </summary>
         [HttpPut("{id}/reactivate")]
-        [AuthorizeRole(Roles.Admin)]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<StaffMemberDto>> Reactivate(Guid id)
         {
             try
@@ -118,7 +118,7 @@ namespace DDDSample1.Controllers
         /// Adiciona uma qualificação a um staff member
         /// </summary>
         [HttpPost("{id}/qualifications")]
-        [AuthorizeRole(Roles.Admin)]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<StaffMemberDto>> AddQualification(
             Guid id,
             [FromBody] AddQualificationDto dto)
@@ -139,7 +139,7 @@ namespace DDDSample1.Controllers
         /// Remove uma qualificação de um staff member
         /// </summary>
         [HttpDelete("{staffId}/qualifications/{qualificationId}")]
-        [AuthorizeRole(Roles.Admin)]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<StaffMemberDto>> RemoveQualification(
             Guid staffId,
             Guid qualificationId)
@@ -160,7 +160,7 @@ namespace DDDSample1.Controllers
         /// Lista todos os staff members ativos
         /// </summary>
         [HttpGet]
-        [AuthorizeRole(Roles.Admin)]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<List<StaffMemberDto>>> GetAllActive()
         {
             var staffMembers = await _service.GetAllActiveAsync();
@@ -172,7 +172,7 @@ namespace DDDSample1.Controllers
         /// Lista todos os staff members
         /// </summary>
         [HttpGet("all")]
-        [AuthorizeRole(Roles.Admin)]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<List<StaffMemberDto>>> GetAllForAudit()
         {
             var staffMembers = await _service.GetAllForAuditAsync();
@@ -185,7 +185,7 @@ namespace DDDSample1.Controllers
         /// Query params: name, status, qualificationId
         /// </summary>
         [HttpGet("search")]
-        [AuthorizeRole(Roles.Admin)]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<List<StaffMemberDto>>> Search(
             [FromQuery] string name = null,
             [FromQuery] MemberStatus? status = null,
@@ -200,7 +200,7 @@ namespace DDDSample1.Controllers
         /// Pesquisa staff members por nome
         /// </summary>
         [HttpGet("by-name/{name}")]
-        [AuthorizeRole(Roles.Admin)]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<List<StaffMemberDto>>> SearchByName(string name)
         {
             var staffMembers = await _service.SearchByNameAsync(name);
@@ -212,7 +212,7 @@ namespace DDDSample1.Controllers
         /// Filtra staff members por status
         /// </summary>
         [HttpGet("by-status/{status}")]
-        [AuthorizeRole(Roles.Admin)]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<List<StaffMemberDto>>> GetByStatus(MemberStatus status)
         {
             var staffMembers = await _service.GetByStatusAsync(status);
@@ -224,7 +224,7 @@ namespace DDDSample1.Controllers
         /// Filtra staff members que têm uma qualificação específica
         /// </summary>
         [HttpGet("by-qualification/{qualificationId}")]
-        [AuthorizeRole(Roles.Admin)]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<List<StaffMemberDto>>> GetByQualification(Guid qualificationId)
         {
             var staffMembers = await _service.GetByQualificationAsync(qualificationId);

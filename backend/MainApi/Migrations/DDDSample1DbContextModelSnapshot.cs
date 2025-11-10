@@ -136,6 +136,9 @@ namespace DDDNetCore.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("role")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
