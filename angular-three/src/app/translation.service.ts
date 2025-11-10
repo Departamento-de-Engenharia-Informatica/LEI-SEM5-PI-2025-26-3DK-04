@@ -108,7 +108,10 @@ export class TranslationService {
           tasksDesc: "Assign and manage internal tasks",
 
           progress: "Project Progress",
-          progressDesc: "Review timeline progress"
+          progressDesc: "Review timeline progress",
+
+          dockView: "Dock View",
+          dockViewDesc: "View and manage dock operations in 3D visualization"
         }
       },
 
@@ -219,7 +222,10 @@ export class TranslationService {
           tasksDesc: "Atribuir e gerir tarefas internas",
 
           progress: "Progresso do Projeto",
-          progressDesc: "Rever evolução da timeline"
+          progressDesc: "Rever evolução da timeline",
+
+          dockView: "Visualização do Porto",
+          dockViewDesc: "Visualize e gerencie operações portuárias em 3D"
         }
       },
       accessDenied: {

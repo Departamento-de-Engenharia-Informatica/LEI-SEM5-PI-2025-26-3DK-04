@@ -38,10 +38,10 @@ $shadow: 0 1px 3px rgba(0,0,0,0.08);
 
 /* ====== GRID (matches .cards globally) ====== */
 .role-sections {
-  margin-top: 24px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 18px;
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 1.5rem;
+  margin-top: 2rem;
 }
 
 /* ====== CARD STYLE EXACT MATCH ====== */
@@ -54,6 +54,7 @@ $shadow: 0 1px 3px rgba(0,0,0,0.08);
   text-align: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
+  min-width: 0;
 
   &:hover {
     transform: translateY(-4px);
@@ -102,6 +103,28 @@ $shadow: 0 1px 3px rgba(0,0,0,0.08);
 /* ========================
    RESPONSIVE
 ======================== */
+@media (max-width: 900px) {
+  .role-panel h1 {
+    font-size: 28px;
+  }
+
+  .role-panel p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .role-sections {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .role-sections {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 @media (max-width: 900px) {
   .role-panel h1 {
     font-size: 28px;
