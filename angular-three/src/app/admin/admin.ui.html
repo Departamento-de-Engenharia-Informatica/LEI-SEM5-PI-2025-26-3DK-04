@@ -1,26 +1,26 @@
-﻿<section class="admin-panel">
-  <div class="admin-container">
-    <h1>Admin Panel</h1>
-    <p>Welcome, choose an administration action below:</p>
+﻿<section class="role-panel">
+  <div class="role-container">
 
-    <div class="admin-sections">
-      <div class="admin-card">
-        <div class="icon"></div>
-        <h3>Manage Users</h3>
-        <p>Edit roles and permissions</p>
+    <h1>{{ t('adminUI.title') }}</h1>
+    <p>{{ t('adminUI.subtitle') }}</p>
+
+    <div class="role-sections">
+
+      <div class="role-card">
+        <h3>{{ t('adminUI.cards.manageUsers') }}</h3>
+        <p>{{ t('adminUI.cards.manageUsersDesc') }}</p>
       </div>
 
-      <div class="admin-card">
-        <div class="icon"></div>
-        <h3>System Logs</h3>
-        <p>View activity logs</p>
+      <div class="role-card">
+        <h3>{{ t('adminUI.cards.logs') }}</h3>
+        <p>{{ t('adminUI.cards.logsDesc') }}</p>
       </div>
 
-      <div class="admin-card">
-        <div class="icon"></div>
-        <h3>Reports</h3>
-        <p>Access system reports</p>
+      <div class="role-card">
+        <h3>{{ t('adminUI.cards.reports') }}</h3>
+        <p>{{ t('adminUI.cards.reportsDesc') }}</p>
       </div>
+
     </div>
   </div>
 </section>

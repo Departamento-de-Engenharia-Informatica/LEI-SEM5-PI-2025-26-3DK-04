@@ -191,7 +191,34 @@ export class App implements OnInit, OnDestroy {
     }
 
   }
+  goToRoleUI() {
+    const role = this.authService.role?.toLowerCase();
 
+    console.log("[Header] goToRoleUI → role =", role);
+
+    if (!role) return;
+
+    switch (role) {
+      case "admin":
+        window.location.href = "/admin";
+        break;
+      case "representative":
+        window.location.href = "/representative";
+        break;
+      case "portauthorityofficer":
+        window.location.href = "/port-officer";
+        break;
+      case "logisticsoperator":
+        window.location.href = "/logistics";
+        break;
+      case "projectmanager":
+        window.location.href = "/project-manager";
+        break;
+      default:
+        window.location.href = "/access-denied";
+        break;
+    }
+  }
 // Função para extrair nome do id_token JWT
   parseUserNameFromIdToken(idToken: string): string | null {
     if (!idToken) return null;

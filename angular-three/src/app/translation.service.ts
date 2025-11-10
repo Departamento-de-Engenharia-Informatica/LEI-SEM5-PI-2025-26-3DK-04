@@ -1,5 +1,4 @@
 ﻿import { Injectable } from "@angular/core";
-import {Group} from 'three';
 
 @Injectable({
   providedIn: "root"
@@ -17,8 +16,11 @@ export class TranslationService {
       menuHome: "Home",
       menuAbout: "About",
       menuGroupMembers: "Group Members",
+      menuFunctionalities: "Functionalities",
+
       userInfo: "User Info",
 
+      hello: "Hello",
       login: "Login",
       logout: "Logout",
 
@@ -28,7 +30,7 @@ export class TranslationService {
       aboutTitle: "About the Project",
       aboutText: "This page contains the project description and group information.",
 
-      groupMembersTitle:'Group Members',
+      groupMembersTitle: "Group Members",
 
       members: [
         { name: "Student One", number: "Number 1" },
@@ -45,8 +47,79 @@ export class TranslationService {
         role: "Role",
         status: "Status",
         picture: "Picture"
+      },
+
+      adminUI: {
+        title: "Admin Panel",
+        subtitle: "Select an administration action:",
+        cards: {
+          manageUsers: "Manage Users",
+          manageUsersDesc: "Edit roles and permissions",
+
+          logs: "System Logs",
+          logsDesc: "View activity logs",
+
+          reports: "Reports",
+          reportsDesc: "Access system reports"
+        }
+      },
+
+      representativeUI: {
+        title: "Representative Dashboard",
+        subtitle: "Overview of your assigned tasks",
+        cards: {
+          requests: "Handle Requests",
+          requestsDesc: "Review pending client requests",
+
+          info: "Company Info",
+          infoDesc: "View registered company data"
+        }
+      },
+
+      portAuthorityUI: {
+        title: "Port Authority Dashboard",
+        subtitle: "Port operational management",
+        cards: {
+          schedule: "Vessel Scheduling",
+          scheduleDesc: "Approve or deny docking schedules",
+
+          inspection: "Port Inspections",
+          inspectionDesc: "Monitor port inspection data"
+        }
+      },
+
+      logisticsUI: {
+        title: "Logistics Dashboard",
+        subtitle: "Cargo and transport management",
+        cards: {
+          cargo: "Manage Cargo",
+          cargoDesc: "Track cargo assignments",
+
+          fleet: "Fleet Info",
+          fleetDesc: "Review transport vehicles"
+        }
+      },
+
+      projectManagerUI: {
+        title: "Project Manager Dashboard",
+        subtitle: "Team and planning tools",
+        cards: {
+          tasks: "Team Tasks",
+          tasksDesc: "Assign and manage internal tasks",
+
+          progress: "Project Progress",
+          progressDesc: "Review timeline progress"
+        }
+      },
+
+      accessDenied: {
+        title: "Access Denied",
+        message: "You do not have permission to view this page.",
+        backHome: "Return to Home"
       }
+
     },
+
 
     pt: {
       appTitle: "Projeto",
@@ -55,9 +128,10 @@ export class TranslationService {
       menuHome: "Início",
       menuAbout: "Sobre",
       menuGroupMembers: "Membros do Grupo",
+      menuFunctionalities: "Funcionalidades",
 
       userInfo: "Informação do Utilizador",
-
+      hello: "Olá",
       login: "Entrar",
       logout: "Sair",
 
@@ -67,7 +141,7 @@ export class TranslationService {
       aboutTitle: "Sobre o Projeto",
       aboutText: "Esta página contém a descrição do projeto e informações do grupo.",
 
-      groupMembersTitle:'Membros do Grupo',
+      groupMembersTitle: "Membros do Grupo",
 
       members: [
         { name: "Aluno Um", number: "Número 1" },
@@ -84,11 +158,79 @@ export class TranslationService {
         role: "Função",
         status: "Estado",
         picture: "Foto"
+      },
 
+      adminUI: {
+        title: "Painel de Administração",
+        subtitle: "Escolha uma ação administrativa:",
+        cards: {
+          manageUsers: "Gerir Utilizadores",
+          manageUsersDesc: "Editar funções e permissões",
+
+          logs: "Registos do Sistema",
+          logsDesc: "Ver registos de atividade",
+
+          reports: "Relatórios",
+          reportsDesc: "Aceder a relatórios do sistema"
+        }
+      },
+
+      representativeUI: {
+        title: "Painel de Representante",
+        subtitle: "Resumo das suas tarefas atribuídas",
+        cards: {
+          requests: "Gerir Pedidos",
+          requestsDesc: "Rever pedidos pendentes",
+
+          info: "Informação da Empresa",
+          infoDesc: "Ver dados registados"
+        }
+      },
+
+      portAuthorityUI: {
+        title: "Painel da Autoridade Portuária",
+        subtitle: "Gestão operacional do porto",
+        cards: {
+          schedule: "Agendamento de Navios",
+          scheduleDesc: "Aprovar ou rejeitar horários de docagem",
+
+          inspection: "Inspeções do Porto",
+          inspectionDesc: "Monitorizar dados de inspeções"
+        }
+      },
+
+      logisticsUI: {
+        title: "Painel de Logística",
+        subtitle: "Gestão de carga e transporte",
+        cards: {
+          cargo: "Gerir Carga",
+          cargoDesc: "Acompanhar cargas atribuídas",
+
+          fleet: "Informação da Frota",
+          fleetDesc: "Ver veículos de transporte"
+        }
+      },
+
+      projectManagerUI: {
+        title: "Painel de Gestor de Projeto",
+        subtitle: "Ferramentas de equipa e planeamento",
+        cards: {
+          tasks: "Tarefas da Equipa",
+          tasksDesc: "Atribuir e gerir tarefas internas",
+
+          progress: "Progresso do Projeto",
+          progressDesc: "Rever evolução da timeline"
+        }
+      },
+      accessDenied: {
+        title: "Acesso Negado",
+        message: "Não tem permissão para ver esta página.",
+        backHome: "Voltar ao Início"
       }
-    }
 
+    }
   };
+
 
   setLanguage(lang: string) {
     if (this.translations[lang]) {
@@ -101,6 +243,17 @@ export class TranslationService {
   }
 
   translate(key: string): any {
-    return this.translations[this.currentLang]?.[key] ?? key;
+    const path = key.split('.');
+    let current = this.translations[this.currentLang];
+
+    for (const segment of path) {
+      if (current[segment] === undefined) {
+        return key; // fallback (mostra a key no HTML)
+      }
+      current = current[segment];
+    }
+
+    return current;
   }
+
 }

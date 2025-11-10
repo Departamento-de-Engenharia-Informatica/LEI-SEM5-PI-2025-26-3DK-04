@@ -1,7 +1,7 @@
 ﻿import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-
+import { TranslationService } from '../translation.service';
 @Component({
   selector: 'app-access-denied',
   standalone: true,
@@ -9,4 +9,10 @@ import { RouterLink } from '@angular/router';
   templateUrl: './access-denied.html',
   styleUrls: ['./access-denied.scss']
 })
-export class AccessDenied {}
+export class AccessDenied {
+  constructor(private translation: TranslationService) {}
+
+  t(key: string): any {
+    return this.translation.translate(key);
+  }
+}

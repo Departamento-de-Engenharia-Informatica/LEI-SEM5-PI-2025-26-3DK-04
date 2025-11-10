@@ -34,6 +34,13 @@
       aria-label="Switch to Portuguese"
     >PT</a>
 
+    <a *ngIf="isLoggedIn"
+       class="login-btn"
+       (click)="goToRoleUI()"
+       aria-label="Role UI link">
+      {{ t('menuFunctionalities') }}
+    </a>
+
 
     <a *ngIf="!isLoggedIn"
        class="login-btn"
@@ -43,7 +50,7 @@
     </a>
 
     <div *ngIf="isLoggedIn" class="user-info">
-      <span class="welcome">Olá, {{ userName }}</span>
+      <span class="welcome">{{ t('hello') }}, {{ userName }}</span>
 
       <a class="login-btn logout-btn"
          (click)="logout()"
