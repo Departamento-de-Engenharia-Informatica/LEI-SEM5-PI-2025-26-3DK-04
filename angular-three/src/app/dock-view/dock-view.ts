@@ -28,84 +28,128 @@ export class DockView implements AfterViewInit, OnDestroy {
   private camera!: THREE.PerspectiveCamera;
   private controls!: OrbitControls;
 
-  private dock!: THREE.Mesh;
+  private docks: THREE.Mesh[] = [];
   private water!: THREE.Mesh;
   private waterMaterial!: THREE.MeshStandardMaterial;
   private resizeObserver!: ResizeObserver;
   private textureLoader: THREE.TextureLoader = new THREE.TextureLoader();
+  private raycaster: THREE.Raycaster = new THREE.Raycaster();
+  private mouse: THREE.Vector2 = new THREE.Vector2();
+  
+  // Animation properties
+  private targetPosition: THREE.Vector3 = new THREE.Vector3();
+  private currentTarget: THREE.Vector3 = new THREE.Vector3();
+  private isAnimating: boolean = false;
+  private animationProgress: number = 0;
+  private animationDuration: number = 1.5; // seconds
+  private clock: THREE.Clock = new THREE.Clock();
 
   private getAspectRatio(): number {
     return this.canvas.clientWidth / this.canvas.clientHeight;
   }
 
   private createPortStructure(): void {
-    const dockMaterial = new THREE.MeshStandardMaterial({ color: 0x8B7355 });
-    const storageMaterial = new THREE.MeshStandardMaterial({ color: 0xFFD700 }); // Yellow storage areas
-    const greenMaterial = new THREE.MeshStandardMaterial({ color: 0x90EE90 }); // Green areas
+    // Create 3 distinct docks
+    const dockMaterial1 = new THREE.MeshStandardMaterial({ color: 0x8B7355 });
+    const dockMaterial2 = new THREE.MeshStandardMaterial({ color: 0xA0826D });
+    const dockMaterial3 = new THREE.MeshStandardMaterial({ color: 0x9B7653 });
     
-    // Main central dock area
-    const mainDock = new THREE.BoxGeometry(50, 0.5, 30);
-    const mainDockMesh = new THREE.Mesh(mainDock, dockMaterial);
-    mainDockMesh.position.set(0, 0, 0);
-    this.scene.add(mainDockMesh);
+    // Dock 1 - Left
+    const dock1Geometry = new THREE.BoxGeometry(30, 1, 20);
+    const dock1 = new THREE.Mesh(dock1Geometry, dockMaterial1);
+    dock1.position.set(-40, 0, 0);
+    dock1.name = 'Dock 1';
+    dock1.userData = { dockId: 1 };
+    this.scene.add(dock1);
+    this.docks.push(dock1);
 
-    // Upper left peninsula
-    const upperLeftPeninsula = new THREE.BoxGeometry(25, 0.5, 20);
-    const upperLeftMesh = new THREE.Mesh(upperLeftPeninsula, dockMaterial);
-    upperLeftMesh.position.set(-30, 0, 20);
-    this.scene.add(upperLeftMesh);
+    // Dock 2 - Center
+    const dock2Geometry = new THREE.BoxGeometry(30, 1, 20);
+    const dock2 = new THREE.Mesh(dock2Geometry, dockMaterial2);
+    dock2.position.set(0, 0, 0);
+    dock2.name = 'Dock 2';
+    dock2.userData = { dockId: 2 };
+    this.scene.add(dock2);
+    this.docks.push(dock2);
 
-    // Upper right peninsula
-    const upperRightPeninsula = new THREE.BoxGeometry(20, 0.5, 15);
-    const upperRightMesh = new THREE.Mesh(upperRightPeninsula, dockMaterial);
-    upperRightMesh.position.set(30, 0, 22);
-    this.scene.add(upperRightMesh);
-
-    // Lower left area
-    const lowerLeftArea = new THREE.BoxGeometry(30, 0.5, 25);
-    const lowerLeftMesh = new THREE.Mesh(lowerLeftArea, dockMaterial);
-    lowerLeftMesh.position.set(-35, 0, -20);
-    this.scene.add(lowerLeftMesh);
-
-    // Lower right area
-    const lowerRightArea = new THREE.BoxGeometry(25, 0.5, 20);
-    const lowerRightMesh = new THREE.Mesh(lowerRightArea, dockMaterial);
-    lowerRightMesh.position.set(32, 0, -18);
-    this.scene.add(lowerRightMesh);
-
-    // Storage areas (yellow)
-    this.createStorageArea(storageMaterial, -10, 0, 5, 8, 0.6, 6);
-    this.createStorageArea(storageMaterial, 10, 0, -5, 10, 0.6, 8);
-    this.createStorageArea(storageMaterial, -30, 0, 18, 12, 0.6, 10);
-    this.createStorageArea(storageMaterial, 28, 0, 20, 8, 0.6, 7);
-
-    // Green perimeter areas
-    this.createStorageArea(greenMaterial, -45, 0, 20, 10, 0.4, 15);
-    this.createStorageArea(greenMaterial, 40, 0, 22, 8, 0.4, 12);
-    this.createStorageArea(greenMaterial, -50, 0, -20, 12, 0.4, 20);
-    this.createStorageArea(greenMaterial, 42, 0, -18, 10, 0.4, 15);
-
-    // Connecting piers
-    this.createPier(dockMaterial, -15, 0, 10, 3, 0.3, 8);
-    this.createPier(dockMaterial, 15, 0, 12, 3, 0.3, 10);
-    this.createPier(dockMaterial, -20, 0, -10, 3, 0.3, 6);
-    this.createPier(dockMaterial, 18, 0, -8, 3, 0.3, 7);
+    // Dock 3 - Right
+    const dock3Geometry = new THREE.BoxGeometry(30, 1, 20);
+    const dock3 = new THREE.Mesh(dock3Geometry, dockMaterial3);
+    dock3.position.set(40, 0, 0);
+    dock3.name = 'Dock 3';
+    dock3.userData = { dockId: 3 };
+    this.scene.add(dock3);
+    this.docks.push(dock3);
   }
 
-  private createStorageArea(material: THREE.Material, x: number, y: number, z: number, 
-                           width: number, height: number, depth: number): void {
-    const geometry = new THREE.BoxGeometry(width, height, depth);
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(x, y, z);
-    this.scene.add(mesh);
+  private onCanvasClick(event: MouseEvent): void {
+    // Calculate mouse position in normalized device coordinates (-1 to +1)
+    const rect = this.canvas.getBoundingClientRect();
+    this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    // Update the raycaster with the camera and mouse position
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+
+    // Check for intersections with the docks
+    const intersects = this.raycaster.intersectObjects(this.docks);
+
+    if (intersects.length > 0) {
+      const clickedDock = intersects[0].object as THREE.Mesh;
+      const dockPosition = clickedDock.position;
+      
+      // Start smooth animation to new target
+      this.currentTarget.copy(this.controls.target);
+      this.targetPosition.copy(dockPosition);
+      this.isAnimating = true;
+      this.animationProgress = 0;
+
+      console.log(`Clicked on ${clickedDock.name} at position:`, dockPosition);
+      
+      // Add visual feedback
+      this.highlightDock(clickedDock);
+    }
   }
 
-  private createPier(material: THREE.Material, x: number, y: number, z: number, 
-                    width: number, height: number, depth: number): void {
-    const geometry = new THREE.BoxGeometry(width, height, depth);
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(x, y, z);
-    this.scene.add(mesh);
+  private highlightDock(dock: THREE.Mesh): void {
+    // Reset all docks to normal
+    this.docks.forEach((d, index) => {
+      const material = d.material as THREE.MeshStandardMaterial;
+      if (index === 0) material.color.setHex(0x8B7355);
+      else if (index === 1) material.color.setHex(0xA0826D);
+      else material.color.setHex(0x9B7653);
+    });
+
+    // Highlight the selected dock
+    const material = dock.material as THREE.MeshStandardMaterial;
+    material.color.setHex(0xFFD700); // Gold color for selected dock
+  }
+
+  // Easing function for smooth animation (ease-in-out)
+  private easeInOutCubic(t: number): number {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  private updateCameraAnimation(deltaTime: number): void {
+    if (!this.isAnimating) return;
+
+    this.animationProgress += deltaTime / this.animationDuration;
+
+    if (this.animationProgress >= 1) {
+      this.animationProgress = 1;
+      this.isAnimating = false;
+    }
+
+    const easedProgress = this.easeInOutCubic(this.animationProgress);
+    
+    // Interpolate between current and target position
+    this.controls.target.lerpVectors(
+      this.currentTarget,
+      this.targetPosition,
+      easedProgress
+    );
+    
+    this.controls.update();
   }
 
   private createScene(): void {
@@ -162,11 +206,16 @@ export class DockView implements AfterViewInit, OnDestroy {
   private animateScene(): void {
     requestAnimationFrame(() => this.animateScene());
     
+    const deltaTime = this.clock.getDelta();
+    
     // Animate water normal map
     if (this.waterMaterial.normalMap) {
       this.waterMaterial.normalMap.offset.x += 0.0009;
       this.waterMaterial.normalMap.offset.y += 0.0006;
     }
+    
+    // Update camera animation
+    this.updateCameraAnimation(deltaTime);
     
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
@@ -200,6 +249,9 @@ export class DockView implements AfterViewInit, OnDestroy {
     this.controls.maxDistance = 50;
     this.controls.maxPolarAngle = Math.PI / 2;
 
+    // Add click event listener
+    this.canvas.addEventListener('click', (event) => this.onCanvasClick(event));
+
     // Setup ResizeObserver to handle zoom and window resize
     this.resizeObserver = new ResizeObserver(() => {
       this.onWindowResize();
@@ -210,6 +262,9 @@ export class DockView implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.canvas) {
+      this.canvas.removeEventListener('click', (event) => this.onCanvasClick(event));
+    }
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
     }
