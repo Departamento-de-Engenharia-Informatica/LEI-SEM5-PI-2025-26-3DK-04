@@ -11,8 +11,7 @@
   <nav class="nav-menu">
     <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
     <!-- <a routerLink="/cube" routerLinkActive="active">Cube</a> -->
-    <a routerLink="/vessel-scheduling" routerLinkActive="active">Vessel Scheduling</a>
-        <a *ngIf="isLoggedIn"
+    <a *ngIf="isLoggedIn"
        class="login-btn"
        (click)="goToRoleUI()"
        aria-label="Role UI link">

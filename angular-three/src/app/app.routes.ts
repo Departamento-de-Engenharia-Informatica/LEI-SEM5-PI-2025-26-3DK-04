@@ -14,7 +14,11 @@ import { ProjectManagerUI } from './ProjectManager/project-manager.ui';
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'cube', component: Cube },
-  { path: 'vessel-scheduling', component: VesselSchedulingComponent },
+  { 
+    path: 'vessel-scheduling', 
+    component: VesselSchedulingComponent
+  },
+  
   { path: 'dock', component: DockView },
 
   {
