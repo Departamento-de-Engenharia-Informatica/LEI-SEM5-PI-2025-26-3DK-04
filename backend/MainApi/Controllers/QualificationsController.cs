@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DDDSample1.Domain.Authentication;
 using DDDSample1.Domain.Shared;
 using DDDSample1.Domain.Qualifications;
 
@@ -23,6 +24,7 @@ namespace DDDSample1.Controllers
         /// Cria uma nova qualificação
         /// </summary>
         [HttpPost]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<QualificationDto>> Create([FromBody] CreateQualificationDto dto)
         {
             try
@@ -41,6 +43,7 @@ namespace DDDSample1.Controllers
         /// Obtém uma qualificação específica por ID
         /// </summary>
         [HttpGet("{id}")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<QualificationDto>> GetById(Guid id)
         {
             var qualification = await _service.GetByIdAsync(id);
@@ -56,6 +59,7 @@ namespace DDDSample1.Controllers
         /// Lista todas as qualificações
         /// </summary>
         [HttpGet]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<List<QualificationDto>>> GetAll()
         {
             var qualifications = await _service.GetAllAsync();
@@ -67,6 +71,7 @@ namespace DDDSample1.Controllers
         /// Atualiza uma qualificação existente
         /// </summary>
         [HttpPut("{id}")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<QualificationDto>> Update(
             Guid id,
             [FromBody] UpdateQualificationDto dto)
@@ -87,6 +92,7 @@ namespace DDDSample1.Controllers
         /// Remove uma qualificação
         /// </summary>
         [HttpDelete("{id}")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<IActionResult> Delete(Guid id)
         {
             try
@@ -105,6 +111,7 @@ namespace DDDSample1.Controllers
         /// Pesquisa qualificações por nome
         /// </summary>
         [HttpGet("search")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<List<QualificationDto>>> SearchByName([FromQuery] string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -119,6 +126,7 @@ namespace DDDSample1.Controllers
         /// Verifica se uma qualificação existe por ID
         /// </summary>
         [HttpGet("exists/{id}")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<bool>> ExistsById(Guid id)
         {
             var qualification = await _service.GetByIdAsync(id);

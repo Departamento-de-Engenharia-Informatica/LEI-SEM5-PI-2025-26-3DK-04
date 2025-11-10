@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
+using DDDSample1.Domain.Authentication;
 using DDDSample1.Domain.Shared;
 using DDDSample1.Domain.Vessels;
 
@@ -20,6 +21,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/VesselTypes
         [HttpGet]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<IEnumerable<VesselTypeDto>>> GetAll([FromQuery] string search)
         {
             if (!string.IsNullOrWhiteSpace(search))
@@ -31,6 +33,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/VesselTypes/5
         [HttpGet("{id}")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<VesselTypeDto>> GetById(Guid id)
         {
             var vesselType = await _service.GetByIdAsync(new VesselTypeId(id));
@@ -45,6 +48,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/VesselTypes/search/name?term=cargo
         [HttpGet("search/name")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<IEnumerable<VesselTypeDto>>> SearchByName([FromQuery] string term)
         {
             if (string.IsNullOrWhiteSpace(term))
@@ -57,6 +61,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/VesselTypes/search/description?term=container
         [HttpGet("search/description")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<IEnumerable<VesselTypeDto>>> SearchByDescription([FromQuery] string term)
         {
             if (string.IsNullOrWhiteSpace(term))
@@ -69,6 +74,7 @@ namespace DDDSample1.Controllers
 
         // POST: api/VesselTypes
         [HttpPost]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<VesselTypeDto>> Create(CreatingVesselTypeDto dto)
         {
             try
@@ -84,6 +90,7 @@ namespace DDDSample1.Controllers
 
         // PUT: api/VesselTypes/5
         [HttpPut("{id}")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<VesselTypeDto>> Update(Guid id, UpdatingVesselTypeDto dto)
         {
             try
@@ -105,6 +112,7 @@ namespace DDDSample1.Controllers
 
         // DELETE: api/VesselTypes/5 (Soft Delete - Inactivate)
         [HttpDelete("{id}")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<VesselTypeDto>> SoftDelete(Guid id)
         {
             try
@@ -126,6 +134,7 @@ namespace DDDSample1.Controllers
 
         // POST: api/VesselTypes/5/activate
         [HttpPost("{id}/activate")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<VesselTypeDto>> Activate(Guid id)
         {
             try
@@ -147,6 +156,7 @@ namespace DDDSample1.Controllers
 
         // DELETE: api/VesselTypes/5/hard (Hard Delete)
         [HttpDelete("{id}/hard")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<VesselTypeDto>> HardDelete(Guid id)
         {
             try

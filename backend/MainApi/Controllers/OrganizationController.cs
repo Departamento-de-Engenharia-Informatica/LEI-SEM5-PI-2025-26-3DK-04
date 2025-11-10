@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DDDSample1.Domain.Authentication;
 using DDDSample1.Domain.Shared;
 using DDDSample1.Domain.Organizations;
 
@@ -23,6 +24,7 @@ namespace DDDSample1.Controllers
         /// Obtém todas as organizações registradas.
         /// </summary>
         [HttpGet]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<List<OrganizationDto>>> GetAll()
         {
             var orgs = await _service.GetAllAsync();
@@ -34,6 +36,7 @@ namespace DDDSample1.Controllers
         /// Obtém uma organização específica por ID.
         /// </summary>
         [HttpGet("{id}")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<OrganizationDto>> GetById(string id)
         {
             try
@@ -56,6 +59,7 @@ namespace DDDSample1.Controllers
         /// Regista uma nova organização.
         /// </summary>
         [HttpPost]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<OrganizationDto>> Register([FromBody] OrganizationDto dto)
         {
             try

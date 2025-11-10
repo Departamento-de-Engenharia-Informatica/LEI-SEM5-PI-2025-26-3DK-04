@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DDDSample1.Domain.Authentication;
 using DDDSample1.Domain.Shared;
 using DDDSample1.Domain.Organizations;
 
@@ -20,6 +21,7 @@ namespace DDDSample1.Controllers
 
         // POST: api/Representatives
         [HttpPost]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<RepresentativeDto>> AddRepresentative([FromBody] AddRepresentativeDto dto)
         {
             try
@@ -35,6 +37,7 @@ namespace DDDSample1.Controllers
 
         // PUT: api/Representatives/{id}/update
         [HttpPut("{id}/update")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<RepresentativeDto>> UpdateRepresentative([FromRoute] string id, [FromBody] UpdateRepresentativeDto dto)
         {
             try
@@ -50,6 +53,7 @@ namespace DDDSample1.Controllers
 
         // PUT: api/Representatives/{id}/deactivate
         [HttpPut("{id}/deactivate")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<RepresentativeDto>> DeactivateRepresentative(string id)
         {
             try
@@ -65,6 +69,7 @@ namespace DDDSample1.Controllers
 
         // PUT: api/Representatives/{id}/activate
         [HttpPut("{id}/activate")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<RepresentativeDto>> ActivateRepresentative(string id)
         {
             try
@@ -80,6 +85,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/Representatives
         [HttpGet]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<List<RepresentativeDto>>> GetAll()
         {
             var reps = await _service.GetAllAsync();
@@ -88,6 +94,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/Representatives/{id}
         [HttpGet("{id}")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<RepresentativeDto>> GetById(string id)
         {
             var rep = await _service.GetByIdAsync(id);

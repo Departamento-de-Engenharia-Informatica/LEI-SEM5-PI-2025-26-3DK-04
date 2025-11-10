@@ -64,13 +64,6 @@ namespace DDDSample1.Domain.Authentication
     }
 }
 
-public enum Roles
-{
-    Unknown,
-    Admin,
-    NoRole
-}
-
 public enum Status
 {
     Active,

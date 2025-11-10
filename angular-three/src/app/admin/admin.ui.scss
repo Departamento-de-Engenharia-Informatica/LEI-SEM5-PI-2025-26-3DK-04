@@ -1,0 +1,113 @@
+﻿/* ========================
+   ADMIN UI - CONSISTENT STYLES
+======================== */
+$accent: #26327C;
+$dark: #0A1C41;
+$white: #ffffff;
+$text-dark: #333;
+$muted: #6c757d;
+$panel: #f8f9fa;
+$shadow: 0 1px 3px rgba(0,0,0,0.08);
+
+.admin-panel {
+  padding: 72px 28px;
+  background: $white;
+  scroll-margin-top: 92px;
+}
+
+.admin-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.admin-panel h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: $accent;
+  margin-bottom: 16px;
+}
+
+.admin-panel p {
+  font-size: 1.125rem;
+  color: $text-dark;
+  max-width: 850px;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+/* ====== GRID (MATCHES .cards from main site) ====== */
+.admin-sections {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+/* ====== CARD STYLE EXACT MATCH ====== */
+.admin-card {
+  background: $panel;
+  padding: 18px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  box-shadow: $shadow;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .icon {
+    font-size: 2rem;
+    color: $accent;
+    margin-bottom: 8px;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: $accent;
+    margin-bottom: 6px;
+  }
+
+  p {
+    font-size: 1rem;
+    color: $text-dark;
+  }
+}
+
+/* ====== BUTTON STYLE (MATCH HEADER) ====== */
+.admin-btn {
+  display: inline-block;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $dark;
+  background: transparent;
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: color 0.18s ease, transform 0.12s ease, background 0.18s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-1px);
+    color: $accent;
+    background: rgba(38,50,124,0.05);
+  }
+}
+
+/* ========================
+   RESPONSIVE
+======================== */
+@media (max-width: 900px) {
+  .admin-panel h1 {
+    font-size: 28px;
+  }
+
+  .admin-panel p {
+    font-size: 1rem;
+  }
+}
