@@ -1,0 +1,56 @@
+<div class="vessel-scheduling-container">
+  <div class="card">
+    <div class="card-header">
+      <h2>Vessel Scheduling - Shortest Delay</h2>
+      <p class="subtitle">Calculate optimal vessel scheduling to minimize delays</p>
+    </div>
+
+    <div class="card-body">
+      <!-- Date Input Section -->
+      <div class="form-group">
+        <label for="targetDate">Target Date:</label>
+        <input 
+          type="date" 
+          id="targetDate" 
+          name="targetDate"
+          [(ngModel)]="targetDate"
+          class="form-control"
+          [disabled]="isLoading"
+        />
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="button-group">
+        <button 
+          class="btn btn-primary" 
+          (click)="calculateSchedule()"
+          [disabled]="isLoading || !targetDate"
+        >
+          <span *ngIf="!isLoading">Calculate Schedule</span>
+          <span *ngIf="isLoading">
+            <span class="spinner"></span> Calculating...
+          </span>
+        </button>
+
+        <button 
+          class="btn btn-secondary" 
+          (click)="clearResults()"
+          [disabled]="isLoading"
+        >
+          Clear Results
+        </button>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="alert alert-error">
+        <strong>Error:</strong> {{ errorMessage }}
+      </div>
+
+      <!-- Results Section -->
+      <div *ngIf="schedulingResult" class="results-section">
+        <h3>Scheduling Results</h3>
+        <pre class="results-output">{{ schedulingResult }}</pre>
+      </div>
+    </div>
+  </div>
+</div>

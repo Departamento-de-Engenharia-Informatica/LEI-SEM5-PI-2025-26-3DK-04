@@ -63,6 +63,8 @@ $shadow: 0 1px 3px rgba(0,0,0,0.08);
 .section p {
   font-size: 1.125rem;
   max-width: 850px;
+  line-height: 1.6;
+  color: $text-dark;
 }
 
 .cards {
@@ -77,6 +79,13 @@ $shadow: 0 1px 3px rgba(0,0,0,0.08);
   padding: 18px;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
+  box-shadow: $shadow;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
 }
 
 .card h3 {
@@ -91,12 +100,82 @@ $shadow: 0 1px 3px rgba(0,0,0,0.08);
   color: $text-dark;
 }
 
+/* ========================
+   USER SECTION STYLES
+======================== */
+
+.user-section {
+  background: $panel;
+  padding: 60px 28px;
+  border-top: 1px solid #ddd;
+  text-align: left;
+  animation: fadeIn 0.6s ease-in-out;
+
+  h2 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: $accent;
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: 1.1rem;
+    color: $text-dark;
+    margin-bottom: 10px;
+
+    strong {
+      color: $dark;
+      font-weight: 600;
+    }
+  }
+}
+
+.user-photo-wrapper {
+  margin-top: 16px;
+}
+
+.user-photo {
+  display: block;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid $accent;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* ========================
+   ANIMATIONS
+======================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================
+   RESPONSIVE
+======================== */
 @media (max-width: 900px) {
-  .section h2 {
+  .section h2,
+  .user-section h2 {
     font-size: 28px;
   }
 
-  .section p {
+  .section p,
+  .user-section p {
     font-size: 1rem;
   }
 
@@ -106,5 +185,10 @@ $shadow: 0 1px 3px rgba(0,0,0,0.08);
 
   .hero-sub {
     font-size: 16px;
+  }
+
+  .user-photo {
+    width: 90px;
+    height: 90px;
   }
 }

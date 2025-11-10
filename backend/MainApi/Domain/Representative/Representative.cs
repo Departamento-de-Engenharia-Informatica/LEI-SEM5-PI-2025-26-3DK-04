@@ -1,4 +1,5 @@
 ﻿using System;
+using DDDSample1.Domain.Authentication;
 using DDDSample1.Domain.Shared;
 
 namespace DDDSample1.Domain.Organizations
@@ -11,6 +12,7 @@ namespace DDDSample1.Domain.Organizations
         public string PhoneNumber { get; private set; }
         public OrganizationId OrganizationId { get; private set; }
         public RepresentativeStatus Status { get; private set; }
+        public Roles role { get; private set; }
 
         private Representative() { } // For EF Core
 
@@ -38,6 +40,7 @@ namespace DDDSample1.Domain.Organizations
             this.Email = email;
             this.PhoneNumber = phoneNumber;
             this.Status = RepresentativeStatus.Active; // default
+            this.role = Roles.Representative;
         }
 
         public void AssignToOrganization(OrganizationId organizationId)

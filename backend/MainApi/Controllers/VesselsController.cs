@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
+using DDDSample1.Domain.Authentication;
 using DDDSample1.Domain.Shared;
 using DDDSample1.Domain.Vessels;
 
@@ -20,6 +21,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/Vessels
         [HttpGet]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<IEnumerable<VesselDto>>> GetAll([FromQuery] string search)
         {
             if (!string.IsNullOrWhiteSpace(search))
@@ -31,6 +33,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/Vessels/5
         [HttpGet("{id}")]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<VesselDto>> GetById(Guid id)
         {
             var vessel = await _service.GetByIdAsync(new VesselId(id));
@@ -45,6 +48,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/Vessels/imo/1234567
         [HttpGet("imo/{imoNumber}")]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<VesselDto>> GetByImoNumber(string imoNumber)
         {
             try
@@ -66,6 +70,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/Vessels/search/name?term=cargo
         [HttpGet("search/name")]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<IEnumerable<VesselDto>>> SearchByName([FromQuery] string term)
         {
             if (string.IsNullOrWhiteSpace(term))
@@ -78,6 +83,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/Vessels/search/owner?term=company
         [HttpGet("search/owner")]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<IEnumerable<VesselDto>>> SearchByOwner([FromQuery] string term)
         {
             if (string.IsNullOrWhiteSpace(term))
@@ -90,6 +96,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/Vessels/search/operator?term=maersk
         [HttpGet("search/operator")]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<IEnumerable<VesselDto>>> SearchByOperator([FromQuery] string term)
         {
             if (string.IsNullOrWhiteSpace(term))
@@ -102,6 +109,7 @@ namespace DDDSample1.Controllers
 
         // POST: api/Vessels
         [HttpPost]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<VesselDto>> Create(CreatingVesselDto dto)
         {
             try
@@ -117,6 +125,7 @@ namespace DDDSample1.Controllers
 
         // PUT: api/Vessels/5
         [HttpPut("{id}")]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<VesselDto>> Update(Guid id, UpdatingVesselDto dto)
         {
             try
@@ -138,6 +147,7 @@ namespace DDDSample1.Controllers
 
         // DELETE: api/Vessels/5 (Soft Delete - Inactivate)
         [HttpDelete("{id}")]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<VesselDto>> SoftDelete(Guid id)
         {
             try
@@ -159,6 +169,7 @@ namespace DDDSample1.Controllers
 
         // POST: api/Vessels/5/activate
         [HttpPost("{id}/activate")]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<VesselDto>> Activate(Guid id)
         {
             try
@@ -180,6 +191,7 @@ namespace DDDSample1.Controllers
 
         // DELETE: api/Vessels/5/hard (Hard Delete)
         [HttpDelete("{id}/hard")]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<VesselDto>> HardDelete(Guid id)
         {
             try

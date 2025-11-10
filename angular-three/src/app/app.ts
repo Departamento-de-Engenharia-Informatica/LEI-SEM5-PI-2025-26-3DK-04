@@ -135,6 +135,18 @@ export class App implements OnInit, OnDestroy {
   get userName(): string | null {
     return this.authService.userName;
   }
+  get email(): string | null {
+    return this.authService.email;
+  }
+  get role(): string | null {
+    return this.authService.role;
+  }
+  get picture(): string | null {
+    return this.authService.picture;
+  }
+  get status(): string | null {
+    return this.authService.status;
+  }
   async handleGoogleCallback() {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
@@ -146,15 +158,32 @@ export class App implements OnInit, OnDestroy {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code })
         });
-        console.log("depois do fetch");
-        console.log(res.status, res.headers.get('content-type'));
+
         const data = await res.json();
-        console.log('data', data);
         const idToken = data.idToken || '';
-        console.log('idToken', idToken);
+
+        const userRes = await fetch('https://localhost:5001/auth/google/user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        });
+
+        if (!userRes.ok) {
+          const errorData = await userRes.json();
+          alert(errorData.error);
+          return;
+        }
+
+        const user = await userRes.json();
+
         const userName = this.parseUserNameFromIdToken(idToken);
-        this.authService.setToken(idToken, userName);
-        console.log('Login feito com sucesso:', userName);
+
+        this.authService.setToken(idToken, user.name,user.email,user.picture,user.role,user.status);
+
+        console.log('Login feito com sucesso:', user.name);
+        console.log('Email', user.email);
+        console.log('Role', user.role);
+        console.log('Status', user.status);
         window.history.replaceState({}, document.title, '/');
       } catch (err) {
         console.error('Erro ao trocar code por token', err);
@@ -162,7 +191,34 @@ export class App implements OnInit, OnDestroy {
     }
 
   }
+  goToRoleUI() {
+    const role = this.authService.role?.toLowerCase();
 
+    console.log("[Header] goToRoleUI → role =", role);
+
+    if (!role) return;
+
+    switch (role) {
+      case "admin":
+        window.location.href = "/admin";
+        break;
+      case "representative":
+        window.location.href = "/representative";
+        break;
+      case "portauthorityofficer":
+        window.location.href = "/port-officer";
+        break;
+      case "logisticsoperator":
+        window.location.href = "/logistics";
+        break;
+      case "projectmanager":
+        window.location.href = "/project-manager";
+        break;
+      default:
+        window.location.href = "/access-denied";
+        break;
+    }
+  }
 // Função para extrair nome do id_token JWT
   parseUserNameFromIdToken(idToken: string): string | null {
     if (!idToken) return null;

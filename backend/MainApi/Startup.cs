@@ -27,6 +27,7 @@ using DDDSample1.Infrastructure.Docks;
 using DDDSample1.Infrastructure.Organizations;
 using DDDSample1.Infrastructure.PhysicalResources;
 using DDDSample1.Infrastructure.StorageAreas;
+using DDDSample1.Infrastructure.Authentication;
 
 namespace DDDSample1
 {
@@ -166,6 +167,8 @@ namespace DDDSample1
             
             services.AddTransient<IPhysicalResourceRepository,PhysicalResourcesRepository>();
             services.AddTransient<PhysicalResourceService>();
+
+            services.AddTransient<IUserRepository,UserRepository>();
             
             services.AddTransient<GoogleAuthService>();
         }

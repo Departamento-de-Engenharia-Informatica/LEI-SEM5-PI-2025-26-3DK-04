@@ -12,8 +12,14 @@
     <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
     <a routerLink="/cube" routerLinkActive="active">Cube</a>
     <a routerLink="/dock" routerLinkActive="active">Dock</a>
+    <a routerLink="/vessel-scheduling" routerLinkActive="active">Vessel Scheduling</a>
 
-    <!-- 🌍 LANGUAGE SWITCH -->
+
+    <!-- <a *ngIf="isLoggedIn" (click)="scrollToAnchor('user-info')">
+     {{ 'userInfo'}}
+   </a>-->
+
+   <!-- 🌍 LANGUAGE SWITCH -->
     <a
       href="#"
       (click)="onLangClick($event, 'en')"
@@ -28,6 +34,13 @@
       aria-label="Switch to Portuguese"
     >PT</a>
 
+    <a *ngIf="isLoggedIn"
+       class="login-btn"
+       (click)="goToRoleUI()"
+       aria-label="Role UI link">
+      {{ t('menuFunctionalities') }}
+    </a>
+
 
     <a *ngIf="!isLoggedIn"
        class="login-btn"
@@ -37,7 +50,7 @@
     </a>
 
     <div *ngIf="isLoggedIn" class="user-info">
-      <span class="welcome">Olá, {{ userName }}</span>
+      <span class="welcome">{{ t('hello') }}, {{ userName }}</span>
 
       <a class="login-btn logout-btn"
          (click)="logout()"
@@ -45,7 +58,6 @@
         {{ t('logout') }}
       </a>
     </div>
-
 
   </nav>
 </header>

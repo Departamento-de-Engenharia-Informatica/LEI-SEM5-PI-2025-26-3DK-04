@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DDDSample1.Domain.Authentication;
 using DDDSample1.Domain.PhysicalResources;
 using DDDSample1.Domain.PhysicalResources.DTOs;
 using DDDSample1.Domain.Shared;
@@ -21,6 +22,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpPost]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<PhysicalResourceDto>> Create([FromBody] CreatePhysicalResourceDto dto)
         {
             try
@@ -35,6 +37,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpPut("{id}")]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<PhysicalResourceDto>> Update(Guid id, [FromBody] UpdatePhysicalResourceDto dto)
         {
             try
@@ -49,6 +52,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpPatch("{id}/status")]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<PhysicalResourceDto>> ChangeStatus(Guid id, [FromBody] ChangeStatusDto dto)
         {
             try
@@ -63,6 +67,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpGet("{id}")]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<PhysicalResourceDto>> GetById(Guid id)
         {
             var results = await _service.SearchAsync(null, null, null);
@@ -74,6 +79,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpGet]
+        //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<List<PhysicalResourceDto>>> Search(
             [FromQuery] string? description,
             [FromQuery] string? type,

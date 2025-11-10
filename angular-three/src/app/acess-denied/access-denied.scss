@@ -1,0 +1,72 @@
+﻿/* ========================
+   ACCESS DENIED PAGE
+======================== */
+$accent: #26327C;
+$dark: #0A1C41;
+$white: #ffffff;
+$text-dark: #333;
+$muted: #6c757d;
+$panel: #f8f9fa;
+$shadow: 0 1px 3px rgba(0,0,0,0.08);
+
+.access-denied {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  background: $panel;
+
+  .denied-box {
+    background: $white;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    box-shadow: $shadow;
+    text-align: center;
+    padding: 48px 60px;
+
+    h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      color: $accent;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    p {
+      font-size: 1.125rem;
+      color: $text-dark;
+      margin-bottom: 24px;
+    }
+
+    a {
+      display: inline-block;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      color: $white;
+      background: $accent;
+      padding: 10px 18px;
+      border-radius: 4px;
+      transition: background 0.18s ease, transform 0.12s ease;
+
+      &:hover {
+        background: $dark;
+        transform: translateY(-1px);
+      }
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .access-denied .denied-box {
+    padding: 36px 28px;
+
+    h1 {
+      font-size: 26px;
+    }
+
+    p {
+      font-size: 1rem;
+    }
+  }
+}
