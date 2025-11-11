@@ -5,36 +5,72 @@ import { AuthService } from '../auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
-  private baseUrl = 'https://localhost:5001/api/UserManagement';
+
+  // USER management routes
+  private userBaseUrl = 'https://localhost:5001/api/UserManagement';
+
+  // DOCK management routes
+  private dockBaseUrl = 'https://localhost:5001/api/Dock';
+  private vesselTypeBaseUrl = 'https://localhost:5001/api/VesselTypes';
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
+  /* ===============================
+            USER MANAGEMENT
+     =============================== */
+
   checkUser(email: string): Observable<any> {
-    console.log(`[checkUser] Checking: ${email}`);
-
     const loggedEmail = this.auth.email;
-
     if (loggedEmail && email === loggedEmail) {
       return throwError(() => ({ error: 'You cannot modify your own role.' }));
     }
-
-    return this.http.get(`${this.baseUrl}/check/${email}`);
+    return this.http.get(`${this.userBaseUrl}/check/${email}`);
   }
 
   createUser(user: any): Observable<any> {
-    console.log('[createUser] Sending:', user);
-    return this.http.post(`${this.baseUrl}/create`, user);
+    return this.http.post(`${this.userBaseUrl}/create`, user);
   }
 
   updateUserRole(email: string, role: string): Observable<any> {
-    console.log(`[updateUserRole] Updating ${email} to role ${role}`);
-
     const loggedEmail = this.auth.email;
-
     if (loggedEmail && email === loggedEmail) {
       return throwError(() => ({ error: 'You cannot update your own role.' }));
     }
+    return this.http.put(`${this.userBaseUrl}/${email}/role`, { role });
+  }
 
-    return this.http.put(`${this.baseUrl}/${email}/role`, { role });
+  /* ===============================
+            DOCK MANAGEMENT
+     =============================== */
+
+  getAllDocks(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.dockBaseUrl}`);
+  }
+
+  getDockById(id: string): Observable<any> {
+    return this.http.get(`${this.dockBaseUrl}/${id}`);
+  }
+
+  createDock(dto: any): Observable<any> {
+    return this.http.post(`${this.dockBaseUrl}`, dto);
+  }
+
+  updateDock(id: string, dto: any): Observable<any> {
+    return this.http.put(`${this.dockBaseUrl}/${id}`, dto);
+  }
+
+  softDeleteDock(id: string): Observable<any> {
+    return this.http.delete(`${this.dockBaseUrl}/${id}`);
+  }
+
+  hardDeleteDock(id: string): Observable<any> {
+    return this.http.delete(`${this.dockBaseUrl}/${id}/hard`);
+  }
+
+  /* ===============================
+            VESSEL TYPES
+     =============================== */
+  getVesselTypes(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.vesselTypeBaseUrl}`);
   }
 }

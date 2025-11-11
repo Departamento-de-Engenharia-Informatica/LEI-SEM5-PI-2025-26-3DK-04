@@ -1,0 +1,96 @@
+﻿<section class="manage-docks">
+  <div class="container">
+    <h1>{{ t('adminUI.manageDocks.title') }}</h1>
+
+    <!-- LIST OF DOCKS -->
+    <div>
+      <h2>{{ t('adminUI.manageDocks.listTitle') }}</h2>
+      <button (click)="loadDocks()">{{ t('adminUI.manageDocks.refresh') }}</button>
+
+      <table *ngIf="docks.length > 0">
+        <thead>
+        <tr>
+          <th>{{ t('adminUI.manageDocks.name') }}</th>
+          <th>{{ t('adminUI.manageDocks.location') }}</th>
+          <th>{{ t('adminUI.manageDocks.vesselTypes') }}</th>
+          <th>{{ t('adminUI.manageDocks.actions') }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let d of docks">
+          <td>{{ d.name }}</td>
+          <td>{{ d.locationDescription }}</td>
+          <td>
+            <span *ngFor="let vt of d.vesselTypeNames; let last = last">
+              {{ vt }}<span *ngIf="!last">, </span>
+            </span>
+          </td>
+          <td>
+            <button (click)="editDock(d)">{{ t('adminUI.manageDocks.edit') }}</button>
+            <button class="danger" (click)="softDeleteDock(d.id)">{{ t('adminUI.manageDocks.delete') }}</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <p *ngIf="docks.length === 0">{{ t('adminUI.manageDocks.noDocks') }}</p>
+    </div>
+
+    <hr />
+
+    <!-- CREATE / EDIT FORM -->
+    <form (ngSubmit)="saveDock()">
+      <h2>{{ editing ? t('adminUI.manageDocks.editTitle') : t('adminUI.manageDocks.createTitle') }}</h2>
+
+      <div class="form-group">
+        <label>{{ t('adminUI.manageDocks.name') }}</label>
+        <input [(ngModel)]="dockForm.name" name="name" placeholder="{{ t('adminUI.manageDocks.namePlaceholder') }}" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('adminUI.manageDocks.location') }}</label>
+        <input [(ngModel)]="dockForm.locationDescription" name="locationDescription" placeholder="{{ t('adminUI.manageDocks.locationPlaceholder') }}" required />
+      </div>
+
+      <div class="form-group">
+        <label>Length (m)</label>
+        <input type="number" [(ngModel)]="dockForm.length" name="length" required />
+      </div>
+
+      <div class="form-group">
+        <label>Depth (m)</label>
+        <input type="number" [(ngModel)]="dockForm.depth" name="depth" required />
+      </div>
+
+      <div class="form-group">
+        <label>Max Draft (m)</label>
+        <input type="number" [(ngModel)]="dockForm.maxDraft" name="maxDraft" required />
+      </div>
+
+      <div class="form-group">
+        <label>Coordinates (e.g., 0,0)</label>
+        <input [(ngModel)]="dockForm.coordinates" name="coordinates" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('VesselTypes') }}</label>
+        <div *ngFor="let vt of vesselTypes">
+          <input
+            type="checkbox"
+            [id]="vt.id"
+            [value]="vt.id"
+            (change)="onVesselTypeChange($event)"
+            [checked]="dockForm.vesselTypeIds.includes(vt.id)"
+          />
+          <label [for]="vt.id">{{ vt.name }}</label>
+        </div>
+
+      </div>
+
+      <div class="form-buttons">
+        <button type="submit">{{ editing ? t('adminUI.manageDocks.saveChanges') : t('adminUI.manageDocks.create') }}</button>
+        <button type="button" class="secondary" (click)="resetForm()">{{ t('adminUI.manageDocks.cancel') }}</button>
+      </div>
+    </form>
+  </div>
+</section>

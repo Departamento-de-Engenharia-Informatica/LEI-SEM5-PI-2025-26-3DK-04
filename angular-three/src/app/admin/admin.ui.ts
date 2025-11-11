@@ -14,6 +14,7 @@ export class AdminUI {
     { name: 'User Management'},
     { name: 'System Logs'},
     { name: 'Settings'},
+    {name: 'Dock Management'}
   ];
 
   constructor(private translation: TranslationService) {}

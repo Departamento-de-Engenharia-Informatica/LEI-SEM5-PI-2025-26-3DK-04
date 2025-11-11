@@ -79,6 +79,37 @@ export class TranslationService {
           userFound: "User found",
           backButton: "Back"
         },
+        manageDocks: {
+          title: "Manage Docks",
+          listTitle: "Docks List",
+          refresh: "Refresh",
+          noDocks: "No docks available.",
+
+          createTitle: "Create New Dock",
+          editTitle: "Edit Dock",
+          name: "Name",
+          namePlaceholder: "Dock name",
+          location: "Location",
+          locationPlaceholder: "Location or coordinates",
+          vesselType: "Vessel Type",
+          vesselTypePlaceholder: "Select vessel type",
+
+          create: "Create",
+          saveChanges: "Save changes",
+          cancel: "Cancel",
+          edit: "Edit",
+          delete: "Delete",
+          confirmDelete: "Are you sure you want to delete this dock?",
+          createdSuccess: "Dock created successfully.",
+          updatedSuccess: "Dock updated successfully.",
+          deletedSuccess: "Dock removed successfully.",
+
+          validation: {
+            requiredName: "Name is required.",
+            requiredLocation: "Location is required.",
+            requiredVesselType: "Vessel Type is required."
+          }
+        },
         roles: {
           representative: "Representative",
           portAuthority: "Port Authority Officer",
@@ -246,6 +277,37 @@ export class TranslationService {
           updateButton: "Atualizar Função",
           userFound: "Utilizador encontrado",
           backButton: "Voltar"
+        },
+        manageDocks: {
+          title: "Gerir Docas",
+          listTitle: "Lista de Docas",
+          refresh: "Atualizar",
+          noDocks: "Não existem docas.",
+
+          createTitle: "Criar Nova Doca",
+          editTitle: "Editar Doca",
+          name: "Nome",
+          namePlaceholder: "Nome da doca",
+          location: "Localização",
+          locationPlaceholder: "Localização ou coordenadas",
+          vesselType: "Tipo de Embarcação",
+          vesselTypePlaceholder: "Selecionar tipo de embarcação",
+
+          create: "Criar",
+          saveChanges: "Guardar alterações",
+          cancel: "Cancelar",
+          edit: "Editar",
+          delete: "Remover",
+          confirmDelete: "Tem a certeza que pretende remover esta doca?",
+          createdSuccess: "Doca criada com sucesso.",
+          updatedSuccess: "Doca atualizada com sucesso.",
+          deletedSuccess: "Doca removida com sucesso.",
+
+          validation: {
+            requiredName: "O nome é obrigatório.",
+            requiredLocation: "A localização é obrigatória.",
+            requiredVesselType: "O tipo de embarcação é obrigatório."
+          }
         },
         roles: {
           representative: "Representante",

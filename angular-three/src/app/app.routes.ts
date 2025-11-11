@@ -11,6 +11,8 @@ import { PortAuthorityUI } from './PortAuthorityOfficer/port-authority.ui';
 import { LogisticsUI } from './Logistics-Operator/logistics.ui';
 import { ProjectManagerUI } from './ProjectManager/project-manager.ui';
 import { ManageUsers } from './admin/manageUsers/manage-users';
+import { ManageDocks } from './admin/ManageDocks/manageDocks';
+
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -33,6 +35,12 @@ export const routes: Routes = [
     component: ManageUsers,
     canActivate: [RoleGuard],
     data: { roles: ['admin'] }
+  },
+  {
+    path: 'admin/manage-docks',
+    component: ManageDocks,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin', 'projectmanager'] } // allow whoever should be able to manage docks
   },
   {
     path: 'representative',
