@@ -63,7 +63,10 @@ export class TranslationService {
           reportsDesc: "Access system reports",
 
           vesselScheduling: "Vessel Scheduling",
-          vesselSchedulingDesc: "Calculate optimal vessel scheduling to minimize delays"
+          vesselSchedulingDesc: "Calculate optimal vessel scheduling to minimize delays",
+
+          manageDocks: "Manage Docks",
+          manageDocksDesc: "Add, edit, or remove docks"
         },
         manageUsers: {
           title: "User Management",
@@ -91,9 +94,12 @@ export class TranslationService {
           namePlaceholder: "Dock name",
           location: "Location",
           locationPlaceholder: "Location or coordinates",
-          vesselType: "Vessel Type",
-          vesselTypePlaceholder: "Select vessel type",
-
+          length: "Length (m)",
+          depth: "Depth (m)",
+          maxDraft: "Max Draft (m)",
+          coordinates: "Coordinates (e.g., 0,0)",
+          vesselTypes: "Vessel Types",
+          actions: "Actions",        // inglês
           create: "Create",
           saveChanges: "Save changes",
           cancel: "Cancel",
@@ -109,7 +115,8 @@ export class TranslationService {
             requiredLocation: "Location is required.",
             requiredVesselType: "Vessel Type is required."
           }
-        },
+        }
+        ,
         roles: {
           representative: "Representative",
           portAuthority: "Port Authority Officer",
@@ -262,7 +269,10 @@ export class TranslationService {
           reportsDesc: "Aceder a relatórios do sistema",
 
           vesselScheduling: "Agendamento de Navios",
-          vesselSchedulingDesc: "Calcular agendamento ótimo de navios para minimizar atrasos"
+          vesselSchedulingDesc: "Calcular agendamento ótimo de navios para minimizar atrasos",
+
+          manageDocks: "Gerir Docas",
+          manageDocksDesc: "Adicionar, editar ou remover docas"
         },
         manageUsers: {
           title: "Gestão de Utilizadores",
@@ -290,9 +300,12 @@ export class TranslationService {
           namePlaceholder: "Nome da doca",
           location: "Localização",
           locationPlaceholder: "Localização ou coordenadas",
-          vesselType: "Tipo de Embarcação",
-          vesselTypePlaceholder: "Selecionar tipo de embarcação",
-
+          length: "Comprimento (m)",
+          depth: "Profundidade (m)",
+          maxDraft: "Calado Máximo (m)",
+          coordinates: "Coordenadas (ex.: 0,0)",
+          vesselTypes: "Tipos de Embarcação",
+          actions: "Ações",          // português
           create: "Criar",
           saveChanges: "Guardar alterações",
           cancel: "Cancelar",
@@ -308,7 +321,8 @@ export class TranslationService {
             requiredLocation: "A localização é obrigatória.",
             requiredVesselType: "O tipo de embarcação é obrigatório."
           }
-        },
+        }
+        ,
         roles: {
           representative: "Representante",
           portAuthority: "Oficial da Autoridade Portuária",

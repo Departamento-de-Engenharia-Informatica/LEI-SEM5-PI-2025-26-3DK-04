@@ -19,6 +19,18 @@ $shadow: 0 1px 3px rgba(0,0,0,0.08);
     border-radius: 8px;
     box-shadow: $shadow;
   }
+  .vessel-types {
+    display: flex;
+    gap: 1rem; // espaço entre checkboxes
+    flex-wrap: wrap; // se não couber na linha, vai para a próxima
+  }
+
+  .vessel-type-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
 
   h1 {
     text-align: center;
