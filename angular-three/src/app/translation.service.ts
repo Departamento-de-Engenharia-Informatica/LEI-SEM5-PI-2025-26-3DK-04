@@ -60,7 +60,10 @@ export class TranslationService {
           logsDesc: "View activity logs",
 
           reports: "Reports",
-          reportsDesc: "Access system reports"
+          reportsDesc: "Access system reports",
+
+          vesselScheduling: "Vessel Scheduling",
+          vesselSchedulingDesc: "Calculate optimal vessel scheduling to minimize delays"
         },
         manageUsers: {
           title: "User Management",
@@ -225,7 +228,10 @@ export class TranslationService {
           logsDesc: "Ver registos de atividade",
 
           reports: "Relatórios",
-          reportsDesc: "Aceder a relatórios do sistema"
+          reportsDesc: "Aceder a relatórios do sistema",
+
+          vesselScheduling: "Agendamento de Navios",
+          vesselSchedulingDesc: "Calcular agendamento ótimo de navios para minimizar atrasos"
         },
         manageUsers: {
           title: "Gestão de Utilizadores",

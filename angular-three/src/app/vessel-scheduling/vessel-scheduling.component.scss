@@ -1,7 +1,13 @@
+// Color variables matching the site's design (same as manage-users)
+$accent: #26327C;
+$dark: #0A1C41;
+$accent-light: #3d4a96;
+$white: #ffffff;
+
 .vessel-scheduling-container {
   max-width: 1200px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+  margin: 0 auto;
+  padding: 6rem 1rem 2rem 1rem; // Increased top padding to clear the header
 }
 
 .card {
@@ -12,7 +18,7 @@
 }
 
 .card-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, $accent 0%, $dark 100%);
   color: white;
   padding: 2rem;
   text-align: center;
@@ -55,7 +61,7 @@
 
     &:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: $accent;
     }
 
     &:disabled {
@@ -89,12 +95,12 @@
   }
 
   &.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, $accent 0%, $dark 100%);
     color: white;
 
     &:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 4px 12px rgba($accent, 0.4);
     }
   }
 
@@ -200,7 +206,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, $accent 0%, $dark 100%);
     color: white;
 
     th {
@@ -254,7 +260,7 @@
 
         &.vessel-name {
           font-weight: 600;
-          color: #667eea;
+          color: $accent;
         }
 
         &.delay-cell {
@@ -307,7 +313,7 @@
       .vessel-label {
         min-width: 80px;
         font-weight: 600;
-        color: #667eea;
+        color: $accent;
         font-size: 0.95rem;
       }
 
@@ -333,11 +339,11 @@
           }
 
           &.low-delay {
-            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            background: linear-gradient(135deg, $accent-light 0%, $accent 100%);
           }
 
           &.high-delay {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            background: linear-gradient(135deg, $dark 0%, darken($dark, 5%) 100%);
           }
 
           .bar-label {
@@ -359,7 +365,8 @@
 
 @media (max-width: 768px) {
   .vessel-scheduling-container {
-    margin: 1rem auto;
+    margin: 0 auto;
+    padding: 5rem 1rem 1rem 1rem; // Adjusted for mobile
   }
 
   .card-header {
