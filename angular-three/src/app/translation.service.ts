@@ -136,6 +136,36 @@ export class TranslationService {
         }
       },
 
+      vesselScheduling: {
+        title: "Vessel Scheduling - Shortest Delay",
+        subtitle: "Calculate optimal vessel scheduling to minimize delays",
+        targetDate: "Target Date",
+        calculateSchedule: "Calculate Schedule",
+        calculating: "Calculating...",
+        clearResults: "Clear Results",
+        error: "Error",
+        summaryCards: {
+          targetDate: "Target Date",
+          totalVessels: "Total Vessels",
+          totalDelay: "Total Delay"
+        },
+        timeUnits: "time units",
+        table: {
+          title: "Vessel Schedule Details",
+          status: "Status",
+          vessel: "Vessel",
+          arrival: "Arrival",
+          departure: "Departure",
+          startTime: "Start Time",
+          endTime: "End Time",
+          duration: "Duration",
+          delay: "Delay"
+        },
+        timeline: {
+          title: "Visual Timeline"
+        }
+      },
+
       accessDenied: {
         title: "Access Denied",
         message: "You do not have permission to view this page.",
@@ -269,6 +299,37 @@ export class TranslationService {
           dockViewDesc: "Visualize e gerencie operações portuárias em 3D"
         }
       },
+
+      vesselScheduling: {
+        title: "Agendamento de Navios - Menor Atraso",
+        subtitle: "Calcular agendamento ótimo de navios para minimizar atrasos",
+        targetDate: "Data Alvo",
+        calculateSchedule: "Calcular Agendamento",
+        calculating: "A calcular...",
+        clearResults: "Limpar Resultados",
+        error: "Erro",
+        summaryCards: {
+          targetDate: "Data Alvo",
+          totalVessels: "Total de Navios",
+          totalDelay: "Atraso Total"
+        },
+        timeUnits: "unidades de tempo",
+        table: {
+          title: "Detalhes do Agendamento de Navios",
+          status: "Estado",
+          vessel: "Navio",
+          arrival: "Chegada",
+          departure: "Partida",
+          startTime: "Início",
+          endTime: "Fim",
+          duration: "Duração",
+          delay: "Atraso"
+        },
+        timeline: {
+          title: "Linha do Tempo Visual"
+        }
+      },
+
       accessDenied: {
         title: "Acesso Negado",
         message: "Não tem permissão para ver esta página.",

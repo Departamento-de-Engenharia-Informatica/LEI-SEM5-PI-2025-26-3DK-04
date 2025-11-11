@@ -2,6 +2,7 @@
 import { CommonModule, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { TranslationService } from '../translation.service';
 
 interface VesselSchedule {
   vessel: string;
@@ -32,9 +33,18 @@ export class VesselSchedulingComponent {
   isLoading: boolean = false;
   errorMessage: string = '';
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private ngZone: NgZone) {
+  constructor(
+    private http: HttpClient, 
+    private cdr: ChangeDetectorRef, 
+    private ngZone: NgZone,
+    private translation: TranslationService
+  ) {
     const today = new Date();
     this.targetDate = today.toISOString().split('T')[0];
+  }
+
+  translate(key: string): any {
+    return this.translation.translate(key);
   }
 
   calculateSchedule(): void {
