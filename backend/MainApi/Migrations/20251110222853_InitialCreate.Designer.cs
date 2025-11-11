@@ -3,6 +3,7 @@ using System;
 using DDDSample1.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DDDNetCore.Migrations
 {
     [DbContext(typeof(DDDSample1DbContext))]
-    partial class DDDSample1DbContextModelSnapshot : ModelSnapshot
+    [Migration("20251110222853_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,6 +45,30 @@ namespace DDDNetCore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("DDDSample1.Domain.Authentication.UserActivation", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.ToTable("UserActivations", (string)null);
                 });
 
             modelBuilder.Entity("DDDSample1.Domain.Docks.Dock", b =>
@@ -433,6 +460,29 @@ namespace DDDNetCore.Migrations
                     b.HasIndex("QualificationId");
 
                     b.ToTable("StaffMemberQualifications");
+                });
+
+            modelBuilder.Entity("DDDSample1.Domain.Authentication.UserActivation", b =>
+                {
+                    b.OwnsOne("DDDSample1.Domain.Authentication.UserID", "UserId", b1 =>
+                        {
+                            b1.Property<string>("UserActivationId")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("UserEmail");
+
+                            b1.HasKey("UserActivationId");
+
+                            b1.ToTable("UserActivations");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserActivationId");
+                        });
+
+                    b.Navigation("UserId");
                 });
 
             modelBuilder.Entity("DDDSample1.Domain.Docks.Dock", b =>

@@ -171,6 +171,9 @@ namespace DDDSample1
             services.AddTransient<IUserRepository,UserRepository>();
             
             services.AddTransient<GoogleAuthService>();
+
+            services.AddTransient<IUserActivationRepository, UserActivationRepository>();
+            services.AddTransient<EmailService>();
         }
     }
 }

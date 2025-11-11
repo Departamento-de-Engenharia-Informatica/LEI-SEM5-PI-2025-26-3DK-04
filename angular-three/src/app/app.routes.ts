@@ -10,15 +10,16 @@ import { RepresentativeUI } from './Representative/representative.ui';
 import { PortAuthorityUI } from './PortAuthorityOfficer/port-authority.ui';
 import { LogisticsUI } from './Logistics-Operator/logistics.ui';
 import { ProjectManagerUI } from './ProjectManager/project-manager.ui';
+import { ManageUsers } from './admin/manageUsers/manage-users';
 
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'cube', component: Cube },
-  { 
-    path: 'vessel-scheduling', 
+  {
+    path: 'vessel-scheduling',
     component: VesselSchedulingComponent
   },
-  
+
   { path: 'dock', component: DockView },
 
   {
@@ -27,7 +28,12 @@ export const routes: Routes = [
     canActivate: [RoleGuard],
     data: { roles: ['admin'] }
   },
-
+  {
+    path: 'admin/manage-users',
+    component: ManageUsers,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin'] }
+  },
   {
     path: 'representative',
     component: RepresentativeUI,

@@ -110,6 +110,21 @@ namespace DDDNetCore.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserActivations",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    UserEmail = table.Column<string>(type: "text", nullable: true),
+                    Token = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserActivations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -462,6 +477,12 @@ namespace DDDNetCore.Migrations
                 column: "CargoManifestId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserActivations_Token",
+                table: "UserActivations",
+                column: "Token",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Vessels_Name",
                 table: "Vessels",
                 column: "Name");
@@ -518,6 +539,9 @@ namespace DDDNetCore.Migrations
 
             migrationBuilder.DropTable(
                 name: "UnloadingManifestContainers");
+
+            migrationBuilder.DropTable(
+                name: "UserActivations");
 
             migrationBuilder.DropTable(
                 name: "Users");

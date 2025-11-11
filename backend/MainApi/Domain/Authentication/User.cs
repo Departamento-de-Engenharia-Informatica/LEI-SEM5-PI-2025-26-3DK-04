@@ -1,9 +1,11 @@
-﻿using DDDSample1.Domain.Shared;
+﻿using System;
+using DDDSample1.Domain.Shared;
 
 namespace DDDSample1.Domain.Authentication
 {
     public class User : Entity<UserID>, IAggregateRoot
-    {
+    { 
+        
         public string Name { get; private set; }
         public string Picture { get; private set; }
         public Roles Role { get; set; }
@@ -61,6 +63,25 @@ namespace DDDSample1.Domain.Authentication
         {
             this.Status = status;
         }
+        
+        public void Activate()
+        {
+            this.Status = Status.Active;
+        }
+
+        public void Deactivate()
+        {
+            this.Status = Status.Inactive;
+        }
+
+        public void UpdateRole(Roles newRole)
+        {
+            if (newRole == Roles.Unknown || newRole == Roles.NoRole)
+                throw new BusinessRuleValidationException("Invalid role");
+
+            this.Role = newRole;
+        }
+        
     }
 }
 

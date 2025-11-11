@@ -6,10 +6,11 @@
 
     <div class="role-sections">
 
-      <div class="role-card">
+      <div class="role-card" routerLink="/admin/manage-users" style="cursor: pointer;">
         <h3>{{ t('adminUI.cards.manageUsers') }}</h3>
         <p>{{ t('adminUI.cards.manageUsersDesc') }}</p>
       </div>
+
 
       <div class="role-card">
         <h3>{{ t('adminUI.cards.logs') }}</h3>
@@ -24,7 +25,7 @@
       <div class="role-card" routerLink="/dock" style="cursor: pointer;">
         <h3>{{ t('projectManagerUI.cards.dockView') }}</h3>
         <p>{{ t('projectManagerUI.cards.dockViewDesc') }}</p>
-      </div>        
+      </div>
 
       <div class="role-card" routerLink="/vessel-scheduling" style="cursor: pointer;">
         <h3>Vessel Scheduling</h3>

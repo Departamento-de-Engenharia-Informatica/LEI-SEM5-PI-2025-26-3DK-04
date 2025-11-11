@@ -61,7 +61,28 @@ export class TranslationService {
 
           reports: "Reports",
           reportsDesc: "Access system reports"
+        },
+        manageUsers: {
+          title: "User Management",
+          checkTitle: "Check if a user exists",
+          emailPlaceholder: "User Email",
+          checkButton: "Check",
+          createTitle: "Create New User",
+          namePlaceholder: "Name",
+          picturePlaceholder: "Picture URL",
+          createButton: "Create User",
+          updateTitle: "Update User Role",
+          updateButton: "Update Role",
+          userFound: "User found",
+          backButton: "Back"
+        },
+        roles: {
+          representative: "Representative",
+          portAuthority: "Port Authority Officer",
+          logistics: "Logistics Operator",
+          projectManager: "Project Manager"
         }
+
       },
 
       representativeUI: {
@@ -175,6 +196,26 @@ export class TranslationService {
 
           reports: "Relatórios",
           reportsDesc: "Aceder a relatórios do sistema"
+        },
+        manageUsers: {
+          title: "Gestão de Utilizadores",
+          checkTitle: "Verificar se o utilizador existe",
+          emailPlaceholder: "Email do Utilizador",
+          checkButton: "Verificar",
+          createTitle: "Criar Novo Utilizador",
+          namePlaceholder: "Nome",
+          picturePlaceholder: "URL da Imagem",
+          createButton: "Criar Utilizador",
+          updateTitle: "Atualizar Função do Utilizador",
+          updateButton: "Atualizar Função",
+          userFound: "Utilizador encontrado",
+          backButton: "Voltar"
+        },
+        roles: {
+          representative: "Representante",
+          portAuthority: "Oficial da Autoridade Portuária",
+          logistics: "Operador Logístico",
+          projectManager: "Gestor de Projeto"
         }
       },
 

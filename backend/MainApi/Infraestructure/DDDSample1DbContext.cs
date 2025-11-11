@@ -34,6 +34,7 @@ namespace DDDSample1.Infrastructure
         public DbSet<StaffMember> StaffMembers { get; set; }
         public DbSet<PhysicalResource> PhysicalResources { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<UserActivation> UserActivations { get; set; }
         public DDDSample1DbContext(DbContextOptions options) : base(options)
         {
         }
@@ -51,6 +52,7 @@ namespace DDDSample1.Infrastructure
             modelBuilder.ApplyConfiguration(new StaffMemberEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PhysicalResourceEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UserEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UserActivationEntityTypeConfiguration());
 
             // modelBuilder.Ignore<QualificationID>();
         }
