@@ -2,6 +2,7 @@
 :- use_module(library(http/thread_httpd)).
 :- use_module(library(http/http_dispatch)).
 :- use_module(library(http/http_parameters)).
+:- use_module(library(http/http_json)).
 
 % Carregar US 3.4.2
 :- consult('PrologCode/US 3.4.2.pl').
@@ -43,21 +44,52 @@ send_file_post(Request) :-
 % ============================================
 % US 3.4.2 - Shortest Delay Endpoint
 % ============================================
-% GET http://localhost:5000/shortest_delay?date=2025-11-09
+% GET http://localhost:5000/shortest_delay?date=2025-11-09&format=json
+% GET http://localhost:5000/shortest_delay?date=2025-11-09&format=text (default)
 get_shortest_delay(Request) :-
     http_parameters(Request,
-                    [ date(Date, [optional(true), default('2025-11-09')])
+                    [ date(Date, [optional(true), default('2025-11-09')]),
+                      format(Format, [optional(true), default('text'), oneof([json, text])])
                     ]),
     obtain_seq_shortest_delay(SeqBetterTriplets, SShortestDelay),
-    format('Content-type: text/plain~n~n'),
-    format('========================================~n'),
-    format('  VESSEL SCHEDULING - SHORTEST DELAY~n'),
-    format('========================================~n~n'),
-    format('Target Date: ~w~n', [Date]),
-    format('Total Delay: ~w time units~n~n', [SShortestDelay]),
-    print_summary_table(SeqBetterTriplets),
-    format('~n'),
-    print_timeline(SeqBetterTriplets).
+    (   Format = json
+    ->  build_json_response(Date, SShortestDelay, SeqBetterTriplets, JsonResponse),
+        reply_json(JsonResponse)
+    ;   format('Content-type: text/plain~n~n'),
+        format('========================================~n'),
+        format('  VESSEL SCHEDULING - SHORTEST DELAY~n'),
+        format('========================================~n~n'),
+        format('Target Date: ~w~n', [Date]),
+        format('Total Delay: ~w time units~n~n', [SShortestDelay]),
+        print_summary_table(SeqBetterTriplets),
+        format('~n'),
+        print_timeline(SeqBetterTriplets)
+    ).
+
+% Build JSON response from schedule data
+build_json_response(Date, TotalDelay, SeqTriplets, JsonResponse) :-
+    maplist(triplet_to_json, SeqTriplets, ScheduleList),
+    JsonResponse = json([
+        date=Date,
+        totalDelay=TotalDelay,
+        schedule=ScheduleList
+    ]).
+
+% Convert a triplet (V, TInUnload, TEndLoad) to JSON object
+triplet_to_json((V, TInUnload, TEndLoad), Json) :-
+    vessel(V, Arrival, Departure, Unload, Load),
+    Duration is Unload + Load,
+    TPossibleDep is TEndLoad + 1,
+    (TPossibleDep > Departure -> Delay is TPossibleDep - Departure ; Delay is 0),
+    Json = json([
+        vessel=V,
+        arrival=Arrival,
+        departure=Departure,
+        startTime=TInUnload,
+        endTime=TEndLoad,
+        duration=Duration,
+        delay=Delay
+    ]).
 
 % Print summary table with vessel details
 print_summary_table(SeqTriplets) :-
