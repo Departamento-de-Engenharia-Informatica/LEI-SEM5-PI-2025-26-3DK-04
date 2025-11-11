@@ -1,3 +1,16 @@
+% ============================================
+% DADOS DOS NAVIOS
+% vessel(ID, Arrival, Departure, Unload, Load)
+% ============================================
+vessel(a, 5, 15, 3, 2).
+vessel(b, 7, 20, 4, 3).
+vessel(c, 10, 25, 2, 4).
+vessel(d, 12, 28, 5, 2).
+
+% ============================================
+% LÓGICA DE AGENDAMENTO
+% ============================================
+
 % sequence_temporization([a,b,c],SeqTriplets).
 % Retorna todas as sequências de navios com a sua temporização associada
 sequence_temporization(LV,SeqTriplets) :-
