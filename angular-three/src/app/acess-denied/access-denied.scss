@@ -56,7 +56,9 @@ $shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
   }
 }
-
+/* ========================
+   RESPONSIVE
+======================== */
 @media (max-width: 900px) {
   .access-denied .denied-box {
     padding: 36px 28px;
@@ -67,6 +69,25 @@ $shadow: 0 1px 3px rgba(0,0,0,0.08);
 
     p {
       font-size: 1rem;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .access-denied .denied-box {
+    padding: 28px 20px;
+
+    h1 {
+      font-size: 24px;
+    }
+
+    p {
+      font-size: 0.95rem;
+    }
+
+    a {
+      font-size: 0.9rem;
+      padding: 8px 12px;
     }
   }
 }

@@ -1,6 +1,7 @@
-﻿import { Component } from '@angular/core';
+﻿import { Component, Inject, PLATFORM_ID } from '@angular/core';
 import { TranslationService } from '../translation.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+
 @Component({
   selector: 'app-port-authority-ui',
   standalone: true,
@@ -8,7 +9,22 @@ import { CommonModule } from '@angular/common';
   styleUrl: './port-authority.ui.scss',
   imports: [CommonModule]
 })
-export class PortAuthorityUI {constructor(private translation: TranslationService) {}
+export class PortAuthorityUI {
+  currentLang = 'en';
+
+  constructor(
+    private translation: TranslationService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    const isBrowser = isPlatformBrowser(this.platformId);
+    if (isBrowser) {
+      const savedLang = localStorage.getItem('appLang');
+      if (savedLang) {
+        this.translation.setLanguage(savedLang);
+        this.currentLang = savedLang;
+      }
+    }
+  }
 
   t(key: string) {
     return this.translation.translate(key);

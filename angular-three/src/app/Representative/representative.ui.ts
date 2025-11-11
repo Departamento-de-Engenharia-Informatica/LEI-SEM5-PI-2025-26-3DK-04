@@ -1,5 +1,5 @@
-﻿import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+﻿import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { TranslationService } from '../translation.service';
 
 @Component({
@@ -10,7 +10,21 @@ import { TranslationService } from '../translation.service';
   imports: [CommonModule]
 })
 export class RepresentativeUI {
-  constructor(private translation: TranslationService) {}
+  currentLang = 'en';
+
+  constructor(
+    private translation: TranslationService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    const isBrowser = isPlatformBrowser(this.platformId);
+    if (isBrowser) {
+      const savedLang = localStorage.getItem('appLang');
+      if (savedLang) {
+        this.translation.setLanguage(savedLang);
+        this.currentLang = savedLang;
+      }
+    }
+  }
 
   t(key: string) {
     return this.translation.translate(key);

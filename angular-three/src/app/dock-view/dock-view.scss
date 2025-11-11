@@ -6,10 +6,29 @@
   height: 100%;
   display: block;
   overflow: hidden;
+  z-index: 0; /* fica atrás de elementos de header/footer se necessário */
 }
 
 #myCanvas {
   width: 100%;
   height: 100%;
   display: block;
+  object-fit: cover; /* garante que o conteúdo do canvas se ajuste à tela */
+}
+
+/* ========================
+   RESPONSIVE
+======================== */
+@media (max-width: 992px) {
+  #myCanvas {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  #myCanvas {
+    width: 100%;
+    height: 100%;
+  }
 }

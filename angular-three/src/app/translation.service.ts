@@ -80,7 +80,14 @@ export class TranslationService {
           updateTitle: "Update User Role",
           updateButton: "Update Role",
           userFound: "User found",
-          backButton: "Back"
+          backButton: "Back",
+          emailEmpty: "Please enter an email",
+          selfModifyError: "You cannot modify yourself",
+          serverError: "Server error, try again later",
+          createSuccess: "User created successfully",
+          createError: "Error creating user",
+          updateSuccess: "User role updated successfully",
+          updateError: "Error updating user role"
         },
         manageDocks: {
           title: "Manage Docks",
@@ -211,7 +218,17 @@ export class TranslationService {
         title: "Access Denied",
         message: "You do not have permission to view this page.",
         backHome: "Return to Home"
-      }
+      },
+      activation: {
+        pending: "Activating...",
+        success: "Activation Successful",
+        error: "Activation Failed",
+        successMessage: "Account activated successfully.",
+        errorMessage: "Activation failed or token invalid.",
+        invalidMessage: "Invalid activation request.",
+        backHome: "Back to Home",
+        afterActivation: "After activation you can try to log in with the account."
+      },
 
     },
 
@@ -286,7 +303,14 @@ export class TranslationService {
           updateTitle: "Atualizar Função do Utilizador",
           updateButton: "Atualizar Função",
           userFound: "Utilizador encontrado",
-          backButton: "Voltar"
+          backButton: "Voltar",
+          emailEmpty: "Por favor insira um email",
+          selfModifyError: "Não pode modificar a si próprio",
+          serverError: "Erro do servidor, tente novamente mais tarde",
+          createSuccess: "Utilizador criado com sucesso",
+          createError: "Erro ao criar o utilizador",
+          updateSuccess: "Função do utilizador atualizada com sucesso",
+          updateError: "Erro ao atualizar função do utilizador"
         },
         manageDocks: {
           title: "Gerir Docas",
@@ -416,7 +440,18 @@ export class TranslationService {
         title: "Acesso Negado",
         message: "Não tem permissão para ver esta página.",
         backHome: "Voltar ao Início"
-      }
+      },
+      activation: {
+        pending: "A ativar...",
+        success: "Ativação bem-sucedida",
+        error: "Falha na ativação",
+        successMessage: "Conta ativada com sucesso.",
+        errorMessage: "Falha na ativação ou token inválido.",
+        invalidMessage: "Pedido de ativação inválido.",
+        backHome: "Voltar ao Início",
+        afterActivation: "Após a ativação, pode tentar iniciar sessão com a conta."
+      },
+
 
     }
   };

@@ -1,7 +1,8 @@
-﻿import { Component, ChangeDetectorRef, NgZone } from '@angular/core';
-import { CommonModule, UpperCasePipe } from '@angular/common';
+﻿import { Component, ChangeDetectorRef, NgZone, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { isPlatformBrowser } from '@angular/common';
 import { TranslationService } from '../translation.service';
 
 interface VesselSchedule {
@@ -32,24 +33,37 @@ export class VesselSchedulingComponent {
   scheduleData: ScheduleResponse | null = null;
   isLoading: boolean = false;
   errorMessage: string = '';
+  currentLang = 'en';
 
   constructor(
-    private http: HttpClient, 
-    private cdr: ChangeDetectorRef, 
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef,
     private ngZone: NgZone,
-    private translation: TranslationService
+    private translation: TranslationService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     const today = new Date();
     this.targetDate = today.toISOString().split('T')[0];
+
+    // --- lógica de tradução ---
+    const isBrowser = isPlatformBrowser(this.platformId);
+    if (isBrowser) {
+      const savedLang = localStorage.getItem('appLang');
+      if (savedLang) {
+        this.translation.setLanguage(savedLang);
+        this.currentLang = savedLang;
+      }
+    }
   }
 
-  translate(key: string): any {
+  // método para usar no template
+  translate(key: string) {
     return this.translation.translate(key);
   }
 
   calculateSchedule(): void {
     if (!this.targetDate) {
-      this.errorMessage = 'Please select a date';
+      this.errorMessage = this.translate('Please select a date'); // usar tradução
       return;
     }
 
@@ -75,7 +89,7 @@ export class VesselSchedulingComponent {
       error: (error) => {
         console.error('❌ Error occurred:', error);
         this.ngZone.run(() => {
-          this.errorMessage = 'Error calculating schedule: ' + error.message;
+          this.errorMessage = this.translate('Error calculating schedule:') + ' ' + error.message; // usar tradução
           this.isLoading = false;
           this.cdr.detectChanges();
         });

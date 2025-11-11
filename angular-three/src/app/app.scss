@@ -75,6 +75,43 @@ html {
   display: flex;
   align-items: center;
   gap: 20px;
+
+  .hamburger {
+    display: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .mobile-menu {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    background: $white;
+    position: absolute;
+    top: 80px;
+    right: 0;
+    width: 200px;
+    padding: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    box-shadow: $shadow;
+    z-index: 1001;
+
+    a {
+      font-weight: 600;
+      color: $dark;
+      text-decoration: none;
+
+      &.active {
+        color: $accent;
+      }
+    }
+  }
+
+  .mobile-menu.open {
+    display: flex;
+  }
 }
 
 /* base estilo para links e botões */
@@ -129,11 +166,11 @@ html {
     color: $text-dark;
   }
 }
+
 .nav-menu .role-btn {
   font-weight: 600;
   color: $accent;
 }
-
 
 /* ========================
    3. HERO BANNER
@@ -247,31 +284,75 @@ html {
 }
 
 /* ========================
-   7. RESPONSIVE
+   7. RESPONSIVE - MOBILE NAV
 ======================== */
 @media (max-width: 900px) {
-
   .nav-menu {
-    display: flex !important;
-    flex-direction: row;
-    gap: 12px;
+    position: absolute;
+    top: 80px;
+    right: 0;
+    width: 100%;
+    flex-direction: column;
+    background: $white;
+    border-top: 1px solid #e0e0e0;
+    padding: 16px 0;
+    display: none;
+    text-align: center;
+
+    a {
+      display: block;
+      padding: 12px 0;
+      color: $dark;
+      font-size: 1.1rem;
+      text-decoration: none;
+      transition: background 0.3s ease;
+
+      &:hover {
+        background: rgba(38,50,124,0.05);
+      }
+    }
   }
 
-  .section h2 {
-    font-size: 28px;
+  .nav-menu.open {
+    display: flex;
   }
 
-  .section p {
+  /* Botão hamburger visível no mobile */
+  .hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    cursor: pointer;
+    width: 28px;
+    height: 22px;
+    gap: 5px;
+    z-index: 1002;
+
+    span {
+      display: block;
+      height: 3px;
+      width: 100%;
+      background: $dark;
+      border-radius: 3px;
+      transition: all 0.3s ease;
+    }
+
+    &.active span:nth-child(1) {
+      transform: translateY(8px) rotate(45deg);
+    }
+
+    &.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    &.active span:nth-child(3) {
+      transform: translateY(-8px) rotate(-45deg);
+    }
+  }
+
+  /* Ocultar o menu desktop */
+  .nav-menu a,
+  .user-info {
     font-size: 1rem;
   }
-
-  .hero-title {
-    font-size: 32px;
-  }
-
-  .hero-sub {
-    font-size: 16px;
-  }
 }
-
-

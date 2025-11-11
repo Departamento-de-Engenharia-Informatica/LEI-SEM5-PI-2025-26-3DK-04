@@ -13,7 +13,7 @@ import { ProjectManagerUI } from './ProjectManager/project-manager.ui';
 import { ManageUsers } from './admin/manageUsers/manage-users';
 import { ManageDocks } from './admin/ManageDocks/manageDocks';
 
-
+import { ActivationSuccess } from './admin/activation-success/activation-success';
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'cube', component: Cube },
@@ -69,6 +69,9 @@ export const routes: Routes = [
     canActivate: [RoleGuard],
     data: { roles: ['projectmanager','admin'] }
   },
+  { path: 'activate', component: ActivationSuccess },
 
-  { path: 'access-denied', component: AccessDenied }
+  { path: 'access-denied', component: AccessDenied },
+
+  { path: '**', redirectTo: '', pathMatch: 'full' }
 ];
