@@ -1,79 +1,83 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# This workflow will build, test, sign and package a WPF or Windows Forms desktop application
-# built on .NET Core.
-# To learn how to migrate your existing application to .NET Core,
-# refer to https://docs.microsoft.com/en-us/dotnet/desktop-wpf/migration/convert-project-from-net-framework
-#
-# To configure this workflow:
-#
-# 1. Configure environment variables
-# GitHub sets default environment variables for every workflow run.
-# Replace the variables relative to your project in the "env" section below.
-#
-# 2. Signing
-# Generate a signing certificate in the Windows Application
-# Packaging Project or add an existing signing certificate to the project.
-# Next, use PowerShell to encode the .pfx file using Base64 encoding
-# by running the following Powershell script to generate the output string:
-#
-# $pfx_cert = Get-Content '.\SigningCertificate.pfx' -Encoding Byte
-# [System.Convert]::ToBase64String($pfx_cert) | Out-File 'SigningCertificate_Encoded.txt'
-#
-# Open the output file, SigningCertificate_Encoded.txt, and copy the
-# string inside. Then, add the string to the repo as a GitHub secret
-# and name it "Base64_Encoded_Pfx."
-# For more information on how to configure your signing certificate for
-# this workflow, refer to https://github.com/microsoft/github-actions-for-desktop-apps#signing
-#
-# Finally, add the signing certificate password to the repo as a secret and name it "Pfx_Key".
-# See "Build the Windows Application Packaging project" below to see how the secret is used.
-#
-# For more information on GitHub Actions, refer to https://github.com/features/actions
-# For a complete CI/CD sample to get started with GitHub Action workflows for Desktop Applications,
-# refer to https://github.com/microsoft/github-actions-for-desktop-apps
-
-name: .NET Core Build and Test
+name: .NET Build, Test, and Deploy to DEI
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  schedule:
+    # Optional nightly build and deploy at 2 AM
+    - cron: '0 2 * * *'
+  workflow_dispatch:
 
 jobs:
-
-  build:
+  build-test-deploy:
 
     strategy:
       matrix:
-        configuration: [Debug, Release]
+        configuration: [Release]
 
     runs-on: ubuntu-latest
 
+    env:
+      DEPLOY_HOST: vsgate-ssh.dei.isep.ipp.pt
+      DEPLOY_PORT: 10592
+      DEPLOY_USER: vs592
+      DEPLOY_PATH: /opt/deployments/module
+      LOGS_PATH: /opt/deployments/logs
+      TEST_SCRIPT: /opt/deployments/module/run_tests.sh
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    # Install the .NET Core workload
-    - name: Install .NET Core
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
+      - name: Install .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
 
-    # Restore the application
-    - name: Restore the application
-      run: dotnet restore LEI-SEM5-PI-2025-26-3DK-04.sln
+      - name: Restore dependencies
+        run: dotnet restore LEI-SEM5-PI-2025-26-3DK-04.sln
 
-    # Build the application
-    - name: Build the application
-      run: dotnet build LEI-SEM5-PI-2025-26-3DK-04.sln --configuration ${{ matrix.configuration }} --no-restore
+      - name: Build the application
+        run: dotnet build LEI-SEM5-PI-2025-26-3DK-04.sln --configuration ${{ matrix.configuration }} --no-restore
 
-    # Execute all unit tests in the solution
-    - name: Execute unit tests
-      run: dotnet test LEI-SEM5-PI-2025-26-3DK-04.sln --configuration ${{ matrix.configuration }} --no-build --verbosity normal
+      - name: Run unit tests
+        run: dotnet test LEI-SEM5-PI-2025-26-3DK-04.sln --configuration ${{ matrix.configuration }} --no-build --verbosity normal
+
+      - name: Package build output
+        run: |
+          mkdir -p package
+          dotnet publish ./YourProject/YourProject.csproj -c ${{ matrix.configuration }} -o package/
+          tar -czf module.tar.gz package/
+
+      - name: Configure SSH access
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p $DEPLOY_PORT $DEPLOY_HOST >> ~/.ssh/known_hosts
+
+      - name: Deploy to Debian server
+        run: |
+          echo "Deploying to $DEPLOY_HOST..."
+          scp -P $DEPLOY_PORT module.tar.gz ${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/
+          ssh -p $DEPLOY_PORT ${DEPLOY_USER}@${DEPLOY_HOST} "bash -s" < .github/scripts/deploy.sh
+
+      - name: Run validation tests
+        run: ssh -p $DEPLOY_PORT ${DEPLOY_USER}@${DEPLOY_HOST} "bash $TEST_SCRIPT"
+
+      - name: Collect logs and results
+        run: |
+          mkdir -p artifacts
+          scp -P $DEPLOY_PORT ${DEPLOY_USER}@${DEPLOY_HOST}:$LOGS_PATH/deploy.log artifacts/ || true
+          scp -P $DEPLOY_PORT ${DEPLOY_USER}@${DEPLOY_HOST}:$LOGS_PATH/test_results.xml artifacts/ || true
+          tar -czf deployment_$(date +%F_%H-%M-%S).tar.gz artifacts
+
+      - name: Upload deployment artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-results
+          path: deployment_*.tar.gz
