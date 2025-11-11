@@ -11,6 +11,8 @@ namespace DDDSample1.Infrastructure.Authentication
         private readonly DDDSample1DbContext _context;
         public UserActivationRepository(DDDSample1DbContext context) : base(context.UserActivations,context)
         {
+            _context = context;
+
         }
 
         public async Task<UserActivation?> GetByTokenAsync(string token)

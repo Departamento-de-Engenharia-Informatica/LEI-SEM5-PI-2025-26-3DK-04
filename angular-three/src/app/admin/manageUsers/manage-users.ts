@@ -1,9 +1,10 @@
-﻿import { Component } from '@angular/core';
+﻿import { Component, Inject, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { TranslationService } from '../../translation.service';
 import { AdminService } from '../admin.service';
 import { AuthService } from '../../auth.service';
+
 @Component({
   selector: 'app-manage-users',
   standalone: true,
@@ -17,8 +18,23 @@ export class ManageUsers {
   userExists = false;
   updateRole = '';
   newUser = { email: '', name: '', picture: '', role: 'NoRole' };
+  currentLang = 'en';
 
-  constructor(private adminService: AdminService, private translation: TranslationService,private auth: AuthService) {}
+  constructor(
+    private adminService: AdminService,
+    private translation: TranslationService,
+    private auth: AuthService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    const isBrowser = isPlatformBrowser(this.platformId);
+    if (isBrowser) {
+      const savedLang = localStorage.getItem('appLang');
+      if (savedLang) {
+        this.translation.setLanguage(savedLang);
+        this.currentLang = savedLang;
+      }
+    }
+  }
 
   t(key: string) {
     return this.translation.translate(key);
@@ -26,12 +42,12 @@ export class ManageUsers {
 
   checkUser() {
     if (!this.email.trim()) {
-      alert("Email cannot be empty.");
+      alert(this.translation.translate('adminUI.manageUsers.emailEmpty'));
       return;
     }
 
     if (this.email === this.auth.email) {
-      alert("You cannot modify your own role.");
+      alert(this.translation.translate('adminUI.manageUsers.selfModifyError'));
       return;
     }
 
@@ -42,7 +58,7 @@ export class ManageUsers {
         this.newUser.email = this.email;
       },
       error: () => {
-        alert("Server error checking user.");
+        alert(this.translation.translate('adminUI.manageUsers.serverError'));
       }
     });
   }
@@ -56,15 +72,15 @@ export class ManageUsers {
     };
 
     this.adminService.createUser(payload).subscribe({
-      next: () => alert(' User created, activation email sent.'),
-      error: () => alert(' Error creating user.')
+      next: () => alert(this.translation.translate('adminUI.manageUsers.createSuccess')),
+      error: () => alert(this.translation.translate('adminUI.manageUsers.createError'))
     });
   }
 
   updateUserRole() {
     this.adminService.updateUserRole(this.email, this.updateRole).subscribe({
-      next: () => alert(' Role updated, activation email sent.'),
-      error: () => alert(' Error updating user role.')
+      next: () => alert(this.translation.translate('adminUI.manageUsers.updateSuccess')),
+      error: () => alert(this.translation.translate('adminUI.manageUsers.updateError'))
     });
   }
 

@@ -1,0 +1,14 @@
+﻿<section class="activation-page">
+  <div class="activation-box">
+    <h1 *ngIf="status === 'pending'">{{ translation.translate('activation.pending') }}</h1>
+    <h1 *ngIf="status === 'success'">{{ translation.translate('activation.success') }}</h1>
+    <h1 *ngIf="status === 'error'">{{ translation.translate('activation.error') }}</h1>
+
+    <p>{{ message }}</p>
+
+    <button (click)="backHome()">{{ translation.translate('activation.backHome') }}</button>
+    <p style="margin-top:8px; font-size:0.9rem;">
+      {{ translation.translate('activation.afterActivation') }}
+    </p>
+  </div>
+</section>
