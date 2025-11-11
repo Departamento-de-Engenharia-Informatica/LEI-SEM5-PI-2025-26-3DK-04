@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using DDDSample1.Domain.Vessels.VesselVisitNotification;
@@ -46,6 +48,28 @@ namespace DDDSample1.Infrastructure.Vessels
                     str => new RepresentativeId(str))
                 .IsRequired()
                 .ValueGeneratedNever();
+            
+            // Novos campos para integração com IARTI
+            builder.Property(b => b.ArrivalTime);
+            
+            builder.Property(b => b.DepartureTime);
+            
+            builder.Property(b => b.UnloadTime);
+            
+            builder.Property(b => b.LoadTime);
+            
+            builder.Property(b => b.PhysicalResourceId)
+                .HasMaxLength(100);
+            
+            builder.Property(b => b.DockId)
+                .HasMaxLength(100);
+            
+            // Propriedade de coleção para Staff Member IDs (armazenada como JSON ou tabela separada)
+            builder.Property(b => b.StaffMemberIds)
+                .HasConversion(
+                    v => string.Join(',', v),
+                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                .HasMaxLength(1000);
 
             builder.HasOne(b => b.Vessel)
                 .WithMany()

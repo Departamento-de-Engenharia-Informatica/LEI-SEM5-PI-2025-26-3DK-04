@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using DDDSample1.Domain.Docks;
 using DDDSample1.Domain.Shared;
 using DDDSample1.Domain.Vessels.VesselInformation;
@@ -31,6 +32,20 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         public RepresentativeId RepresentativeId { get; private set; }
         
         public DateTime CreatedAt { get; private set; }
+        
+        // Novos atributos para integração com IARTI
+        public DateTime? ArrivalTime { get; private set; }
+        public DateTime? DepartureTime { get; private set; }
+        public int? UnloadTime { get; private set; } // Em minutos
+        public int? LoadTime { get; private set; } // Em minutos
+        
+        // Associações necessárias
+        private List<string> _staffMemberIds = new List<string>();
+        public IReadOnlyCollection<string> StaffMemberIds => _staffMemberIds.AsReadOnly();
+        
+        public string PhysicalResourceId { get; private set; } // Crane ID
+        public string DockId { get; private set; }
+        
         //private List<CargoManifest> _cargoManifests;
 
         private VesselVisitNotification()
@@ -38,13 +53,27 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
         }
 
-        public VesselVisitNotification(Vessel vessel, LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo, RepresentativeId representativeId)
+        public VesselVisitNotification(
+            Vessel vessel, 
+            LoadingCargoMaterial loadingCargo, 
+            UnloadingCargoMaterial unloadingCargo, 
+            RepresentativeId representativeId,
+            DateTime arrivalTime,
+            DateTime departureTime,
+            List<string> staffMemberIds = null,
+            string physicalResourceId = null,
+            int? physicalResourceSetupTime = null,
+            string dockId = null)
         {
             if (vessel == null)
                 throw new BusinessRuleValidationException("Vessel is required for a visit notification.");
             
             if (representativeId == null)
                 throw new BusinessRuleValidationException("Representative is required for a visit notification.");
+            
+            // Validar que departure é posterior ao arrival
+            if (departureTime <= arrivalTime)
+                throw new BusinessRuleValidationException("Departure time must be after arrival time.");
                 
             this.Id = new VesselVisitNotificationID(Guid.NewGuid());
             this.Vessel = vessel;
@@ -53,6 +82,22 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             this.RepresentativeId = representativeId;
             this.Status = NotificationStatus.InProgress;
             this.CreatedAt = DateTime.UtcNow;
+            
+            // Definir tempos de chegada e partida
+            this.ArrivalTime = arrivalTime;
+            this.DepartureTime = departureTime;
+            
+            // Associações opcionais
+            if (staffMemberIds != null && staffMemberIds.Count > 0)
+            {
+                this._staffMemberIds = new List<string>(staffMemberIds);
+            }
+            
+            this.PhysicalResourceId = physicalResourceId;
+            this.DockId = dockId;
+            
+            // Calcular tempos de carga e descarga
+            CalculateLoadAndUnloadTimes(physicalResourceSetupTime);
         }
 
         public void Approve(string dockId, string officerId)
@@ -171,6 +216,47 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         public void UpdateUnloadingCargo(UnloadingCargoMaterial cargo)
         {
             this.UnloadingCargo = cargo ?? new UnloadingCargoMaterial(new List<CargoManifest>());
+        }
+
+        /// <summary>
+        /// Calcula os tempos de carga e descarga baseado na quantidade de carga e no setup time do physical resource (crane).
+        /// Fórmula: Tempo = (Quantidade de containers * SetupTime) em minutos
+        /// </summary>
+        private void CalculateLoadAndUnloadTimes(int? physicalResourceSetupTime)
+        {
+            if (physicalResourceSetupTime == null || physicalResourceSetupTime <= 0)
+            {
+                // Se não houver setup time, não calculamos os tempos
+                this.UnloadTime = null;
+                this.LoadTime = null;
+                return;
+            }
+
+            int setupTime = physicalResourceSetupTime.Value;
+
+            // Calcular unload time baseado na quantidade de containers no UnloadingCargo
+            if (this.UnloadingCargo != null && this.UnloadingCargo.Manifests.Any())
+            {
+                int totalUnloadContainers = this.UnloadingCargo.Manifests
+                    .Sum(m => m.Containers.Count);
+                this.UnloadTime = totalUnloadContainers * setupTime;
+            }
+            else
+            {
+                this.UnloadTime = 0;
+            }
+
+            // Calcular load time baseado na quantidade de containers no LoadingCargo
+            if (this.LoadingCargo != null && this.LoadingCargo.Manifests.Any())
+            {
+                int totalLoadContainers = this.LoadingCargo.Manifests
+                    .Sum(m => m.Containers.Count);
+                this.LoadTime = totalLoadContainers * setupTime;
+            }
+            else
+            {
+                this.LoadTime = 0;
+            }
         }
 
         
