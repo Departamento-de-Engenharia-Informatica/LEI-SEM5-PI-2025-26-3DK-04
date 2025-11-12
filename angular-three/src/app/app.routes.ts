@@ -12,6 +12,7 @@ import { LogisticsUI } from './Logistics-Operator/logistics.ui';
 import { ProjectManagerUI } from './ProjectManager/project-manager.ui';
 import { ManageUsers } from './admin/manageUsers/manage-users';
 import { ManageDocks } from './admin/ManageDocks/manageDocks';
+import { ManageStorageAreas } from './admin/manageStorageAreas/manageStorageAreas';
 
 import { ActivationSuccess } from './admin/activation-success/activation-success';
 export const routes: Routes = [
@@ -41,6 +42,12 @@ export const routes: Routes = [
     component: ManageDocks,
     canActivate: [RoleGuard],
     data: { roles: ['admin', 'projectmanager'] } // allow whoever should be able to manage docks
+  },
+  {
+    path: 'admin/manage-storage-areas',
+    component: ManageStorageAreas,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin', 'logisticsoperator'] }
   },
   {
     path: 'representative',

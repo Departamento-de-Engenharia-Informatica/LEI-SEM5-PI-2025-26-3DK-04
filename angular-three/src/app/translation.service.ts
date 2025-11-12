@@ -66,7 +66,10 @@ export class TranslationService {
           vesselSchedulingDesc: "Calculate optimal vessel scheduling to minimize delays",
 
           manageDocks: "Manage Docks",
-          manageDocksDesc: "Add, edit, or remove docks"
+          manageDocksDesc: "Add, edit, or remove docks",
+
+          manageStorageAreas: "Manage Storage Areas",
+          manageStorageAreasDesc: "Create, edit or remove storage areas"
         },
         manageUsers: {
           title: "User Management",
@@ -122,8 +125,28 @@ export class TranslationService {
             requiredLocation: "Location is required.",
             requiredVesselType: "Vessel Type is required."
           }
-        }
-        ,
+        },
+        manageStorageAreas: {
+          title: "Manage Storage Areas",
+          listTitle: "Storage Areas List",
+          refresh: "Refresh",
+          noStorageAreas: "No storage areas available.",
+          code: "Code",
+          designation: "Designation",
+          type: "Type",
+          location: "Location",
+          capacity: "Capacity (TEUs)",
+          actions: "Actions",
+          edit: "Edit",
+          delete: "Delete",
+          createTitle: "Create New Storage Area",
+          editTitle: "Edit Storage Area",
+          coordinates: "Coordinates",
+          initialDockAssignments: "Initial Dock Assignments",
+          saveChanges: "Save changes",
+          create: "Create",
+          cancel: "Cancel"
+        },
         roles: {
           representative: "Representative",
           portAuthority: "Port Authority Officer",
@@ -345,8 +368,29 @@ export class TranslationService {
             requiredLocation: "A localização é obrigatória.",
             requiredVesselType: "O tipo de embarcação é obrigatório."
           }
-        }
-        ,
+        },
+// Inside the "pt" section
+        manageStorageAreas: {
+          title: "Gerir Áreas de Armazenamento",
+          listTitle: "Lista de Áreas de Armazenamento",
+          refresh: "Atualizar",
+          noStorageAreas: "Não existem áreas de armazenamento.",
+          code: "Código",
+          designation: "Designação",
+          type: "Tipo",
+          location: "Localização",
+          capacity: "Capacidade (TEUs)",
+          actions: "Ações",
+          edit: "Editar",
+          delete: "Remover",
+          createTitle: "Criar Nova Área de Armazenamento",
+          editTitle: "Editar Área de Armazenamento",
+          coordinates: "Coordenadas",
+          initialDockAssignments: "Atribuições Iniciais de Docas",
+          saveChanges: "Guardar alterações",
+          create: "Criar",
+          cancel: "Cancelar"
+        },
         roles: {
           representative: "Representante",
           portAuthority: "Oficial da Autoridade Portuária",

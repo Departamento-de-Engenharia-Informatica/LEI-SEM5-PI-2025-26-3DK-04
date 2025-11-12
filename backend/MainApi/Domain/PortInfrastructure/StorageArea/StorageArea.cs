@@ -9,13 +9,10 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
 {
     public class StorageArea : Entity<StorageAreaID>, IAggregateRoot
     {
-        public StorageAreaType StorageAreaType { get; private set; } // Changed from class/ID
-        
-        public Location Location { get; private set; }
-
-        
         public string Code { get; private set; }
         public string Designation { get; private set; }
+        public StorageAreaType StorageAreaType { get; private set; } // Changed from class/ID
+        public Location Location { get; private set; }
         public int MaxCapacityTEUs { get; private set; }
         public int CurrentOccupancyTEUs { get; private set; }
         public bool Active { get; private set; }

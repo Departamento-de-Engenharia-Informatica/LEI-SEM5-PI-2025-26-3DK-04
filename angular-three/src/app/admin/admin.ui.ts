@@ -17,7 +17,8 @@ export class AdminUI {
     { name: 'User Management' },
     { name: 'System Logs' },
     { name: 'Settings' },
-    {name: 'Dock Management'}
+    {name: 'Dock Management'},
+    { name: 'Storage Area Management' }
   ];
 
   constructor(

@@ -1,0 +1,126 @@
+﻿@use 'sass:color';
+
+$accent: #26327C;
+$dark: #0A1C41;
+$white: #ffffff;
+$panel: #f8f9fa;
+$shadow: 0 1px 3px rgba(0,0,0,0.08);
+
+.manage-storage-areas {
+  margin-top: 100px;
+  padding: 40px;
+  background: $white;
+
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: $panel;
+    padding: 32px;
+    border-radius: 8px;
+    box-shadow: $shadow;
+  }
+
+  h1, h2 {
+    color: $accent;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f5f5f5;
+    }
+
+    .danger {
+      background-color: #e74c3c;
+      color: $white;
+    }
+  }
+
+  form {
+    .form-group {
+      margin-bottom: 15px;
+
+      label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      input, select {
+        width: 100%;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+      }
+    }
+
+    .dock-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+
+      .dock-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        input[type='number'] {
+          width: 100px;
+          padding: 8px;
+          border-radius: 4px;
+          border: 1px solid #ccc;
+        }
+
+        input[type='checkbox'] {
+          width: auto;
+          margin-right: 8px;
+        }
+      }
+    }
+
+    .form-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 20px;
+
+      button {
+        background: $accent;
+        color: $white;
+        padding: 8px 14px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+
+        &:hover {
+          background: color.adjust($accent, $lightness: -10%);
+        }
+
+        &.secondary {
+          background: #bbb;
+          &:hover {
+            background: color.adjust(#bbb, $lightness: -10%);
+          }
+        }
+
+        &.danger {
+          background: #d9534f;
+          &:hover {
+            background: color.adjust(#d9534f, $lightness: -10%);
+          }
+        }
+      }
+    }
+  }
+}

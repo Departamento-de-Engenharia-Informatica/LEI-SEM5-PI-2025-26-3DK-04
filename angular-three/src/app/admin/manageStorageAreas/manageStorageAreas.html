@@ -1,0 +1,111 @@
+﻿<section class="manage-storage-areas">
+  <div class="container">
+    <h1>{{ t('adminUI.manageStorageAreas.title') }}</h1>
+
+    <!-- LIST -->
+    <div>
+      <h2>{{ t('adminUI.manageStorageAreas.listTitle') }}</h2>
+      <button (click)="loadStorageAreas()">{{ t('adminUI.manageStorageAreas.refresh') }}</button>
+
+      <table *ngIf="storageAreas.length > 0">
+        <thead>
+        <tr>
+          <th>{{ t('adminUI.manageStorageAreas.code') }}</th>
+          <th>{{ t('adminUI.manageStorageAreas.designation') }}</th>
+          <th>{{ t('adminUI.manageStorageAreas.type') }}</th>
+          <th>{{ t('adminUI.manageStorageAreas.location') }}</th>
+          <th>{{ t('adminUI.manageStorageAreas.capacity') }}</th>
+          <th>{{ t('adminUI.manageStorageAreas.actions') }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let area of storageAreas">
+          <td>{{ area.code }}</td>
+          <td>{{ area.designation }}</td>
+          <td>{{ area.storageAreaType }}</td>
+          <td>{{ area.locationDescription }}</td>
+          <td>{{ area.maxCapacityTEUs }}</td>
+          <td>
+            <button (click)="editStorageArea(area)">{{ t('adminUI.manageStorageAreas.edit') }}</button>
+            <button class="danger" (click)="softDeleteStorageArea(area.id)">{{ t('adminUI.manageStorageAreas.delete') }}</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <p *ngIf="storageAreas.length === 0">{{ t('adminUI.manageStorageAreas.noStorageAreas') }}</p>
+    </div>
+
+    <hr />
+
+    <!-- FORM -->
+    <form (ngSubmit)="saveStorageArea()">
+      <h2>{{ editing ? t('adminUI.manageStorageAreas.editTitle') : t('adminUI.manageStorageAreas.createTitle') }}</h2>
+
+      <div class="form-group">
+        <label>{{ t('adminUI.manageStorageAreas.code') }}</label>
+        <input [(ngModel)]="storageForm.code" name="code" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('adminUI.manageStorageAreas.designation') }}</label>
+        <input [(ngModel)]="storageForm.designation" name="designation" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('adminUI.manageStorageAreas.type') }}</label>
+        <select [(ngModel)]="storageForm.storageAreaType" name="storageAreaType" required>
+          <option value="Yard">Yard</option>
+          <option value="Warehouse">Warehouse</option>
+          <option value="Refrigerated">Refrigerated</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('adminUI.manageStorageAreas.coordinates') }}</label>
+        <input [(ngModel)]="storageForm.coordinates" name="coordinates" placeholder="e.g., 41.1786, -8.6080" />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('adminUI.manageStorageAreas.location') }}</label>
+        <input [(ngModel)]="storageForm.locationDescription" name="locationDescription" />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('adminUI.manageStorageAreas.capacity') }}</label>
+        <input type="number" [(ngModel)]="storageForm.maxCapacityTEUs" name="maxCapacityTEUs" min="1" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('adminUI.manageStorageAreas.initialDockAssignments') }}</label>
+        <div class="dock-checkboxes">
+          <div *ngFor="let dock of docks" class="dock-item">
+            <input
+              type="checkbox"
+              [id]="dock.id"
+              [checked]="isDockAssigned(dock.id)"
+              (change)="onDockAssignmentChange(dock.id, $event)"
+            />
+            <label [for]="dock.id">{{ dock.name }}</label>
+
+            <input
+              type="number"
+              placeholder="Distance (m)"
+              [disabled]="!isDockAssigned(dock.id)"
+              [value]="getDockDistance(dock.id)"
+              min="0"
+              step="0.1"
+              (input)="updateDockDistance(dock.id, $event)"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <button type="submit">{{ editing ? t('adminUI.manageStorageAreas.saveChanges') : t('adminUI.manageStorageAreas.create') }}</button>
+        <button type="button" class="secondary" (click)="resetForm()">{{ t('adminUI.manageStorageAreas.cancel') }}</button>
+      </div>
+    </form>
+  </div>
+</section>
