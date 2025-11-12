@@ -46,80 +46,80 @@ $shadow: 0 1px 3px rgba(0,0,0,0.08);
       color: $white;
     }
   }
+  .form-group {
+    margin-bottom: 15px;
 
-  form {
-    .form-group {
-      margin-bottom: 15px;
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
 
-      label {
-        display: block;
-        font-weight: bold;
-        margin-bottom: 5px;
-      }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+  }
 
-      input, select {
-        width: 100%;
-        padding: 10px;
+  .dock-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+
+    .dock-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      input[type='number'] {
+        width: 100px;
+        padding: 8px;
         border-radius: 4px;
         border: 1px solid #ccc;
-        box-sizing: border-box;
+      }
+
+      input[type='checkbox'] {
+        width: auto;
+        margin-right: 8px;
+      }
+    }
+  }
+
+  /* Botões do formulário */
+  .form-buttons {
+    margin-top: 20px;
+
+    button {
+      margin-right: 10px;
+    }
+  }
+
+  button {
+    background: $accent;
+    color: $white;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+      background: color.adjust($accent, $lightness: -10%);
+    }
+
+    &.secondary {
+      background: #bbb;
+      &:hover {
+        background: color.adjust(#bbb, $lightness: -10%);
       }
     }
 
-    .dock-checkboxes {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-
-      .dock-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-
-        input[type='number'] {
-          width: 100px;
-          padding: 8px;
-          border-radius: 4px;
-          border: 1px solid #ccc;
-        }
-
-        input[type='checkbox'] {
-          width: auto;
-          margin-right: 8px;
-        }
-      }
-    }
-
-    .form-buttons {
-      display: flex;
-      gap: 1rem;
-      margin-top: 20px;
-
-      button {
-        background: $accent;
-        color: $white;
-        padding: 8px 14px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-
-        &:hover {
-          background: color.adjust($accent, $lightness: -10%);
-        }
-
-        &.secondary {
-          background: #bbb;
-          &:hover {
-            background: color.adjust(#bbb, $lightness: -10%);
-          }
-        }
-
-        &.danger {
-          background: #d9534f;
-          &:hover {
-            background: color.adjust(#d9534f, $lightness: -10%);
-          }
-        }
+    &.danger {
+      background: #d9534f;
+      &:hover {
+        background: color.adjust(#d9534f, $lightness: -10%);
       }
     }
   }

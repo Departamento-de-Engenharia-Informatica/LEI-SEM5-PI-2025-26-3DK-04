@@ -145,7 +145,12 @@ export class TranslationService {
           initialDockAssignments: "Initial Dock Assignments",
           saveChanges: "Save changes",
           create: "Create",
-          cancel: "Cancel"
+          cancel: "Cancel",
+          codePlaceholder: "Storage area code",
+          designationPlaceholder: "Storage area designation",
+          locationPlaceholder: "Location",
+          capacityPlaceholder: "Maximum capacity in TEUs",
+          dockAssignments: "Dock Assignments",
         },
         roles: {
           representative: "Representative",
@@ -312,7 +317,10 @@ export class TranslationService {
           vesselSchedulingDesc: "Calcular agendamento ótimo de navios para minimizar atrasos",
 
           manageDocks: "Gerir Docas",
-          manageDocksDesc: "Adicionar, editar ou remover docas"
+          manageDocksDesc: "Adicionar, editar ou remover docas",
+
+          manageStorageAreas: "Gerir Áreas de Armazenamento",
+          manageStorageAreasDesc: "Criar, editar ou remover áreas de armazenamento"
         },
         manageUsers: {
           title: "Gestão de Utilizadores",
@@ -389,7 +397,12 @@ export class TranslationService {
           initialDockAssignments: "Atribuições Iniciais de Docas",
           saveChanges: "Guardar alterações",
           create: "Criar",
-          cancel: "Cancelar"
+          cancel: "Cancelar",
+          codePlaceholder: "Código da área de armazenamento",
+          designationPlaceholder: "Designação da área de armazenamento",
+          locationPlaceholder: "Localização",
+          capacityPlaceholder: "Capacidade máxima em TEUs",
+          dockAssignments: "Atribuições de Docas",
         },
         roles: {
           representative: "Representante",

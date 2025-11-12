@@ -2,7 +2,7 @@
   <div class="container">
     <h1>{{ t('adminUI.manageStorageAreas.title') }}</h1>
 
-    <!-- LIST -->
+    <!-- LIST OF STORAGE AREAS -->
     <div>
       <h2>{{ t('adminUI.manageStorageAreas.listTitle') }}</h2>
       <button (click)="loadStorageAreas()">{{ t('adminUI.manageStorageAreas.refresh') }}</button>
@@ -15,6 +15,7 @@
           <th>{{ t('adminUI.manageStorageAreas.type') }}</th>
           <th>{{ t('adminUI.manageStorageAreas.location') }}</th>
           <th>{{ t('adminUI.manageStorageAreas.capacity') }}</th>
+          <th>{{ t('adminUI.manageStorageAreas.dockAssignments') }}</th>
           <th>{{ t('adminUI.manageStorageAreas.actions') }}</th>
         </tr>
         </thead>
@@ -26,6 +27,11 @@
           <td>{{ area.locationDescription }}</td>
           <td>{{ area.maxCapacityTEUs }}</td>
           <td>
+              <span *ngFor="let vt of area.dockAssignments; let last = last">
+                {{ vt }}<span *ngIf="!last">, </span>
+              </span>
+          </td>
+          <td>
             <button (click)="editStorageArea(area)">{{ t('adminUI.manageStorageAreas.edit') }}</button>
             <button class="danger" (click)="softDeleteStorageArea(area.id)">{{ t('adminUI.manageStorageAreas.delete') }}</button>
           </td>
@@ -33,23 +39,26 @@
         </tbody>
       </table>
 
-      <p *ngIf="storageAreas.length === 0">{{ t('adminUI.manageStorageAreas.noStorageAreas') }}</p>
+      <p *ngIf="storageAreas.length === 0">
+        {{ t('adminUI.manageStorageAreas.noStorageAreas') }}
+      </p>
     </div>
 
     <hr />
 
-    <!-- FORM -->
+    <!-- CREATE / EDIT FORM -->
     <form (ngSubmit)="saveStorageArea()">
       <h2>{{ editing ? t('adminUI.manageStorageAreas.editTitle') : t('adminUI.manageStorageAreas.createTitle') }}</h2>
 
       <div class="form-group">
         <label>{{ t('adminUI.manageStorageAreas.code') }}</label>
-        <input [(ngModel)]="storageForm.code" name="code" required />
+        <input [(ngModel)]="storageForm.code" name="code" placeholder="{{ t('adminUI.manageStorageAreas.codePlaceholder') }}" required />
       </div>
 
       <div class="form-group">
         <label>{{ t('adminUI.manageStorageAreas.designation') }}</label>
-        <input [(ngModel)]="storageForm.designation" name="designation" required />
+        <input [(ngModel)]="storageForm.designation" name="designation"
+               placeholder="{{ t('adminUI.manageStorageAreas.designationPlaceholder') }}" required />
       </div>
 
       <div class="form-group">
@@ -64,17 +73,30 @@
 
       <div class="form-group">
         <label>{{ t('adminUI.manageStorageAreas.coordinates') }}</label>
-        <input [(ngModel)]="storageForm.coordinates" name="coordinates" placeholder="e.g., 41.1786, -8.6080" />
+        <input
+          [(ngModel)]="storageForm.coordinates"
+          name="coordinates"
+          placeholder="e.g., 41.1786, -8.6080"
+          required
+        />
       </div>
 
       <div class="form-group">
         <label>{{ t('adminUI.manageStorageAreas.location') }}</label>
-        <input [(ngModel)]="storageForm.locationDescription" name="locationDescription" />
+        <input [(ngModel)]="storageForm.locationDescription" name="locationDescription"
+               placeholder="{{ t('adminUI.manageStorageAreas.locationPlaceholder') }}"/>
       </div>
 
       <div class="form-group">
         <label>{{ t('adminUI.manageStorageAreas.capacity') }}</label>
-        <input type="number" [(ngModel)]="storageForm.maxCapacityTEUs" name="maxCapacityTEUs" min="1" required />
+        <input
+          type="number"
+          [(ngModel)]="storageForm.maxCapacityTEUs"
+          name="maxCapacityTEUs"
+          min="1"
+          placeholder="{{ t('adminUI.manageStorageAreas.capacityPlaceholder') }}"
+          required
+        />
       </div>
 
       <div class="form-group">
@@ -84,27 +106,35 @@
             <input
               type="checkbox"
               [id]="dock.id"
-              [checked]="isDockAssigned(dock.id)"
-              (change)="onDockAssignmentChange(dock.id, $event)"
+              [(ngModel)]="dockAssignmentsMap[dock.id].assigned"
+              (ngModelChange)="onDockAssignmentChange(dock.id, $event)"
+              name="dockAssigned_{{ dock.id }}"
             />
             <label [for]="dock.id">{{ dock.name }}</label>
 
             <input
               type="number"
               placeholder="Distance (m)"
-              [disabled]="!isDockAssigned(dock.id)"
-              [value]="getDockDistance(dock.id)"
+              [disabled]="!dockAssignmentsMap[dock.id].assigned"
+              [(ngModel)]="dockAssignmentsMap[dock.id].distance"
+              (ngModelChange)="updateDockDistance(dock.id, $event)"
+              name="dockDistance_{{ dock.id }}"
               min="0"
               step="0.1"
-              (input)="updateDockDistance(dock.id, $event)"
             />
           </div>
         </div>
       </div>
 
       <div class="form-buttons">
-        <button type="submit">{{ editing ? t('adminUI.manageStorageAreas.saveChanges') : t('adminUI.manageStorageAreas.create') }}</button>
-        <button type="button" class="secondary" (click)="resetForm()">{{ t('adminUI.manageStorageAreas.cancel') }}</button>
+        <button type="submit">
+          {{ editing
+          ? t('adminUI.manageStorageAreas.saveChanges')
+          : t('adminUI.manageStorageAreas.create') }}
+        </button>
+        <button type="button" class="secondary" (click)="resetForm()">
+          {{ t('adminUI.manageStorageAreas.cancel') }}
+        </button>
       </div>
     </form>
   </div>

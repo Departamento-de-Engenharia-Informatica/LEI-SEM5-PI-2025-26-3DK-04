@@ -9,7 +9,6 @@ interface DockAssignment {
   distanceMeters: number;
 }
 
-// Tipagem precisa do enum StorageAreaType do backend
 type StorageAreaType = 'Yard' | 'Warehouse' | 'Refrigerated' | 'Other';
 
 interface StorageArea {
@@ -39,39 +38,51 @@ export class ManageStorageAreas {
   editing = false;
   editingId: string | null = null;
 
-  storageForm: Omit<StorageArea, 'id' | 'currentOccupancyTEUs' | 'active'> = {
+  storageForm = {
     code: '',
     designation: '',
-    storageAreaType: 'Yard',
+    storageAreaType: 'Yard' as StorageAreaType,
     coordinates: '',
     locationDescription: '',
     maxCapacityTEUs: 0,
-    dockAssignments: []
+    dockAssignments: [] as DockAssignment[]
   };
+
+  dockAssignmentsMap: { [dockId: string]: { assigned: boolean; distance: number } } = {};
 
   constructor(private adminService: AdminService, private translation: TranslationService) {}
 
-  t(key: string): string {
+  t(key: string) {
     return this.translation.translate(key);
   }
 
   ngOnInit() {
-    this.loadStorageAreas();
     this.loadDocks();
+    this.loadStorageAreas();
   }
 
   loadStorageAreas() {
     this.adminService.getAllStorageAreas().subscribe({
-      next: (res: StorageArea[]) => this.storageAreas = res,
+      next: res => (this.storageAreas = res),
       error: err => console.error('Error loading storage areas:', err)
     });
   }
 
   loadDocks() {
     this.adminService.getAllDocks().subscribe({
-      next: (res: { id: string; name: string }[]) => this.docks = res,
+      next: res => {
+        this.docks = res;
+        this.initDockAssignmentsMap();
+      },
       error: err => console.error('Error loading docks:', err)
     });
+  }
+
+  initDockAssignmentsMap() {
+    this.dockAssignmentsMap = {};
+    for (const dock of this.docks) {
+      this.dockAssignmentsMap[dock.id] = { assigned: false, distance: 0 };
+    }
   }
 
   saveStorageArea() {
@@ -89,20 +100,14 @@ export class ManageStorageAreas {
     };
 
     if (this.editing && this.editingId) {
-      this.adminService.updateStorageArea(this.editingId, dto).subscribe({
-        next: () => {
-          this.loadStorageAreas();
-          this.resetForm();
-        },
-        error: err => console.error('Error updating storage area:', err)
+      this.adminService.updateStorageArea(this.editingId, dto).subscribe(() => {
+        this.loadStorageAreas();
+        this.resetForm();
       });
     } else {
-      this.adminService.createStorageArea(dto).subscribe({
-        next: () => {
-          this.loadStorageAreas();
-          this.resetForm();
-        },
-        error: err => console.error('Error creating storage area:', err)
+      this.adminService.createStorageArea(dto).subscribe(() => {
+        this.loadStorageAreas();
+        this.resetForm();
       });
     }
   }
@@ -110,6 +115,8 @@ export class ManageStorageAreas {
   editStorageArea(area: StorageArea) {
     this.editing = true;
     this.editingId = area.id;
+
+    // Atualiza o formulário com os dados existentes
     this.storageForm = {
       code: area.code,
       designation: area.designation,
@@ -122,11 +129,14 @@ export class ManageStorageAreas {
         distanceMeters: a.distanceMeters
       }))
     };
-  }
 
-  softDeleteStorageArea(id: string) {
-    if (confirm('Are you sure you want to delete this storage area?')) {
-      this.adminService.inactivateStorageArea(id).subscribe(() => this.loadStorageAreas());
+    // Atualiza o mapa de docks com os dados do storage
+    for (const dock of this.docks) {
+      const assigned = area.dockAssignments.find(a => a.dockId === dock.id);
+      this.dockAssignmentsMap[dock.id] = {
+        assigned: !!assigned,
+        distance: assigned ? assigned.distanceMeters : 0
+      };
     }
   }
 
@@ -142,29 +152,40 @@ export class ManageStorageAreas {
       maxCapacityTEUs: 0,
       dockAssignments: []
     };
+    this.initDockAssignmentsMap();
   }
 
-  onDockAssignmentChange(dockId: string, event: Event) {
-    const target = event.target as HTMLInputElement;
-    if (target.checked) {
-      this.storageForm.dockAssignments.push({ dockId, distanceMeters: 0 });
+  softDeleteStorageArea(id: string) {
+    if (confirm('Are you sure?')) {
+      this.adminService.inactivateStorageArea(id).subscribe(() => this.loadStorageAreas());
+    }
+  }
+
+  isDockAssigned(dockId: string): boolean {
+    return !!this.dockAssignmentsMap[dockId]?.assigned;
+  }
+
+  getDockDistance(dockId: string): number {
+    return this.dockAssignmentsMap[dockId]?.distance ?? 0;
+  }
+
+  onDockAssignmentChange(dockId: string, event: any) {
+    const checked = event.target.checked;
+    this.dockAssignmentsMap[dockId].assigned = checked;
+
+    if (checked) {
+      if (!this.storageForm.dockAssignments.some(a => a.dockId === dockId)) {
+        this.storageForm.dockAssignments.push({ dockId, distanceMeters: 0 });
+      }
     } else {
       this.storageForm.dockAssignments = this.storageForm.dockAssignments.filter(a => a.dockId !== dockId);
     }
   }
 
-  updateDockDistance(dockId: string, event: Event) {
-    const target = event.target as HTMLInputElement;
-    const value = parseFloat(target.value);
+  updateDockDistance(dockId: string, event: any) {
+    const val = parseFloat(event.target.value);
+    this.dockAssignmentsMap[dockId].distance = val;
     const assignment = this.storageForm.dockAssignments.find(a => a.dockId === dockId);
-    if (assignment && !isNaN(value)) assignment.distanceMeters = value;
-  }
-
-  isDockAssigned(dockId: string): boolean {
-    return this.storageForm.dockAssignments.some(a => a.dockId === dockId);
-  }
-
-  getDockDistance(dockId: string): number {
-    return this.storageForm.dockAssignments.find(a => a.dockId === dockId)?.distanceMeters ?? 0;
+    if (assignment) assignment.distanceMeters = val;
   }
 }
