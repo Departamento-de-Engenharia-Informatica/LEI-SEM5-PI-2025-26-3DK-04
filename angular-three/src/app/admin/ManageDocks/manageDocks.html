@@ -21,7 +21,7 @@
           <td>{{ d.name }}</td>
           <td>{{ d.locationDescription }}</td>
           <td>
-              <span *ngFor="let vt of d.vesselTypeNames; let last = last">
+              <span *ngFor="let vt of d.allowedVesselTypes; let last = last">
                 {{ vt }}<span *ngIf="!last">, </span>
               </span>
           </td>
