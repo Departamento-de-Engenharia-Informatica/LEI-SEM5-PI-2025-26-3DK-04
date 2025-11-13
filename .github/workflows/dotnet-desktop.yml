@@ -169,19 +169,18 @@ jobs:
           EOF
             fi
             
-            # Create systemd service file if it doesn't exist
-            if [ ! -f /etc/systemd/system/mainapi.service ]; then
-              sudo tee /etc/systemd/system/mainapi.service > /dev/null << 'EOF'
+            # Create systemd service file (overwrite if exists to update config)
+            sudo tee /etc/systemd/system/mainapi.service > /dev/null << 'EOF'
           [Unit]
           Description=MainApi .NET Core Application
           After=network.target
 
           [Service]
-          Type=notify
+          Type=simple
           User=${{ secrets.DEI_SSH_USER }}
           WorkingDirectory=${{ env.DEPLOY_PATH }}/current
           ExecStart=/usr/bin/dotnet ${{ env.DEPLOY_PATH }}/current/DDDNetCore.dll
-          Restart=on-failure
+          Restart=always
           RestartSec=10
           KillSignal=SIGINT
           SyslogIdentifier=mainapi
@@ -191,8 +190,7 @@ jobs:
           [Install]
           WantedBy=multi-user.target
           EOF
-              sudo systemctl daemon-reload
-            fi
+            sudo systemctl daemon-reload
           ENDSSH
 
       - name: Deploy to DEI server
