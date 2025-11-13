@@ -24,7 +24,7 @@ on:
 env:
   SSH_HOST: vsgate-ssh.dei.isep.ipp.pt
   SSH_PORT: 10592
-  DEPLOY_PATH: /home/${{ secrets.DEI_SSH_USER }}/mainapi
+  DEPLOY_PATH: /root/mainapi
   DOTNET_VERSION: '8.0.x'
 
 jobs:
