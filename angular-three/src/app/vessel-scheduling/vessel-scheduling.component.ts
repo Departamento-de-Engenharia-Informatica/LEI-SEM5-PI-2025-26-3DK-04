@@ -71,7 +71,7 @@ export class VesselSchedulingComponent {
     this.errorMessage = '';
     this.scheduleData = null;
 
-    const url = `http://localhost:5002/shortest_delay?date=${this.targetDate}&format=json`;
+    const url = `http://localhost:5003/shortest_delay?date=${this.targetDate}&format=json`;
     console.log('Making request to:', url);
 
     this.http.get<ScheduleResponse>(url).subscribe({

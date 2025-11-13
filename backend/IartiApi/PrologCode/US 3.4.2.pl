@@ -2,10 +2,10 @@
 % DADOS DOS NAVIOS
 % vessel(ID, Arrival, Departure, Unload, Load)
 % ============================================
-vessel(a, 5, 15, 3, 2).
-vessel(b, 7, 20, 4, 3).
-vessel(c, 10, 25, 2, 4).
-vessel(d, 12, 28, 5, 2).
+% Os dados dos navios são agora carregados dinamicamente
+% a partir da base de dados através do servidor (server.pl)
+% Declaração dinâmica para permitir assertz/retract em runtime
+:- dynamic vessel/5.
 
 % ============================================
 % LÓGICA DE AGENDAMENTO

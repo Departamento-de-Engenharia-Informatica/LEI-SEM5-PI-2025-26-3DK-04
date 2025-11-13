@@ -3,6 +3,9 @@
 :- use_module(library(http/http_dispatch)).
 :- use_module(library(http/http_parameters)).
 :- use_module(library(http/http_json)).
+:- use_module(library(http/http_client)).
+:- use_module(library(http/json)).
+:- use_module(library(http/http_cors)).
 
 % Carregar US 3.4.2
 :- consult('PrologCode/US 3.4.2.pl').
@@ -11,6 +14,9 @@
 :- http_handler('/register_user', register_user, []).
 :- http_handler('/send_file_post', send_file_post, []).
 :- http_handler('/shortest_delay', get_shortest_delay, [method(get)]).
+
+% Enable CORS for all routes
+:- set_setting(http:cors, [*]).
 
 server(Port) :-						
         http_server(http_dispatch, [port(Port)]).
@@ -47,11 +53,51 @@ send_file_post(Request) :-
 % GET http://localhost:5000/shortest_delay?date=2025-11-09&format=json
 % GET http://localhost:5000/shortest_delay?date=2025-11-09&format=text (default)
 get_shortest_delay(Request) :-
+    % Enable CORS
+    cors_enable(Request, [methods([get])]),
+    
+    % Read query parameters
     http_parameters(Request,
                     [ date(Date, [optional(true), default('2025-11-09')]),
                       format(Format, [optional(true), default('text'), oneof([json, text])])
                     ]),
-    obtain_seq_shortest_delay(SeqBetterTriplets, SShortestDelay),
+
+    % Fetch approved vessel visit notifications from MainApi
+    % NOTE: MainApi runs on port 5000 (HTTP) or 5001 (HTTPS)
+    MainApiUrl = 'http://localhost:5000/api/VesselVisitNotifications/approved',
+    format(user_error, '[INFO] Fetching approved notifications from: ~w~n', [MainApiUrl]),
+    catch(
+        (http_get(MainApiUrl, JsonData, [json_object(dict)]),
+         format(user_error, '[DEBUG] HTTP GET successful~n', [])),
+        E,
+        (format(user_error, '[ERROR] Failed to fetch notifications: ~w~n', [E]), 
+         format(user_error, '[ERROR] Make sure MainApi is running on port 5000~n', []),
+         JsonData = [])
+    ),
+
+    % JsonData is already a list of dicts
+    (   is_list(JsonData) -> JsonList = JsonData ; JsonList = [] ),
+    length(JsonList, TotalCount),
+    format(user_error, '[INFO] Received ~w notifications from API~n', [TotalCount]),
+
+    % Remove any existing vessel facts (we will assert the ones from the DB)
+    retractall(vessel(_,_,_,_,_)),
+    format(user_error, '[INFO] Cleared existing vessel facts~n', []),
+
+    % Iterate notifications and assert vessel facts only for the requested date
+    assert_notifications_for_date(JsonList, Date, 1, CountAsserted),
+    format(user_error, '[INFO] Asserted ~w vessel facts for date ~w~n', [CountAsserted, Date]),
+
+    % If no vessels were asserted, return empty schedule
+    (   findall(V, vessel(V,_,_,_,_), Vs), Vs = []
+    ->  (format(user_error, '[WARNING] No vessels found for date ~w, returning empty schedule~n', [Date]),
+         SeqBetterTriplets = [], SShortestDelay = 0)
+    ;   (format(user_error, '[INFO] Running scheduling algorithm...~n', []),
+         obtain_seq_shortest_delay(SeqBetterTriplets, SShortestDelay),
+         format(user_error, '[INFO] Scheduling complete. Total delay: ~w~n', [SShortestDelay]))
+    ),
+
+    % Return as previously (JSON or text)
     (   Format = json
     ->  build_json_response(Date, SShortestDelay, SeqBetterTriplets, JsonResponse),
         reply_json(JsonResponse)
@@ -64,6 +110,60 @@ get_shortest_delay(Request) :-
         print_summary_table(SeqBetterTriplets),
         format('~n'),
         print_timeline(SeqBetterTriplets)
+    ).
+
+% assert_notifications_for_date(+JsonList, +DateStr, +IndexIncr, -Count)
+assert_notifications_for_date([], _Date, Count, Count) :-
+    format(user_error, '[INFO] Finished processing notifications~n', []).
+assert_notifications_for_date([D|Rest], Date, N, Count) :-
+    (   get_dict(arrivalTime, D, ArrivalAtom)
+    ->  (   atom(ArrivalAtom) -> atom_string(ArrivalAtom, ArrivalStr)
+        ;   string(ArrivalAtom) -> ArrivalStr = ArrivalAtom
+        ;   format(user_error, '[WARNING] arrivalTime is not atom/string: ~w~n', [ArrivalAtom]), fail
+        ),
+        % Extract date (first 10 chars) from ISO8601 like 2025-11-13T05:00:00Z
+        sub_string(ArrivalStr, 0, 10, _, ArrivalDateStr),
+        % Convert Date parameter to string for comparison
+        (   atom(Date) -> atom_string(Date, DateStr) ; DateStr = Date ),
+        format(user_error, '[DEBUG] Processing notification: ArrivalDate=~w, RequestedDate=~w (types: ~w vs ~w)~n', 
+               [ArrivalDateStr, DateStr, ArrivalDateStr, DateStr]),
+        (   ArrivalDateStr = DateStr
+        ->  % extract hour from ISO8601 (position 11-12)
+            (   sub_string(ArrivalStr, 11, 2, _, Hs) -> atom_number(Hs, ArrivalHour) ; ArrivalHour = 0 ),
+            % Get departure time
+            (   get_dict(departureTime, D, DepAtom) 
+            ->  (atom(DepAtom) -> atom_string(DepAtom, DepStr) ; DepStr = DepAtom),
+                (sub_string(DepStr, 11, 2, _, Ds) -> atom_number(Ds, DepartureHour) ; DepartureHour = ArrivalHour + 6)
+            ;   DepartureHour is ArrivalHour + 6
+            ),
+            % UnloadTime and LoadTime are in HOURS from backend DTO
+            % Use them directly as time units in the Prolog scheduling logic
+            (   get_dict(unloadTime, D, UnloadHours), number(UnloadHours) 
+            ->  UnloadTime = UnloadHours
+            ;   UnloadTime = 1
+            ),
+            (   get_dict(loadTime, D, LoadHours), number(LoadHours) 
+            ->  LoadTime = LoadHours
+            ;   LoadTime = 1
+            ),
+            % Build an id atom like v1, v2, ...
+            atomic_list_concat([v, N], IdAtom),
+            % Get vessel name if available
+            (   get_dict(vesselName, D, VesselName) -> true ; VesselName = 'Unknown' ),
+            % Log the vessel being added
+            format(user_error, '[INFO] Adding vessel ~w: ~w (Arrival=~w, Departure=~w, Unload=~w hours, Load=~w hours)~n', 
+                   [IdAtom, VesselName, ArrivalHour, DepartureHour, UnloadTime, LoadTime]),
+            % Assert vessel(Id, ArrivalHour, DepartureHour, UnloadTime, LoadTime)
+            assertz(vessel(IdAtom, ArrivalHour, DepartureHour, UnloadTime, LoadTime)),
+            N1 is N + 1,
+            assert_notifications_for_date(Rest, Date, N1, Count)
+        ;   % not match date -> skip
+            format(user_error, '[DEBUG] Skipping notification with arrival date ~w (requested: ~w)~n', [ArrivalDateStr, DateStr]),
+            assert_notifications_for_date(Rest, Date, N, Count)
+        )
+    ;   % no arrivalTime field -> skip
+        format(user_error, '[WARNING] Notification without arrivalTime field, skipping~n', []),
+        assert_notifications_for_date(Rest, Date, N, Count)
     ).
 
 % Build JSON response from schedule data

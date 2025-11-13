@@ -47,6 +47,14 @@ namespace DDDSample1.Controllers
             return Ok(notifications);
         }
 
+        [HttpGet("approved")]
+        //[AuthorizeRole(Roles.Admin)]
+        public async Task<ActionResult<List<VesselVisitNotificationDto>>> GetApprovedNotifications()
+        {
+            var notifications = await _service.GetApprovedNotificationsAsync();
+            return Ok(notifications);
+        }
+
         [HttpGet("{id}")]
         //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<VesselVisitNotificationDto>> GetById(Guid id)

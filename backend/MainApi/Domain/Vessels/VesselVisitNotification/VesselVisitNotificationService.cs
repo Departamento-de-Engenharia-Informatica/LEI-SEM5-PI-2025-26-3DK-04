@@ -41,6 +41,18 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         //Create new notification
         public async Task<VesselVisitNotificationDto> CreateAsync(CreateNotificationDto dto)
         {
+            // Validar que arrival time não é no passado
+            if (dto.ArrivalTime < DateTime.UtcNow)
+                throw new BusinessRuleValidationException("Arrival time cannot be in the past.");
+            
+            // Validar que departure time não é no passado
+            if (dto.DepartureTime < DateTime.UtcNow)
+                throw new BusinessRuleValidationException("Departure time cannot be in the past.");
+            
+            // Validar que departure é posterior ao arrival
+            if (dto.DepartureTime <= dto.ArrivalTime)
+                throw new BusinessRuleValidationException("Departure time must be after arrival time.");
+            
             //  Obter o vessel
             var vessel = await _vesselRepo.GetByIdAsync(new VesselId(dto.VesselId));
             if (vessel == null)
@@ -151,6 +163,14 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         public async Task<List<VesselVisitNotificationDto>> GetSubmittedNotificationsAsync()
         {
             var notifications = await _repo.GetSubmittedNotificationsAsync();
+            
+            return notifications.Select(n => MapToDto(n)).ToList();
+        }
+        
+        // Listar notificações aprovadas (prontas para scheduling)
+        public async Task<List<VesselVisitNotificationDto>> GetApprovedNotificationsAsync()
+        {
+            var notifications = await _repo.GetByStateAsync(NotificationStatus.Approved);
             
             return notifications.Select(n => MapToDto(n)).ToList();
         }

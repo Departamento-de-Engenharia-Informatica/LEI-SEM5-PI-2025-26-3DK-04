@@ -29,8 +29,8 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         // Novos campos para integração com IARTI
         public DateTime? ArrivalTime { get; set; }
         public DateTime? DepartureTime { get; set; }
-        public int? UnloadTime { get; set; } // Em minutos
-        public int? LoadTime { get; set; } // Em minutos
+        public int? UnloadTime { get; set; } // Em horas
+        public int? LoadTime { get; set; } // Em horas
         
         public List<string> StaffMemberIds { get; set; }
         public string PhysicalResourceId { get; set; } // Crane ID
