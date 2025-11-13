@@ -62,6 +62,32 @@ get_shortest_delay(Request) :-
                       format(Format, [optional(true), default('text'), oneof([json, text])])
                     ]),
 
+    % Validate that the date is not in the past
+    get_time(Now),
+    stamp_date_time(Now, date(YearNow, MonthNow, DayNow, _, _, _, _, _, _), local),
+    (   atom(Date) -> atom_string(Date, DateStr) ; DateStr = Date ),
+    % Parse the requested date (format: YYYY-MM-DD)
+    split_string(DateStr, "-", "", [YearStr, MonthStr, DayStr]),
+    atom_number(YearStr, Year),
+    atom_number(MonthStr, Month),
+    atom_number(DayStr, Day),
+    % Compare dates
+    (   (Year < YearNow ; (Year =:= YearNow, Month < MonthNow) ; (Year =:= YearNow, Month =:= MonthNow, Day < DayNow))
+    ->  % Date is in the past
+        format(user_error, '[ERROR] Cannot schedule for past date: ~w (today is ~w-~w-~w)~n', [DateStr, YearNow, MonthNow, DayNow]),
+        (   Format = json
+        ->  reply_json(json([error='Cannot schedule for a date in the past', requestedDate=Date]))
+        ;   format('Content-type: text/plain~n~n'),
+            format('ERROR: Cannot schedule for a date in the past.~n'),
+            format('Requested date: ~w~n', [Date]),
+            format('Current date: ~w-~w-~w~n', [YearNow, MonthNow, DayNow])
+        )
+    ;   % Date is valid, proceed with scheduling
+        schedule_for_date(Request, Date, DateStr, Format)
+    ).
+
+% Helper predicate to handle the actual scheduling logic
+schedule_for_date(_Request, Date, DateStr, Format) :-
     % Fetch approved vessel visit notifications from MainApi
     % NOTE: MainApi runs on port 5000 (HTTP) or 5001 (HTTPS)
     MainApiUrl = 'http://localhost:5000/api/VesselVisitNotifications/approved',
@@ -88,28 +114,32 @@ get_shortest_delay(Request) :-
     assert_notifications_for_date(JsonList, Date, 1, CountAsserted),
     format(user_error, '[INFO] Asserted ~w vessel facts for date ~w~n', [CountAsserted, Date]),
 
-    % If no vessels were asserted, return empty schedule
+    % If no vessels were asserted, return error message
     (   findall(V, vessel(V,_,_,_,_), Vs), Vs = []
-    ->  (format(user_error, '[WARNING] No vessels found for date ~w, returning empty schedule~n', [Date]),
-         SeqBetterTriplets = [], SShortestDelay = 0)
+    ->  (format(user_error, '[ERROR] No approved vessels found for date ~w~n', [Date]),
+         (   Format = json
+         ->  reply_json(json([error='No approved vessel visit notifications found for the selected date', requestedDate=Date]))
+         ;   format('Content-type: text/plain~n~n'),
+             format('ERROR: No approved vessel visit notifications found for the selected date.~n'),
+             format('Requested date: ~w~n', [Date])
+         ))
     ;   (format(user_error, '[INFO] Running scheduling algorithm...~n', []),
          obtain_seq_shortest_delay(SeqBetterTriplets, SShortestDelay),
-         format(user_error, '[INFO] Scheduling complete. Total delay: ~w~n', [SShortestDelay]))
-    ),
-
-    % Return as previously (JSON or text)
-    (   Format = json
-    ->  build_json_response(Date, SShortestDelay, SeqBetterTriplets, JsonResponse),
-        reply_json(JsonResponse)
-    ;   format('Content-type: text/plain~n~n'),
-        format('========================================~n'),
-        format('  VESSEL SCHEDULING - SHORTEST DELAY~n'),
-        format('========================================~n~n'),
-        format('Target Date: ~w~n', [Date]),
-        format('Total Delay: ~w time units~n~n', [SShortestDelay]),
-        print_summary_table(SeqBetterTriplets),
-        format('~n'),
-        print_timeline(SeqBetterTriplets)
+         format(user_error, '[INFO] Scheduling complete. Total delay: ~w~n', [SShortestDelay]),
+         % Return as previously (JSON or text)
+         (   Format = json
+         ->  build_json_response(Date, SShortestDelay, SeqBetterTriplets, JsonResponse),
+             reply_json(JsonResponse)
+         ;   format('Content-type: text/plain~n~n'),
+             format('========================================~n'),
+             format('  VESSEL SCHEDULING - SHORTEST DELAY~n'),
+             format('========================================~n~n'),
+             format('Target Date: ~w~n', [Date]),
+             format('Total Delay: ~w time units~n~n', [SShortestDelay]),
+             print_summary_table(SeqBetterTriplets),
+             format('~n'),
+             print_timeline(SeqBetterTriplets)
+         ))
     ).
 
 % assert_notifications_for_date(+JsonList, +DateStr, +IndexIncr, -Count)

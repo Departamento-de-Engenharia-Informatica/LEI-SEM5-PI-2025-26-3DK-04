@@ -78,18 +78,27 @@ export class VesselSchedulingComponent {
       next: (response) => {
         console.log('✅ Response received:', response);
         this.ngZone.run(() => {
-          this.scheduleData = response;
-          this.isLoading = false;
-          console.log('✅ isLoading set to false');
-          console.log('✅ scheduleData:', this.scheduleData);
-          this.cdr.markForCheck();
-          setTimeout(() => this.cdr.detectChanges(), 0);
+          // Check if response contains an error
+          if ((response as any).error) {
+            this.errorMessage = (response as any).error;
+            this.scheduleData = null;
+            this.isLoading = false;
+            console.log('❌ Error from server:', this.errorMessage);
+            this.cdr.detectChanges();
+          } else {
+            this.scheduleData = response;
+            this.isLoading = false;
+            console.log('✅ isLoading set to false');
+            console.log('✅ scheduleData:', this.scheduleData);
+            this.cdr.markForCheck();
+            setTimeout(() => this.cdr.detectChanges(), 0);
+          }
         });
       },
       error: (error) => {
         console.error('❌ Error occurred:', error);
         this.ngZone.run(() => {
-          this.errorMessage = this.translate('Error calculating schedule:') + ' ' + error.message; // usar tradução
+          this.errorMessage = this.translate('Error calculating schedule:') + ' ' + error.message;
           this.isLoading = false;
           this.cdr.detectChanges();
         });
