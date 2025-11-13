@@ -1,0 +1,78 @@
+﻿<section class="add-representative">
+  <div class="container">
+    <h1>{{ t('manageRepresentatives.createTitle') }}</h1>
+    <p>{{ t('manageRepresentatives.createSubtitle') }}</p>
+
+    <!-- Lista de organizações -->
+    <div class="list-controls">
+      <input
+        placeholder="{{ t('manageRepresentatives.searchOrganizationPlaceholder') }}"
+        [(ngModel)]="searchTerm"
+        (input)="applyFilter()"
+      />
+      <button (click)="loadOrganizations()">{{ t('manageRepresentatives.refresh') }}</button>
+    </div>
+
+    <table *ngIf="filteredOrganizations.length > 0">
+      <thead>
+      <tr>
+        <th>{{ t('manageRepresentatives.organizationId') }}</th>
+        <th>{{ t('manageRepresentatives.organizationName') }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let org of filteredOrganizations">
+        <td>{{ org.id }}</td>
+        <td>{{ org.legalName }}</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="filteredOrganizations.length === 0">{{ t('manageRepresentatives.noOrganizations') }}</p>
+
+    <form (ngSubmit)="saveRepresentative()">
+      <div class="form-group">
+        <label>{{ t('manageRepresentatives.name') }}</label>
+        <input [(ngModel)]="repForm.name" name="name" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('manageRepresentatives.citizenId') }}</label>
+        <input [(ngModel)]="repForm.citizenId" name="citizenId" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('manageRepresentatives.nationality') }}</label>
+        <input [(ngModel)]="repForm.nationality" name="nationality" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('manageRepresentatives.email') }}</label>
+        <input [(ngModel)]="repForm.email" name="email" type="email" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('manageRepresentatives.phone') }}</label>
+        <input [(ngModel)]="repForm.phoneNumber" name="phoneNumber" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('manageRepresentatives.organizationId') }}</label>
+        <input
+          [(ngModel)]="repForm.organizationId"
+          name="organizationId"
+          placeholder="Organization ID"
+          required
+        />
+      </div>
+
+      <div class="form-buttons">
+        <button type="submit">{{ t('manageRepresentatives.create') }}</button>
+      </div>
+    </form>
+
+    <div class="form-buttons">
+      <button type="button" class="secondary" (click)="goBack()">{{ t('common.back') }}</button>
+    </div>
+  </div>
+</section>

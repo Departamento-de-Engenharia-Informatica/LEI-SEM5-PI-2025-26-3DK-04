@@ -1,0 +1,78 @@
+﻿<section class="manage-organizations">
+  <div class="container">
+    <h1>{{ t('manageOrganizations.title') }}</h1>
+
+    <div class="role-sections">
+      <div class="role-card" style="cursor:pointer;">
+        <h3>{{ t('manageOrganizations.create') }}</h3>
+        <p>{{ t('manageOrganizations.createDesc') }}</p>
+        <form (ngSubmit)="saveOrganization()">
+          <div class="form-group">
+            <label>{{ t('manageOrganizations.id') }}</label>
+            <input [(ngModel)]="orgForm.id" name="id" required />
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('manageOrganizations.legalName') }}</label>
+            <input [(ngModel)]="orgForm.legalName" name="legalName" required />
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('manageOrganizations.alternativeName') }}</label>
+            <input [(ngModel)]="orgForm.alternativeName" name="alternativeName" />
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('manageOrganizations.address') }}</label>
+            <input [(ngModel)]="orgForm.address" name="address" required />
+          </div>
+
+          <div class="form-group">
+            <label>{{ t('manageOrganizations.taxNumber') }}</label>
+            <input [(ngModel)]="orgForm.taxNumber" name="taxNumber" required />
+          </div>
+
+          <h3>{{ t('manageOrganizations.representativeSection') }}</h3>
+          <div *ngFor="let rep of orgForm.representatives; let i = index" class="representative-block">
+            <div class="form-group">
+              <label>{{ t('manageOrganizations.name') }}</label>
+              <input [(ngModel)]="rep.name" [name]="'name' + i" required />
+            </div>
+            <div class="form-group">
+              <label>{{ t('manageOrganizations.citizenId') }}</label>
+              <input [(ngModel)]="rep.citizenId" [name]="'citizenId' + i" required />
+            </div>
+            <div class="form-group">
+              <label>{{ t('manageOrganizations.nationality') }}</label>
+              <input [(ngModel)]="rep.nationality" [name]="'nationality' + i" required />
+            </div>
+            <div class="form-group">
+              <label>{{ t('manageOrganizations.email') }}</label>
+              <input [(ngModel)]="rep.email" [name]="'email' + i" required />
+            </div>
+            <div class="form-group">
+              <label>{{ t('manageOrganizations.phoneNumber') }}</label>
+              <input [(ngModel)]="rep.phoneNumber" [name]="'phoneNumber' + i" required />
+            </div>
+
+            <button type="button" class="secondary" (click)="removeRepresentative(i)">
+              {{ t('manageOrganizations.removeRepresentative') }}
+            </button>
+            <hr />
+          </div>
+
+          <button type="button" (click)="addRepresentative()">
+            {{ t('manageOrganizations.addRepresentative') }}
+          </button>
+
+          <div class="form-buttons">
+            <button type="submit">{{ t('manageOrganizations.create') }}</button>
+            <button type="button" class="secondary" (click)="resetForm()">
+              {{ t('manageOrganizations.cancel') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,32 @@
+﻿<section class="manage-representatives-dashboard">
+  <div class="container">
+    <h1>{{ t('manageRepresentatives.dashboardTitle') }}</h1>
+    <p>{{ t('manageRepresentatives.dashboardSubtitle') }}</p>
+
+    <div class="dashboard-cards">
+      <!-- Adicionar -->
+      <div class="dashboard-card" routerLink="/admin/manage-representatives/add-representative" style="cursor: pointer;">
+        <h3>{{ t('cards.add') }}</h3>
+        <p>{{ t('cards.addDesc') }}</p>
+      </div>
+
+      <!-- Editar -->
+      <div class="dashboard-card" routerLink="/admin/manage-representatives/edit-representative" style="cursor: pointer;">
+        <h3>{{ t('cards.edit') }}</h3>
+        <p>{{ t('cards.editDesc') }}</p>
+      </div>
+
+      <!-- Ativar -->
+      <div class="dashboard-card" routerLink="/admin/manage-representatives/activate-representative" style="cursor: pointer;">
+        <h3>{{ t('cards.activate') }}</h3>
+        <p>{{ t('cards.activateDesc') }}</p>
+      </div>
+
+      <!-- Desativar -->
+      <div class="dashboard-card" routerLink="/admin/manage-representatives/deactivate-representative" style="cursor: pointer;">
+        <h3>{{ t('cards.deactivate') }}</h3>
+        <p>{{ t('cards.deactivateDesc') }}</p>
+      </div>
+    </div>
+  </div>
+</section>
