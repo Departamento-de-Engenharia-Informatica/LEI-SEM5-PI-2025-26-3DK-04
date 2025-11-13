@@ -545,7 +545,12 @@ export class TranslationService {
           create: "Criar",
           cancel: "Cancelar",
           namePlaceholder: "Nome da qualificação (ex: 'Operador de Grua')",
-          nameHint: "O nome deve ter pelo menos duas palavras com um máximo de 150 caracteres"
+          nameHint: "O nome deve ter pelo menos duas palavras com um máximo de 150 caracteres",
+          filters: "Filtros",
+          filterByName: "Filtrar por Nome",
+          filterByNamePlaceholder: "Pesquisar por nome...",
+          applyFilter: "Aplicar Filtro",
+          clearFilter: "Limpar Filtro"
         },
         roles: {
           representative: "Representante",
