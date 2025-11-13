@@ -1,77 +1,74 @@
 <section class="manage-qualifications">
   <div class="container">
-    <h1>{{ t('adminUI.manageQualifications.title') }}</h1>
+    <h1>{{ t('manageQualifications.title') }}</h1>
 
-    <!-- LIST OF QUALIFICATIONS -->
     <div>
-      <h2>{{ t('adminUI.manageQualifications.listTitle') }}</h2>
-      <button (click)="loadQualifications()">{{ t('adminUI.manageQualifications.refresh') }}</button>
+      <h2>{{ t('manageQualifications.listTitle') }}</h2>
+      <button (click)="loadQualifications()">{{ t('manageQualifications.refresh') }}</button>
 
-      <!-- FILTERS -->
       <div class="filters-section">
-        <h3>{{ t('adminUI.manageQualifications.filters') }}</h3>
+        <h3>{{ t('manageQualifications.filters') }}</h3>
         <div class="filter-group">
-          <label>{{ t('adminUI.manageQualifications.filterByName') }}</label>
-          <input 
-            type="text" 
-            [(ngModel)]="filterName" 
+          <label>{{ t('manageQualifications.filterByName') }}</label>
+          <input
+            type="text"
+            [(ngModel)]="filterName"
             name="filterName"
-            placeholder="{{ t('adminUI.manageQualifications.filterByNamePlaceholder') }}"
+            placeholder="{{ t('manageQualifications.filterByNamePlaceholder') }}"
             (keyup.enter)="applyFilter()"
           />
         </div>
         <div class="filter-buttons">
-          <button class="primary" (click)="applyFilter()">{{ t('adminUI.manageQualifications.applyFilter') }}</button>
-          <button class="secondary" (click)="clearFilter()">{{ t('adminUI.manageQualifications.clearFilter') }}</button>
+          <button class="primary" (click)="applyFilter()">{{ t('manageQualifications.applyFilter') }}</button>
+          <button class="secondary" (click)="clearFilter()">{{ t('manageQualifications.clearFilter') }}</button>
         </div>
       </div>
 
       <table *ngIf="qualifications.length > 0">
         <thead>
         <tr>
-          <th>{{ t('adminUI.manageQualifications.name') }}</th>
-          <th>{{ t('adminUI.manageQualifications.actions') }}</th>
+          <th>{{ t('manageQualifications.name') }}</th>
+          <th>{{ t('manageQualifications.actions') }}</th>
         </tr>
         </thead>
         <tbody>
         <tr *ngFor="let qual of qualifications">
           <td>{{ qual.name }}</td>
           <td>
-            <button (click)="editQualification(qual)">{{ t('adminUI.manageQualifications.edit') }}</button>
-            <button class="danger" (click)="deleteQualification(qual.id)">{{ t('adminUI.manageQualifications.delete') }}</button>
+            <button (click)="editQualification(qual)">{{ t('manageQualifications.edit') }}</button>
+            <button class="danger" (click)="deleteQualification(qual.id)">{{ t('manageQualifications.delete') }}</button>
           </td>
         </tr>
         </tbody>
       </table>
 
       <p *ngIf="qualifications.length === 0" class="no-data">
-        {{ t('adminUI.manageQualifications.noQualifications') }}
+        {{ t('manageQualifications.noQualifications') }}
       </p>
     </div>
 
     <hr />
 
-    <!-- CREATE / EDIT FORM -->
     <form (ngSubmit)="saveQualification()">
-      <h2>{{ editing ? t('adminUI.manageQualifications.editTitle') : t('adminUI.manageQualifications.createTitle') }}</h2>
+      <h2>{{ editing ? t('manageQualifications.editTitle') : t('manageQualifications.createTitle') }}</h2>
 
       <div class="form-group">
-        <label>{{ t('adminUI.manageQualifications.name') }}</label>
-        <input [(ngModel)]="qualificationForm.name" name="name" 
-               placeholder="{{ t('adminUI.manageQualifications.namePlaceholder') }}" 
-               required 
+        <label>{{ t('manageQualifications.name') }}</label>
+        <input [(ngModel)]="qualificationForm.name" name="name"
+               placeholder="{{ t('manageQualifications.namePlaceholder') }}"
+               required
                maxlength="150" />
-        <small class="form-hint">{{ t('adminUI.manageQualifications.nameHint') }}</small>
+        <small class="form-hint">{{ t('manageQualifications.nameHint') }}</small>
       </div>
 
       <div class="form-buttons">
         <button type="submit">
           {{ editing
-          ? t('adminUI.manageQualifications.saveChanges')
-          : t('adminUI.manageQualifications.create') }}
+          ? t('manageQualifications.saveChanges')
+          : t('manageQualifications.create') }}
         </button>
         <button type="button" class="secondary" (click)="resetForm()">
-          {{ t('adminUI.manageQualifications.cancel') }}
+          {{ t('manageQualifications.cancel') }}
         </button>
       </div>
     </form>

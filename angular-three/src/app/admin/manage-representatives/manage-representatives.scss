@@ -1,0 +1,56 @@
+﻿.manage-representatives-dashboard {
+  margin-top: 60px;
+  padding: 20px;
+  background: #ffffff;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 2rem;
+    color: #26327C;
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 40px;
+  }
+
+  .dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .dashboard-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    h3 {
+      margin: 0 0 10px 0;
+      color: #0A1C41;
+      font-size: 1.2rem;
+    }
+
+    p {
+      margin: 0;
+      color: #555;
+      font-size: 0.95rem;
+    }
+
+    &:hover {
+      background: #e2e6ea;
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+  }
+}

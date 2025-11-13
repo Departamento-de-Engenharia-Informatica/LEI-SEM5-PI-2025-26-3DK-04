@@ -1,44 +1,39 @@
 ﻿<section class="manage-users">
   <div class="container">
-    <h1>{{ t('adminUI.manageUsers.title') }}</h1>
+    <h1>{{ t('manageUsers.title') }}</h1>
 
-    <!-- STEP 1: verificar se user existe -->
     <div *ngIf="!userChecked">
-      <h2>{{ t('adminUI.manageUsers.checkTitle') }}</h2>
-      <input [(ngModel)]="email" name="email"
-             placeholder="{{ t('adminUI.manageUsers.emailPlaceholder') }}"
-             required />
-      <button (click)="checkUser()">{{ t('adminUI.manageUsers.checkButton') }}</button>
+      <h2>{{ t('manageUsers.checkTitle') }}</h2>
+      <input [(ngModel)]="email" name="email" placeholder="{{ t('manageUsers.emailPlaceholder') }}" required />
+      <button (click)="checkUser()">{{ t('manageUsers.checkButton') }}</button>
     </div>
 
-    <!-- STEP 2: criar user novo -->
     <form *ngIf="userChecked && !userExists" (ngSubmit)="createUser()">
-      <h2>{{ t('adminUI.manageUsers.createTitle') }}</h2>
+      <h2>{{ t('manageUsers.createTitle') }}</h2>
       <p><strong>Email:</strong> {{ email }}</p>
-      <input [(ngModel)]="newUser.name" name="name" placeholder="{{ t('adminUI.manageUsers.namePlaceholder') }}" required />
-      <input [(ngModel)]="newUser.picture" name="picture" placeholder="{{ t('adminUI.manageUsers.picturePlaceholder') }}" />
+      <input [(ngModel)]="newUser.name" name="name" placeholder="{{ t('manageUsers.namePlaceholder') }}" required />
+      <input [(ngModel)]="newUser.picture" name="picture" placeholder="{{ t('manageUsers.picturePlaceholder') }}" />
       <select [(ngModel)]="newUser.role" name="role">
-        <option value="Representative">{{ t('adminUI.roles.representative') }}</option>
-        <option value="PortAuthorityOfficer">{{ t('adminUI.roles.portAuthority') }}</option>
-        <option value="LogisticsOperator">{{ t('adminUI.roles.logistics') }}</option>
-        <option value="ProjectManager">{{ t('adminUI.roles.projectManager') }}</option>
+        <option value="Representative">{{ t('roles.representative') }}</option>
+        <option value="PortAuthorityOfficer">{{ t('roles.portAuthority') }}</option>
+        <option value="LogisticsOperator">{{ t('roles.logistics') }}</option>
+        <option value="ProjectManager">{{ t('roles.projectManager') }}</option>
       </select>
-      <button type="submit">{{ t('adminUI.manageUsers.createButton') }}</button>
-      <button type="button" (click)="resetForm()">{{ t('adminUI.manageUsers.backButton') }}</button>
+      <button type="submit">{{ t('manageUsers.createButton') }}</button>
+      <button type="button" (click)="resetForm()">{{ t('manageUsers.backButton') }}</button>
     </form>
 
-    <!-- STEP 3: atualizar role de user existente -->
     <div *ngIf="userChecked && userExists">
-      <h2>{{ t('adminUI.manageUsers.updateTitle') }}</h2>
-      <p>{{ t('adminUI.manageUsers.userFound') }}: <strong>{{ email }}</strong></p>
+      <h2>{{ t('manageUsers.updateTitle') }}</h2>
+      <p>{{ t('manageUsers.userFound') }}: <strong>{{ email }}</strong></p>
       <select [(ngModel)]="updateRole">
-        <option value="Representative">{{ t('adminUI.roles.representative') }}</option>
-        <option value="PortAuthorityOfficer">{{ t('adminUI.roles.portAuthority') }}</option>
-        <option value="LogisticsOperator">{{ t('adminUI.roles.logistics') }}</option>
-        <option value="ProjectManager">{{ t('adminUI.roles.projectManager') }}</option>
+        <option value="Representative">{{ t('roles.representative') }}</option>
+        <option value="PortAuthorityOfficer">{{ t('roles.portAuthority') }}</option>
+        <option value="LogisticsOperator">{{ t('roles.logistics') }}</option>
+        <option value="ProjectManager">{{ t('roles.projectManager') }}</option>
       </select>
-      <button (click)="updateUserRole()">{{ t('adminUI.manageUsers.updateButton') }}</button>
-      <button type="button" (click)="resetForm()">{{ t('adminUI.manageUsers.backButton') }}</button>
+      <button (click)="updateUserRole()">{{ t('manageUsers.updateButton') }}</button>
+      <button type="button" (click)="resetForm()">{{ t('manageUsers.backButton') }}</button>
     </div>
   </div>
 </section>

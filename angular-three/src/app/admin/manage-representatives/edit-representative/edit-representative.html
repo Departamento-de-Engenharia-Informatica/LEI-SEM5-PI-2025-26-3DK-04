@@ -1,0 +1,74 @@
+﻿<section class="edit-representative">
+  <div class="container">
+    <h1>{{ t('manageRepresentatives.editTitle') }}</h1>
+    <p>{{ t('manageRepresentatives.editSubtitle') }}</p>
+
+    <!-- Controles da lista -->
+    <div class="list-controls">
+      <input
+        placeholder="{{ t('manageRepresentatives.searchPlaceholder') }}"
+        [(ngModel)]="searchTerm"
+        (input)="applyFilter()"
+      />
+      <button (click)="loadRepresentatives()">{{ t('manageRepresentatives.refresh') }}</button>
+    </div>
+
+    <table *ngIf="filteredRepresentatives.length > 0">
+      <thead>
+      <tr>
+        <th>{{ t('manageRepresentatives.name') }}</th>
+        <th>{{ t('manageRepresentatives.email') }}</th>
+        <th>{{ t('manageRepresentatives.citizenId') }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let r of filteredRepresentatives">
+        <td>{{ r.name }}</td>
+        <td>{{ r.email }}</td>
+        <td>{{ r.citizenId ?? r.id }}</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="filteredRepresentatives.length === 0">{{ t('manageRepresentatives.noRepresentatives') }}</p>
+
+    <!-- Seleção do representante -->
+    <div class="select-edit">
+      <label>{{ t('manageRepresentatives.enterId') }}</label>
+      <input [(ngModel)]="selectedId" placeholder="Citizen ID" />
+      <button (click)="selectRepresentative()">{{ t('manageRepresentatives.loadRepresentative') }}</button>
+    </div>
+
+    <!-- Formulário de edição -->
+    <form *ngIf="repForm" (ngSubmit)="saveChanges()">
+      <div class="form-group">
+        <label>{{ t('manageRepresentatives.name') }}</label>
+        <input [(ngModel)]="repForm.name" name="name" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('manageRepresentatives.nationality') }}</label>
+        <input [(ngModel)]="repForm.nationality" name="nationality" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('manageRepresentatives.email') }}</label>
+        <input [(ngModel)]="repForm.email" name="email" type="email" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('manageRepresentatives.phone') }}</label>
+        <input [(ngModel)]="repForm.phoneNumber" name="phoneNumber" required />
+      </div>
+
+      <div class="form-buttons">
+        <button type="submit">{{ t('manageRepresentatives.saveChanges') }}</button>
+        <button type="button" class="secondary" (click)="cancelEdit()">{{ t('manageRepresentatives.cancel') }}</button>
+      </div>
+    </form>
+
+    <div class="form-buttons">
+      <button type="button" class="secondary" (click)="goBack()">{{ t('common.back') }}</button>
+    </div>
+  </div>
+</section>

@@ -42,12 +42,12 @@ export class ManageUsers {
 
   checkUser() {
     if (!this.email.trim()) {
-      alert(this.translation.translate('adminUI.manageUsers.emailEmpty'));
+      alert(this.translation.translate('manageUsers.emailEmpty'));
       return;
     }
 
     if (this.email === this.auth.email) {
-      alert(this.translation.translate('adminUI.manageUsers.selfModifyError'));
+      alert(this.translation.translate('manageUsers.selfModifyError'));
       return;
     }
 
@@ -58,7 +58,7 @@ export class ManageUsers {
         this.newUser.email = this.email;
       },
       error: () => {
-        alert(this.translation.translate('adminUI.manageUsers.serverError'));
+        alert(this.translation.translate('manageUsers.serverError'));
       }
     });
   }
@@ -72,15 +72,15 @@ export class ManageUsers {
     };
 
     this.adminService.createUser(payload).subscribe({
-      next: () => alert(this.translation.translate('adminUI.manageUsers.createSuccess')),
-      error: () => alert(this.translation.translate('adminUI.manageUsers.createError'))
+      next: () => alert(this.translation.translate('manageUsers.createSuccess')),
+      error: () => alert(this.translation.translate('manageUsers.createError'))
     });
   }
 
   updateUserRole() {
     this.adminService.updateUserRole(this.email, this.updateRole).subscribe({
-      next: () => alert(this.translation.translate('adminUI.manageUsers.updateSuccess')),
-      error: () => alert(this.translation.translate('adminUI.manageUsers.updateError'))
+      next: () => alert(this.translation.translate('manageUsers.updateSuccess')),
+      error: () => alert(this.translation.translate('manageUsers.updateError'))
     });
   }
 

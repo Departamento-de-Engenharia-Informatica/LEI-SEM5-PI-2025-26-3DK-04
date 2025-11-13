@@ -5,7 +5,6 @@ import { AuthService } from '../auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
-
   // USER management routes
   private userBaseUrl = 'https://localhost:5001/api/UserManagement';
 
@@ -13,17 +12,23 @@ export class AdminService {
   private dockBaseUrl = 'https://localhost:5001/api/Dock';
   private vesselTypeBaseUrl = 'https://localhost:5001/api/VesselTypes';
 
+  // STORAGE AREA management
   private storageAreaBaseUrl = 'https://localhost:5001/api/StorageArea';
-  
+
   // STAFF MEMBERS management routes
   private staffMembersBaseUrl = 'https://localhost:5001/api/StaffMembers';
   private qualificationsBaseUrl = 'https://localhost:5001/api/Qualifications';
+  // ORGANIZATION management
+  private organizationBaseUrl = 'https://localhost:5001/api/Organizations';
+
+  // REPRESENTATIVE management
+  private representativeBaseUrl = 'https://localhost:5001/api/Representatives';
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
   /* ===============================
             USER MANAGEMENT
-     =============================== */
+  =============================== */
 
   checkUser(email: string): Observable<any> {
     const loggedEmail = this.auth.email;
@@ -47,7 +52,7 @@ export class AdminService {
 
   /* ===============================
             DOCK MANAGEMENT
-     =============================== */
+  =============================== */
 
   getAllDocks(): Observable<any[]> {
     return this.http.get<any[]>(`${this.dockBaseUrl}`);
@@ -75,12 +80,14 @@ export class AdminService {
 
   /* ===============================
             VESSEL TYPES
-     =============================== */
+  =============================== */
   getVesselTypes(): Observable<any[]> {
     return this.http.get<any[]>(`${this.vesselTypeBaseUrl}`);
   }
 
-  // STORAGE AREA management
+  /* ===============================
+            STORAGE AREAS
+  =============================== */
   getAllStorageAreas(): Observable<any[]> {
     return this.http.get<any[]>(`${this.storageAreaBaseUrl}`);
   }
@@ -140,7 +147,7 @@ export class AdminService {
     if (name) params += `name=${name}&`;
     if (status) params += `status=${status}&`;
     if (qualificationId) params += `qualificationId=${qualificationId}&`;
-    
+
     return this.http.get<any[]>(`${this.staffMembersBaseUrl}/search?${params}`);
   }
 
@@ -167,5 +174,62 @@ export class AdminService {
   deleteQualification(id: string): Observable<any> {
     return this.http.delete(`${this.qualificationsBaseUrl}/${id}`);
   }
+  /* ===============================
+       ORGANIZATION MANAGEMENT
+=============================== */
 
+  getAllOrganizations(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.organizationBaseUrl}`);
+  }
+
+  getOrganizationById(id: string): Observable<any> {
+    return this.http.get(`${this.organizationBaseUrl}/${id}`);
+  }
+
+  createOrganization(dto: any): Observable<any> {
+    return this.http.post(`${this.organizationBaseUrl}`, dto);
+  }
+
+  deleteOrganization(id: string): Observable<any> {
+    return this.http.delete(`${this.organizationBaseUrl}/${id}`);
+  }
+
+  /* ===============================
+          REPRESENTATIVE MANAGEMENT
+  =============================== */
+
+  getAllRepresentatives(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.representativeBaseUrl}`);
+  }
+
+  getRepresentativeById(id: string): Observable<any> {
+    return this.http.get(`${this.representativeBaseUrl}/${id}`);
+  }
+
+  createRepresentative(dto: any): Observable<any> {
+    return this.http.post(`${this.representativeBaseUrl}`, dto);
+  }
+
+  updateRepresentative(id: string, dto: any): Observable<any> {
+    return this.http.put(`${this.representativeBaseUrl}/${id}/update`, dto);
+  }
+
+  activateRepresentative(id: string): Observable<any> {
+    return this.http.put(`${this.representativeBaseUrl}/${id}/activate`, {});
+  }
+
+  deactivateRepresentative(id: string): Observable<any> {
+    return this.http.put(`${this.representativeBaseUrl}/${id}/deactivate`, {});
+  }
+
+  deleteRepresentative(id: string): Observable<any> {
+    return this.http.delete(`${this.representativeBaseUrl}/${id}`);
+  }
+  getActiveRepresentatives(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.representativeBaseUrl}/active`);
+  }
+
+  getInactiveRepresentatives(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.representativeBaseUrl}/inactive`);
+  }
 }
