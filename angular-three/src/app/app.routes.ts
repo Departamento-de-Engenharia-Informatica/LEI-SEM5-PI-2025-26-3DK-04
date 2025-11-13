@@ -23,6 +23,8 @@ import { ActivateRepresentative } from './admin/manage-representatives/activate-
 import { DeactivateRepresentative } from './admin/manage-representatives/deactivate-representative/deactivate-representative';
 import { EditRepresentative } from './admin/manage-representatives/edit-representative/edit-representative';
 import { AddRepresentative } from './admin/manage-representatives/add-representative/add-representative';
+import { EditUser } from './admin/manageUsers/edit-user/edit-user';
+import { AddUser } from './admin/manageUsers/add-user/add-user';
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'cube', component: Cube },
@@ -42,6 +44,18 @@ export const routes: Routes = [
   {
     path: 'admin/manage-users',
     component: ManageUsers,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin'] }
+  },
+  {
+    path: 'admin/manage-users/edit-user',
+    component: EditUser,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin'] }
+  },
+  {
+    path: 'admin/manage-users/add-user',
+    component: AddUser,
     canActivate: [RoleGuard],
     data: { roles: ['admin'] }
   },

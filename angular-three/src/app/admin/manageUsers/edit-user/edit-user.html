@@ -1,0 +1,59 @@
+﻿<section class="edit-user">
+  <div class="container">
+    <h1>{{ t('manageUsers.editTitle') }}</h1>
+    <p>{{ t('manageUsers.editSubtitle') }}</p>
+
+    <div class="list-controls">
+      <input placeholder="{{ t('manageUsers.searchPlaceholder') }}" [(ngModel)]="searchTerm" (input)="applyFilter()" />
+      <button (click)="loadUsers()">{{ t('manageUsers.refresh') }}</button>
+    </div>
+
+    <table *ngIf="filteredUsers.length > 0">
+      <thead>
+      <tr>
+        <th>{{ t('manageUsers.name') }}</th>
+        <th>{{ t('manageUsers.email') }}</th>
+        <th>{{ t('manageUsers.role') }}</th>
+        <th>{{ t('manageUsers.actions') }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let u of filteredUsers">
+        <td>{{ u.name }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.role }}</td>
+        <td>
+          <button (click)="selectUser(u)">{{ t('manageUsers.edit') }}</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="filteredUsers.length === 0">{{ t('manageUsers.noUsers') }}</p>
+
+    <form *ngIf="userForm" (ngSubmit)="saveChanges()">
+      <div class="form-group">
+        <label>{{ t('manageUsers.name') }}</label>
+        <input [(ngModel)]="userForm.name" name="name" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('manageUsers.role') }}</label>
+        <select [(ngModel)]="userForm.role" name="role">
+          <option value="PortAuthorityOfficer">{{ t('roles.portAuthority') }}</option>
+          <option value="LogisticsOperator">{{ t('roles.logistics') }}</option>
+          <option value="ProjectManager">{{ t('roles.projectManager') }}</option>
+        </select>
+      </div>
+
+      <div class="form-buttons">
+        <button type="submit">{{ t('manageUsers.saveChanges') }}</button>
+        <button type="button" class="secondary" (click)="cancelEdit()">{{ t('manageUsers.cancel') }}</button>
+      </div>
+    </form>
+
+    <div class="form-buttons">
+      <button type="button" class="secondary" (click)="goBack()">{{ t('common.back') }}</button>
+    </div>
+  </div>
+</section>

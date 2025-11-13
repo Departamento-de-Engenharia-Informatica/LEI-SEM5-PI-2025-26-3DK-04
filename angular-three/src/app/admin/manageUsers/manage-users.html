@@ -1,39 +1,20 @@
-﻿<section class="manage-users">
+﻿<section class="manage-users-dashboard">
   <div class="container">
-    <h1>{{ t('manageUsers.title') }}</h1>
+    <h1>{{ t('manageUsers.dashboardTitle') }}</h1>
+    <p>{{ t('manageUsers.dashboardSubtitle') }}</p>
 
-    <div *ngIf="!userChecked">
-      <h2>{{ t('manageUsers.checkTitle') }}</h2>
-      <input [(ngModel)]="email" name="email" placeholder="{{ t('manageUsers.emailPlaceholder') }}" required />
-      <button (click)="checkUser()">{{ t('manageUsers.checkButton') }}</button>
-    </div>
+    <div class="dashboard-cards">
+      <!-- Adicionar -->
+      <div class="dashboard-card" routerLink="/admin/manage-users/add-user" style="cursor: pointer;">
+        <h3>{{ t('cards.add') }}</h3>
+        <p>{{ t('cards.addUserDesc') }}</p>
+      </div>
 
-    <form *ngIf="userChecked && !userExists" (ngSubmit)="createUser()">
-      <h2>{{ t('manageUsers.createTitle') }}</h2>
-      <p><strong>Email:</strong> {{ email }}</p>
-      <input [(ngModel)]="newUser.name" name="name" placeholder="{{ t('manageUsers.namePlaceholder') }}" required />
-      <input [(ngModel)]="newUser.picture" name="picture" placeholder="{{ t('manageUsers.picturePlaceholder') }}" />
-      <select [(ngModel)]="newUser.role" name="role">
-        <option value="Representative">{{ t('roles.representative') }}</option>
-        <option value="PortAuthorityOfficer">{{ t('roles.portAuthority') }}</option>
-        <option value="LogisticsOperator">{{ t('roles.logistics') }}</option>
-        <option value="ProjectManager">{{ t('roles.projectManager') }}</option>
-      </select>
-      <button type="submit">{{ t('manageUsers.createButton') }}</button>
-      <button type="button" (click)="resetForm()">{{ t('manageUsers.backButton') }}</button>
-    </form>
-
-    <div *ngIf="userChecked && userExists">
-      <h2>{{ t('manageUsers.updateTitle') }}</h2>
-      <p>{{ t('manageUsers.userFound') }}: <strong>{{ email }}</strong></p>
-      <select [(ngModel)]="updateRole">
-        <option value="Representative">{{ t('roles.representative') }}</option>
-        <option value="PortAuthorityOfficer">{{ t('roles.portAuthority') }}</option>
-        <option value="LogisticsOperator">{{ t('roles.logistics') }}</option>
-        <option value="ProjectManager">{{ t('roles.projectManager') }}</option>
-      </select>
-      <button (click)="updateUserRole()">{{ t('manageUsers.updateButton') }}</button>
-      <button type="button" (click)="resetForm()">{{ t('manageUsers.backButton') }}</button>
+      <!-- Editar -->
+      <div class="dashboard-card" routerLink="/admin/manage-users/edit-user" style="cursor: pointer;">
+        <h3>{{ t('cards.edit') }}</h3>
+        <p>{{ t('cards.editUserDesc') }}</p>
+      </div>
     </div>
   </div>
 </section>

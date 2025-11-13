@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DDDSample1.Domain.Authentication;
 using DDDSample1.Domain.Shared;
 
 namespace DDDSample1.Domain.Organizations
@@ -11,6 +12,7 @@ namespace DDDSample1.Domain.Organizations
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepresentativeRepository _repo;
         private readonly IOrganizationRepository _organizationRepo;
+        private readonly IUserRepository _userRepo;
 
         public RepresentativeService(
             IUnitOfWork unitOfWork,
@@ -31,7 +33,9 @@ namespace DDDSample1.Domain.Organizations
                 throw new BusinessRuleValidationException("Phone number already in use by another representative.");
             if (await _repo.ExistsWithCidAsync(dto.CitizenId))
                 throw new BusinessRuleValidationException("Citizen Id already in use by another representative.");
-
+            if(await  _userRepo.GetByEmailAsync(dto.Email) != null)
+                throw new BusinessRuleValidationException("Email already in use by another System User.");
+            
             var rep = new Representative(
                 dto.Name,
                 dto.CitizenId,
@@ -40,6 +44,13 @@ namespace DDDSample1.Domain.Organizations
                 dto.PhoneNumber
             );
 
+            var user = new User(
+                dto.Email,
+                dto.Name,
+                " ",
+                Roles.Representative,
+                Status.Active
+            );
             if (!string.IsNullOrWhiteSpace(dto.OrganizationId))
             {
                 var org = await _organizationRepo.GetByIdAsync(new OrganizationId(dto.OrganizationId));
@@ -58,6 +69,7 @@ namespace DDDSample1.Domain.Organizations
             }
 
             await _repo.AddAsync(rep);
+            await _userRepo.AddAsync(user);
             await _unitOfWork.CommitAsync();
 
             return ToDto(rep);

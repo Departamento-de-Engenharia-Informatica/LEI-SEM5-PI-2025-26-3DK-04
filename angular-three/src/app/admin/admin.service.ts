@@ -41,7 +41,9 @@ export class AdminService {
   createUser(user: any): Observable<any> {
     return this.http.post(`${this.userBaseUrl}/create`, user);
   }
-
+  getAllUsers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.userBaseUrl}/get`);
+  }
   updateUserRole(email: string, role: string): Observable<any> {
     const loggedEmail = this.auth.email;
     if (loggedEmail && email === loggedEmail) {
