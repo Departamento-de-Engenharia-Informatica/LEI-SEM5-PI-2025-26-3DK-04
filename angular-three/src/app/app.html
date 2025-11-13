@@ -8,15 +8,27 @@
     </div>
   </div>
 
-  <nav class="nav-menu">
+  <!-- HAMBURGER MOBILE -->
+  <div class="hamburger" (click)="toggleMobileMenu()" [class.active]="mobileMenuOpen" aria-label="Mobile menu toggle">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <nav class="nav-menu" [class.open]="mobileMenuOpen">
     <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
     <!-- <a routerLink="/cube" routerLinkActive="active">Cube</a> -->
-    <a *ngIf="isLoggedIn"
-       class="login-btn"
-       (click)="goToRoleUI()"
-       aria-label="Role UI link">
+    <a
+      *ngIf="isLoggedIn"
+      class="login-btn"
+      [routerLink]="rolePath"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      aria-label="Role UI link"
+    >
       {{ t('menuFunctionalities') }}
     </a>
+
 
 
     <!-- <a *ngIf="isLoggedIn" (click)="scrollToAnchor('user-info')">

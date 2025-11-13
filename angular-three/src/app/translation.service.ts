@@ -60,7 +60,22 @@ export class TranslationService {
           logsDesc: "View activity logs",
 
           reports: "Reports",
-          reportsDesc: "Access system reports"
+          reportsDesc: "Access system reports",
+
+          vesselScheduling: "Vessel Scheduling",
+          vesselSchedulingDesc: "Calculate optimal vessel scheduling to minimize delays",
+
+          manageDocks: "Manage Docks",
+          manageDocksDesc: "Add, edit, or remove docks",
+
+          manageStorageAreas: "Manage Storage Areas",
+          manageStorageAreasDesc: "Create, edit or remove storage areas",
+
+          manageStaffMembers: "Manage Staff Members",
+          manageStaffMembersDesc: "Create, edit, or manage staff members and their qualifications",
+
+          manageQualifications: "Manage Qualifications",
+          manageQualificationsDesc: "Create, edit, or delete qualifications for staff members"
         },
         manageUsers: {
           title: "User Management",
@@ -74,7 +89,142 @@ export class TranslationService {
           updateTitle: "Update User Role",
           updateButton: "Update Role",
           userFound: "User found",
-          backButton: "Back"
+          backButton: "Back",
+          emailEmpty: "Please enter an email",
+          selfModifyError: "You cannot modify yourself",
+          serverError: "Server error, try again later",
+          createSuccess: "User created successfully",
+          createError: "Error creating user",
+          updateSuccess: "User role updated successfully",
+          updateError: "Error updating user role"
+        },
+        manageDocks: {
+          title: "Manage Docks",
+          listTitle: "Docks List",
+          refresh: "Refresh",
+          noDocks: "No docks available.",
+
+          createTitle: "Create New Dock",
+          editTitle: "Edit Dock",
+          name: "Name",
+          namePlaceholder: "Dock name",
+          location: "Location",
+          locationPlaceholder: "Location or coordinates",
+          length: "Length (m)",
+          depth: "Depth (m)",
+          maxDraft: "Max Draft (m)",
+          coordinates: "Coordinates (e.g., 0,0)",
+          vesselTypes: "Vessel Types",
+          actions: "Actions",        // inglês
+          create: "Create",
+          saveChanges: "Save changes",
+          cancel: "Cancel",
+          edit: "Edit",
+          delete: "Delete",
+          confirmDelete: "Are you sure you want to delete this dock?",
+          createdSuccess: "Dock created successfully.",
+          updatedSuccess: "Dock updated successfully.",
+          deletedSuccess: "Dock removed successfully.",
+
+          validation: {
+            requiredName: "Name is required.",
+            requiredLocation: "Location is required.",
+            requiredVesselType: "Vessel Type is required."
+          },
+          filters: "Filters",
+          filterByName: "Filter by Name",
+          filterByNamePlaceholder: "Search by dock name...",
+          applyFilter: "Apply Filter",
+          clearFilter: "Clear Filter"
+        },
+        manageStorageAreas: {
+          title: "Manage Storage Areas",
+          listTitle: "Storage Areas List",
+          refresh: "Refresh",
+          noStorageAreas: "No storage areas available.",
+          code: "Code",
+          designation: "Designation",
+          type: "Type",
+          location: "Location",
+          capacity: "Capacity (TEUs)",
+          actions: "Actions",
+          edit: "Edit",
+          delete: "Delete",
+          createTitle: "Create New Storage Area",
+          editTitle: "Edit Storage Area",
+          coordinates: "Coordinates",
+          initialDockAssignments: "Initial Dock Assignments",
+          saveChanges: "Save changes",
+          create: "Create",
+          cancel: "Cancel",
+          codePlaceholder: "Storage area code",
+          designationPlaceholder: "Storage area designation",
+          locationPlaceholder: "Location",
+          capacityPlaceholder: "Maximum capacity in TEUs",
+          dockAssignments: "Dock Assignments",
+          filters: "Filters",
+          filterByName: "Filter by Name/Code",
+          filterByNamePlaceholder: "Search by name or code...",
+          applyFilter: "Apply Filter",
+          clearFilter: "Clear Filter"
+        },
+        manageStaffMembers: {
+          title: "Manage Staff Members",
+          listTitle: "Staff Members List",
+          refresh: "Refresh",
+          noStaffMembers: "No staff members available.",
+          name: "Name",
+          email: "Email",
+          phone: "Phone Number",
+          operationalWindow: "Operational Window",
+          status: "Status",
+          qualifications: "Qualifications",
+          noQualifications: "No qualifications available. Please create qualifications first.",
+          actions: "Actions",
+          edit: "Edit",
+          deactivate: "Deactivate",
+          reactivate: "Reactivate",
+          createTitle: "Create New Staff Member",
+          editTitle: "Edit Staff Member",
+          startTime: "Start Time",
+          endTime: "End Time",
+          saveChanges: "Save changes",
+          create: "Create",
+          cancel: "Cancel",
+          namePlaceholder: "Staff member name",
+          emailPlaceholder: "email@example.com",
+          phonePlaceholder: "Phone number",
+          filters: "Filters",
+          filterByName: "Filter by Name",
+          filterByNamePlaceholder: "Search by name...",
+          filterByStatus: "Filter by Status",
+          filterByQualification: "Filter by Qualification",
+          allStatuses: "All Statuses",
+          allQualifications: "All Qualifications",
+          applyFilters: "Apply Filters",
+          clearFilters: "Clear Filters"
+        },
+        manageQualifications: {
+          title: "Manage Qualifications",
+          listTitle: "Qualifications List",
+          refresh: "Refresh",
+          noQualifications: "No qualifications available.",
+          name: "Name",
+          actions: "Actions",
+          edit: "Edit",
+          delete: "Delete",
+          createTitle: "Create New Qualification",
+          editTitle: "Edit Qualification",
+          saveChanges: "Save changes",
+          create: "Create",
+          cancel: "Cancel",
+          namePlaceholder: "Qualification name (e.g., 'Crane Operator')",
+          nameHint: "Name must be at least two words with a maximum of 150 characters",
+          filters: "Filters",
+          filterByName: "Filter by Name",
+          filterByNamePlaceholder: "Search by name...",
+          applyFilter: "Apply Filter",
+          clearFilter: "Clear Filter"
         },
         roles: {
           representative: "Representative",
@@ -136,11 +286,51 @@ export class TranslationService {
         }
       },
 
+      vesselScheduling: {
+        title: "Vessel Scheduling - Shortest Delay",
+        subtitle: "Calculate optimal vessel scheduling to minimize delays",
+        targetDate: "Target Date",
+        calculateSchedule: "Calculate Schedule",
+        calculating: "Calculating...",
+        clearResults: "Clear Results",
+        error: "Error",
+        summaryCards: {
+          targetDate: "Target Date",
+          totalVessels: "Total Vessels",
+          totalDelay: "Total Delay"
+        },
+        timeUnits: "time units",
+        table: {
+          title: "Vessel Schedule Details",
+          status: "Status",
+          vessel: "Vessel",
+          arrival: "Arrival",
+          departure: "Departure",
+          startTime: "Start Time",
+          endTime: "End Time",
+          duration: "Duration",
+          delay: "Delay"
+        },
+        timeline: {
+          title: "Visual Timeline"
+        }
+      },
+
       accessDenied: {
         title: "Access Denied",
         message: "You do not have permission to view this page.",
         backHome: "Return to Home"
-      }
+      },
+      activation: {
+        pending: "Activating...",
+        success: "Activation Successful",
+        error: "Activation Failed",
+        successMessage: "Account activated successfully.",
+        errorMessage: "Activation failed or token invalid.",
+        invalidMessage: "Invalid activation request.",
+        backHome: "Back to Home",
+        afterActivation: "After activation you can try to log in with the account."
+      },
 
     },
 
@@ -195,7 +385,22 @@ export class TranslationService {
           logsDesc: "Ver registos de atividade",
 
           reports: "Relatórios",
-          reportsDesc: "Aceder a relatórios do sistema"
+          reportsDesc: "Aceder a relatórios do sistema",
+
+          vesselScheduling: "Agendamento de Navios",
+          vesselSchedulingDesc: "Calcular agendamento ótimo de navios para minimizar atrasos",
+
+          manageDocks: "Gerir Docas",
+          manageDocksDesc: "Adicionar, editar ou remover docas",
+
+          manageStorageAreas: "Gerir Áreas de Armazenamento",
+          manageStorageAreasDesc: "Criar, editar ou remover áreas de armazenamento",
+
+          manageStaffMembers: "Gerir Membros do Staff",
+          manageStaffMembersDesc: "Criar, editar ou gerir membros do staff e suas qualifica\u00e7\u00f5es",
+
+          manageQualifications: "Gerir Qualifica\u00e7\u00f5es",
+          manageQualificationsDesc: "Criar, editar ou eliminar qualifica\u00e7\u00f5es para membros do staff"
         },
         manageUsers: {
           title: "Gestão de Utilizadores",
@@ -209,7 +414,143 @@ export class TranslationService {
           updateTitle: "Atualizar Função do Utilizador",
           updateButton: "Atualizar Função",
           userFound: "Utilizador encontrado",
-          backButton: "Voltar"
+          backButton: "Voltar",
+          emailEmpty: "Por favor insira um email",
+          selfModifyError: "Não pode modificar a si próprio",
+          serverError: "Erro do servidor, tente novamente mais tarde",
+          createSuccess: "Utilizador criado com sucesso",
+          createError: "Erro ao criar o utilizador",
+          updateSuccess: "Função do utilizador atualizada com sucesso",
+          updateError: "Erro ao atualizar função do utilizador"
+        },
+        manageDocks: {
+          title: "Gerir Docas",
+          listTitle: "Lista de Docas",
+          refresh: "Atualizar",
+          noDocks: "Não existem docas.",
+
+          createTitle: "Criar Nova Doca",
+          editTitle: "Editar Doca",
+          name: "Nome",
+          namePlaceholder: "Nome da doca",
+          location: "Localização",
+          locationPlaceholder: "Localização ou coordenadas",
+          length: "Comprimento (m)",
+          depth: "Profundidade (m)",
+          maxDraft: "Calado Máximo (m)",
+          coordinates: "Coordenadas (ex.: 0,0)",
+          vesselTypes: "Tipos de Embarcação",
+          actions: "Ações",          // português
+          create: "Criar",
+          saveChanges: "Guardar alterações",
+          cancel: "Cancelar",
+          edit: "Editar",
+          delete: "Remover",
+          confirmDelete: "Tem a certeza que pretende remover esta doca?",
+          createdSuccess: "Doca criada com sucesso.",
+          updatedSuccess: "Doca atualizada com sucesso.",
+          deletedSuccess: "Doca removida com sucesso.",
+
+          validation: {
+            requiredName: "O nome é obrigatório.",
+            requiredLocation: "A localização é obrigatória.",
+            requiredVesselType: "O tipo de embarcação é obrigatório."
+          },
+          filters: "Filtros",
+          filterByName: "Filtrar por Nome",
+          filterByNamePlaceholder: "Pesquisar por nome do cais...",
+          applyFilter: "Aplicar Filtro",
+          clearFilter: "Limpar Filtro"
+        },
+// Inside the "pt" section
+        manageStorageAreas: {
+          title: "Gerir Áreas de Armazenamento",
+          listTitle: "Lista de Áreas de Armazenamento",
+          refresh: "Atualizar",
+          noStorageAreas: "Não existem áreas de armazenamento.",
+          code: "Código",
+          designation: "Designação",
+          type: "Tipo",
+          location: "Localização",
+          capacity: "Capacidade (TEUs)",
+          actions: "Ações",
+          edit: "Editar",
+          delete: "Remover",
+          createTitle: "Criar Nova Área de Armazenamento",
+          editTitle: "Editar Área de Armazenamento",
+          coordinates: "Coordenadas",
+          initialDockAssignments: "Atribuições Iniciais de Docas",
+          saveChanges: "Guardar alterações",
+          create: "Criar",
+          cancel: "Cancelar",
+          codePlaceholder: "Código da área de armazenamento",
+          designationPlaceholder: "Designação da área de armazenamento",
+          locationPlaceholder: "Localização",
+          capacityPlaceholder: "Capacidade máxima em TEUs",
+          dockAssignments: "Atribuições de Docas",
+          filters: "Filtros",
+          filterByName: "Filtrar por Nome/Código",
+          filterByNamePlaceholder: "Pesquisar por nome ou código...",
+          applyFilter: "Aplicar Filtro",
+          clearFilter: "Limpar Filtro"
+        },
+        manageStaffMembers: {
+          title: "Gerir Membros do Staff",
+          listTitle: "Lista de Membros do Staff",
+          refresh: "Atualizar",
+          noStaffMembers: "Não existem membros do staff.",
+          name: "Nome",
+          email: "Email",
+          phone: "Número de Telefone",
+          operationalWindow: "Janela Operacional",
+          status: "Estado",
+          qualifications: "Qualificações",
+          noQualifications: "Não existem qualificações disponíveis. Por favor, crie qualificações primeiro.",
+          actions: "Ações",
+          edit: "Editar",
+          deactivate: "Desativar",
+          reactivate: "Reativar",
+          createTitle: "Criar Novo Membro do Staff",
+          editTitle: "Editar Membro do Staff",
+          startTime: "Hora de Início",
+          endTime: "Hora de Fim",
+          saveChanges: "Guardar alterações",
+          create: "Criar",
+          cancel: "Cancelar",
+          namePlaceholder: "Nome do membro do staff",
+          emailPlaceholder: "email@exemplo.com",
+          phonePlaceholder: "N\u00famero de telefone",
+          filters: "Filtros",
+          filterByName: "Filtrar por Nome",
+          filterByNamePlaceholder: "Pesquisar por nome...",
+          filterByStatus: "Filtrar por Estado",
+          filterByQualification: "Filtrar por Qualifica\u00e7\u00e3o",
+          allStatuses: "Todos os Estados",
+          allQualifications: "Todas as Qualifica\u00e7\u00f5es",
+          applyFilters: "Aplicar Filtros",
+          clearFilters: "Limpar Filtros"
+        },
+        manageQualifications: {
+          title: "Gerir Qualificações",
+          listTitle: "Lista de Qualificações",
+          refresh: "Atualizar",
+          noQualifications: "Não existem qualificações.",
+          name: "Nome",
+          actions: "Ações",
+          edit: "Editar",
+          delete: "Eliminar",
+          createTitle: "Criar Nova Qualificação",
+          editTitle: "Editar Qualificação",
+          saveChanges: "Guardar alterações",
+          create: "Criar",
+          cancel: "Cancelar",
+          namePlaceholder: "Nome da qualificação (ex: 'Operador de Grua')",
+          nameHint: "O nome deve ter pelo menos duas palavras com um máximo de 150 caracteres",
+          filters: "Filtros",
+          filterByName: "Filtrar por Nome",
+          filterByNamePlaceholder: "Pesquisar por nome...",
+          applyFilter: "Aplicar Filtro",
+          clearFilter: "Limpar Filtro"
         },
         roles: {
           representative: "Representante",
@@ -269,11 +610,53 @@ export class TranslationService {
           dockViewDesc: "Visualize e gerencie operações portuárias em 3D"
         }
       },
+
+      vesselScheduling: {
+        title: "Agendamento de Navios - Menor Atraso",
+        subtitle: "Calcular agendamento ótimo de navios para minimizar atrasos",
+        targetDate: "Data Alvo",
+        calculateSchedule: "Calcular Agendamento",
+        calculating: "A calcular...",
+        clearResults: "Limpar Resultados",
+        error: "Erro",
+        summaryCards: {
+          targetDate: "Data Alvo",
+          totalVessels: "Total de Navios",
+          totalDelay: "Atraso Total"
+        },
+        timeUnits: "unidades de tempo",
+        table: {
+          title: "Detalhes do Agendamento de Navios",
+          status: "Estado",
+          vessel: "Navio",
+          arrival: "Chegada",
+          departure: "Partida",
+          startTime: "Início",
+          endTime: "Fim",
+          duration: "Duração",
+          delay: "Atraso"
+        },
+        timeline: {
+          title: "Linha do Tempo Visual"
+        }
+      },
+
       accessDenied: {
         title: "Acesso Negado",
         message: "Não tem permissão para ver esta página.",
         backHome: "Voltar ao Início"
-      }
+      },
+      activation: {
+        pending: "A ativar...",
+        success: "Ativação bem-sucedida",
+        error: "Falha na ativação",
+        successMessage: "Conta ativada com sucesso.",
+        errorMessage: "Falha na ativação ou token inválido.",
+        invalidMessage: "Pedido de ativação inválido.",
+        backHome: "Voltar ao Início",
+        afterActivation: "Após a ativação, pode tentar iniciar sessão com a conta."
+      },
+
 
     }
   };

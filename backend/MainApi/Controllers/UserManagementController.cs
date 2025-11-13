@@ -85,20 +85,26 @@ namespace DDDSample1.Controllers
         public async Task<IActionResult> ActivateByToken([FromQuery] string token)
         {
             var activation = await _activationRepo.GetByTokenAsync(token);
-            if (activation == null || !activation.IsValid(token))
-                return BadRequest(new { error = "Invalid or expired activation token." });
 
-            var user = await _repo.GetByIdAsync(activation.UserId);
+            if (activation == null || !activation.IsValid(token))
+            {
+                return Redirect("http://localhost:4200/activate?status=error");
+            }
+
+            // Ativa o user
+            var user = await _repo.GetByEmailAsync(activation.UserId.Value);
             if (user == null)
-                return NotFound(new { error = "User not found." });
+            {
+                return Redirect("http://localhost:4200/activate?status=error");
+            }
 
             user.Activate();
             await _repo.UpdateAsync(user);
-
             await _activationRepo.DeleteAsync(activation);
 
-            return Ok(new { message = "Account activated successfully." });
+            return Redirect("http://localhost:4200/activate?status=success");
         }
+
 
         
         [HttpPut("{email}/deactivate")]

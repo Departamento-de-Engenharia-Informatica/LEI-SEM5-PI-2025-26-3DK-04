@@ -11,7 +11,12 @@ import { PortAuthorityUI } from './PortAuthorityOfficer/port-authority.ui';
 import { LogisticsUI } from './Logistics-Operator/logistics.ui';
 import { ProjectManagerUI } from './ProjectManager/project-manager.ui';
 import { ManageUsers } from './admin/manageUsers/manage-users';
+import { ManageDocks } from './admin/ManageDocks/manageDocks';
+import { ManageStorageAreas } from './admin/manageStorageAreas/manageStorageAreas';
+import { ManageStaffMembers } from './admin/manageStaffMembers/manageStaffMembers';
+import { ManageQualifications } from './admin/manageQualifications/manageQualifications';
 
+import { ActivationSuccess } from './admin/activation-success/activation-success';
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'cube', component: Cube },
@@ -31,6 +36,30 @@ export const routes: Routes = [
   {
     path: 'admin/manage-users',
     component: ManageUsers,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin'] }
+  },
+  {
+    path: 'admin/manage-docks',
+    component: ManageDocks,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin', 'projectmanager'] } // allow whoever should be able to manage docks
+  },
+  {
+    path: 'admin/manage-storage-areas',
+    component: ManageStorageAreas,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin', 'logisticsoperator'] }
+  },
+  {
+    path: 'admin/manage-staff-members',
+    component: ManageStaffMembers,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin', 'projectmanager'] }
+  },
+  {
+    path: 'admin/manage-qualifications',
+    component: ManageQualifications,
     canActivate: [RoleGuard],
     data: { roles: ['admin'] }
   },
@@ -61,6 +90,9 @@ export const routes: Routes = [
     canActivate: [RoleGuard],
     data: { roles: ['projectmanager','admin'] }
   },
+  { path: 'activate', component: ActivationSuccess },
 
-  { path: 'access-denied', component: AccessDenied }
+  { path: 'access-denied', component: AccessDenied },
+
+  { path: '**', redirectTo: '', pathMatch: 'full' }
 ];

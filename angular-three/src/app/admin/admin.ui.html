@@ -11,6 +11,25 @@
         <p>{{ t('adminUI.cards.manageUsersDesc') }}</p>
       </div>
 
+      <div class="role-card" routerLink="/admin/manage-docks" style="cursor: pointer;">
+        <h3>{{ t('adminUI.cards.manageDocks') }}</h3>
+        <p>{{ t('adminUI.cards.manageDocksDesc') }}</p>
+      </div>
+
+      <div class="role-card" routerLink="/admin/manage-storage-areas" style="cursor: pointer;">
+        <h3>{{ t('adminUI.cards.manageStorageAreas') }}</h3>
+        <p>{{ t('adminUI.cards.manageStorageAreasDesc') }}</p>
+      </div>
+
+      <div class="role-card" routerLink="/admin/manage-staff-members" style="cursor: pointer;">
+        <h3>{{ t('adminUI.cards.manageStaffMembers') }}</h3>
+        <p>{{ t('adminUI.cards.manageStaffMembersDesc') }}</p>
+      </div>
+
+      <div class="role-card" routerLink="/admin/manage-qualifications" style="cursor: pointer;">
+        <h3>{{ t('adminUI.cards.manageQualifications') }}</h3>
+        <p>{{ t('adminUI.cards.manageQualificationsDesc') }}</p>
+      </div>
 
       <div class="role-card">
         <h3>{{ t('adminUI.cards.logs') }}</h3>
@@ -28,8 +47,8 @@
       </div>
 
       <div class="role-card" routerLink="/vessel-scheduling" style="cursor: pointer;">
-        <h3>Vessel Scheduling</h3>
-        <p>Calculate optimal vessel scheduling to minimize delays</p>
+        <h3>{{ t('adminUI.cards.vesselScheduling') }}</h3>
+        <p>{{ t('adminUI.cards.vesselSchedulingDesc') }}</p>
       </div>
 
     </div>

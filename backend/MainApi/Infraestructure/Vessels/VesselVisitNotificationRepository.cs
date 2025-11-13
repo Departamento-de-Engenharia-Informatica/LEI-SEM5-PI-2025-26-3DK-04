@@ -90,15 +90,15 @@ namespace DDDSample1.Infrastructure.Vessels
                 query = query.Where(n => representativeIds.Contains(n.RepresentativeId));
             }
 
-            // Filter by date range
+            // Filter by date range (ArrivalTime and DepartureTime)
             if (startDate.HasValue)
             {
-                query = query.Where(n => n.CreatedAt >= startDate.Value);
+                query = query.Where(n => n.ArrivalTime >= startDate.Value);
             }
 
             if (endDate.HasValue)
             {
-                query = query.Where(n => n.CreatedAt <= endDate.Value);
+                query = query.Where(n => n.DepartureTime <= endDate.Value);
             }
 
             return await query

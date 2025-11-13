@@ -1,0 +1,172 @@
+<section class="manage-staff-members">
+  <div class="container">
+    <h1>{{ t('adminUI.manageStaffMembers.title') }}</h1>
+
+    <!-- LIST OF STAFF MEMBERS -->
+    <div>
+      <h2>{{ t('adminUI.manageStaffMembers.listTitle') }}</h2>
+      <button (click)="loadStaffMembers()">{{ t('adminUI.manageStaffMembers.refresh') }}</button>
+
+      <!-- FILTERS -->
+      <div class="filters-section">
+        <h3>{{ t('adminUI.manageStaffMembers.filters') }}</h3>
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label>{{ t('adminUI.manageStaffMembers.filterByName') }}</label>
+            <input 
+              type="text" 
+              [(ngModel)]="filters.name" 
+              name="filterName"
+              placeholder="{{ t('adminUI.manageStaffMembers.filterByNamePlaceholder') }}"
+              (keyup.enter)="applyFilters()"
+            />
+          </div>
+
+          <div class="filter-group">
+            <label>{{ t('adminUI.manageStaffMembers.filterByStatus') }}</label>
+            <select [(ngModel)]="filters.status" name="filterStatus">
+              <option value="">{{ t('adminUI.manageStaffMembers.allStatuses') }}</option>
+              <option value="Available">Available</option>
+              <option value="Unavailable">Unavailable</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>{{ t('adminUI.manageStaffMembers.filterByQualification') }}</label>
+            <select [(ngModel)]="filters.qualificationId" name="filterQualification">
+              <option value="">{{ t('adminUI.manageStaffMembers.allQualifications') }}</option>
+              <option *ngFor="let qual of qualifications" [value]="qual.id">{{ qual.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-buttons">
+          <button class="primary" (click)="applyFilters()">{{ t('adminUI.manageStaffMembers.applyFilters') }}</button>
+          <button class="secondary" (click)="clearFilters()">{{ t('adminUI.manageStaffMembers.clearFilters') }}</button>
+        </div>
+      </div>
+
+      <table *ngIf="staffMembers.length > 0">
+        <thead>
+        <tr>
+          <th>{{ t('adminUI.manageStaffMembers.name') }}</th>
+          <th>{{ t('adminUI.manageStaffMembers.email') }}</th>
+          <th>{{ t('adminUI.manageStaffMembers.phone') }}</th>
+          <th>{{ t('adminUI.manageStaffMembers.operationalWindow') }}</th>
+          <th>{{ t('adminUI.manageStaffMembers.status') }}</th>
+          <th>{{ t('adminUI.manageStaffMembers.qualifications') }}</th>
+          <th>{{ t('adminUI.manageStaffMembers.actions') }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let staff of staffMembers">
+          <td>{{ staff.name }}</td>
+          <td>{{ staff.email }}</td>
+          <td>{{ staff.phoneNumber }}</td>
+          <td>{{ staff.operationalWindow.startTime }} - {{ staff.operationalWindow.endTime }}</td>
+          <td>
+            <span [class]="getStatusClass(staff.status)">{{ staff.status }}</span>
+          </td>
+          <td>
+            <span *ngIf="staff.qualifications && staff.qualifications.length > 0">
+              <span *ngFor="let q of staff.qualifications; let last = last">
+                {{ q.name }}<span *ngIf="!last">, </span>
+              </span>
+            </span>
+            <span *ngIf="!staff.qualifications || staff.qualifications.length === 0" class="no-data">
+              No qualifications
+            </span>
+          </td>
+          <td>
+            <button (click)="editStaffMember(staff)">{{ t('adminUI.manageStaffMembers.edit') }}</button>
+            <button *ngIf="staff.status === 'Available'" class="warning" (click)="deactivateStaffMember(staff.id)">
+              {{ t('adminUI.manageStaffMembers.deactivate') }}
+            </button>
+            <button *ngIf="staff.status === 'Unavailable'" class="success" (click)="reactivateStaffMember(staff.id)">
+              {{ t('adminUI.manageStaffMembers.reactivate') }}
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <p *ngIf="staffMembers.length === 0">
+        {{ t('adminUI.manageStaffMembers.noStaffMembers') }}
+      </p>
+    </div>
+
+    <hr />
+
+    <!-- CREATE / EDIT FORM -->
+    <form (ngSubmit)="saveStaffMember()">
+      <h2>{{ editing ? t('adminUI.manageStaffMembers.editTitle') : t('adminUI.manageStaffMembers.createTitle') }}</h2>
+
+      <div class="form-group">
+        <label>{{ t('adminUI.manageStaffMembers.name') }}</label>
+        <input [(ngModel)]="staffForm.name" name="name" placeholder="{{ t('adminUI.manageStaffMembers.namePlaceholder') }}" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('adminUI.manageStaffMembers.email') }}</label>
+        <input type="email" [(ngModel)]="staffForm.email" name="email"
+               placeholder="{{ t('adminUI.manageStaffMembers.emailPlaceholder') }}" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('adminUI.manageStaffMembers.phone') }}</label>
+        <input type="number" [(ngModel)]="staffForm.phoneNumber" name="phoneNumber"
+               placeholder="{{ t('adminUI.manageStaffMembers.phonePlaceholder') }}" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('adminUI.manageStaffMembers.startTime') }}</label>
+        <input type="time" [(ngModel)]="staffForm.startTime" name="startTime"
+               placeholder="HH:mm" required />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('adminUI.manageStaffMembers.endTime') }}</label>
+        <input type="time" [(ngModel)]="staffForm.endTime" name="endTime"
+               placeholder="HH:mm" required />
+      </div>
+
+      <div class="form-group" *ngIf="editing">
+        <label>{{ t('adminUI.manageStaffMembers.status') }}</label>
+        <select [(ngModel)]="staffForm.status" name="status">
+          <option value="Available">Available</option>
+          <option value="Unavailable">Unavailable</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('adminUI.manageStaffMembers.qualifications') }}</label>
+        <div class="qualifications-checkboxes" *ngIf="qualifications.length > 0">
+          <div *ngFor="let qual of qualifications" class="qualification-item">
+            <input
+              type="checkbox"
+              [id]="qual.id"
+              [value]="qual.id"
+              (change)="onQualificationChange(qual.id, $event)"
+              [checked]="isQualificationAssigned(qual.id)"
+            />
+            <label [for]="qual.id">{{ qual.name }}</label>
+          </div>
+        </div>
+        <p *ngIf="qualifications.length === 0" class="no-data">
+          {{ t('adminUI.manageStaffMembers.noQualifications') }}
+        </p>
+      </div>
+
+      <div class="form-buttons">
+        <button type="submit">
+          {{ editing
+          ? t('adminUI.manageStaffMembers.saveChanges')
+          : t('adminUI.manageStaffMembers.create') }}
+        </button>
+        <button type="button" class="secondary" (click)="resetForm()">
+          {{ t('adminUI.manageStaffMembers.cancel') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</section>

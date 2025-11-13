@@ -1,7 +1,13 @@
+// Color variables matching the site's design (same as manage-users)
+$accent: #26327C;
+$dark: #0A1C41;
+$accent-light: #3d4a96;
+$white: #ffffff;
+
 .vessel-scheduling-container {
   max-width: 1200px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+  margin: 0 auto;
+  padding: 6rem 1rem 2rem 1rem; // Increased top padding to clear the header
 }
 
 .card {
@@ -12,7 +18,7 @@
 }
 
 .card-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, $accent 0%, $dark 100%);
   color: white;
   padding: 2rem;
   text-align: center;
@@ -55,7 +61,7 @@
 
     &:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: $accent;
     }
 
     &:disabled {
@@ -89,12 +95,12 @@
   }
 
   &.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, $accent 0%, $dark 100%);
     color: white;
 
     &:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 4px 12px rgba($accent, 0.4);
     }
   }
 
@@ -142,30 +148,225 @@
   margin-top: 2rem;
   padding-top: 2rem;
   border-top: 2px solid #e0e0e0;
+}
+
+// Summary Card
+.summary-card {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  .summary-item {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &.delay-warning {
+      background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+    }
+
+    .summary-label {
+      display: block;
+      font-size: 0.85rem;
+      color: #666;
+      font-weight: 500;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .summary-value {
+      display: block;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #333;
+    }
+  }
+}
+
+// Table Styles
+.table-container {
+  margin-bottom: 2rem;
 
   h3 {
     margin: 0 0 1rem 0;
     color: #333;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
+  }
+}
+
+.vessels-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  thead {
+    background: linear-gradient(135deg, $accent 0%, $dark 100%);
+    color: white;
+
+    th {
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
   }
 
-  .results-output {
-    background: #f8f9fa;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    padding: 1.5rem;
-    overflow-x: auto;
-    font-family: 'Courier New', monospace;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    white-space: pre;
+  tbody {
+    tr {
+      border-bottom: 1px solid #e0e0e0;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #f8f9fa;
+      }
+
+      &.no-delay {
+        background-color: #d4edda;
+      }
+
+      &.low-delay {
+        background-color: #fff3cd;
+      }
+
+      &.high-delay {
+        background-color: #f8d7da;
+      }
+
+      td {
+        padding: 1rem;
+        font-size: 0.95rem;
+        color: #333;
+
+        &.status-icon {
+          text-align: center;
+          font-size: 1.2rem;
+
+          .icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            border-radius: 50%;
+            background: white;
+          }
+        }
+
+        &.vessel-name {
+          font-weight: 600;
+          color: $accent;
+        }
+
+        &.delay-cell {
+          text-align: center;
+
+          .delay-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            background: #28a745;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+
+            &.has-delay {
+              background: #dc3545;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Timeline Styles
+.timeline-container {
+  margin-top: 2rem;
+
+  h3 {
+    margin: 0 0 1rem 0;
     color: #333;
+    font-size: 1.3rem;
+  }
+
+  .timeline {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+
+    .timeline-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      gap: 1rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .vessel-label {
+        min-width: 80px;
+        font-weight: 600;
+        color: $accent;
+        font-size: 0.95rem;
+      }
+
+      .timeline-bar-container {
+        flex: 1;
+        height: 40px;
+        background: #e0e0e0;
+        border-radius: 4px;
+        position: relative;
+
+        .timeline-bar {
+          position: absolute;
+          height: 100%;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+          &.no-delay {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+          }
+
+          &.low-delay {
+            background: linear-gradient(135deg, $accent-light 0%, $accent 100%);
+          }
+
+          &.high-delay {
+            background: linear-gradient(135deg, $dark 0%, darken($dark, 5%) 100%);
+          }
+
+          .bar-label {
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+          }
+
+          &:hover {
+            transform: scaleY(1.1);
+            z-index: 1;
+          }
+        }
+      }
+    }
   }
 }
 
 @media (max-width: 768px) {
   .vessel-scheduling-container {
-    margin: 1rem auto;
+    margin: 0 auto;
+    padding: 5rem 1rem 1rem 1rem; // Adjusted for mobile
   }
 
   .card-header {
@@ -187,5 +388,31 @@
   .btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .summary-card {
+    grid-template-columns: 1fr;
+  }
+
+  .vessels-table {
+    font-size: 0.85rem;
+
+    thead th,
+    tbody td {
+      padding: 0.5rem;
+    }
+  }
+
+  .timeline-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+
+    .vessel-label {
+      min-width: auto;
+    }
+
+    .timeline-bar-container {
+      width: 100%;
+    }
   }
 }

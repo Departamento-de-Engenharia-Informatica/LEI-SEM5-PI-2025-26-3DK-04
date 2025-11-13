@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using DDDSample1.Domain.Shared;
 using DDDSample1.Domain.Vessels.VesselInformation;
 using DDDSample1.Domain.Organizations;
+using DDDSample1.Domain.PhysicalResources;
+using DDDSample1.Domain.StaffMembers;
 
 namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 {
@@ -15,22 +17,42 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         private readonly IVesselRepository _vesselRepo;
         private readonly IVesselTypeRepository _vesselTypeRepo;
         private readonly IRepresentativeRepository _representativeRepo;
+        private readonly IPhysicalResourceRepository _physicalResourceRepo;
+        private readonly IStaffMemberRepository _staffMemberRepo;
+        
         public VesselVisitNotificationService(
             IUnitOfWork unitOfWork,
             IVesselVisitNotificationRepository repo,
             IVesselRepository vesselRepo,
-            IVesselTypeRepository vesselTypeRepo,IRepresentativeRepository representativeRepo)
+            IVesselTypeRepository vesselTypeRepo,
+            IRepresentativeRepository representativeRepo,
+            IPhysicalResourceRepository physicalResourceRepo,
+            IStaffMemberRepository staffMemberRepo)
         {
             _unitOfWork = unitOfWork;
             _repo = repo;
             _vesselRepo = vesselRepo;
             _vesselTypeRepo = vesselTypeRepo;
             _representativeRepo = representativeRepo;
+            _physicalResourceRepo = physicalResourceRepo;
+            _staffMemberRepo = staffMemberRepo;
         }
         
         //Create new notification
         public async Task<VesselVisitNotificationDto> CreateAsync(CreateNotificationDto dto)
         {
+            // Validar que arrival time não é no passado
+            if (dto.ArrivalTime < DateTime.UtcNow)
+                throw new BusinessRuleValidationException("Arrival time cannot be in the past.");
+            
+            // Validar que departure time não é no passado
+            if (dto.DepartureTime < DateTime.UtcNow)
+                throw new BusinessRuleValidationException("Departure time cannot be in the past.");
+            
+            // Validar que departure é posterior ao arrival
+            if (dto.DepartureTime <= dto.ArrivalTime)
+                throw new BusinessRuleValidationException("Departure time must be after arrival time.");
+            
             //  Obter o vessel
             var vessel = await _vesselRepo.GetByIdAsync(new VesselId(dto.VesselId));
             if (vessel == null)
@@ -49,7 +71,8 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             //  Atualizar crew se vier no DTO
             if (dto.Crew != null && dto.Crew.Any())
             {
-                vessel.setCrew(dto.Crew);
+                var crewMembers = dto.Crew.Select(c => new CrewMember(c.Name, c.CitizenId, c.Nationality)).ToList();
+                vessel.setCrew(crewMembers);
                 await _vesselRepo.UpdateAsync(vessel);
             }
 
@@ -88,11 +111,42 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                         $"Unloading cargo weight ({totalUnloadWeight} kg) cannot exceed vessel capacity ({vesselType.Capacity} kg).");
             }
             
+            // Validar e obter Physical Resource (crane) se fornecido
+            int? physicalResourceSetupTime = null;
+            if (!string.IsNullOrWhiteSpace(dto.PhysicalResourceId))
+            {
+                var physicalResource = await _physicalResourceRepo.GetByIdAsync(new PhysicalResourceId(Guid.Parse(dto.PhysicalResourceId)));
+                if (physicalResource == null)
+                    throw new BusinessRuleValidationException("Physical Resource (crane) not found.");
+                
+                if (physicalResource.Type != "Crane")
+                    throw new BusinessRuleValidationException("Physical Resource must be a Crane.");
+                
+                physicalResourceSetupTime = physicalResource.SetupTime;
+            }
+            
+            // Validar staff members se fornecidos
+            if (dto.StaffMemberIds != null && dto.StaffMemberIds.Any())
+            {
+                foreach (var staffId in dto.StaffMemberIds)
+                {
+                    var staffMember = await _staffMemberRepo.GetByIdAsync(new StaffMemberID(Guid.Parse(staffId)));
+                    if (staffMember == null)
+                        throw new BusinessRuleValidationException($"Staff member with ID {staffId} not found.");
+                }
+            }
+            
             var notification = new VesselVisitNotification(
                 vessel,
                 loadingCargo,
                 unloadingCargo,
-                new RepresentativeId(dto.RepresentativeId)
+                new RepresentativeId(dto.RepresentativeId),
+                dto.ArrivalTime,
+                dto.DepartureTime,
+                dto.StaffMemberIds,
+                dto.PhysicalResourceId,
+                physicalResourceSetupTime,
+                dto.DockId
             );
 
             await _repo.AddAsync(notification);
@@ -109,6 +163,14 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         public async Task<List<VesselVisitNotificationDto>> GetSubmittedNotificationsAsync()
         {
             var notifications = await _repo.GetSubmittedNotificationsAsync();
+            
+            return notifications.Select(n => MapToDto(n)).ToList();
+        }
+        
+        // Listar notificações aprovadas (prontas para scheduling)
+        public async Task<List<VesselVisitNotificationDto>> GetApprovedNotificationsAsync()
+        {
+            var notifications = await _repo.GetByStateAsync(NotificationStatus.Approved);
             
             return notifications.Select(n => MapToDto(n)).ToList();
         }
@@ -174,7 +236,15 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 VesselName = notification.Vessel.Name,
                 VesselCallsign = notification.Vessel.ImoNumber.ToString(),
                 RepresentativeId = notification.RepresentativeId?.AsString(),
-                CreatedAt = notification.CreatedAt
+                CreatedAt = notification.CreatedAt,
+                // Novos campos
+                ArrivalTime = notification.ArrivalTime,
+                DepartureTime = notification.DepartureTime,
+                UnloadTime = notification.UnloadTime,
+                LoadTime = notification.LoadTime,
+                StaffMemberIds = notification.StaffMemberIds?.ToList(),
+                PhysicalResourceId = notification.PhysicalResourceId,
+                DockId = notification.DockId
             };
             return dto;
         }

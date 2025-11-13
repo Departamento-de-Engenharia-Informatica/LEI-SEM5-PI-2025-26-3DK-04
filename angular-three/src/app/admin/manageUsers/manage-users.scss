@@ -84,3 +84,30 @@ $shadow: 0 1px 3px rgba(0,0,0,0.08);
     color: $text-dark;
   }
 }
+
+/* ========================
+   RESPONSIVE
+======================== */
+@media (max-width: 768px) {
+  .manage-users {
+    padding: 20px;
+
+    .container {
+      padding: 20px;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+    }
+
+    input, select, button {
+      font-size: 0.95rem;
+      padding: 8px 10px;
+    }
+
+    button {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  }
+}

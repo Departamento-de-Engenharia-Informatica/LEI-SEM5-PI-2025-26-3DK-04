@@ -1,0 +1,38 @@
+﻿.activation-page {
+  padding: 80px 28px;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+
+.activation-box {
+  max-width: 720px;
+  width: 100%;
+  border-radius: 6px;
+  padding: 28px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  text-align: center;
+
+  h1 {
+    color: #26327C;
+    font-family: Georgia, "Times New Roman", serif;
+    margin-bottom: 12px;
+  }
+
+  p {
+    color: #333;
+    margin-bottom: 16px;
+  }
+
+  button {
+    background: #26327C;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+}

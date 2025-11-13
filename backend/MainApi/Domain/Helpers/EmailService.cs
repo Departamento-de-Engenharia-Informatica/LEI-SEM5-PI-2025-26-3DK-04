@@ -3,8 +3,8 @@ using System.Net.Mail;
 
 public class EmailService
 {
-    private readonly string _from = "your_email@gmail.com";
-    private readonly string _password = "your_app_password";
+    private readonly string _from = "gmail";
+    private readonly string _password = "password";
 
     public void SendActivationEmail(string toEmail, string activationLink)
     {
@@ -20,7 +20,6 @@ public class EmailService
             Body = $"Click the link to activate your account:\n\n{activationLink}",
             IsBodyHtml = false
         };
-
         client.Send(mail);
     }
 }

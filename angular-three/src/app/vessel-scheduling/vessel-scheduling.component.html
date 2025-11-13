@@ -1,14 +1,14 @@
 <div class="vessel-scheduling-container">
   <div class="card">
     <div class="card-header">
-      <h2>Vessel Scheduling - Shortest Delay</h2>
-      <p class="subtitle">Calculate optimal vessel scheduling to minimize delays</p>
+      <h2>{{ translate('vesselScheduling.title') }}</h2>
+      <p class="subtitle">{{ translate('vesselScheduling.subtitle') }}</p>
     </div>
 
     <div class="card-body">
       <!-- Date Input Section -->
       <div class="form-group">
-        <label for="targetDate">Target Date:</label>
+        <label for="targetDate">{{ translate('vesselScheduling.targetDate') }}:</label>
         <input 
           type="date" 
           id="targetDate" 
@@ -26,9 +26,9 @@
           (click)="calculateSchedule()"
           [disabled]="isLoading || !targetDate"
         >
-          <span *ngIf="!isLoading">Calculate Schedule</span>
+          <span *ngIf="!isLoading">{{ translate('vesselScheduling.calculateSchedule') }}</span>
           <span *ngIf="isLoading">
-            <span class="spinner"></span> Calculating...
+            <span class="spinner"></span> {{ translate('vesselScheduling.calculating') }}
           </span>
         </button>
 
@@ -37,19 +37,87 @@
           (click)="clearResults()"
           [disabled]="isLoading"
         >
-          Clear Results
+          {{ translate('vesselScheduling.clearResults') }}
         </button>
       </div>
 
       <!-- Error Message -->
       <div *ngIf="errorMessage" class="alert alert-error">
-        <strong>Error:</strong> {{ errorMessage }}
+        <strong>{{ translate('vesselScheduling.error') }}:</strong> {{ errorMessage }}
       </div>
 
       <!-- Results Section -->
-      <div *ngIf="schedulingResult" class="results-section">
-        <h3>Scheduling Results</h3>
-        <pre class="results-output">{{ schedulingResult }}</pre>
+      <div *ngIf="scheduleData" class="results-section">
+        <!-- Summary Card -->
+        <div class="summary-card">
+          <div class="summary-item">
+            <span class="summary-label">{{ translate('vesselScheduling.summaryCards.targetDate') }}</span>
+            <span class="summary-value">{{ scheduleData.date }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">{{ translate('vesselScheduling.summaryCards.totalVessels') }}</span>
+            <span class="summary-value">{{ scheduleData.schedule.length }}</span>
+          </div>
+          <div class="summary-item" [class.delay-warning]="scheduleData.totalDelay > 0">
+            <span class="summary-label">{{ translate('vesselScheduling.summaryCards.totalDelay') }}</span>
+            <span class="summary-value">{{ scheduleData.totalDelay }} {{ translate('vesselScheduling.timeUnits') }}</span>
+          </div>
+        </div>
+
+        <!-- Vessels Table -->
+        <div class="table-container">
+          <h3>{{ translate('vesselScheduling.table.title') }}</h3>
+          <table class="vessels-table">
+            <thead>
+              <tr>
+                <th>{{ translate('vesselScheduling.table.status') }}</th>
+                <th>{{ translate('vesselScheduling.table.vessel') }}</th>
+                <th>{{ translate('vesselScheduling.table.arrival') }}</th>
+                <th>{{ translate('vesselScheduling.table.departure') }}</th>
+                <th>{{ translate('vesselScheduling.table.startTime') }}</th>
+                <th>{{ translate('vesselScheduling.table.endTime') }}</th>
+                <th>{{ translate('vesselScheduling.table.duration') }}</th>
+                <th>{{ translate('vesselScheduling.table.delay') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let vessel of scheduleData.schedule" [ngClass]="getDelayClass(vessel.delay)">
+                <td class="status-icon">
+                  <span class="icon">{{ getStatusIcon(vessel.delay) }}</span>
+                </td>
+                <td class="vessel-name">{{ vessel.vessel }}</td>
+                <td>{{ vessel.arrival }}</td>
+                <td>{{ vessel.departure }}</td>
+                <td>{{ vessel.startTime }}</td>
+                <td>{{ vessel.endTime }}</td>
+                <td>{{ vessel.duration }}</td>
+                <td class="delay-cell">
+                  <span class="delay-badge" [class.has-delay]="vessel.delay > 0">
+                    {{ vessel.delay }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Visual Timeline -->
+        <div class="timeline-container">
+          <h3>{{ translate('vesselScheduling.timeline.title') }}</h3>
+          <div class="timeline">
+            <div *ngFor="let vessel of scheduleData.schedule" class="timeline-row">
+              <div class="vessel-label">{{ vessel.vessel }}</div>
+              <div class="timeline-bar-container">
+                <div class="timeline-bar" 
+                     [style.margin-left.%]="(vessel.startTime / 30) * 100"
+                     [style.width.%]="(vessel.duration / 30) * 100"
+                     [ngClass]="getDelayClass(vessel.delay)">
+                  <span class="bar-label">{{ vessel.startTime }} - {{ vessel.endTime }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

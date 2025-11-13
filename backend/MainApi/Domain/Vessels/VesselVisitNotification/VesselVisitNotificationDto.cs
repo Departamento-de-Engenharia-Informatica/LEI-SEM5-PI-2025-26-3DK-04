@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using DDDSample1.Domain.Docks;
 using DDDSample1.Domain.Vessels.VesselInformation;
 
@@ -24,6 +25,16 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         
         public string? RepresentativeId { get; set; }
         public DateTime CreatedAt { get; set; }
+        
+        // Novos campos para integração com IARTI
+        public DateTime? ArrivalTime { get; set; }
+        public DateTime? DepartureTime { get; set; }
+        public int? UnloadTime { get; set; } // Em horas
+        public int? LoadTime { get; set; } // Em horas
+        
+        public List<string> StaffMemberIds { get; set; }
+        public string PhysicalResourceId { get; set; } // Crane ID
+        public string DockId { get; set; }
 
         public VesselVisitNotificationDto(LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo)
         {
@@ -33,3 +44,4 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         }
     }
 }
+

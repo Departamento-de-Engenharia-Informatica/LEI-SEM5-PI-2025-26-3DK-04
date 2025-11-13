@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from "@angular/core";
 import { CommonModule, isPlatformBrowser } from "@angular/common";
-import { RouterOutlet, RouterLink, RouterLinkActive } from "@angular/router";
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from "@angular/router";
 import { TranslationService } from "./translation.service";
 import { AuthService } from "./auth.service";
 
@@ -12,6 +12,16 @@ import { AuthService } from "./auth.service";
   styleUrls: ["./app.scss"]
 })
 export class App implements OnInit, OnDestroy {
+  mobileMenuOpen = false;
+
+  toggleMobileMenu() {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen = false;
+  }
+
   currentLang = "en";
   currentAnchor = "home";
   isBrowser: boolean;
@@ -24,16 +34,28 @@ export class App implements OnInit, OnDestroy {
 
   constructor(
     private translation: TranslationService,
-    private authService : AuthService,
+    private authService: AuthService,
+    private router: Router, // ✅ adicionado para navegação sem refresh
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
 
-    this.currentLang = this.translation.getLang();
+    // 🔹 Lê idioma guardado no browser (mantém idioma após reload)
+    if (this.isBrowser) {
+      const savedLang = localStorage.getItem('appLang');
+      if (savedLang) {
+        this.translation.setLanguage(savedLang);
+        this.currentLang = savedLang;
+      } else {
+        this.currentLang = this.translation.getLang();
+        localStorage.setItem('appLang', this.currentLang);
+      }
+    } else {
+      this.currentLang = this.translation.getLang();
+    }
 
-    // Só inicializa OAuth no browser
-    // Detecta o retorno do Google
-    if (typeof window !== 'undefined') {
+    // 🔹 Só inicializa o OAuth no browser e deteta retorno do Google
+    if (this.isBrowser) {
       this.handleGoogleCallback();
     }
   }
@@ -42,8 +64,6 @@ export class App implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (!this.isBrowser) return;
-
-    // set initial active anchor based on scroll position (in case user landed in middle)
     setTimeout(() => this.onWindowScroll(), 0);
     window.addEventListener("scroll", this.scrollHandler, { passive: true });
   }
@@ -66,6 +86,9 @@ export class App implements OnInit, OnDestroy {
   switchLanguage(lang: string): void {
     this.translation.setLanguage(lang);
     this.currentLang = this.translation.getLang();
+    if (this.isBrowser) {
+      localStorage.setItem('appLang', this.currentLang);
+    }
   }
 
   onNavClick(ev: Event, anchor: string): void {
@@ -82,7 +105,6 @@ export class App implements OnInit, OnDestroy {
 
   scrollToAnchor(anchor: string): void {
     if (!this.isBrowser) return;
-
     const el = document.getElementById(anchor);
     if (el) {
       const top = el.getBoundingClientRect().top + window.scrollY - 72;
@@ -94,7 +116,6 @@ export class App implements OnInit, OnDestroy {
     if (!this.isBrowser) return;
 
     const scrollPos = window.scrollY;
-
     const offsets = this.menuItems.map((it) => {
       const el = document.getElementById(it.anchor);
       if (!el) return { anchor: it.anchor, top: Infinity };
@@ -112,7 +133,6 @@ export class App implements OnInit, OnDestroy {
     }
 
     if (scrollPos < (offsets[0]?.top ?? 0)) current = this.menuItems[0].anchor;
-
     this.currentAnchor = current;
   }
 
@@ -147,6 +167,7 @@ export class App implements OnInit, OnDestroy {
   get status(): string | null {
     return this.authService.status;
   }
+
   async handleGoogleCallback() {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
@@ -175,10 +196,9 @@ export class App implements OnInit, OnDestroy {
         }
 
         const user = await userRes.json();
-
         const userName = this.parseUserNameFromIdToken(idToken);
 
-        this.authService.setToken(idToken, user.name,user.email,user.picture,user.role,user.status);
+        this.authService.setToken(idToken, user.name, user.email, user.picture, user.role, user.status);
 
         console.log('Login feito com sucesso:', user.name);
         console.log('Email', user.email);
@@ -189,37 +209,48 @@ export class App implements OnInit, OnDestroy {
         console.error('Erro ao trocar code por token', err);
       }
     }
-
   }
+
   goToRoleUI() {
     const role = this.authService.role?.toLowerCase();
-
-    console.log("[Header] goToRoleUI → role =", role);
 
     if (!role) return;
 
     switch (role) {
       case "admin":
-        window.location.href = "/admin";
+        this.router.navigate(["/admin"]);
         break;
       case "representative":
-        window.location.href = "/representative";
+        this.router.navigate(["/representative"]);
         break;
       case "portauthorityofficer":
-        window.location.href = "/port-officer";
+        this.router.navigate(["/port-officer"]);
         break;
       case "logisticsoperator":
-        window.location.href = "/logistics";
+        this.router.navigate(["/logistics"]);
         break;
       case "projectmanager":
-        window.location.href = "/project-manager";
+        this.router.navigate(["/project-manager"]);
         break;
       default:
-        window.location.href = "/access-denied";
+        this.router.navigate(["/access-denied"]);
         break;
     }
   }
-// Função para extrair nome do id_token JWT
+
+  get rolePath(): string {
+    const role = this.authService.role?.toLowerCase();
+    switch (role) {
+      case "admin": return "/admin";
+      case "representative": return "/representative";
+      case "portauthorityofficer": return "/port-officer";
+      case "logisticsoperator": return "/logistics";
+      case "projectmanager": return "/project-manager";
+      default: return "/";
+    }
+  }
+
+  // Função para extrair nome do id_token JWT
   parseUserNameFromIdToken(idToken: string): string | null {
     if (!idToken) return null;
     const payload = JSON.parse(atob(idToken.split('.')[1]));

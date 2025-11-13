@@ -1,7 +1,25 @@
-﻿import { Component, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, ChangeDetectorRef, NgZone, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { isPlatformBrowser } from '@angular/common';
+import { TranslationService } from '../translation.service';
+
+interface VesselSchedule {
+  vessel: string;
+  arrival: number;
+  departure: number;
+  startTime: number;
+  endTime: number;
+  duration: number;
+  delay: number;
+}
+
+interface ScheduleResponse {
+  date: string;
+  totalDelay: number;
+  schedule: VesselSchedule[];
+}
 
 @Component({
   selector: 'app-vessel-scheduling',
@@ -12,45 +30,94 @@ import { HttpClient } from '@angular/common/http';
 })
 export class VesselSchedulingComponent {
   targetDate: string = '';
-  schedulingResult: string = '';
+  scheduleData: ScheduleResponse | null = null;
   isLoading: boolean = false;
   errorMessage: string = '';
+  currentLang = 'en';
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
+    private translation: TranslationService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
     const today = new Date();
     this.targetDate = today.toISOString().split('T')[0];
+
+    // --- lógica de tradução ---
+    const isBrowser = isPlatformBrowser(this.platformId);
+    if (isBrowser) {
+      const savedLang = localStorage.getItem('appLang');
+      if (savedLang) {
+        this.translation.setLanguage(savedLang);
+        this.currentLang = savedLang;
+      }
+    }
+  }
+
+  // método para usar no template
+  translate(key: string) {
+    return this.translation.translate(key);
   }
 
   calculateSchedule(): void {
     if (!this.targetDate) {
-      this.errorMessage = 'Please select a date';
+      this.errorMessage = this.translate('Please select a date'); // usar tradução
       return;
     }
 
     this.isLoading = true;
     this.errorMessage = '';
-    this.schedulingResult = '';
+    this.scheduleData = null;
 
-    const url = `http://localhost:5002/shortest_delay?date=${this.targetDate}`;
+    const url = `http://localhost:5003/shortest_delay?date=${this.targetDate}&format=json`;
     console.log('Making request to:', url);
 
-    this.http.get(url, { responseType: 'text' }).subscribe({
+    this.http.get<ScheduleResponse>(url).subscribe({
       next: (response) => {
-        console.log('Response received:', response);
-        this.schedulingResult = response;
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        console.log('✅ Response received:', response);
+        this.ngZone.run(() => {
+          // Check if response contains an error
+          if ((response as any).error) {
+            this.errorMessage = (response as any).error;
+            this.scheduleData = null;
+            this.isLoading = false;
+            console.log('❌ Error from server:', this.errorMessage);
+            this.cdr.detectChanges();
+          } else {
+            this.scheduleData = response;
+            this.isLoading = false;
+            console.log('✅ isLoading set to false');
+            console.log('✅ scheduleData:', this.scheduleData);
+            this.cdr.markForCheck();
+            setTimeout(() => this.cdr.detectChanges(), 0);
+          }
+        });
       },
       error: (error) => {
-        console.error('Error occurred:', error);
-        this.errorMessage = 'Error calculating schedule: ' + error.message;
-        this.isLoading = false;
+        console.error('❌ Error occurred:', error);
+        this.ngZone.run(() => {
+          this.errorMessage = this.translate('Error calculating schedule:') + ' ' + error.message;
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        });
       }
     });
   }
 
   clearResults(): void {
-    this.schedulingResult = '';
+    this.scheduleData = null;
     this.errorMessage = '';
+  }
+
+  getDelayClass(delay: number): string {
+    if (delay === 0) return 'no-delay';
+    if (delay <= 2) return 'low-delay';
+    return 'high-delay';
+  }
+
+  getStatusIcon(delay: number): string {
+    return delay === 0 ? '✓' : '⚠';
   }
 }
