@@ -97,7 +97,10 @@ export class TranslationService {
         manageOrganizations: "Manage Organizations",
         manageOrganizationsDesc: "Create and manage organizations",
         manageRepresentatives: "Manage Representatives",
-        manageRepresentativesDesc: "Create and manage representatives"
+        manageRepresentativesDesc: "Create and manage representatives",
+
+        addUserDesc: "Add a new system user",
+        editUserDesc: "Edit existing user details and role",
       },
 
       roles: {
@@ -180,7 +183,6 @@ export class TranslationService {
         dashboardTitle: "Representative Dashboard",
         dashboardSubtitle: "Overview of assigned tasks",
 
-        // NOVAS CHAVES ADICIONADAS
         create: "Create Representative",
       },
 
@@ -229,7 +231,10 @@ export class TranslationService {
         namePlaceholder: "Qualification name (e.g., 'Crane Operator')",
         nameHint: "Name must be at least two words with a maximum of 150 characters",
         create: "Create",
-        cancel: "Cancel"
+        cancel: "Cancel",
+
+        editTitle: "Edit Qualification",
+        saveChanges: "Save Changes",
       },
 
       manageStaffMembers: {
@@ -259,11 +264,13 @@ export class TranslationService {
         deactivate: "Deactivate",
         reactivate: "Reactivate",
 
-        // NOVAS CHAVES ADICIONADAS
         operationalWindow: "Operational Window",
         status: "Status",
         create: "Create Staff Member",
         cancel: "Cancel",
+
+        editTitle: "Edit Staff Member",
+        saveChanges: "Save Changes",
       },
 
       manageStorageAreas: {
@@ -291,9 +298,11 @@ export class TranslationService {
         delete: "Delete",
         cancel: "Cancel",
 
-        // NOVAS CHAVES ADICIONADAS
         dockAssignments: "Dock Assignments",
         create: "Create Storage Area",
+
+        editTitle: "Edit Storage Area",
+        saveChanges: "Save Changes",
       },
 
       manageDocks: {
@@ -320,8 +329,10 @@ export class TranslationService {
         createTitle: "Create New Dock",
         cancel: "Cancel",
 
-        // NOVAS CHAVES ADICIONADAS
         create: "Create Dock",
+
+        editTitle: "Edit Dock",
+        saveChanges: "Save Changes",
       },
 
       manageUsers: {
@@ -339,7 +350,6 @@ export class TranslationService {
         createButton: "Create User",
         cancel: "Cancel",
 
-        // NOVAS CHAVES ADICIONADAS
         emailEmpty: "Email cannot be empty",
         selfModifyError: "You cannot modify your own role",
         serverError: "Server error occurred",
@@ -347,9 +357,42 @@ export class TranslationService {
         createError: "Error creating user",
         updateSuccess: "User role updated successfully",
         updateError: "Error updating user role",
+
+        editTitle: "Edit User",
+        editSubtitle: "Update user details and role",
+        searchPlaceholder: "Search user...",
+        refresh: "Refresh",
+        name: "Name",
+        email: "Email",
+        role: "Role",
+        actions: "Actions",
+        edit: "Edit",
+        saveChanges: "Save Changes",
+        addTitle: "Add New User",
+        dashboardTitle: "User Dashboard",
+        dashboardSubtitle: "Overview of your user management access",
+
+        noUsers: "No users found",
       },
 
-      common: { back: "Back" }
+      common: { back: "Back" },
+
+      activation: {
+        success: "Account Activated!",
+        successMessage: "Your account has been successfully verified and activated. You can now log in to the platform.",
+        afterActivation: "You can now return to the login page to access your account.",
+        backHome: "Go to Login Page",
+        // NOVAS CHAVES ADICIONADAS
+        error: "Activation Error",
+        errorMessage: "The activation link is invalid or expired. Please check your email or contact support.",
+      },
+
+      // NOVAS CHAVES ADICIONADAS
+      accessDenied: {
+        title: "Access Denied",
+        message: "You do not have the necessary permissions to view this page.",
+        backHome: "Go to Dashboard",
+      }
     },
 
     pt: {
@@ -440,7 +483,10 @@ export class TranslationService {
         manageOrganizations: "Gerir Organizações",
         manageOrganizationsDesc: "Criar e gerir organizações",
         manageRepresentatives: "Gerir Representantes",
-        manageRepresentativesDesc: "Criar e gerir representantes"
+        manageRepresentativesDesc: "Criar e gerir representantes",
+
+        addUserDesc: "Adicionar um novo utilizador ao sistema",
+        editUserDesc: "Editar detalhes e função de um utilizador existente",
       },
 
       roles: {
@@ -523,7 +569,6 @@ export class TranslationService {
         dashboardTitle: "Painel de Representante",
         dashboardSubtitle: "Resumo das tarefas atribuídas",
 
-        // NOVAS CHAVES ADICIONADAS
         create: "Criar Representante",
       },
 
@@ -572,7 +617,10 @@ export class TranslationService {
         namePlaceholder: "Nome da qualificação (ex: 'Operador de Grua')",
         nameHint: "O nome deve ter pelo menos duas palavras com um máximo de 150 caracteres",
         create: "Criar",
-        cancel: "Cancelar"
+        cancel: "Cancelar",
+
+        editTitle: "Editar Qualificação",
+        saveChanges: "Guardar Alterações",
       },
 
       manageStaffMembers: {
@@ -602,11 +650,13 @@ export class TranslationService {
         deactivate: "Desativar",
         reactivate: "Reativar",
 
-        // NOVAS CHAVES ADICIONADAS
         operationalWindow: "Janela Operacional",
         status: "Estado",
         create: "Criar Membro do Staff",
         cancel: "Cancelar",
+
+        editTitle: "Editar Membro do Staff",
+        saveChanges: "Guardar Alterações",
       },
 
       manageStorageAreas: {
@@ -634,9 +684,11 @@ export class TranslationService {
         delete: "Eliminar",
         cancel: "Cancelar",
 
-        // NOVAS CHAVES ADICIONADAS
         dockAssignments: "Atribuições de Docas",
         create: "Criar Área de Armazenamento",
+
+        editTitle: "Editar Área de Armazenamento",
+        saveChanges: "Guardar Alterações",
       },
 
       manageDocks: {
@@ -663,8 +715,10 @@ export class TranslationService {
         createTitle: "Criar Nova Doca",
         cancel: "Cancelar",
 
-        // NOVAS CHAVES ADICIONADAS
         create: "Criar Doca",
+
+        editTitle: "Editar Doca",
+        saveChanges: "Guardar Alterações",
       },
 
       manageUsers: {
@@ -682,7 +736,6 @@ export class TranslationService {
         createButton: "Criar Utilizador",
         cancel: "Cancelar",
 
-        // NOVAS CHAVES ADICIONADAS
         emailEmpty: "O email não pode estar vazio",
         selfModifyError: "Não pode modificar a sua própria função",
         serverError: "Ocorreu um erro no servidor",
@@ -690,9 +743,42 @@ export class TranslationService {
         createError: "Erro ao criar utilizador",
         updateSuccess: "Função do utilizador atualizada com sucesso",
         updateError: "Erro ao atualizar a função do utilizador",
+
+        editTitle: "Editar Utilizador",
+        editSubtitle: "Atualizar detalhes e função do utilizador",
+        searchPlaceholder: "Procurar utilizador...",
+        refresh: "Atualizar",
+        name: "Nome",
+        email: "Email",
+        role: "Função",
+        actions: "Ações",
+        edit: "Editar",
+        saveChanges: "Guardar Alterações",
+        addTitle: "Adicionar Novo Utilizador",
+        dashboardTitle: "Painel de Utilizador",
+        dashboardSubtitle: "Visão geral do seu acesso à gestão de utilizadores",
+
+        noUsers: "Nenhum utilizador encontrado",
       },
 
-      common: { back: "Voltar" }
+      common: { back: "Voltar" },
+
+      activation: {
+        success: "Conta Ativada!",
+        successMessage: "A sua conta foi verificada e ativada com sucesso. Já pode iniciar sessão na plataforma.",
+        afterActivation: "Pode agora regressar à página de início de sessão para aceder à sua conta.",
+        backHome: "Ir para a Página de Login",
+        // NOVAS CHAVES ADICIONADAS
+        error: "Erro de Ativação",
+        errorMessage: "O link de ativação é inválido ou expirou. Por favor, verifique o seu email ou contacte o suporte.",
+      },
+
+      // NOVAS CHAVES ADICIONADAS
+      accessDenied: {
+        title: "Acesso Negado",
+        message: "Não tem as permissões necessárias para visualizar esta página.",
+        backHome: "Ir para o Painel",
+      }
     }
 
   };

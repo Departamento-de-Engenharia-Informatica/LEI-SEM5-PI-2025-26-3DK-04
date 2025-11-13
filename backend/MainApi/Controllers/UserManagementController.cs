@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using DDDSample1.Domain.Authentication;
+using DDDSample1.Domain.Organizations;
 using DDDSample1.Domain.Shared;
 using Microsoft.AspNetCore.Authorization;
 
@@ -15,7 +17,7 @@ namespace DDDSample1.Controllers
         private readonly IUserRepository _repo;
         private readonly IUserActivationRepository _activationRepo;
         private readonly EmailService _emailService;
-
+        private readonly IRepresentativeRepository _repRepo;
         public UserManagementController(IUserRepository repo, IUserActivationRepository activationRepo, EmailService emailService)
         {
             _repo = repo;
@@ -45,7 +47,15 @@ namespace DDDSample1.Controllers
         public async Task<IActionResult> CreateUser([FromBody] CreateUserDTO dto)
         {
             Console.WriteLine($"[CreateUser] Email: {dto.Email}, Name: {dto.Name}, Role: {dto.Role}");
-
+            
+            var existingRep = await _repRepo.GetByEmailAsync(dto.Email);
+            if (existingRep != null)
+                return BadRequest(new { error = "A representative with this email already exists." });
+            
+            var existingUser = await _repo.GetByIdAsync(new UserID(dto.Email));
+            if (existingUser != null)
+                return BadRequest(new { error = "A user with this email already exists." });
+            
             var user = new User(dto.Email, dto.Name, dto.Picture, dto.Role, Status.Inactive);
             await _repo.AddAsync(user);
 
@@ -65,7 +75,10 @@ namespace DDDSample1.Controllers
             var user = await _repo.GetByIdAsync(new UserID(email));
             if (user == null)
                 return NotFound(new { error = "User not found" });
-
+            
+            if (dto.Role == Roles.Representative)
+                return BadRequest(new { error = "Cannot manually assign Representative role." });
+            
             user.SetRole(dto.Role);
             user.SetStatus(Status.Inactive);
             await _repo.UpdateAsync(user);
@@ -119,6 +132,26 @@ namespace DDDSample1.Controllers
 
             return Ok(new { message = "User deactivated" });
         }
+        [HttpGet("get")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await _repo.GetAllAsync();
+
+            if (users == null)
+                return NotFound(new { error = "No users found" });
+
+            var result = users.Select(u => new
+            {
+                email = u.Id.Value,
+                name = u.Name,
+                picture = u.Picture,
+                role = u.Role.ToString(),
+                status = u.Status.ToString()
+            });
+
+            return Ok(result);
+        }
+
     }
 
     public class CreateUserDTO
