@@ -13,6 +13,8 @@ import { ProjectManagerUI } from './ProjectManager/project-manager.ui';
 import { ManageUsers } from './admin/manageUsers/manage-users';
 import { ManageDocks } from './admin/ManageDocks/manageDocks';
 import { ManageStorageAreas } from './admin/manageStorageAreas/manageStorageAreas';
+import { ManageStaffMembers } from './admin/manageStaffMembers/manageStaffMembers';
+import { ManageQualifications } from './admin/manageQualifications/manageQualifications';
 
 import { ActivationSuccess } from './admin/activation-success/activation-success';
 export const routes: Routes = [
@@ -48,6 +50,18 @@ export const routes: Routes = [
     component: ManageStorageAreas,
     canActivate: [RoleGuard],
     data: { roles: ['admin', 'logisticsoperator'] }
+  },
+  {
+    path: 'admin/manage-staff-members',
+    component: ManageStaffMembers,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin', 'projectmanager'] }
+  },
+  {
+    path: 'admin/manage-qualifications',
+    component: ManageQualifications,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin'] }
   },
   {
     path: 'representative',

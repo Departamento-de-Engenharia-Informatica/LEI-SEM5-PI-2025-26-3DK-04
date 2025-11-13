@@ -1,4 +1,4 @@
-﻿import { Component } from '@angular/core';
+﻿import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslationService } from '../../translation.service';
@@ -31,12 +31,16 @@ interface StorageArea {
   templateUrl: './manageStorageAreas.html',
   styleUrls: ['./manageStorageAreas.scss']
 })
-export class ManageStorageAreas {
+export class ManageStorageAreas implements OnInit {
   storageAreas: StorageArea[] = [];
   docks: { id: string; name: string }[] = [];
 
   editing = false;
   editingId: string | null = null;
+
+  // Filtros
+  filterName: string = '';
+  allStorageAreas: StorageArea[] = []; // Para manter todas as storage areas antes de filtrar
 
   storageForm = {
     code: '',
@@ -50,31 +54,74 @@ export class ManageStorageAreas {
 
   dockAssignmentsMap: { [dockId: string]: { assigned: boolean; distance: number } } = {};
 
-  constructor(private adminService: AdminService, private translation: TranslationService) {}
+  constructor(
+    private adminService: AdminService, 
+    private translation: TranslationService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   t(key: string) {
     return this.translation.translate(key);
   }
 
   ngOnInit() {
+    console.log('ManageStorageAreas: ngOnInit called');
     this.loadDocks();
     this.loadStorageAreas();
   }
 
   loadStorageAreas() {
+    console.log('ManageStorageAreas: loadStorageAreas called');
     this.adminService.getAllStorageAreas().subscribe({
-      next: res => (this.storageAreas = res),
-      error: err => console.error('Error loading storage areas:', err)
+      next: res => {
+        console.log('ManageStorageAreas: received storage areas', res);
+        this.allStorageAreas = res;
+        this.storageAreas = res;
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        console.error('Error loading storage areas:', err);
+        const errorMessage = err?.error?.Message || err?.error?.message || 'Error loading storage areas';
+        alert('Error: ' + errorMessage);
+      }
     });
   }
 
+  applyFilter() {
+    if (!this.filterName) {
+      this.storageAreas = this.allStorageAreas;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    console.log('ManageStorageAreas: applying filter', this.filterName);
+    this.storageAreas = this.allStorageAreas.filter(sa => 
+      sa.designation.toLowerCase().includes(this.filterName.toLowerCase()) ||
+      sa.code.toLowerCase().includes(this.filterName.toLowerCase())
+    );
+    this.cdr.detectChanges();
+  }
+
+  clearFilter() {
+    this.filterName = '';
+    this.storageAreas = this.allStorageAreas;
+    this.cdr.detectChanges();
+  }
+
   loadDocks() {
+    console.log('ManageStorageAreas: loadDocks called');
     this.adminService.getAllDocks().subscribe({
       next: res => {
+        console.log('ManageStorageAreas: received docks', res);
         this.docks = res;
         this.initDockAssignmentsMap();
+        this.cdr.detectChanges();
       },
-      error: err => console.error('Error loading docks:', err)
+      error: err => {
+        console.error('Error loading docks:', err);
+        const errorMessage = err?.error?.Message || err?.error?.message || 'Error loading docks';
+        alert('Error: ' + errorMessage);
+      }
     });
   }
 
@@ -100,14 +147,30 @@ export class ManageStorageAreas {
     };
 
     if (this.editing && this.editingId) {
-      this.adminService.updateStorageArea(this.editingId, dto).subscribe(() => {
-        this.loadStorageAreas();
-        this.resetForm();
+      this.adminService.updateStorageArea(this.editingId, dto).subscribe({
+        next: () => {
+          alert('Storage area updated successfully!');
+          this.loadStorageAreas();
+          this.resetForm();
+        },
+        error: err => {
+          console.error('Error updating storage area:', err);
+          const errorMessage = err?.error?.Message || err?.error?.message || 'Error updating storage area';
+          alert('Error: ' + errorMessage);
+        }
       });
     } else {
-      this.adminService.createStorageArea(dto).subscribe(() => {
-        this.loadStorageAreas();
-        this.resetForm();
+      this.adminService.createStorageArea(dto).subscribe({
+        next: () => {
+          alert('Storage area created successfully!');
+          this.loadStorageAreas();
+          this.resetForm();
+        },
+        error: err => {
+          console.error('Error creating storage area:', err);
+          const errorMessage = err?.error?.Message || err?.error?.message || 'Error creating storage area';
+          alert('Error: ' + errorMessage);
+        }
       });
     }
   }
@@ -157,7 +220,17 @@ export class ManageStorageAreas {
 
   softDeleteStorageArea(id: string) {
     if (confirm('Are you sure?')) {
-      this.adminService.inactivateStorageArea(id).subscribe(() => this.loadStorageAreas());
+      this.adminService.inactivateStorageArea(id).subscribe({
+        next: () => {
+          alert('Storage area inactivated successfully!');
+          this.loadStorageAreas();
+        },
+        error: err => {
+          console.error('Error inactivating storage area:', err);
+          const errorMessage = err?.error?.Message || err?.error?.message || 'Error inactivating storage area';
+          alert('Error: ' + errorMessage);
+        }
+      });
     }
   }
 

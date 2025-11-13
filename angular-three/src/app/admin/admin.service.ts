@@ -14,6 +14,11 @@ export class AdminService {
   private vesselTypeBaseUrl = 'https://localhost:5001/api/VesselTypes';
 
   private storageAreaBaseUrl = 'https://localhost:5001/api/StorageArea';
+  
+  // STAFF MEMBERS management routes
+  private staffMembersBaseUrl = 'https://localhost:5001/api/StaffMembers';
+  private qualificationsBaseUrl = 'https://localhost:5001/api/Qualifications';
+
   constructor(private http: HttpClient, private auth: AuthService) {}
 
   /* ===============================
@@ -90,6 +95,77 @@ export class AdminService {
 
   inactivateStorageArea(id: string): Observable<any> {
     return this.http.patch(`${this.storageAreaBaseUrl}${id}/inactivate`, {});
+  }
+
+  /* ===============================
+          STAFF MEMBERS MANAGEMENT
+     =============================== */
+
+  getAllStaffMembers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.staffMembersBaseUrl}`);
+  }
+
+  getStaffMemberById(id: string): Observable<any> {
+    return this.http.get(`${this.staffMembersBaseUrl}/${id}`);
+  }
+
+  createStaffMember(dto: any): Observable<any> {
+    return this.http.post(`${this.staffMembersBaseUrl}`, dto);
+  }
+
+  updateStaffMember(id: string, dto: any): Observable<any> {
+    return this.http.put(`${this.staffMembersBaseUrl}/${id}`, dto);
+  }
+
+  deactivateStaffMember(id: string): Observable<any> {
+    return this.http.delete(`${this.staffMembersBaseUrl}/${id}`);
+  }
+
+  reactivateStaffMember(id: string): Observable<any> {
+    return this.http.put(`${this.staffMembersBaseUrl}/${id}/reactivate`, {});
+  }
+
+  addQualificationToStaff(staffId: string, qualificationId: string): Observable<any> {
+    return this.http.post(`${this.staffMembersBaseUrl}/${staffId}/qualifications`, {
+      QualificationId: qualificationId
+    });
+  }
+
+  removeQualificationFromStaff(staffId: string, qualificationId: string): Observable<any> {
+    return this.http.delete(`${this.staffMembersBaseUrl}/${staffId}/qualifications/${qualificationId}`);
+  }
+
+  searchStaffMembers(name?: string, status?: string, qualificationId?: string): Observable<any[]> {
+    let params = '';
+    if (name) params += `name=${name}&`;
+    if (status) params += `status=${status}&`;
+    if (qualificationId) params += `qualificationId=${qualificationId}&`;
+    
+    return this.http.get<any[]>(`${this.staffMembersBaseUrl}/search?${params}`);
+  }
+
+  /* ===============================
+          QUALIFICATIONS MANAGEMENT
+     =============================== */
+
+  getAllQualifications(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.qualificationsBaseUrl}`);
+  }
+
+  getQualificationById(id: string): Observable<any> {
+    return this.http.get(`${this.qualificationsBaseUrl}/${id}`);
+  }
+
+  createQualification(dto: any): Observable<any> {
+    return this.http.post(`${this.qualificationsBaseUrl}`, dto);
+  }
+
+  updateQualification(id: string, dto: any): Observable<any> {
+    return this.http.put(`${this.qualificationsBaseUrl}/${id}`, dto);
+  }
+
+  deleteQualification(id: string): Observable<any> {
+    return this.http.delete(`${this.qualificationsBaseUrl}/${id}`);
   }
 
 }

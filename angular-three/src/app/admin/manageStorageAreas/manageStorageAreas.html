@@ -5,6 +5,26 @@
     <!-- LIST OF STORAGE AREAS -->
     <div>
       <h2>{{ t('adminUI.manageStorageAreas.listTitle') }}</h2>
+      
+      <!-- FILTERS SECTION -->
+      <div class="filters-section">
+        <h3>{{ t('adminUI.manageStorageAreas.filters') }}</h3>
+        <div class="filter-group">
+          <label>{{ t('adminUI.manageStorageAreas.filterByName') }}</label>
+          <input 
+            type="text" 
+            [(ngModel)]="filterName" 
+            name="filterName"
+            placeholder="{{ t('adminUI.manageStorageAreas.filterByNamePlaceholder') }}"
+            (keyup.enter)="applyFilter()"
+          />
+        </div>
+        <div class="filter-buttons">
+          <button class="primary" (click)="applyFilter()">{{ t('adminUI.manageStorageAreas.applyFilter') }}</button>
+          <button class="secondary" (click)="clearFilter()">{{ t('adminUI.manageStorageAreas.clearFilter') }}</button>
+        </div>
+      </div>
+
       <button (click)="loadStorageAreas()">{{ t('adminUI.manageStorageAreas.refresh') }}</button>
 
       <table *ngIf="storageAreas.length > 0">

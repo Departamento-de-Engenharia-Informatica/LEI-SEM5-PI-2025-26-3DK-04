@@ -69,7 +69,13 @@ export class TranslationService {
           manageDocksDesc: "Add, edit, or remove docks",
 
           manageStorageAreas: "Manage Storage Areas",
-          manageStorageAreasDesc: "Create, edit or remove storage areas"
+          manageStorageAreasDesc: "Create, edit or remove storage areas",
+
+          manageStaffMembers: "Manage Staff Members",
+          manageStaffMembersDesc: "Create, edit, or manage staff members and their qualifications",
+
+          manageQualifications: "Manage Qualifications",
+          manageQualificationsDesc: "Create, edit, or delete qualifications for staff members"
         },
         manageUsers: {
           title: "User Management",
@@ -124,7 +130,12 @@ export class TranslationService {
             requiredName: "Name is required.",
             requiredLocation: "Location is required.",
             requiredVesselType: "Vessel Type is required."
-          }
+          },
+          filters: "Filters",
+          filterByName: "Filter by Name",
+          filterByNamePlaceholder: "Search by dock name...",
+          applyFilter: "Apply Filter",
+          clearFilter: "Clear Filter"
         },
         manageStorageAreas: {
           title: "Manage Storage Areas",
@@ -151,6 +162,69 @@ export class TranslationService {
           locationPlaceholder: "Location",
           capacityPlaceholder: "Maximum capacity in TEUs",
           dockAssignments: "Dock Assignments",
+          filters: "Filters",
+          filterByName: "Filter by Name/Code",
+          filterByNamePlaceholder: "Search by name or code...",
+          applyFilter: "Apply Filter",
+          clearFilter: "Clear Filter"
+        },
+        manageStaffMembers: {
+          title: "Manage Staff Members",
+          listTitle: "Staff Members List",
+          refresh: "Refresh",
+          noStaffMembers: "No staff members available.",
+          name: "Name",
+          email: "Email",
+          phone: "Phone Number",
+          operationalWindow: "Operational Window",
+          status: "Status",
+          qualifications: "Qualifications",
+          noQualifications: "No qualifications available. Please create qualifications first.",
+          actions: "Actions",
+          edit: "Edit",
+          deactivate: "Deactivate",
+          reactivate: "Reactivate",
+          createTitle: "Create New Staff Member",
+          editTitle: "Edit Staff Member",
+          startTime: "Start Time",
+          endTime: "End Time",
+          saveChanges: "Save changes",
+          create: "Create",
+          cancel: "Cancel",
+          namePlaceholder: "Staff member name",
+          emailPlaceholder: "email@example.com",
+          phonePlaceholder: "Phone number",
+          filters: "Filters",
+          filterByName: "Filter by Name",
+          filterByNamePlaceholder: "Search by name...",
+          filterByStatus: "Filter by Status",
+          filterByQualification: "Filter by Qualification",
+          allStatuses: "All Statuses",
+          allQualifications: "All Qualifications",
+          applyFilters: "Apply Filters",
+          clearFilters: "Clear Filters"
+        },
+        manageQualifications: {
+          title: "Manage Qualifications",
+          listTitle: "Qualifications List",
+          refresh: "Refresh",
+          noQualifications: "No qualifications available.",
+          name: "Name",
+          actions: "Actions",
+          edit: "Edit",
+          delete: "Delete",
+          createTitle: "Create New Qualification",
+          editTitle: "Edit Qualification",
+          saveChanges: "Save changes",
+          create: "Create",
+          cancel: "Cancel",
+          namePlaceholder: "Qualification name (e.g., 'Crane Operator')",
+          nameHint: "Name must be at least two words with a maximum of 150 characters",
+          filters: "Filters",
+          filterByName: "Filter by Name",
+          filterByNamePlaceholder: "Search by name...",
+          applyFilter: "Apply Filter",
+          clearFilter: "Clear Filter"
         },
         roles: {
           representative: "Representative",
@@ -320,7 +394,13 @@ export class TranslationService {
           manageDocksDesc: "Adicionar, editar ou remover docas",
 
           manageStorageAreas: "Gerir Áreas de Armazenamento",
-          manageStorageAreasDesc: "Criar, editar ou remover áreas de armazenamento"
+          manageStorageAreasDesc: "Criar, editar ou remover áreas de armazenamento",
+
+          manageStaffMembers: "Gerir Membros do Staff",
+          manageStaffMembersDesc: "Criar, editar ou gerir membros do staff e suas qualifica\u00e7\u00f5es",
+
+          manageQualifications: "Gerir Qualifica\u00e7\u00f5es",
+          manageQualificationsDesc: "Criar, editar ou eliminar qualifica\u00e7\u00f5es para membros do staff"
         },
         manageUsers: {
           title: "Gestão de Utilizadores",
@@ -375,7 +455,12 @@ export class TranslationService {
             requiredName: "O nome é obrigatório.",
             requiredLocation: "A localização é obrigatória.",
             requiredVesselType: "O tipo de embarcação é obrigatório."
-          }
+          },
+          filters: "Filtros",
+          filterByName: "Filtrar por Nome",
+          filterByNamePlaceholder: "Pesquisar por nome do cais...",
+          applyFilter: "Aplicar Filtro",
+          clearFilter: "Limpar Filtro"
         },
 // Inside the "pt" section
         manageStorageAreas: {
@@ -403,6 +488,64 @@ export class TranslationService {
           locationPlaceholder: "Localização",
           capacityPlaceholder: "Capacidade máxima em TEUs",
           dockAssignments: "Atribuições de Docas",
+          filters: "Filtros",
+          filterByName: "Filtrar por Nome/Código",
+          filterByNamePlaceholder: "Pesquisar por nome ou código...",
+          applyFilter: "Aplicar Filtro",
+          clearFilter: "Limpar Filtro"
+        },
+        manageStaffMembers: {
+          title: "Gerir Membros do Staff",
+          listTitle: "Lista de Membros do Staff",
+          refresh: "Atualizar",
+          noStaffMembers: "Não existem membros do staff.",
+          name: "Nome",
+          email: "Email",
+          phone: "Número de Telefone",
+          operationalWindow: "Janela Operacional",
+          status: "Estado",
+          qualifications: "Qualificações",
+          noQualifications: "Não existem qualificações disponíveis. Por favor, crie qualificações primeiro.",
+          actions: "Ações",
+          edit: "Editar",
+          deactivate: "Desativar",
+          reactivate: "Reativar",
+          createTitle: "Criar Novo Membro do Staff",
+          editTitle: "Editar Membro do Staff",
+          startTime: "Hora de Início",
+          endTime: "Hora de Fim",
+          saveChanges: "Guardar alterações",
+          create: "Criar",
+          cancel: "Cancelar",
+          namePlaceholder: "Nome do membro do staff",
+          emailPlaceholder: "email@exemplo.com",
+          phonePlaceholder: "N\u00famero de telefone",
+          filters: "Filtros",
+          filterByName: "Filtrar por Nome",
+          filterByNamePlaceholder: "Pesquisar por nome...",
+          filterByStatus: "Filtrar por Estado",
+          filterByQualification: "Filtrar por Qualifica\u00e7\u00e3o",
+          allStatuses: "Todos os Estados",
+          allQualifications: "Todas as Qualifica\u00e7\u00f5es",
+          applyFilters: "Aplicar Filtros",
+          clearFilters: "Limpar Filtros"
+        },
+        manageQualifications: {
+          title: "Gerir Qualificações",
+          listTitle: "Lista de Qualificações",
+          refresh: "Atualizar",
+          noQualifications: "Não existem qualificações.",
+          name: "Nome",
+          actions: "Ações",
+          edit: "Editar",
+          delete: "Eliminar",
+          createTitle: "Criar Nova Qualificação",
+          editTitle: "Editar Qualificação",
+          saveChanges: "Guardar alterações",
+          create: "Criar",
+          cancel: "Cancelar",
+          namePlaceholder: "Nome da qualificação (ex: 'Operador de Grua')",
+          nameHint: "O nome deve ter pelo menos duas palavras com um máximo de 150 caracteres"
         },
         roles: {
           representative: "Representante",

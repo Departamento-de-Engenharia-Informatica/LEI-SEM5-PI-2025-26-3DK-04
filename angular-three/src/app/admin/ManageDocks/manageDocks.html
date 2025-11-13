@@ -5,6 +5,26 @@
     <!-- LIST OF DOCKS -->
     <div>
       <h2>{{ t('adminUI.manageDocks.listTitle') }}</h2>
+      
+      <!-- FILTERS SECTION -->
+      <div class="filters-section">
+        <h3>{{ t('adminUI.manageDocks.filters') }}</h3>
+        <div class="filter-group">
+          <label>{{ t('adminUI.manageDocks.filterByName') }}</label>
+          <input 
+            type="text" 
+            [(ngModel)]="filterName" 
+            name="filterName"
+            placeholder="{{ t('adminUI.manageDocks.filterByNamePlaceholder') }}"
+            (keyup.enter)="applyFilter()"
+          />
+        </div>
+        <div class="filter-buttons">
+          <button class="primary" (click)="applyFilter()">{{ t('adminUI.manageDocks.applyFilter') }}</button>
+          <button class="secondary" (click)="clearFilter()">{{ t('adminUI.manageDocks.clearFilter') }}</button>
+        </div>
+      </div>
+
       <button (click)="loadDocks()">{{ t('adminUI.manageDocks.refresh') }}</button>
 
       <table *ngIf="docks.length > 0">
