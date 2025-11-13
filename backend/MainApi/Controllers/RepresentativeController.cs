@@ -103,5 +103,20 @@ namespace DDDSample1.Controllers
 
             return Ok(rep);
         }
+        
+        [HttpGet("active")]
+        public async Task<ActionResult<IEnumerable<RepresentativeDto>>> GetActiveRepresentatives()
+        {
+            var reps = await _service.GetActiveAsync();
+            return Ok(reps);
+        }
+
+        [HttpGet("inactive")]
+        public async Task<ActionResult<IEnumerable<RepresentativeDto>>> GetInactiveRepresentatives()
+        {
+            var reps = await _service.GetInactiveAsync();
+            return Ok(reps);
+        }
+
     }
 }

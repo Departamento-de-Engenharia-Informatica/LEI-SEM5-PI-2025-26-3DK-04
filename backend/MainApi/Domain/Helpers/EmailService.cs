@@ -3,8 +3,8 @@ using System.Net.Mail;
 
 public class EmailService
 {
-    private readonly string _from = "gmail";
-    private readonly string _password = "password";
+    private readonly string _from = "bauleluis2@gmail.com";
+    private readonly string _password = "edcw nmiw gqsf ycpm";
 
     public void SendActivationEmail(string toEmail, string activationLink)
     {

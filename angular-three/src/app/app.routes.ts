@@ -17,6 +17,12 @@ import { ManageStaffMembers } from './admin/manageStaffMembers/manageStaffMember
 import { ManageQualifications } from './admin/manageQualifications/manageQualifications';
 
 import { ActivationSuccess } from './admin/activation-success/activation-success';
+import { ManageOrganizations } from './admin/manage-organizations/manage-organizations';
+import { ManageRepresentatives } from './admin/manage-representatives/manage-representatives';
+import { ActivateRepresentative } from './admin/manage-representatives/activate-representative/activate-representative';
+import { DeactivateRepresentative } from './admin/manage-representatives/deactivate-representative/deactivate-representative';
+import { EditRepresentative } from './admin/manage-representatives/edit-representative/edit-representative';
+import { AddRepresentative } from './admin/manage-representatives/add-representative/add-representative';
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'cube', component: Cube },
@@ -39,6 +45,45 @@ export const routes: Routes = [
     canActivate: [RoleGuard],
     data: { roles: ['admin'] }
   },
+
+  {
+    path: 'admin/manage-organizations',
+    component: ManageOrganizations,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin'] }
+  },
+
+  {
+    path: 'admin/manage-representatives',
+    component: ManageRepresentatives,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin'] }
+  },
+  {
+    path: 'admin/manage-representatives/add-representative',
+    component: AddRepresentative,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin'] }
+  },
+  {
+    path: 'admin/manage-representatives/edit-representative',
+    component: EditRepresentative,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin'] }
+  },
+  {
+    path: 'admin/manage-representatives/deactivate-representative',
+    component: DeactivateRepresentative,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin'] }
+  },
+  {
+    path: 'admin/manage-representatives/activate-representative',
+    component: ActivateRepresentative,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin'] }
+  },
+
   {
     path: 'admin/manage-docks',
     component: ManageDocks,

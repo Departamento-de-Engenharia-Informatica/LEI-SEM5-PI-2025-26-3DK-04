@@ -147,6 +147,19 @@ namespace DDDSample1.Domain.Organizations
             var reps = await _repo.GetAllAsync();
             return reps.Select(ToDto).ToList();
         }
+        public async Task<List<RepresentativeDto>> GetActiveAsync()
+        {
+            var reps = await _repo.GetAllAsync();
+            var active = reps.Where(r => r.Status == RepresentativeStatus.Active).ToList();
+            return active.Select(ToDto).ToList();
+        }
+
+        public async Task<List<RepresentativeDto>> GetInactiveAsync()
+        {
+            var reps = await _repo.GetAllAsync();
+            var inactive = reps.Where(r => r.Status == RepresentativeStatus.Inactive).ToList();
+            return inactive.Select(ToDto).ToList();
+        }
 
         public async Task<RepresentativeDto> GetByIdAsync(string id)
         {
