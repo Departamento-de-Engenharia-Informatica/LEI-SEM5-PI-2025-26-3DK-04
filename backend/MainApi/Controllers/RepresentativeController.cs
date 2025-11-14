@@ -117,6 +117,26 @@ namespace DDDSample1.Controllers
             var reps = await _service.GetInactiveAsync();
             return Ok(reps);
         }
+        
+        [HttpGet("check-email/{email}")]
+        public async Task<ActionResult<bool>> CheckEmail(string email)
+        {
+            var exists = await _service.EmailExistsAsync(email);
+            return Ok(exists);
+        }
 
+        [HttpGet("check-citizenid/{cid}")]
+        public async Task<ActionResult<bool>> CheckCitizenId(string cid)
+        {
+            var exists = await _service.CitizenIdExistsAsync(cid);
+            return Ok(exists);
+        }
+
+        [HttpGet("check-phone/{phone}")]
+        public async Task<ActionResult<bool>> CheckPhone(string phone)
+        {
+            var exists = await _service.PhoneExistsAsync(phone);
+            return Ok(exists);
+        }
     }
 }

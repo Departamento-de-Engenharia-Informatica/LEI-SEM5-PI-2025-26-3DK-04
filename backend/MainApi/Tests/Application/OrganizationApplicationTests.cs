@@ -41,9 +41,9 @@ private readonly List<Organization> _items = new();
             return Task.FromResult(found);
         }
 
-        public Task<Organization> GetByTaxNumberAsync(string taxNumber)
+        public Task<bool> GetByTaxNumberAsync(string taxNumber)
         {
-            var found = _items.FirstOrDefault(o => o.TaxNumber == taxNumber);
+            var found = _items.Any(o => o.TaxNumber == taxNumber);
             return Task.FromResult(found);
         }
 
@@ -102,6 +102,21 @@ private readonly List<Organization> _items = new();
         {
             _items.Remove(rep);
             return Task.CompletedTask;
+        }
+
+        public Task<Representative> GetRepresentativeByEmailAsync(string email)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Representative> GetRepresentativeByCitizenCardAsync(string citizenCard)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Representative> GetRepresentativeByPhoneAsync(string phone)
+        {
+            throw new NotImplementedException();
         }
     }
 

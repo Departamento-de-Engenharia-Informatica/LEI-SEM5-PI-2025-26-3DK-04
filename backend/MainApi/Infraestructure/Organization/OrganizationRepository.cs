@@ -19,9 +19,9 @@ namespace DDDSample1.Infrastructure.Organizations
             return await _objs.AnyAsync(o => o.LegalName == legalName);
         }
         
-        public Task<Organization> GetByTaxNumberAsync(string taxNumber)
+        public async Task<bool> GetByTaxNumberAsync(string taxNumber)
         {
-            throw new System.NotImplementedException();
+            return await _objs.AnyAsync(o => o.TaxNumber == taxNumber);
         }
 
         public async Task<List<Organization>> GetAllAsync()

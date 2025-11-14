@@ -1,15 +1,24 @@
 ﻿<section class="add-user">
   <div class="container">
     <h1>{{ t('manageUsers.addTitle') }}</h1>
-    <form (ngSubmit)="createUser()">
+
+    <form (ngSubmit)="createUser()" novalidate>
       <div class="form-group">
         <label>{{ t('manageUsers.email') }}</label>
-        <input [(ngModel)]="newUser.email" name="email" type="email" required />
+        <input
+          [(ngModel)]="newUser.email"
+          name="email"
+          type="email"
+          required
+          (blur)="validateEmail()"
+        />
+        <div class="field-error" *ngIf="errors.email">{{ errors.email }}</div>
       </div>
 
       <div class="form-group">
         <label>{{ t('manageUsers.name') }}</label>
         <input [(ngModel)]="newUser.name" name="name" required />
+        <div class="field-error" *ngIf="errors.name">{{ errors.name }}</div>
       </div>
 
       <div class="form-group">
@@ -20,6 +29,9 @@
           <option value="ProjectManager">{{ t('roles.projectManager') }}</option>
         </select>
       </div>
+
+      <div class="message success" *ngIf="messageSuccess">{{ messageSuccess }}</div>
+      <div class="message error" *ngIf="messageError">{{ messageError }}</div>
 
       <div class="form-buttons">
         <button type="submit">{{ t('manageUsers.createButton') }}</button>

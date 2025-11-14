@@ -195,6 +195,23 @@ namespace DDDSample1.Domain.Organizations
             var rep = await _repo.GetByIdAsync(new RepresentativeId(id));
             return rep == null ? null : ToDto(rep);
         }
+        public async Task<bool> EmailExistsAsync(string email)
+        {
+            var rep = await _repo.GetRepresentativeByEmailAsync(email);
+            return rep != null;
+        }
+
+        public async Task<bool> CitizenIdExistsAsync(string cid)
+        {
+            var rep = await _repo.GetRepresentativeByCitizenCardAsync(cid);
+            return rep != null;
+        }
+
+        public async Task<bool> PhoneExistsAsync(string phone)
+        {
+            var rep = await _repo.GetRepresentativeByPhoneAsync(phone);
+            return rep != null;
+        }
 
         // ------------------------------------------------------------------------------------
         //                                  DTO

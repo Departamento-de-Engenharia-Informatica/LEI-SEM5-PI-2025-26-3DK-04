@@ -31,7 +31,10 @@
 
     <p *ngIf="filteredUsers.length === 0">{{ t('manageUsers.noUsers') }}</p>
 
-    <form *ngIf="userForm" (ngSubmit)="saveChanges()">
+    <div class="message success" *ngIf="messageSuccess">{{ messageSuccess }}</div>
+    <div class="message error" *ngIf="messageError">{{ messageError }}</div>
+
+    <form *ngIf="userForm" (ngSubmit)="saveChanges()" novalidate>
       <div class="form-group">
         <label>{{ t('manageUsers.name') }}</label>
         <input [(ngModel)]="userForm.name" name="name" required />

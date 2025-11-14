@@ -76,7 +76,19 @@ namespace DDDSample1.Domain.Organizations
             return org == null ? null : ToDto(org);
         }
 
-
+        
+        
+        public async Task<bool> LegalNameExistsAsync(string legalName)
+        {
+            var org = await _repo.ExistsWithLegalNameAsync(legalName);
+            return org != null;
+        }
+        public async Task<bool> TaxNumberExistsAsync(string taxNumber)
+        {
+            var org = await _repo.GetByTaxNumberAsync(taxNumber);
+            return org != null;
+        }
+        
         private static OrganizationDto ToDto(Organization org)
         {
             return new OrganizationDto

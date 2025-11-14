@@ -72,5 +72,20 @@ namespace DDDSample1.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
+        
+        
+        // GET: api/Organizations/check-legalname/{name}
+        [HttpGet("check-legalname/{name}")]
+        public async Task<ActionResult<bool>> CheckLegalName(string name)
+        {
+            var exists = await _service.LegalNameExistsAsync(name);
+            return Ok(exists);
+        }
+        [HttpGet("check-taxnumber")]
+        public async Task<ActionResult<bool>> CheckTaxNumber(string taxNumber)
+        {
+            var exists = await _service.TaxNumberExistsAsync(taxNumber);
+            return Ok(exists);
+        }
     }
 }
