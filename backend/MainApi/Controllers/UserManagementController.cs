@@ -17,7 +17,6 @@ namespace DDDSample1.Controllers
         private readonly IUserRepository _repo;
         private readonly IUserActivationRepository _activationRepo;
         private readonly EmailService _emailService;
-        private readonly IRepresentativeRepository _repRepo;
         public UserManagementController(IUserRepository repo, IUserActivationRepository activationRepo, EmailService emailService)
         {
             _repo = repo;
@@ -48,9 +47,6 @@ namespace DDDSample1.Controllers
         {
             Console.WriteLine($"[CreateUser] Email: {dto.Email}, Name: {dto.Name}, Role: {dto.Role}");
             
-            var existingRep = await _repRepo.GetByEmailAsync(dto.Email);
-            if (existingRep != null)
-                return BadRequest(new { error = "A representative with this email already exists." });
             
             var existingUser = await _repo.GetByIdAsync(new UserID(dto.Email));
             if (existingUser != null)

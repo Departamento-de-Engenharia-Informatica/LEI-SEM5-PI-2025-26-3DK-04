@@ -49,11 +49,11 @@ export class EditUser implements OnInit {
         const loggedEmail = this.auth.email; // AuthService deve guardar o email do login
 
         this.users = (users || []).filter(u =>
-          u.role !== 'Representative' &&
           u.role !== 'NoRole' &&
           u.role !== 'Unknown' &&
           u.email !== loggedEmail &&
-          u.status !== 'Inactive'
+          u.status !== 'Inactive' &&
+          u.role !== 'Admin'
         );
 
         this.filteredUsers = [...this.users];
