@@ -1,0 +1,45 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_TOP_DOWN()
+
+title Level 2 - Logical View
+
+interface admin  as "Administrator UI"
+interface agent   as "Shipping Agent Representative UI"
+interface officer as "Port Authority Officer UI"
+interface operator as "Logistics Operator UI"
+
+' Interface externa
+interface "UI" as webui_interface
+interface "Rest API" as restapi_interface
+interface "IAM" as iam_interface
+
+System_Boundary(pms, "Port Management System") {
+
+  ' Interfaces internas
+  interface "BackendAPI" as backend_interface
+  interface "PlanningAPI" as planning_interface
+
+  Container(gui, "Frontend (GUI)")
+  Container(api, "Backend App", ".NET")
+  Container(planning, "Planning Service", "Service")
+  
+  ' Ligação das interfaces aos containers
+  gui -up- webui_interface
+  gui -down-( backend_interface
+  backend_interface )-up- api
+  planning_interface )-up- gui
+  backend_interface )-down- planning
+  iam_interface )- gui: Authentication/Authorization
+  iam_interface )- api: Authentication/Authorization
+}
+
+agent -d-( webui_interface : Uses
+officer -d-( webui_interface : Uses
+operator -d-( webui_interface : Uses
+admin -d-( webui_interface : Uses
+
+planning_interface -d- planning
+restapi_interface )-d- api
+
+@enduml

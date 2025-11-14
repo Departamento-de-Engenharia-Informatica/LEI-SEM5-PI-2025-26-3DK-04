@@ -169,6 +169,7 @@ namespace DDDSample1
             services.AddTransient<PhysicalResourceService>();
 
             services.AddTransient<IUserRepository,UserRepository>();
+            services.AddTransient<UserService>();
             
             services.AddTransient<GoogleAuthService>();
 

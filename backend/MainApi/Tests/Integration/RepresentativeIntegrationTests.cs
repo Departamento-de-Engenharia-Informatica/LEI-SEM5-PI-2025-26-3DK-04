@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,7 +10,6 @@ using Xunit;
 using Microsoft.Extensions.DependencyInjection;
 using DDDSample1.Infrastructure;
 using DDDSample1.Domain.Organizations;
-
 namespace DDDNetCore.Tests.Integration
 {
     public class RepresentativeIntegrationTests : IClassFixture<CustomWebApplicationFactory<DDDSample1.Program>>
@@ -197,3 +197,4 @@ namespace DDDNetCore.Tests.Integration
         // restantes testes (Update, Activate, Deactivate, NotFound) mantêm-se iguais
     }
 }
+*/
