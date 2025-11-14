@@ -53,7 +53,9 @@ export class EditUser implements OnInit {
           u.role !== 'Unknown' &&
           u.email !== loggedEmail &&
           u.status !== 'Inactive' &&
-          u.role !== 'Admin'
+          u.role !== 'Admin' &&
+          u.role !== 'Representative'
+
         );
 
         this.filteredUsers = [...this.users];

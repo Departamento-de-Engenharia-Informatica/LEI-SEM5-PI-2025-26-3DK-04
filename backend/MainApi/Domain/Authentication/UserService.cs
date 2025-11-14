@@ -2,21 +2,25 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using DDDSample1.Domain.Organizations;
 using DDDSample1.Domain.Shared;
 
 namespace DDDSample1.Domain.Authentication
 {
     public class UserService
     {
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IUserRepository _repo;
         private readonly IUserActivationRepository _activationRepo;
         private readonly EmailService _emailService;
 
         public UserService(
+            IUnitOfWork unitOfWork,
             IUserRepository repo,
             IUserActivationRepository activationRepo,
             EmailService emailService)
         {
+            _unitOfWork = unitOfWork;
             _repo = repo;
             _activationRepo = activationRepo;
             _emailService = emailService;
@@ -76,7 +80,8 @@ namespace DDDSample1.Domain.Authentication
 
             var link = $"https://localhost:5001/api/UserManagement/activate?token={activation.Token}";
             _emailService.SendActivationEmail(dto.Email, link);
-
+            await _unitOfWork.CommitAsync();
+            
             return (true, null);
         }
 
@@ -96,10 +101,11 @@ namespace DDDSample1.Domain.Authentication
 
             var activation = new UserActivation(user.Id);
             await _activationRepo.AddAsync(activation);
-
+            
             var link = $"https://localhost:5001/api/UserManagement/activate?token={activation.Token}";
             _emailService.SendActivationEmail(email, link);
-
+            await _unitOfWork.CommitAsync();
+            
             return (true, null);
         }
 
@@ -118,7 +124,8 @@ namespace DDDSample1.Domain.Authentication
             user.Activate();
             await _repo.UpdateAsync(user);
             await _activationRepo.DeleteAsync(activation);
-
+            await _unitOfWork.CommitAsync();
+            
             return "http://localhost:4200/activate?status=success";
         }
 
@@ -131,6 +138,8 @@ namespace DDDSample1.Domain.Authentication
 
             user.Deactivate();
             await _repo.UpdateAsync(user);
+            await _unitOfWork.CommitAsync();
+            
             return (true, null);
         }
 
@@ -152,5 +161,35 @@ namespace DDDSample1.Domain.Authentication
                 Status = u.Status.ToString()
             };
         }
+        
+        public async Task<(bool Success, string Error)> CreateRepresentativeUserAsync(string email, string name)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return (false, "Invalid email.");
+
+            // 2. Criar User com role Representative e status Inactive
+            var user = new User(
+                email: email,
+                name: name,
+                picture: " ",   // reps não têm picture nesta fase
+                role: Roles.Representative,
+                status: Status.Inactive
+            );
+
+            await _repo.AddAsync(user);
+
+            // 3. Criar token de ativação
+            var activation = new UserActivation(user.Id);
+            await _activationRepo.AddAsync(activation);
+            await _unitOfWork.CommitAsync();
+            
+            // 4. Enviar email de ativação
+            var link = $"https://localhost:5001/api/UserManagement/activate?token={activation.Token}";
+            _emailService.SendActivationEmail(email, link);
+
+            return (true, null);
+        }
+
+
     }
 }
