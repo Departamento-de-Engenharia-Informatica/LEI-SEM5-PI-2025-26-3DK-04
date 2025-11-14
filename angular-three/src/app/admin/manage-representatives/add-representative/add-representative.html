@@ -3,7 +3,6 @@
     <h1>{{ t('manageRepresentatives.createTitle') }}</h1>
     <p>{{ t('manageRepresentatives.createSubtitle') }}</p>
 
-    <!-- Lista de organizações -->
     <div class="list-controls">
       <input
         placeholder="{{ t('manageRepresentatives.searchOrganizationPlaceholder') }}"
@@ -30,7 +29,7 @@
 
     <p *ngIf="filteredOrganizations.length === 0">{{ t('manageRepresentatives.noOrganizations') }}</p>
 
-    <form (ngSubmit)="saveRepresentative()">
+    <form #repNgForm="ngForm" (ngSubmit)="saveRepresentative()" novalidate>
       <div class="form-group">
         <label>{{ t('manageRepresentatives.name') }}</label>
         <input [(ngModel)]="repForm.name" name="name" required />
@@ -38,36 +37,44 @@
 
       <div class="form-group">
         <label>{{ t('manageRepresentatives.citizenId') }}</label>
-        <input [(ngModel)]="repForm.citizenId" name="citizenId" required />
+        <input [(ngModel)]="repForm.citizenId" name="citizenId" required (blur)="validateCitizenId()" />
+        <div class="field-error" *ngIf="errors.citizenId">{{ errors.citizenId }}</div>
       </div>
 
       <div class="form-group">
         <label>{{ t('manageRepresentatives.nationality') }}</label>
-        <input [(ngModel)]="repForm.nationality" name="nationality" required />
+        <select [(ngModel)]="repForm.nationality" name="nationality">
+          <option *ngFor="let n of nationalities" [value]="n">{{ n }}</option>
+        </select>
       </div>
 
       <div class="form-group">
         <label>{{ t('manageRepresentatives.email') }}</label>
-        <input [(ngModel)]="repForm.email" name="email" type="email" required />
+        <input [(ngModel)]="repForm.email" name="email" type="email" required (blur)="validateEmail()" />
+        <div class="field-error" *ngIf="errors.email">{{ errors.email }}</div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group phone-group">
         <label>{{ t('manageRepresentatives.phone') }}</label>
-        <input [(ngModel)]="repForm.phoneNumber" name="phoneNumber" required />
+        <div class="phone-with-country">
+          <select [(ngModel)]="repForm.phoneCountry" name="phoneCountry">
+            <option *ngFor="let c of countryCodes" [ngValue]="c">{{ c.flag }} {{ c.name }} ({{ c.code }})</option>
+          </select>
+          <input [(ngModel)]="repForm.phoneNumber" name="phoneNumber" required (blur)="validatePhone()" />
+        </div>
+        <div class="field-error" *ngIf="errors.phoneNumber">{{ errors.phoneNumber }}</div>
       </div>
 
       <div class="form-group">
         <label>{{ t('manageRepresentatives.organizationId') }}</label>
-        <input
-          [(ngModel)]="repForm.organizationId"
-          name="organizationId"
-          placeholder="Organization ID"
-          required
-        />
+        <input [(ngModel)]="repForm.organizationId" name="organizationId" placeholder="Organization ID" required />
       </div>
+
+
 
       <div class="form-buttons">
         <button type="submit">{{ t('manageRepresentatives.create') }}</button>
+        <button type="button" class="secondary" (click)="clearForm()">{{ t('manageRepresentatives.cancel') }}</button>
       </div>
     </form>
 

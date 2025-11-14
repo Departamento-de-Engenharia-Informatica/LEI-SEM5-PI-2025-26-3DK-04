@@ -68,6 +68,22 @@ namespace DDDSample1.Infrastructure.Organizations
             _objs.Remove(rep);
             await _context.SaveChangesAsync();
         }
-        
+
+        public async Task<Representative> GetRepresentativeByEmailAsync(string email)
+        {
+            return await GetByEmailAsync(email);
+        }
+
+        public async Task<Representative> GetRepresentativeByCitizenCardAsync(string citizenCard)
+        {
+            return await _objs
+                .FirstOrDefaultAsync(r => r.Id.AsString() == citizenCard);
+        }
+
+        public async Task<Representative> GetRepresentativeByPhoneAsync(string phone)
+        {
+            return await _objs
+                .FirstOrDefaultAsync(r => r.PhoneNumber == phone);
+        }
     }
 }

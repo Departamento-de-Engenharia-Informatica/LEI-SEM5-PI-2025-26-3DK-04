@@ -1,15 +1,9 @@
 ﻿<section class="edit-representative">
   <div class="container">
     <h1>{{ t('manageRepresentatives.editTitle') }}</h1>
-    <p>{{ t('manageRepresentatives.editSubtitle') }}</p>
 
-    <!-- Controles da lista -->
     <div class="list-controls">
-      <input
-        placeholder="{{ t('manageRepresentatives.searchPlaceholder') }}"
-        [(ngModel)]="searchTerm"
-        (input)="applyFilter()"
-      />
+      <input placeholder="{{ t('manageRepresentatives.searchPlaceholder') }}" [(ngModel)]="searchTerm" (input)="applyFilter()" />
       <button (click)="loadRepresentatives()">{{ t('manageRepresentatives.refresh') }}</button>
     </div>
 
@@ -18,52 +12,59 @@
       <tr>
         <th>{{ t('manageRepresentatives.name') }}</th>
         <th>{{ t('manageRepresentatives.email') }}</th>
-        <th>{{ t('manageRepresentatives.citizenId') }}</th>
+        <th>{{ t('manageRepresentatives.phone') }}</th>
+        <th>{{ t('manageRepresentatives.nationality') }}</th>
+        <th>{{ t('manageRepresentatives.actions') }}</th>
       </tr>
       </thead>
       <tbody>
       <tr *ngFor="let r of filteredRepresentatives">
         <td>{{ r.name }}</td>
         <td>{{ r.email }}</td>
-        <td>{{ r.citizenId ?? r.id }}</td>
+        <td>{{ r.phoneNumber }}</td>
+        <td>{{ r.nationality }}</td>
+        <td>
+          <button (click)="selectRepresentative(r)">{{ t('manageRepresentatives.edit') }}</button>
+        </td>
       </tr>
       </tbody>
     </table>
 
     <p *ngIf="filteredRepresentatives.length === 0">{{ t('manageRepresentatives.noRepresentatives') }}</p>
 
-    <!-- Seleção do representante -->
-    <div class="select-edit">
-      <label>{{ t('manageRepresentatives.enterId') }}</label>
-      <input [(ngModel)]="selectedId" placeholder="Citizen ID" />
-      <button (click)="selectRepresentative()">{{ t('manageRepresentatives.loadRepresentative') }}</button>
-    </div>
-
-    <!-- Formulário de edição -->
-    <form *ngIf="repForm" (ngSubmit)="saveChanges()">
+    <form #repNgForm="ngForm" *ngIf="repForm" (ngSubmit)="saveRepresentative()" novalidate>
       <div class="form-group">
         <label>{{ t('manageRepresentatives.name') }}</label>
         <input [(ngModel)]="repForm.name" name="name" required />
       </div>
 
       <div class="form-group">
-        <label>{{ t('manageRepresentatives.nationality') }}</label>
-        <input [(ngModel)]="repForm.nationality" name="nationality" required />
-      </div>
-
-      <div class="form-group">
         <label>{{ t('manageRepresentatives.email') }}</label>
-        <input [(ngModel)]="repForm.email" name="email" type="email" required />
+        <input type="email" [(ngModel)]="repForm.email" name="email" required />
+        <div class="error" *ngIf="errors.email">{{ errors.email }}</div>
       </div>
 
       <div class="form-group">
         <label>{{ t('manageRepresentatives.phone') }}</label>
+        <select [(ngModel)]="repForm.phoneCountry" name="phoneCountry">
+          <option *ngFor="let c of countryCodes" [ngValue]="c">{{ c.flag }} {{ c.name }} ({{ c.code }})</option>
+        </select>
         <input [(ngModel)]="repForm.phoneNumber" name="phoneNumber" required />
+        <div class="error" *ngIf="errors.phoneNumber">{{ errors.phoneNumber }}</div>
       </div>
+
+      <div class="form-group">
+        <label>{{ t('manageRepresentatives.nationality') }}</label>
+        <select [(ngModel)]="repForm.nationality" name="nationality">
+          <option *ngFor="let n of nationalities" [value]="n">{{ n }}</option>
+        </select>
+      </div>
+
+
 
       <div class="form-buttons">
         <button type="submit">{{ t('manageRepresentatives.saveChanges') }}</button>
-        <button type="button" class="secondary" (click)="cancelEdit()">{{ t('manageRepresentatives.cancel') }}</button>
+        <button type="button" class="secondary" (click)="clearForm()">{{ t('manageRepresentatives.cancel') }}</button>
       </div>
     </form>
 

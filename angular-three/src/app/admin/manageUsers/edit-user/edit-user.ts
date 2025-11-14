@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AdminService } from '../../admin.service';
 import { TranslationService } from '../../../translation.service';
 import { AuthService } from '../../../auth.service';
+
 @Component({
   selector: 'app-edit-user',
   standalone: true,
@@ -17,7 +18,8 @@ export class EditUser implements OnInit {
   filteredUsers: any[] = [];
   searchTerm = '';
   userForm: any = null;
-  message = '';
+  messageSuccess = '';
+  messageError = '';
   currentLang = 'en';
 
   constructor(
@@ -46,7 +48,7 @@ export class EditUser implements OnInit {
   loadUsers() {
     this.adminService.getAllUsers().subscribe({
       next: users => {
-        const loggedEmail = this.auth.email; // AuthService deve guardar o email do login
+        const loggedEmail = this.auth.email;
 
         this.users = (users || []).filter(u =>
           u.role !== 'NoRole' &&
@@ -55,18 +57,16 @@ export class EditUser implements OnInit {
           u.status !== 'Inactive' &&
           u.role !== 'Admin' &&
           u.role !== 'Representative'
-
         );
 
         this.filteredUsers = [...this.users];
       },
       error: err => {
         console.error('Load users error', err);
-        this.message = this.t('manageUsers.loadError');
+        this.messageError = this.t('manageUsers.loadError');
       }
     });
   }
-
 
   applyFilter() {
     const q = (this.searchTerm || '').toLowerCase();
@@ -77,26 +77,34 @@ export class EditUser implements OnInit {
   }
 
   selectUser(user: any) {
+    // fill userForm with the selected user for editing
     this.userForm = { ...user };
+    this.messageSuccess = '';
+    this.messageError = '';
   }
 
   saveChanges() {
+    if (!this.userForm) return;
+    // call updateUserRole or generic update path if exists
     this.adminService.updateUserRole(this.userForm.email, this.userForm.role).subscribe({
       next: () => {
-        this.message = this.t('manageUsers.updateSuccess');
+        // show message that activation email was sent (as requested)
+        this.messageSuccess = this.t('manageUsers.updateSuccessActivation') || 'User updated; activation email was sent successfully.';
+        // clear form fields
         this.userForm = null;
         this.loadUsers();
       },
       error: err => {
         console.error(err);
-        this.message = this.t('manageUsers.updateError');
+        this.messageError = this.t('manageUsers.updateError') || 'Error updating user.';
       }
     });
   }
 
-
   cancelEdit() {
     this.userForm = null;
+    this.messageError = '';
+    this.messageSuccess = '';
   }
 
   goBack() {

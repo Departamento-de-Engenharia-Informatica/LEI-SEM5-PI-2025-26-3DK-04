@@ -7,7 +7,7 @@ namespace DDDSample1.Domain.Organizations
     public interface IOrganizationRepository : IRepository<Organization, OrganizationId>
     {
         // Método para procurar por número fiscal (único)
-        Task<Organization> GetByTaxNumberAsync(string taxNumber);
+        Task<bool> GetByTaxNumberAsync(string taxNumber);
 
         // Método para listar todas as organizações
         Task<List<Organization>> GetAllAsync();

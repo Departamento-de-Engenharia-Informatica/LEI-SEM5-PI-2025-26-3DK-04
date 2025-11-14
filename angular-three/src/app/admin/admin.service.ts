@@ -2,26 +2,23 @@
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { AuthService } from '../auth.service';
+import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
-  // USER management routes
   private userBaseUrl = 'https://localhost:5001/api/UserManagement';
+
   private baseUrl = 'https://localhost:5001/api';
   // DOCK management routes
   private dockBaseUrl = 'https://localhost:5001/api/Dock';
   private vesselTypeBaseUrl = 'https://localhost:5001/api/VesselTypes';
 
-  // STORAGE AREA management
   private storageAreaBaseUrl = 'https://localhost:5001/api/StorageArea';
 
-  // STAFF MEMBERS management routes
   private staffMembersBaseUrl = 'https://localhost:5001/api/StaffMembers';
   private qualificationsBaseUrl = 'https://localhost:5001/api/Qualifications';
-  // ORGANIZATION management
-  private organizationBaseUrl = 'https://localhost:5001/api/Organizations';
 
-  // REPRESENTATIVE management
+  private organizationBaseUrl = 'https://localhost:5001/api/Organizations';
   private representativeBaseUrl = 'https://localhost:5001/api/Representatives';
 
   constructor(private http: HttpClient, private auth: AuthService) {}
@@ -41,9 +38,11 @@ export class AdminService {
   createUser(user: any): Observable<any> {
     return this.http.post(`${this.userBaseUrl}/create`, user);
   }
+
   getAllUsers(): Observable<any[]> {
     return this.http.get<any[]>(`${this.userBaseUrl}/get`);
   }
+
   updateUserRole(email: string, role: string): Observable<any> {
     const loggedEmail = this.auth.email;
     if (loggedEmail && email === loggedEmail) {
@@ -107,8 +106,8 @@ export class AdminService {
   }
 
   /* ===============================
-          STAFF MEMBERS MANAGEMENT
-     =============================== */
+        STAFF MEMBERS MANAGEMENT
+  =============================== */
 
   getAllStaffMembers(): Observable<any[]> {
     return this.http.get<any[]>(`${this.staffMembersBaseUrl}`);
@@ -154,8 +153,8 @@ export class AdminService {
   }
 
   /* ===============================
-          QUALIFICATIONS MANAGEMENT
-     =============================== */
+        QUALIFICATIONS MANAGEMENT
+  =============================== */
 
   getAllQualifications(): Observable<any[]> {
     return this.http.get<any[]>(`${this.qualificationsBaseUrl}`);
@@ -176,9 +175,10 @@ export class AdminService {
   deleteQualification(id: string): Observable<any> {
     return this.http.delete(`${this.qualificationsBaseUrl}/${id}`);
   }
+
   /* ===============================
-       ORGANIZATION MANAGEMENT
-=============================== */
+        ORGANIZATION MANAGEMENT
+  =============================== */
 
   getAllOrganizations(): Observable<any[]> {
     return this.http.get<any[]>(`${this.organizationBaseUrl}`);
@@ -192,12 +192,20 @@ export class AdminService {
     return this.http.post(`${this.organizationBaseUrl}`, dto);
   }
 
-  deleteOrganization(id: string): Observable<any> {
-    return this.http.delete(`${this.organizationBaseUrl}/${id}`);
+  checkOrganizationLegalNameExists(name: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.organizationBaseUrl}/check-legalname/${encodeURIComponent(name)}`).pipe(
+      map(res => !!res)
+    );
+  }
+
+  checkOrganizationTaxNumberExists(taxNumber: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.organizationBaseUrl}/check-taxnumber?taxNumber=${encodeURIComponent(taxNumber)}`).pipe(
+      map(res => !!res)
+    );
   }
 
   /* ===============================
-          REPRESENTATIVE MANAGEMENT
+        REPRESENTATIVE MANAGEMENT
   =============================== */
 
   getAllRepresentatives(): Observable<any[]> {
@@ -224,9 +232,6 @@ export class AdminService {
     return this.http.put(`${this.representativeBaseUrl}/${id}/deactivate`, {});
   }
 
-  deleteRepresentative(id: string): Observable<any> {
-    return this.http.delete(`${this.representativeBaseUrl}/${id}`);
-  }
   getActiveRepresentatives(): Observable<any[]> {
     return this.http.get<any[]>(`${this.representativeBaseUrl}/active`);
   }
@@ -234,8 +239,26 @@ export class AdminService {
   getInactiveRepresentatives(): Observable<any[]> {
     return this.http.get<any[]>(`${this.representativeBaseUrl}/inactive`);
   }
+
+  checkRepresentativeEmailExists(email: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.representativeBaseUrl}/check-email/${encodeURIComponent(email)}`).pipe(
+      map(res => !!res)
+    );
+  }
+
+  checkRepresentativeCitizenIdExists(cid: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.representativeBaseUrl}/check-citizenid/${encodeURIComponent(cid)}`).pipe(
+      map(res => !!res)
+    );
+  }
+
+  checkRepresentativePhoneExists(phone: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.representativeBaseUrl}/check-phone/${encodeURIComponent(phone)}`).pipe(
+      map(res => !!res)
+    );
+  }
   /* ===============================
-     PHYSICAL RESOURCES MANAGEMENT
+    PHYSICAL RESOURCES MANAGEMENT
 =============================== */
 
   private physicalResourcesBaseUrl = 'https://localhost:5001/api/PhysicalResources';

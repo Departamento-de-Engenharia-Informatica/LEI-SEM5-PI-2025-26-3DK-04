@@ -1,9 +1,11 @@
-﻿import { Component, Inject, PLATFORM_ID } from '@angular/core';
+﻿import { Component, Inject, PLATFORM_ID, ViewChild } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { TranslationService } from '../../../translation.service';
 import { AdminService } from '../../admin.service';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-add-representative',
@@ -13,12 +15,15 @@ import { Router } from '@angular/router';
   styleUrls: ['./add-representative.scss']
 })
 export class AddRepresentative {
+  @ViewChild('repNgForm') repNgForm!: NgForm;
+
   repForm = {
     name: '',
     citizenId: '',
     nationality: '',
     email: '',
     phoneNumber: '',
+    phoneCountry: { code: '+351', name: 'Portugal', flag: '🇵🇹' },
     organizationId: ''
   };
 
@@ -26,6 +31,19 @@ export class AddRepresentative {
   filteredOrganizations: any[] = [];
   searchTerm = '';
   currentLang = 'en';
+
+  countryCodes = [
+    { code: '+351', name: 'Portugal', flag: '🇵🇹' },
+    { code: '+34', name: 'Spain', flag: '🇪🇸' },
+    { code: '+44', name: 'United Kingdom', flag: '🇬🇧' },
+    { code: '+33', name: 'France', flag: '🇫🇷' },
+    { code: '+39', name: 'Italy', flag: '🇮🇹' },
+    { code: '+49', name: 'Germany', flag: '🇩🇪' }
+  ];
+
+  nationalities = ['PT','ES','FR','IT','GR','UK'];
+
+  errors: any = {};
 
   constructor(
     private adminService: AdminService,
@@ -41,13 +59,9 @@ export class AddRepresentative {
     }
   }
 
-  t(key: string) {
-    return this.translation.translate(key);
-  }
+  t(key: string) { return this.translation.translate(key); }
 
-  ngOnInit() {
-    this.loadOrganizations();
-  }
+  ngOnInit() { this.loadOrganizations(); }
 
   loadOrganizations() {
     this.adminService.getAllOrganizations().subscribe({
@@ -55,10 +69,7 @@ export class AddRepresentative {
         this.organizations = res;
         this.applyFilter();
       },
-      error: err => {
-        console.error(err);
-        alert(this.t('manageRepresentatives.loadOrganizationsError'));
-      }
+      error: () => alert(this.t('manageRepresentatives.loadOrganizationsError'))
     });
   }
 
@@ -70,29 +81,70 @@ export class AddRepresentative {
     );
   }
 
+  validateEmail() {
+    this.errors.email = '';
+    const email = (this.repForm.email || '').trim();
+    if (!/^[^\s@]+@gmail\.com$/i.test(email)) {
+      this.errors.email = this.t('manageRepresentatives.emailMustBeGmail');
+      return false;
+    }
+    return true;
+  }
+
+  validateCitizenId() {
+    this.errors.citizenId = '';
+    const cid = (this.repForm.citizenId || '').trim();
+    if (!/^[a-zA-Z0-9]{5,20}$/.test(cid)) {
+      this.errors.citizenId = this.t('manageRepresentatives.citizenIdInvalid');
+      return false;
+    }
+    return true;
+  }
+
+  validatePhone() {
+    this.errors.phoneNumber = '';
+    const pn = (this.repForm.phoneNumber || '').trim();
+    if (!pn) {
+      this.errors.phoneNumber = this.t('manageRepresentatives.phoneRequired');
+      return false;
+    }
+    return true;
+  }
+
+  clearForm() {
+    if (this.repNgForm) this.repNgForm.resetForm();
+    this.repForm = {
+      name: '',
+      citizenId: '',
+      nationality: '',
+      email: '',
+      phoneNumber: '',
+      phoneCountry: { code: '+351', name: 'Portugal', flag: '🇵🇹' },
+      organizationId: ''
+    };
+    this.errors = {};
+  }
+
   saveRepresentative() {
     if (!this.repForm.organizationId) {
       alert(this.t('manageRepresentatives.organizationRequired'));
       return;
     }
 
-    const dto = { ...this.repForm };
+    if (!this.validateCitizenId() || !this.validateEmail() || !this.validatePhone()) {
+      alert(this.t('manageRepresentatives.invalidFields'));
+      return;
+    }
+
+    const dto = { ...this.repForm, phoneNumber: `${this.repForm.phoneCountry.code}${this.repForm.phoneNumber}` };
+
     this.adminService.createRepresentative(dto).subscribe({
       next: () => {
         alert(this.t('manageRepresentatives.createSuccess'));
-        this.repForm = {
-          name: '',
-          citizenId: '',
-          nationality: '',
-          email: '',
-          phoneNumber: '',
-          organizationId: ''
-        };
+        this.clearForm();
+        this.loadOrganizations();
       },
-      error: err => {
-        console.error(err);
-        alert(this.t('manageRepresentatives.createError'));
-      }
+      error: () => alert(this.t('manageRepresentatives.createError'))
     });
   }
 
