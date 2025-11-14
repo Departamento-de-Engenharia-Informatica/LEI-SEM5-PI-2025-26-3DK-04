@@ -27,10 +27,10 @@ export class TranslationService {
       groupMembersTitle: "Group Members",
 
       members: [
-        { name: "Student One", number: "Number 1" },
-        { name: "Student Two", number: "Number 2" },
-        { name: "Student Three", number: "Number 3" },
-        { name: "Student Four", number: "Number 4" },
+        { name: "João Monteiro", number: "1230762" },
+        { name: "Luís Baller", number: "1230725" },
+        { name: "Alexandre Teixeira", number: "1230946" },
+        { name: "Bruno Teixeira", number: "123XXXX" },
         { name: "Student Five", number: "Number 5" }
       ],
 
@@ -43,7 +43,10 @@ export class TranslationService {
           manageStaffMembers: "Manage Staff Members",
           manageStaffMembersDesc: "Create, edit or manage staff members and their qualifications",
           manageQualifications: "Manage Qualifications",
-          manageQualificationsDesc: "Create, edit or delete qualifications for staff members"
+          manageQualificationsDesc: "Create, edit or delete qualifications for staff members",
+          managePhysicalResources: "Manage Physical Resources",
+          managePhysicalResourcesDesc: "Create, edit or manage physical resources and their statuses",
+
         }
       },
       representativeUI: { title: "Representative Dashboard", subtitle: "Overview of your assigned tasks" },
@@ -68,6 +71,8 @@ export class TranslationService {
         manageStaffMembersDesc: "Create, edit or manage staff members and their qualifications",
         manageQualifications: "Manage Qualifications",
         manageQualificationsDesc: "Create, edit or delete qualifications for staff members",
+        managePhysicalResources: "Manage Physical Resources",
+        managePhysicalResourcesDesc: "Create, edit or manage physical resources and their statuses",
         requests: "Handle Requests",
         requestsDesc: "Review pending client requests",
         info: "Company Info",
@@ -334,6 +339,33 @@ export class TranslationService {
         editTitle: "Edit Dock",
         saveChanges: "Save Changes",
       },
+      managePhysicalResources: {
+        title: "Manage Physical Resources",
+        filtersTitle: "Filters",
+        descriptionFilter: "Description",
+        descriptionPlaceholder: "Enter description...",
+        typeFilter: "Type",
+        typePlaceholder: "Enter type...",
+        description: "Description",
+        type: "Type",
+        capacity: "Capacity",
+        assignedArea: "Assigned Area",
+        setupTime: "Setup Time",
+        status: "Status",
+        qualifications: "Qualifications",
+        createTitle: "Create New Physical Resource",
+        editTitle: "Edit Physical Resource",
+        changeStatus: "Change Status",
+        changeStatusTitle: "Change Resource Status"
+      },
+      filter: "Apply Filter",
+      clear: "Clear",
+      edit: "Edit",
+      cancel: "Cancel",
+      saveChanges: "Save Changes",
+      create: "Create",
+      actions: "Actions",
+      confirm: "Confirm",
 
       manageUsers: {
         title: "User Management",
@@ -454,6 +486,8 @@ export class TranslationService {
         manageStaffMembersDesc: "Criar, editar ou gerir membros do staff e suas qualificações",
         manageQualifications: "Gerir Qualificações",
         manageQualificationsDesc: "Criar, editar ou eliminar qualificações para membros do staff",
+        managePhysicalResources: "Gerir Recursos Físicos",
+        managePhysicalResourcesDesc: "Criar, editar ou gerir recursos físicos e seus estados",
         requests: "Gerir Pedidos",
         requestsDesc: "Rever pedidos pendentes",
         info: "Informação da Empresa",
@@ -571,6 +605,33 @@ export class TranslationService {
 
         create: "Criar Representante",
       },
+      managePhysicalResources: {
+        title: "Gerir Recursos Físicos",
+        filtersTitle: "Filtros",
+        descriptionFilter: "Descrição",
+        descriptionPlaceholder: "Introduza a descrição...",
+        typeFilter: "Tipo",
+        typePlaceholder: "Introduza o tipo...",
+        description: "Descrição",
+        type: "Tipo",
+        capacity: "Capacidade",
+        assignedArea: "Área Atribuída",
+        setupTime: "Tempo de Preparação",
+        status: "Estado",
+        qualifications: "Qualificações",
+        createTitle: "Criar Novo Recurso Físico",
+        editTitle: "Editar Recurso Físico",
+        changeStatus: "Alterar Estado",
+        changeStatusTitle: "Alterar Estado do Recurso"
+      },
+      filter: "Aplicar Filtro",
+      clear: "Limpar",
+      edit: "Editar",
+      cancel: "Cancelar",
+      saveChanges: "Guardar Alterações",
+      create: "Criar",
+      actions: "Ações",
+      confirm: "Confirmar",
 
       vesselScheduling: {
         title: "Agendamento de Navios - Mínimo Atraso",

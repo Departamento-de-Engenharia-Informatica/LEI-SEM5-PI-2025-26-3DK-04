@@ -25,6 +25,7 @@ import { EditRepresentative } from './admin/manage-representatives/edit-represen
 import { AddRepresentative } from './admin/manage-representatives/add-representative/add-representative';
 import { EditUser } from './admin/manageUsers/edit-user/edit-user';
 import { AddUser } from './admin/manageUsers/add-user/add-user';
+import { ManagePhysicalResources } from './admin/managePhysicalResources/managePhysicalResources';
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'cube', component: Cube },
@@ -121,6 +122,12 @@ export const routes: Routes = [
     component: ManageQualifications,
     canActivate: [RoleGuard],
     data: { roles: ['admin'] }
+  },
+  {
+  path: 'admin/managePhysicalResources',
+  component: ManagePhysicalResources,
+  canActivate: [RoleGuard],
+  data: { roles: ['admin', 'logisticsoperator'] }
   },
   {
     path: 'representative',

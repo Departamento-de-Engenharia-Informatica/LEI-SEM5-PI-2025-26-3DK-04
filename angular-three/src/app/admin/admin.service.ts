@@ -234,4 +234,33 @@ export class AdminService {
   getInactiveRepresentatives(): Observable<any[]> {
     return this.http.get<any[]>(`${this.representativeBaseUrl}/inactive`);
   }
+  /* ===============================
+     PHYSICAL RESOURCES MANAGEMENT
+=============================== */
+
+  private physicalResourcesBaseUrl = 'https://localhost:5001/api/PhysicalResources';
+
+  getAllPhysicalResources(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.physicalResourcesBaseUrl}`);
+  }
+
+  getPhysicalResourceById(id: string): Observable<any> {
+    return this.http.get(`${this.physicalResourcesBaseUrl}/${id}`);
+  }
+
+  createPhysicalResource(dto: any): Observable<any> {
+    return this.http.post(`${this.physicalResourcesBaseUrl}`, dto);
+  }
+
+  updatePhysicalResource(id: string, dto: any): Observable<any> {
+    return this.http.put(`${this.physicalResourcesBaseUrl}/${id}`, dto);
+  }
+
+  updatePhysicalResourceStatus(id: string, status: string): Observable<any> {
+    return this.http.patch(
+      `${this.physicalResourcesBaseUrl}/${id}/status`,
+      { status }
+    );
+  }
+
 }
