@@ -26,6 +26,7 @@ import { AddRepresentative } from './admin/manage-representatives/add-representa
 import { EditUser } from './admin/manageUsers/edit-user/edit-user';
 import { AddUser } from './admin/manageUsers/add-user/add-user';
 import { ManagePhysicalResources } from './admin/managePhysicalResources/managePhysicalResources';
+import { ManageVesselVisitNotifications } from './admin/manageVesselVisitNotifications/manageVesselVisitNotifications';
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'cube', component: Cube },
@@ -98,7 +99,12 @@ export const routes: Routes = [
     canActivate: [RoleGuard],
     data: { roles: ['admin'] }
   },
-
+  {
+    path: 'admin/manageVesselVisitNotifications',
+    component: ManageVesselVisitNotifications,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin', 'portauthorityofficer', 'logisticsoperator', 'projectmanager'] }
+  },
   {
     path: 'admin/manage-docks',
     component: ManageDocks,

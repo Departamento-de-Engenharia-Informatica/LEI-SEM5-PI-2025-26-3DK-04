@@ -1,0 +1,163 @@
+﻿<section class="manageVesselVisitNotifications">
+  <div class="container">
+    <h1>{{ t('vesselVisitNotifications.title') }}</h1>
+
+    <!-- ========== LIST OF SUBMITTED NOTIFICATIONS ========== -->
+    <div class="list-section">
+      <h2>{{ t('vesselVisitNotifications.submittedListTitle') }}</h2>
+      <button (click)="loadSubmittedNotifications()">{{ t('vesselVisitNotifications.refresh') }}</button>
+
+      <table *ngIf="submittedNotifications.length > 0">
+        <thead>
+        <tr>
+          <th>{{ t('vesselVisitNotifications.id') }}</th>
+          <th>{{ t('vesselVisitNotifications.vesselName') }}</th>
+          <th>{{ t('vesselVisitNotifications.status') }}</th>
+          <th>{{ t('vesselVisitNotifications.arrival') }}</th>
+          <th>{{ t('vesselVisitNotifications.departure') }}</th>
+          <th>{{ t('vesselVisitNotifications.assignedDock') }}</th>
+          <th>{{ t('vesselVisitNotifications.actions') }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let n of submittedNotifications">
+          <td>{{ n.id }}</td>
+          <td>{{ n.vesselName }}</td>
+          <td>{{ n.status }}</td>
+          <td>{{ n.arrivalTime ? (n.arrivalTime | date:'short') : '-' }}</td>
+          <td>{{ n.departureTime ? (n.departureTime | date:'short') : '-' }}</td>
+          <td>{{ n.assignedDock || '-' }}</td>
+          <td>
+            <button (click)="loadNotificationDetails(n)">{{ t('vesselVisitNotifications.view') }}</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <p *ngIf="submittedNotifications.length === 0">{{ t('vesselVisitNotifications.noSubmitted') }}</p>
+    </div>
+
+    <hr />
+
+    <!-- ========== CREATE / SUBMIT FORM ========== -->
+    <form (ngSubmit)="createNotification()" class="form-section">
+      <h2>{{ t('vesselVisitNotifications.createTitle') }}</h2>
+
+      <div class="form-grid">
+        <!-- Vessel -->
+        <div class="form-group">
+          <label>{{ t('vesselVisitNotifications.vessel') }}</label>
+          <select [(ngModel)]="form.vesselId" name="vesselId" required>
+            <option [ngValue]="null">{{ t('vesselVisitNotifications.selectVessel') }}</option>
+            <option *ngFor="let v of vessels" [ngValue]="v.id">{{ v.name }} ({{ v.callsign || '-' }})</option>
+          </select>
+        </div>
+
+        <!-- Representative -->
+        <div class="form-group">
+          <label>{{ t('vesselVisitNotifications.representative') }}</label>
+          <input [(ngModel)]="form.representativeId" name="representativeId" placeholder="{{ t('vesselVisitNotifications.representativePlaceholder') }}" required />
+        </div>
+
+        <!-- Arrival / Departure -->
+        <div class="form-group">
+          <label>{{ t('vesselVisitNotifications.arrivalTime') }}</label>
+          <input type="datetime-local" [(ngModel)]="form.arrivalTime" name="arrivalTime" required />
+        </div>
+        <div class="form-group">
+          <label>{{ t('vesselVisitNotifications.departureTime') }}</label>
+          <input type="datetime-local" [(ngModel)]="form.departureTime" name="departureTime" required />
+        </div>
+
+        <!-- Preferred Dock -->
+        <div class="form-group">
+          <label>{{ t('vesselVisitNotifications.preferredDock') }}</label>
+          <select [(ngModel)]="form.dockId" name="dockId">
+            <option [ngValue]="null">{{ t('vesselVisitNotifications.selectDock') }}</option>
+            <option *ngFor="let d of docks" [ngValue]="d.id">{{ d.name }}</option>
+          </select>
+        </div>
+
+        <!-- Physical Resource -->
+        <div class="form-group">
+          <label>{{ t('vesselVisitNotifications.physicalResource') }}</label>
+          <select [(ngModel)]="form.physicalResourceId" name="physicalResourceId">
+            <option [ngValue]="null">{{ t('vesselVisitNotifications.selectPhysicalResource') }}</option>
+            <option *ngFor="let p of physicalResources" [ngValue]="p.id">{{ p.name }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- STAFF MEMBERS -->
+      <div class="section-block">
+        <h3>{{ t('vesselVisitNotifications.staffListTitle') }}</h3>
+        <div class="staff-list">
+          <div *ngFor="let s of staff" class="staff-item">
+            <input type="checkbox" [id]="s.id" [value]="s.id" (change)="onStaffChange($event)" [checked]="form.staffMemberIds.includes(s.id)" />
+            <label [for]="s.id">{{ s.name }}</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOADING MANIFESTS -->
+      <div class="section-block">
+        <h3>{{ t('vesselVisitNotifications.loadingManifests') }}</h3>
+        <div *ngFor="let m of form.loadingManifests; let mi = index" class="manifest">
+          <div class="manifest-header">
+            <strong>{{ t('vesselVisitNotifications.manifest') }} #{{ mi + 1 }}</strong>
+            <button type="button" class="danger" (click)="removeLoadingManifest(mi)">{{ t('vesselVisitNotifications.remove') }}</button>
+          </div>
+          <div class="containers">
+            <div *ngFor="let c of m.containers; let ci = index" class="container-row">
+              <label>{{ t('vesselVisitNotifications.container') }} #{{ ci + 1 }}</label>
+              <input type="number" step="0.01" [(ngModel)]="c.payloadWeight" name="load_payload_{{mi}}_{{ci}}" placeholder="{{ t('vesselVisitNotifications.payloadWeight') }}" required />
+              <input [(ngModel)]="c.contentsDescription" name="load_contents_{{mi}}_{{ci}}" placeholder="{{ t('vesselVisitNotifications.contentsDescription') }}" required />
+              <button type="button" class="secondary" (click)="removeLoadingContainer(mi, ci)">{{ t('vesselVisitNotifications.remove') }}</button>
+            </div>
+            <button type="button" (click)="addLoadingContainer(mi)">{{ t('vesselVisitNotifications.addContainer') }}</button>
+          </div>
+        </div>
+        <button type="button" (click)="addLoadingManifest()">{{ t('vesselVisitNotifications.addManifest') }}</button>
+      </div>
+
+      <!-- UNLOADING MANIFESTS -->
+      <div class="section-block">
+        <h3>{{ t('vesselVisitNotifications.unloadingManifests') }}</h3>
+        <div *ngFor="let m of form.unloadingManifests; let mi = index" class="manifest">
+          <div class="manifest-header">
+            <strong>{{ t('vesselVisitNotifications.manifest') }} #{{ mi + 1 }}</strong>
+            <button type="button" class="danger" (click)="removeUnloadingManifest(mi)">{{ t('vesselVisitNotifications.remove') }}</button>
+          </div>
+          <div class="containers">
+            <div *ngFor="let c of m.containers; let ci = index" class="container-row">
+              <label>{{ t('vesselVisitNotifications.container') }} #{{ ci + 1 }}</label>
+              <input type="number" step="0.01" [(ngModel)]="c.payloadWeight" name="unload_payload_{{mi}}_{{ci}}" placeholder="{{ t('vesselVisitNotifications.payloadWeight') }}" required />
+              <input [(ngModel)]="c.contentsDescription" name="unload_contents_{{mi}}_{{ci}}" placeholder="{{ t('vesselVisitNotifications.contentsDescription') }}" required />
+              <button type="button" class="secondary" (click)="removeUnloadingContainer(mi, ci)">{{ t('vesselVisitNotifications.remove') }}</button>
+            </div>
+            <button type="button" (click)="addUnloadingContainer(mi)">{{ t('vesselVisitNotifications.addContainer') }}</button>
+          </div>
+        </div>
+        <button type="button" (click)="addUnloadingManifest()">{{ t('vesselVisitNotifications.addManifest') }}</button>
+      </div>
+
+      <!-- CREW -->
+      <div class="section-block">
+        <h3>{{ t('vesselVisitNotifications.crew') }}</h3>
+        <div *ngFor="let cr of form.crew; let ci = index" class="crew-row">
+          <input [(ngModel)]="cr.name" name="crew_name_{{ci}}" placeholder="{{ t('vesselVisitNotifications.crewName') }}" required />
+          <input [(ngModel)]="cr.citizenId" name="crew_citizen_{{ci}}" placeholder="{{ t('vesselVisitNotifications.crewCitizenId') }}" required />
+          <input [(ngModel)]="cr.nationality" name="crew_nationality_{{ci}}" placeholder="{{ t('vesselVisitNotifications.crewNationality') }}" required />
+          <button type="button" class="danger" (click)="removeCrew(ci)">{{ t('vesselVisitNotifications.remove') }}</button>
+        </div>
+        <button type="button" (click)="addCrew()">{{ t('vesselVisitNotifications.addCrew') }}</button>
+      </div>
+
+      <!-- FORM BUTTONS -->
+      <div class="form-buttons">
+        <button type="submit" class="primary">{{ t('vesselVisitNotifications.createSubmit') }}</button>
+        <button type="button" class="secondary" (click)="resetForm()">{{ t('vesselVisitNotifications.cancel') }}</button>
+      </div>
+    </form>
+  </div>
+</section>

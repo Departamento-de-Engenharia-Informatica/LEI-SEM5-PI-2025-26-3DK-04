@@ -1,0 +1,187 @@
+﻿@use 'sass:color';
+
+$accent: #26327C;
+$dark: #0A1C41;
+$white: #ffffff;
+$panel: #f8f9fa;
+$shadow: 0 1px 3px rgba(0,0,0,0.08);
+
+.manageVesselVisitNotifications {
+  margin-top: 60px;
+  padding: 24px;
+  background: $white;
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: $panel;
+    padding: 32px;
+    border-radius: 8px;
+    box-shadow: $shadow;
+  }
+
+  h1 {
+    text-align: center;
+    color: $accent;
+    margin-bottom: 30px;
+  }
+
+  /* LIST OF SUBMITTED NOTIFICATIONS */
+  .list-section {
+    margin-bottom: 20px;
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+
+      th, td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+      }
+
+      th {
+        background: $white;
+      }
+    }
+
+    button {
+      margin-top: 8px;
+    }
+  }
+
+  /* FORM SECTION */
+  .form-section {
+    margin-top: 18px;
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .form-group {
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: $dark;
+      }
+
+      input, select {
+        width: 100%;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+      }
+
+      input[type="checkbox"] {
+        width: auto;
+        margin-right: 8px;
+      }
+    }
+
+    .section-block {
+      margin-top: 18px;
+      padding: 14px;
+      background: $white;
+      border-radius: 6px;
+      box-shadow: $shadow;
+
+      h3 {
+        color: $accent;
+        margin-bottom: 10px;
+      }
+
+      .staff-list {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .manifest {
+        margin-bottom: 12px;
+        border: 1px dashed #e2e2e2;
+        padding: 10px;
+        border-radius: 6px;
+      }
+
+      .manifest-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .container-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 8px;
+
+        input {
+          width: 100%;
+        }
+      }
+
+      .crew-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+    }
+
+    .form-buttons {
+      margin-top: 20px;
+
+      button {
+        margin-right: 10px;
+      }
+    }
+  }
+
+  /* BUTTON STYLES */
+  button {
+    background: $accent;
+    color: $white;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &:hover {
+      background: color.adjust($accent, $lightness: -10%);
+    }
+
+    &.secondary {
+      background: #bbb;
+      &:hover {
+        background: color.adjust(#bbb, $lightness: -10%);
+      }
+    }
+
+    &.danger {
+      background: #d9534f;
+      &:hover {
+        background: color.adjust(#d9534f, $lightness: -10%);
+      }
+    }
+  }
+}
+
+/* Optional: reutilizando estilos de docks para consistência */
+.vessel-types {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.vessel-type-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}

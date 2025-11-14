@@ -7,7 +7,7 @@ import { AuthService } from '../auth.service';
 export class AdminService {
   // USER management routes
   private userBaseUrl = 'https://localhost:5001/api/UserManagement';
-
+  private baseUrl = 'https://localhost:5001/api';
   // DOCK management routes
   private dockBaseUrl = 'https://localhost:5001/api/Dock';
   private vesselTypeBaseUrl = 'https://localhost:5001/api/VesselTypes';
@@ -262,5 +262,26 @@ export class AdminService {
       { status }
     );
   }
+  // VESSEL VISIT NOTIFICATION management
+  private vesselVisitNotificationBaseUrl = 'https://localhost:5001/api/VesselVisitNotification';
+
+  createVesselVisitNotification(dto: any): Observable<any> {
+    return this.http.post(`${this.vesselVisitNotificationBaseUrl}`, dto);
+  }
+  getAllVesselVisitNotifications(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.vesselVisitNotificationBaseUrl}`);
+  }
+  getVesselVisitNotificationById(id: string): Observable<any> {
+    return this.http.get(`${this.vesselVisitNotificationBaseUrl}/${id}`);
+  }
+  submitVesselVisitNotification(id: string): Observable<any> {
+    return this.http.put(`${this.vesselVisitNotificationBaseUrl}/${id}/submit`, {});
+  }
+// GET submitted vessel visit notifications
+  getSubmittedVesselVisitNotifications() {
+    return this.http.get<any[]>(`${this.baseUrl}/VesselVisitNotifications/submitted`);
+  }
+
+  getVessels(): Observable<any[]> { return this.http.get<any[]>(this.vesselTypeBaseUrl); }
 
 }
