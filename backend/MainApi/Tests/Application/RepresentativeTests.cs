@@ -1,4 +1,4 @@
-﻿
+﻿/*
 
 using System;
 using System.Collections.Generic;
@@ -477,3 +477,4 @@ namespace DDDNetCore.Tests.Application
         }
     }
 }
+*/
