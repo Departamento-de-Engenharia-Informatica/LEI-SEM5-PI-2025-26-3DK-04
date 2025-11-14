@@ -95,11 +95,11 @@ namespace DDDNetCore.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Designation = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     StorageAreaType = table.Column<int>(type: "integer", nullable: false),
                     Location_Coordinates = table.Column<string>(type: "text", nullable: true),
                     Location_Description = table.Column<string>(type: "text", nullable: true),
-                    Code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Designation = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     MaxCapacityTEUs = table.Column<int>(type: "integer", nullable: false),
                     CurrentOccupancyTEUs = table.Column<int>(type: "integer", nullable: false),
                     Active = table.Column<bool>(type: "boolean", nullable: false)
@@ -300,7 +300,14 @@ namespace DDDNetCore.Migrations
                     AssignedDock = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     OfficerId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     RepresentativeId = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ArrivalTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DepartureTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UnloadTime = table.Column<int>(type: "integer", nullable: true),
+                    LoadTime = table.Column<int>(type: "integer", nullable: true),
+                    StaffMemberIds = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    PhysicalResourceId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    DockId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {

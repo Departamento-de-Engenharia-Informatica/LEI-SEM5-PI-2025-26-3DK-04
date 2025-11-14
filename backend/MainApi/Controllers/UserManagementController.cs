@@ -3,163 +3,84 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using DDDSample1.Domain.Authentication;
-using DDDSample1.Domain.Organizations;
 using DDDSample1.Domain.Shared;
 using Microsoft.AspNetCore.Authorization;
 
 namespace DDDSample1.Controllers
 {
-    //[AuthorizeRole(Roles.Admin)]
     [ApiController]
     [Route("api/[controller]")]
     public class UserManagementController : ControllerBase
     {
-        private readonly IUserRepository _repo;
-        private readonly IUserActivationRepository _activationRepo;
-        private readonly EmailService _emailService;
-        public UserManagementController(IUserRepository repo, IUserActivationRepository activationRepo, EmailService emailService)
+        private readonly UserService _service;
+
+        public UserManagementController(UserService service)
         {
-            _repo = repo;
-            _activationRepo = activationRepo;
-            _emailService = emailService;
+            _service = service;
         }
-        
+
         [HttpGet("check/{email}")]
         public async Task<IActionResult> CheckUserPath(string email)
         {
             return await CheckUser(email);
         }
-        
+
         [HttpGet("check")]
         public async Task<IActionResult> CheckUser([FromQuery] string email)
         {
-            if (string.IsNullOrWhiteSpace(email))
-                return BadRequest(new { exists = false, error = "Invalid email" });
+            var result = await _service.CheckUserExistsAsync(email);
+            if (!result.IsValid)
+                return BadRequest(new { exists = false, error = result.Error });
 
-            var user = await _repo.GetByIdAsync(new UserID(email));
-
-            return Ok(new { exists = user != null });
+            return Ok(new { exists = result.Exists });
         }
 
-        
         [HttpPost("create")]
-        public async Task<IActionResult> CreateUser([FromBody] CreateUserDTO dto)
+        public async Task<IActionResult> CreateUser([FromBody] UserService.CreateUserDTO dto)
         {
-            Console.WriteLine($"[CreateUser] Email: {dto.Email}, Name: {dto.Name}, Role: {dto.Role}");
-            
-            
-            var existingUser = await _repo.GetByIdAsync(new UserID(dto.Email));
-            if (existingUser != null)
-                return BadRequest(new { error = "A user with this email already exists." });
-            
-            var user = new User(dto.Email, dto.Name, dto.Picture, dto.Role, Status.Inactive);
-            await _repo.AddAsync(user);
+            var response = await _service.CreateUserAsync(dto);
 
-            var activation = new UserActivation(user.Id);
-            await _activationRepo.AddAsync(activation);
-
-            var link = $"https://localhost:5001/api/UserManagement/activate?token={activation.Token}";
-            _emailService.SendActivationEmail(dto.Email, link);
+            if (!response.Success)
+                return BadRequest(new { error = response.Error });
 
             return Ok(new { message = "User created. Activation email sent." });
         }
 
-      
         [HttpPut("{email}/role")]
-        public async Task<IActionResult> UpdateRole(string email, [FromBody] UpdateRoleDTO dto)
+        public async Task<IActionResult> UpdateRole(string email, [FromBody] UserService.UpdateRoleDTO dto)
         {
-            var user = await _repo.GetByIdAsync(new UserID(email));
-            if (user == null)
-                return NotFound(new { error = "User not found" });
-            
-            if (dto.Role == Roles.Representative)
-                return BadRequest(new { error = "Cannot manually assign Representative role." });
-            
-            user.SetRole(dto.Role);
-            user.SetStatus(Status.Inactive);
-            await _repo.UpdateAsync(user);
+            var result = await _service.UpdateRoleAsync(email, dto);
 
-            var activation = new UserActivation(user.Id);
-            await _activationRepo.AddAsync(activation);
-
-            var link = $"https://localhost:5001/api/UserManagement/activate?token={activation.Token}";
-            _emailService.SendActivationEmail(email, link);
+            if (!result.Success)
+                return BadRequest(new { error = result.Error });
 
             return Ok(new { message = "Role updated and activation email sent." });
         }
 
-       
         [AllowAnonymous]
         [HttpGet("activate")]
         public async Task<IActionResult> ActivateByToken([FromQuery] string token)
         {
-            var activation = await _activationRepo.GetByTokenAsync(token);
-
-            if (activation == null || !activation.IsValid(token))
-            {
-                return Redirect("http://localhost:4200/activate?status=error");
-            }
-
-            // Ativa o user
-            var user = await _repo.GetByEmailAsync(activation.UserId.Value);
-            if (user == null)
-            {
-                return Redirect("http://localhost:4200/activate?status=error");
-            }
-
-            user.Activate();
-            await _repo.UpdateAsync(user);
-            await _activationRepo.DeleteAsync(activation);
-
-            return Redirect("http://localhost:4200/activate?status=success");
+            var url = await _service.ActivateUserAsync(token);
+            return Redirect(url);
         }
 
-
-        
         [HttpPut("{email}/deactivate")]
         public async Task<IActionResult> Deactivate(string email)
         {
-            var user = await _repo.GetByIdAsync(new UserID(email));
-            if (user == null)
-                return NotFound(new { error = "User not found" });
+            var result = await _service.DeactivateUserAsync(email);
 
-            user.Deactivate();
-            await _repo.UpdateAsync(user);
+            if (!result.Success)
+                return NotFound(new { error = result.Error });
 
             return Ok(new { message = "User deactivated" });
         }
+
         [HttpGet("get")]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = await _repo.GetAllAsync();
-
-            if (users == null)
-                return NotFound(new { error = "No users found" });
-
-            var result = users.Select(u => new
-            {
-                email = u.Id.Value,
-                name = u.Name,
-                picture = u.Picture,
-                role = u.Role.ToString(),
-                status = u.Status.ToString()
-            });
-
-            return Ok(result);
+            var list = await _service.GetAllUsersAsync();
+            return Ok(list);
         }
-
-    }
-
-    public class CreateUserDTO
-    {
-        public string Email { get; set; }
-        public string Name { get; set; }
-        public string Picture { get; set; }
-        public Roles Role { get; set; }
-    }
-
-    public class UpdateRoleDTO
-    {
-        public Roles Role { get; set; }
     }
 }

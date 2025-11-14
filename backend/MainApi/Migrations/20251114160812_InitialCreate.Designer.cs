@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DDDNetCore.Migrations
 {
     [DbContext(typeof(DDDSample1DbContext))]
-    [Migration("20251110222853_InitialCreate")]
+    [Migration("20251114160812_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -375,6 +375,9 @@ namespace DDDNetCore.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("ArrivalTime")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("AssignedDock")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
@@ -389,7 +392,21 @@ namespace DDDNetCore.Migrations
                     b.Property<DateTime?>("DecisionTimeStamp")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime?>("DepartureTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DockId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int?>("LoadTime")
+                        .HasColumnType("integer");
+
                     b.Property<string>("OfficerId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PhysicalResourceId")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
@@ -401,9 +418,16 @@ namespace DDDNetCore.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("StaffMemberIds")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int?>("UnloadTime")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("VesselId")
                         .HasColumnType("uuid");
