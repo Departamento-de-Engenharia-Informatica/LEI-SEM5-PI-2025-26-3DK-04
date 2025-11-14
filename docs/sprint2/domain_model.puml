@@ -1,0 +1,228 @@
+@startuml
+title Domain Model
+
+package "Vessel Aggregate" {
+    class Vessel <<Entity, AggregateRoot>>{
+        IMOnumber: int
+        name: String
+    }
+
+    class VesselId <<EntityId>>{
+    }
+
+    class Owner <<Entity>>{
+        name: String
+        ID: int
+    }
+
+    class Cargo <<Value Object>>{
+        Type: String
+        Quantity: double
+    }
+
+    class Crew <<Entity>> {
+        ID: int
+    }
+
+    class CrewMember <<Entity>> {
+        ID: int
+        name: String
+        nationality: String
+        dateOfBirth: String
+    }
+}
+
+package "VesselType Aggregate" {
+    class VesselType <<Entity>>{
+        name: String
+        description: String
+        capacity: double
+        maximumNumberOfRows: int
+        bays: int
+        tiers: int
+    }
+
+    class VesselTypeID <<EntityId>>{
+    }
+}
+
+package "VesselVisitNotification Aggregate" {
+    class VesselVisitNotification <<Entity, AggregateRoot>> {
+        rejectionReason: String? #pode ser null
+        decisionTimeStamp: String
+        decisionOutcome: String
+        arrivalTime: DateTime
+        departureTime: DateTime
+        unloadTime: int
+        loadTime: int
+    }
+    
+    class VesselVisitNotificationID <<EntityId>>{
+    }
+
+    enum NotificationState{
+        name: String
+    }
+
+    class ManifestCargo <<Value Object>>{
+        type: String
+        quantity: double
+    }
+
+    class LoadingCargoManifest <<Value Object>>{
+
+    }
+
+    class UnloadingCargoManifest <<Value Object>>{
+
+    }
+}
+
+package "ShippingAgentOrganization Aggregate" {
+    class ShippingAgentOrganization <<Entity, AggregateRoot>>{
+        legalName: String
+        altName: String
+        taxNumber: int
+    }
+
+    class OrganizationID <<EntityId>>{
+    }
+
+    class Address <<ValueObject>>{
+        street: String
+        city: String
+        postalCode: String
+        country: String
+    }
+
+    class OrganizationRepresentative <<Entity>>{
+        name: String
+        nationality: String
+        email: String
+        phoneNumber: int
+        citizenId : string
+    }
+
+    class OrganizationRepresentativeID <<EntityId>>{
+    }
+}
+
+package "Port Infrastructure Aggregate" {
+    class Dock <<Entity, AggregateRoot>>{
+        name: String
+        length: double
+        depth: double
+        maxDraft: int
+    }
+
+    class DockID <<EntityId>>{
+    }
+
+    class StorageArea <<Entity>>{
+        type: String
+        maxCapacity: double
+        currentOccupancy: double
+    }
+
+    class StorageAreaID <<EntityId>>{
+    }
+
+    class Location <<ValueObject>>{
+        coordinates: String
+        description: String
+    }
+    enum StorageAreaType {
+            Yard,          
+            Warehouse,     
+            Refrigerated,
+            Other
+        }
+
+}    
+
+package "Staff Management Aggregate" {
+    class StaffMember <<Entity, AggregateRoot>> {
+        name: String
+        email: String
+        phoneNumber: int
+    }
+
+    class StaffMemberID <<EntityId>> {
+    }
+
+    class OperationalWindow <<ValueObject>> {
+        startTime: TimeSpan
+        endTime: TimeSpan
+    }
+
+    enum MemberStatus{
+        name: String
+    }
+}    
+
+package "Qualification Aggregate" {
+    class Qualification <<Entity, AggregateRoot>>{
+        name: String
+        description: String
+    }
+
+    class QualificationID <<EntityId>>{
+    }
+}
+
+package "Physical Resource Aggregate" {
+    class PhysicalResource <<Entity, AggregateRoot>>{
+        name: String
+        description: String
+        operationalCapacity: int
+        setupTime: String
+        qualifRequirements: String
+    }
+
+    class PhysicalResourceID <<EntityId>>{
+    }
+
+    enum ResourceStatus{
+        name: String
+    }
+}
+
+Vessel "*" --> "1" VesselType : has 
+Vessel "*" --> "1..*" Owner : has
+Dock "1" --> "1" DockID : has
+Dock "*" --> "*" VesselType : has
+Dock "1" --> "1" Location : located at
+StorageArea "1" --> "1" StorageAreaID : has
+StorageArea "1" --> "1" Location : located at
+StorageArea "*" --> "*" Dock : serves
+ShippingAgentOrganization "1" --> "1" OrganizationID : has
+ShippingAgentOrganization "1" --> "1..*" OrganizationRepresentative : has
+ShippingAgentOrganization "1" --> "*" Vessel : has
+ShippingAgentOrganization "1" --> "1..*" Address : located at
+OrganizationRepresentative "1" --> "1" OrganizationRepresentativeID : has
+VesselVisitNotification "*" --> "1" Vessel : has
+VesselVisitNotification "*" --> "1" Dock : happens
+Vessel "1" --> "*" Cargo : has
+LoadingCargoManifest "1" --> "*" ManifestCargo : has
+UnloadingCargoManifest "1" --> "*" ManifestCargo : has
+VesselVisitNotification "1" --> "1" VesselVisitNotificationID : has
+VesselVisitNotification "1" --> "0..1" LoadingCargoManifest : has
+VesselVisitNotification "1" --> "0..1" UnloadingCargoManifest : has
+VesselVisitNotification "*" --> "1" NotificationState : has
+Vessel "1" --> "1" Crew : has
+Vessel "1" --> "1" VesselId : has
+VesselType "1" --> "1" VesselTypeID : has
+Crew "1" --> "*" CrewMember : has
+ShippingAgentOrganization "1" --> "*" VesselVisitNotification : submits
+StaffMember "1" --> "1" StaffMemberID : has
+StaffMember "1" --> "1" OperationalWindow : has
+StaffMember "*" --> "*" PhysicalResource : uses
+StaffMember "*" --> "*" Dock : works
+StaffMember "*" --> "*" Qualification : has
+StaffMember "*" --> "1" MemberStatus : has
+PhysicalResource "*" --> "*" Qualification : has
+PhysicalResource "*" --> "1" ResourceStatus : has
+PhysicalResource "*" --> "1" PhysicalResourceID : has
+StorageArea "1" --> "1" StorageAreaType : type
+Qualification "1" --> "1" QualificationID : has
+@enduml

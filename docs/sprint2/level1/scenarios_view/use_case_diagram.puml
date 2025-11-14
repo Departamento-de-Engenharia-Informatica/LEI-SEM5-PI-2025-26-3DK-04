@@ -1,0 +1,87 @@
+@startuml use_case_diagram
+title Use Case Diagram 
+left to right direction
+
+actor "Project Manager" as PM
+actor "System User" as SU
+actor "System User (Role)" as SUR
+actor "Non-Authenticated User" as NAU
+actor "Administrator" as Admin
+actor "Logistics Operator" as LO
+actor "Port Authority Officer" as POA
+actor "System Administrator" as SysAdmin
+
+rectangle "System" {
+    ("3.1.1 Setup SPA with Modern Framework") as UC311
+    ("3.1.2 Provide Unified Layout") as UC312
+    ("3.1.3 Show Role-based Menus") as UC313
+    ("3.1.4 Show Action Feedback") as UC314
+    ("3.1.5 Provide Role-based Pages/Forms") as UC315
+
+    ("3.2.1 Authenticate via IAM Provider") as UC321
+    ("3.2.2 Load Internal Authorization Role") as UC322
+    ("3.2.3 Maintain Secure Session") as UC323
+    ("3.2.4 Restrict Access by Role") as UC324
+    ("3.2.5 Assign/Update User Roles") as UC325
+    ("3.2.6 Complete First Access via Activation Link") as UC326
+
+    ("3.3.1 Integrate 3D Visualization Module") as UC331
+    ("3.3.2 Show 3D Port Structure") as UC332
+    ("3.3.3 Show Vessels & Resources in 3D") as UC333
+    ("3.3.4 Render 3D Models with Textures") as UC334
+    ("3.3.5 Provide 3D Scene Lighting") as UC335
+    ("3.3.6 Control 3D Camera with Mouse") as UC336
+
+    ("3.4.1 Planning & Scheduling API Module") as UC341
+    ("3.4.2 Generate Daily Vessel Schedule") as UC342
+    ("3.4.3 Analyze Scheduling Algorithm Complexity") as UC343
+    ("3.4.4 Alternative Efficient Scheduling Algorithm") as UC344
+    ("3.4.5 Support Multi-Crane Scheduling") as UC345
+
+    ("3.5.1 Automated Deployment Pipeline") as UC351
+    ("3.5.2 Restrict Access to DEI Network") as UC352
+    ("3.5.3 Configurable Allowed Endpoints") as UC353
+    ("3.5.4 Public Folder for Shared Resources") as UC354
+    ("3.5.5 Monitor Remote Shell Logins") as UC355
+    ("3.5.6 Identify & Quantify Risks") as UC356
+    ("3.5.7 Define Minimum Business Continuity Objective") as UC357
+    ("3.5.8 Propose & Implement Backup Strategy") as UC358
+}
+
+PM --> UC311
+SU --> UC312
+SUR --> UC313
+SU --> UC314
+SU --> UC315
+
+NAU --> UC321
+SU --> UC322
+SU --> UC323
+SU --> UC324
+Admin --> UC325
+SU --> UC326
+
+PM --> UC331
+SU --> UC332
+LO --> UC333
+POA --> UC333
+SU --> UC334
+SU --> UC335
+SU --> UC336
+
+PM --> UC341
+LO --> UC342
+LO --> UC343
+LO --> UC344
+LO --> UC345
+
+SysAdmin --> UC351
+SysAdmin --> UC352
+SysAdmin --> UC353
+SysAdmin --> UC354
+SysAdmin --> UC355
+SysAdmin --> UC356
+SysAdmin --> UC357
+SysAdmin --> UC358
+
+@enduml
