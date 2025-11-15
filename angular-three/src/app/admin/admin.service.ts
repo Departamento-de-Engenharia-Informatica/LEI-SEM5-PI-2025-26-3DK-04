@@ -326,5 +326,10 @@ export class AdminService {
   }
 
   getVessels(): Observable<any[]> { return this.http.get<any[]>(this.vesselTypeBaseUrl); }
+  getInProgressVesselVisitNotifications() {
+    return this.http.get<any[]>(`${this.baseUrl}/VesselVisitNotifications/in-progress`);
+  }
+
+
 
 }

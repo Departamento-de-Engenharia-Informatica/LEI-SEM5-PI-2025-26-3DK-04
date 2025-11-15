@@ -125,6 +125,13 @@ namespace DDDSample1.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
+        [HttpGet("in-progress")]
+        public async Task<ActionResult<IEnumerable<VesselVisitNotificationDto>>> GetInProgress()
+        {
+            var notifications = await _service.GetInProgressNotificationsAsync();
+            return Ok(notifications);
+        }
+
         [HttpPut("{id}/withdraw")]
         //[AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<VesselVisitNotificationDto>> Withdraw(Guid id)

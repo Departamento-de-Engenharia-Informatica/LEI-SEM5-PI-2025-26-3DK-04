@@ -12,35 +12,27 @@ import { AdminService } from '../admin.service';
   styleUrls: ['./manageVesselVisitNotifications.scss']
 })
 export class ManageVesselVisitNotifications implements OnInit {
+
+  notifications: any[] = [];
+  inProgressNotifications: any[] = [];
+  submittedNotifications: any[] = [];
+  selectedNotification: any = null;
+
   vessels: any[] = [];
   docks: any[] = [];
   physicalResources: any[] = [];
   staff: any[] = [];
   representatives: any[] = [];
 
-  submittedNotifications: any[] = [];
-  selectedNotification: any = null;
-  
-  // Review modal state
-  showReviewModal: boolean = false;
-  reviewAction: 'approve' | 'reject' | null = null;
-  reviewNotification: any = null;
-  reviewForm: any = {
-    dockId: null,
-    officerId: '',
-    reason: ''
-  };
-
-  // Form model aligned with CreateNotificationDto
   form: any = {
     vesselId: null,
     representativeId: '',
-    loadingManifests: [] as any[],
-    unloadingManifests: [] as any[],
-    crew: [] as any[],
-    arrivalTime: '', // datetime-local string
-    departureTime: '', // datetime-local string
-    staffMemberIds: [] as string[],
+    loadingManifests: [{ containers: [{ payloadWeight: 0, contentsDescription: '' }] }],
+    unloadingManifests: [{ containers: [{ payloadWeight: 0, contentsDescription: '' }] }],
+    crew: [],
+    arrivalTime: '',
+    departureTime: '',
+    staffMemberIds: [],
     physicalResourceId: null,
     dockId: null
   };
@@ -62,160 +54,141 @@ export class ManageVesselVisitNotifications implements OnInit {
     this.loadStaff();
     this.loadRepresentatives();
     this.loadSubmittedNotifications();
-    this.resetForm();
+    this.loadInProgressNotifications();
   }
 
   /* -------------------
-     LOADING DATA
+       LOAD DATA
   ------------------- */
+
   loadVessels() {
     this.adminService.getVessels()?.subscribe({
-      next: (res: any[]) => { this.vessels = res || []; this.cdr.detectChanges(); },
-      error: err => { console.error('Error loading vessels', err); alert('Error loading vessels: ' + (err?.message || err)); }
+      next: res => { this.vessels = res || []; this.cdr.detectChanges(); }
     });
   }
 
   loadDocks() {
     this.adminService.getAllDocks()?.subscribe({
-      next: (res: any[]) => { this.docks = res || []; this.cdr.detectChanges(); },
-      error: err => { console.error('Error loading docks', err); alert('Error loading docks: ' + (err?.message || err)); }
+      next: res => { this.docks = res || []; this.cdr.detectChanges(); }
     });
   }
 
   loadPhysicalResources() {
     this.adminService.getAllPhysicalResources().subscribe({
-      next: (res: any[]) => { this.physicalResources = res || []; this.cdr.detectChanges(); },
-      error: err => { console.error('Error loading physical resources', err); }
+      next: res => { this.physicalResources = res || []; this.cdr.detectChanges(); }
     });
   }
 
   loadStaff() {
     this.adminService.getAllStaffMembers().subscribe({
-      next: (res: any[]) => { this.staff = res || []; this.cdr.detectChanges(); },
-      error: err => { console.error('Error loading staff members', err); }
+      next: res => { this.staff = res || []; this.cdr.detectChanges(); }
     });
   }
 
   loadRepresentatives() {
     this.adminService.getAllRepresentatives().subscribe({
-      next: (res: any[]) => { this.representatives = res || []; this.cdr.detectChanges(); },
-      error: err => { console.error('Error loading representatives', err); }
+      next: res => { this.representatives = res || []; this.cdr.detectChanges(); }
+    });
+  }
+
+  loadInProgressNotifications() {
+    this.adminService.getInProgressVesselVisitNotifications().subscribe({
+      next: res => {
+        this.inProgressNotifications = res || [];
+        this.cdr.detectChanges();
+      },
+      error: () => alert('Error loading in-progress notifications')
     });
   }
 
   loadSubmittedNotifications() {
-    if (this.adminService.getSubmittedVesselVisitNotifications) {
-      this.adminService.getSubmittedVesselVisitNotifications().subscribe({
-        next: (res: any[]) => { this.submittedNotifications = res || []; this.cdr.detectChanges(); },
-        error: err => { console.error('Error loading notifications', err); alert('Error loading notifications: ' + (err?.message || err)); }
-      });
-    }
-  }
-  submitNotification(notification: any) {
-    this.adminService.submitVesselVisitNotification(notification.id).subscribe({
-      next: () => {
-        alert('Notification submitted successfully!');
-        this.loadSubmittedNotifications();
+    this.adminService.getSubmittedVesselVisitNotifications().subscribe({
+      next: res => {
+        this.submittedNotifications = res || [];
+        this.cdr.detectChanges();
       },
-      error: err => {
-        console.error('Error submitting notification', err);
-        alert('Error: ' + (err?.error?.message || err));
+      error: () => alert('Error loading submitted notifications')
+    });
+  }
+
+  loadNotificationDetails(n: any) {
+    this.adminService.getVesselVisitNotificationById(n.id).subscribe({
+      next: res => {
+        this.selectedNotification = res;
+        this.cdr.detectChanges();
       }
     });
   }
 
   /* -------------------
-     REVIEW (APPROVE/REJECT)
+       SUBMIT
   ------------------- */
-  openReviewModal(notification: any, action: 'approve' | 'reject') {
-    this.reviewNotification = notification;
-    this.reviewAction = action;
-    this.showReviewModal = true;
-    this.reviewForm = {
-      dockId: notification.dockId || null,
-      officerId: '',
-      reason: ''
-    };
-  }
 
-  closeReviewModal() {
-    this.showReviewModal = false;
-    this.reviewNotification = null;
-    this.reviewAction = null;
-    this.reviewForm = { dockId: null, officerId: '', reason: '' };
-  }
-
-  confirmReview() {
-    if (!this.reviewNotification || !this.reviewAction) return;
-
-    if (this.reviewAction === 'approve') {
-      if (!this.reviewForm.dockId) {
-        alert(this.t('vesselVisitNotifications.dockRequired'));
-        return;
-      }
-      if (!this.reviewForm.officerId) {
-        alert(this.t('vesselVisitNotifications.officerRequired'));
-        return;
-      }
-
-      this.adminService.approveVesselVisitNotification(
-        this.reviewNotification.id,
-        this.reviewForm.dockId,
-        this.reviewForm.officerId
-      ).subscribe({
-        next: () => {
-          alert(this.t('vesselVisitNotifications.approveSuccess'));
-          this.closeReviewModal();
-          this.loadSubmittedNotifications();
-        },
-        error: err => {
-          console.error('Error approving notification', err);
-          alert(this.t('vesselVisitNotifications.approveError') + ': ' + (err?.error?.Message || err?.message || err));
-        }
-      });
-    } else if (this.reviewAction === 'reject') {
-      if (!this.reviewForm.reason) {
-        alert(this.t('vesselVisitNotifications.reasonRequired'));
-        return;
-      }
-      if (!this.reviewForm.officerId) {
-        alert(this.t('vesselVisitNotifications.officerRequired'));
-        return;
-      }
-
-      this.adminService.rejectVesselVisitNotification(
-        this.reviewNotification.id,
-        this.reviewForm.reason,
-        this.reviewForm.officerId
-      ).subscribe({
-        next: () => {
-          alert(this.t('vesselVisitNotifications.rejectSuccess'));
-          this.closeReviewModal();
-          this.loadSubmittedNotifications();
-        },
-        error: err => {
-          console.error('Error rejecting notification', err);
-          alert(this.t('vesselVisitNotifications.rejectError') + ': ' + (err?.error?.Message || err?.message || err));
-        }
-      });
+  submitNotification(notification: any) {
+    if (notification.status !== 'InProgress') {
+      return alert('Only In Progress notifications can be submitted.');
     }
-  }
 
-
-  loadNotificationDetails(n: any) {
-    if (this.adminService.getVesselVisitNotificationById) {
-      this.adminService.getVesselVisitNotificationById(n.id).subscribe({
-        next: (res: any) => { this.selectedNotification = res; this.cdr.detectChanges(); },
-        error: err => { console.error('Error fetching notification details', err); alert('Error fetching notification details: ' + (err?.message || err)); }
-      });
-    } else {
-      this.selectedNotification = n;
-    }
+    this.adminService.submitVesselVisitNotification(notification.id).subscribe({
+      next: () => {
+        alert('Notification submitted successfully!');
+        this.loadInProgressNotifications();
+        this.loadSubmittedNotifications();
+      },
+      error: err => alert('Error: ' + (err?.error?.message || err))
+    });
   }
 
   /* -------------------
-     FORM HELPERS: MANIFESTS / CONTAINERS / CREW
+       CREATE
   ------------------- */
+
+  createNotification() {
+    if (!this.form.vesselId || !this.form.representativeId) {
+      return alert('Required fields missing');
+    }
+
+    const dto = {
+      VesselId: this.form.vesselId,
+      RepresentativeId: this.form.representativeId,
+      LoadingManifests: this.form.loadingManifests.map((m: any) => ({
+        Containers: m.containers.map((c: any) => ({
+          PayloadWeight: Number(c.payloadWeight),
+          ContentsDescription: c.contentsDescription
+        }))
+      })),
+      UnloadingManifests: this.form.unloadingManifests.map((m: any) => ({
+        Containers: m.containers.map((c: any) => ({
+          PayloadWeight: Number(c.payloadWeight),
+          ContentsDescription: c.contentsDescription
+        }))
+      })),
+      Crew: this.form.crew.map((cr: any) => ({
+        Name: cr.name,
+        CitizenId: cr.citizenId,
+        Nationality: cr.nationality
+      })),
+      ArrivalTime: new Date(this.form.arrivalTime).toISOString(),
+      DepartureTime: new Date(this.form.departureTime).toISOString(),
+      StaffMemberIds: this.form.staffMemberIds,
+      PhysicalResourceId: this.form.physicalResourceId,
+      DockId: this.form.dockId
+    };
+
+    this.adminService.createVesselVisitNotification(dto).subscribe({
+      next: () => {
+        alert('Notification created');
+        this.resetForm();
+        this.loadInProgressNotifications();
+      },
+      error: err => alert('Error: ' + (err?.error?.message || err))
+    });
+  }
+
+  /* -------------------
+       FORM HELPERS
+  ------------------- */
+
   resetForm() {
     this.form = {
       vesselId: null,
@@ -229,62 +202,63 @@ export class ManageVesselVisitNotifications implements OnInit {
       physicalResourceId: null,
       dockId: null
     };
-    this.cdr.detectChanges();
   }
-
-  addLoadingManifest() { this.form.loadingManifests.push({ containers: [{ payloadWeight: 0, contentsDescription: '' }] }); }
-  removeLoadingManifest(i: number) { this.form.loadingManifests.splice(i, 1); }
-  addLoadingContainer(i: number) { this.form.loadingManifests[i].containers.push({ payloadWeight: 0, contentsDescription: '' }); }
-  removeLoadingContainer(mi: number, ci: number) { this.form.loadingManifests[mi].containers.splice(ci, 1); }
-
-  addUnloadingManifest() { this.form.unloadingManifests.push({ containers: [{ payloadWeight: 0, contentsDescription: '' }] }); }
-  removeUnloadingManifest(i: number) { this.form.unloadingManifests.splice(i, 1); }
-  addUnloadingContainer(mi: number) { this.form.unloadingManifests[mi].containers.push({ payloadWeight: 0, contentsDescription: '' }); }
-  removeUnloadingContainer(mi: number, ci: number) { this.form.unloadingManifests[mi].containers.splice(ci, 1); }
-
-  addCrew() { this.form.crew.push({ name: '', citizenId: '', nationality: '' }); }
-  removeCrew(i: number) { this.form.crew.splice(i, 1); }
 
   onStaffChange(event: any) {
     const id = event.target.value;
     if (event.target.checked) {
-      if (!this.form.staffMemberIds.includes(id)) this.form.staffMemberIds.push(id);
+      if (!this.form.staffMemberIds.includes(id))
+        this.form.staffMemberIds.push(id);
     } else {
       this.form.staffMemberIds = this.form.staffMemberIds.filter((s: any) => s !== id);
     }
   }
 
   /* -------------------
-     CREATE / SUBMIT
+       Manifest helpers
   ------------------- */
-  createNotification() {
-    try {
-      if (!this.form.vesselId) return alert('Vessel is required');
-      if (!this.form.representativeId) return alert('Representative is required');
-      if (!this.form.arrivalTime || !this.form.departureTime) return alert('Arrival and Departure times are required');
 
-      const dto = {
-        VesselId: this.form.vesselId,
-        RepresentativeId: this.form.representativeId,
-        LoadingManifests: this.form.loadingManifests.map((m: any) => ({ Containers: m.containers.map((c: any) => ({ PayloadWeight: Number(c.payloadWeight), ContentsDescription: c.contentsDescription || '' })) })),
-        UnloadingManifests: this.form.unloadingManifests.map((m: any) => ({ Containers: m.containers.map((c: any) => ({ PayloadWeight: Number(c.payloadWeight), ContentsDescription: c.contentsDescription || '' })) })),
-        Crew: this.form.crew.map((cr: any) => ({ Name: cr.name, CitizenId: cr.citizenId, Nationality: cr.nationality })),
-        ArrivalTime: new Date(this.form.arrivalTime).toISOString(),
-        DepartureTime: new Date(this.form.departureTime).toISOString(),
-        StaffMemberIds: this.form.staffMemberIds,
-        PhysicalResourceId: this.form.physicalResourceId,
-        DockId: this.form.dockId
-      };
+  addLoadingManifest() {
+    this.form.loadingManifests.push({ containers: [{ payloadWeight: 0, contentsDescription: '' }] });
+  }
 
-      if (!this.adminService.createVesselVisitNotification) return alert('Create service not available.');
+  removeLoadingManifest(i: number) {
+    this.form.loadingManifests.splice(i, 1);
+  }
 
-      this.adminService.createVesselVisitNotification(dto).subscribe({
-        next: () => { alert('Notification created successfully'); this.loadSubmittedNotifications(); this.resetForm(); },
-        error: err => { console.error('Error creating notification', err); alert('Error: ' + (err?.error?.message || err)); }
-      });
-    } catch (ex) {
-      console.error('Exception creating notification', ex);
-      alert('Unexpected error: ' + ex);
-    }
+  addLoadingContainer(mi: number) {
+    this.form.loadingManifests[mi].containers.push({ payloadWeight: 0, contentsDescription: '' });
+  }
+
+  removeLoadingContainer(mi: number, ci: number) {
+    this.form.loadingManifests[mi].containers.splice(ci, 1);
+  }
+
+  addUnloadingManifest() {
+    this.form.unloadingManifests.push({ containers: [{ payloadWeight: 0, contentsDescription: '' }] });
+  }
+
+  removeUnloadingManifest(i: number) {
+    this.form.unloadingManifests.splice(i, 1);
+  }
+
+  addUnloadingContainer(mi: number) {
+    this.form.unloadingManifests[mi].containers.push({ payloadWeight: 0, contentsDescription: '' });
+  }
+
+  removeUnloadingContainer(mi: number, ci: number) {
+    this.form.unloadingManifests[mi].containers.splice(ci, 1);
+  }
+
+  /* -------------------
+       Crew helpers
+  ------------------- */
+
+  addCrew() {
+    this.form.crew.push({ name: '', citizenId: '', nationality: '' });
+  }
+
+  removeCrew(i: number) {
+    this.form.crew.splice(i, 1);
   }
 }

@@ -166,6 +166,14 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             
             return notifications.Select(n => MapToDto(n)).ToList();
         }
+        // Listar notificações InProgress
+        public async Task<List<VesselVisitNotificationDto>> GetInProgressNotificationsAsync()
+        {
+            var notifications = await _repo.GetByStateAsync(NotificationStatus.InProgress);
+    
+            return notifications.Select(n => MapToDto(n)).ToList();
+        }
+
         
         // Listar notificações aprovadas (prontas para scheduling)
         public async Task<List<VesselVisitNotificationDto>> GetApprovedNotificationsAsync()

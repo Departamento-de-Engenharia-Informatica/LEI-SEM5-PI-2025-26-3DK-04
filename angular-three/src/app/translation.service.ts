@@ -334,7 +334,7 @@ export class TranslationService {
         filterByOperatorPlaceholder: "Search by operator...",
         applyFilters: "Apply Filters",
         clearFilters: "Clear Filters",
-        
+
         imoNumber: "IMO Number",
         imoNumberPlaceholder: "7 digits",
         name: "Name",
@@ -349,7 +349,7 @@ export class TranslationService {
         active: "Active",
         inactive: "Inactive",
         actions: "Actions",
-        
+
         createTitle: "Create Vessel",
         editTitle: "Edit Vessel",
         create: "Create Vessel",
@@ -358,16 +358,16 @@ export class TranslationService {
         cancel: "Cancel",
         deactivate: "Deactivate",
         reactivate: "Reactivate",
-        
+
         noVessels: "No vessels found",
-        
+
         imoRequired: "IMO Number is required",
         imoInvalid: "IMO Number must be 7 digits",
         nameRequired: "Name is required",
         vesselTypeRequired: "Vessel Type is required",
         ownerRequired: "Owner is required",
         operatorRequired: "Operator is required",
-        
+
         createSuccess: "Vessel created successfully",
         createError: "Error creating vessel",
         updateSuccess: "Vessel updated successfully",
@@ -399,7 +399,7 @@ export class TranslationService {
         actions: "Actions",
         applyFilters: "Apply Filters",
         clearFilters: "Clear Filters",
-        
+
         createVesselType: "Create Vessel Type",
         editVesselType: "Edit Vessel Type",
         create: "Create",
@@ -408,16 +408,16 @@ export class TranslationService {
         edit: "Edit",
         deactivate: "Deactivate",
         reactivate: "Reactivate",
-        
+
         noData: "No vessel types found",
-        
+
         nameRequired: "Name is required",
         descriptionRequired: "Description is required",
         capacityInvalid: "Capacity must be greater than 0",
         maxRowsInvalid: "Max Rows must be greater than 0",
         maxBaysInvalid: "Max Bays must be greater than 0",
         maxTiersInvalid: "Max Tiers must be greater than 0",
-        
+
         createSuccess: "Vessel type created successfully",
         updateSuccess: "Vessel type updated successfully",
         deactivateSuccess: "Vessel type deactivated successfully",
@@ -523,7 +523,10 @@ export class TranslationService {
         view: "View Details",
 
         createTitle: "Create New Notification",
-        createSubmit: "Create & Submit",
+        createSubmit: "Create",
+        cancel: "Cancel",
+        noInProgress: "No notifications in progress",
+        inProgressListTitle: "Notifications In Progress",
         addCrew: "Add Crew",
         vessel: "Vessel",
         selectVessel: "Select a vessel",
@@ -557,7 +560,7 @@ export class TranslationService {
         createError: "Error creating notification",
         submitSuccess: "Notification submitted successfully",
         submitError: "Error submitting notification",
-        
+
         // Review (Approve/Reject)
         approve: "Approve",
         reject: "Reject",
@@ -569,7 +572,7 @@ export class TranslationService {
         rejectReason: "Rejection Reason",
         rejectReasonPlaceholder: "Enter reason for rejection",
         confirm: "Confirm",
-        cancel: "Cancel",
+        //cancel: "Cancel",
         dockRequired: "Dock is required for approval",
         officerRequired: "Officer ID is required",
         reasonRequired: "Rejection reason is required",
@@ -942,8 +945,10 @@ export class TranslationService {
         view: "Ver Detalhes",
 
         createTitle: "Criar Nova Notificação",
-        createSubmit: "Criar & Submeter",
-
+        createSubmit: "Criar",
+        cancel: "Cancelar",
+        noInProgress: "Não existem notificações em progresso",
+        inProgressListTitle: "Notificações em Progresso",
         addCrew: "Adicionar Tripulação",
         vessel: "Navio",
         selectVessel: "Selecionar um navio",
@@ -977,7 +982,7 @@ export class TranslationService {
         createError: "Erro ao criar a notificação",
         submitSuccess: "Notificação submetida com sucesso",
         submitError: "Erro ao submeter a notificação",
-        
+
         // Review (Aprovar/Rejeitar)
         approve: "Aprovar",
         reject: "Rejeitar",
@@ -989,7 +994,7 @@ export class TranslationService {
         rejectReason: "Motivo da Rejeição",
         rejectReasonPlaceholder: "Introduza o motivo da rejeição",
         confirm: "Confirmar",
-        cancel: "Cancelar",
+        //cancel: "Cancelar",
         dockRequired: "O cais é obrigatório para aprovação",
         officerRequired: "O ID do oficial é obrigatório",
         reasonRequired: "O motivo da rejeição é obrigatório",
@@ -1101,7 +1106,7 @@ export class TranslationService {
         filterByOperatorPlaceholder: "Procurar por operador...",
         applyFilters: "Aplicar Filtros",
         clearFilters: "Limpar Filtros",
-        
+
         imoNumber: "Número IMO",
         imoNumberPlaceholder: "7 dígitos",
         name: "Nome",
@@ -1116,7 +1121,7 @@ export class TranslationService {
         active: "Ativo",
         inactive: "Inativo",
         actions: "Ações",
-        
+
         createTitle: "Criar Navio",
         editTitle: "Editar Navio",
         create: "Criar Navio",
@@ -1125,16 +1130,16 @@ export class TranslationService {
         cancel: "Cancelar",
         deactivate: "Desativar",
         reactivate: "Reativar",
-        
+
         noVessels: "Nenhum navio encontrado",
-        
+
         imoRequired: "Número IMO é obrigatório",
         imoInvalid: "Número IMO deve ter 7 dígitos",
         nameRequired: "Nome é obrigatório",
         vesselTypeRequired: "Tipo de Navio é obrigatório",
         ownerRequired: "Proprietário é obrigatório",
         operatorRequired: "Operador é obrigatório",
-        
+
         createSuccess: "Navio criado com sucesso",
         createError: "Erro ao criar navio",
         updateSuccess: "Navio atualizado com sucesso",
@@ -1166,7 +1171,7 @@ export class TranslationService {
         actions: "Ações",
         applyFilters: "Aplicar Filtros",
         clearFilters: "Limpar Filtros",
-        
+
         createVesselType: "Criar Tipo de Navio",
         editVesselType: "Editar Tipo de Navio",
         create: "Criar",
@@ -1175,16 +1180,16 @@ export class TranslationService {
         edit: "Editar",
         deactivate: "Desativar",
         reactivate: "Reativar",
-        
+
         noData: "Nenhum tipo de navio encontrado",
-        
+
         nameRequired: "Nome é obrigatório",
         descriptionRequired: "Descrição é obrigatória",
         capacityInvalid: "Capacidade deve ser maior que 0",
         maxRowsInvalid: "Máximo de Filas deve ser maior que 0",
         maxBaysInvalid: "Máximo de Baías deve ser maior que 0",
         maxTiersInvalid: "Máximo de Níveis deve ser maior que 0",
-        
+
         createSuccess: "Tipo de navio criado com sucesso",
         updateSuccess: "Tipo de navio atualizado com sucesso",
         deactivateSuccess: "Tipo de navio desativado com sucesso",
