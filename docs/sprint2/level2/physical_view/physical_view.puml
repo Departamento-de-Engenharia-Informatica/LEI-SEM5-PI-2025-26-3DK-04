@@ -1,0 +1,42 @@
+@startuml
+title Level 2 Physical View
+
+skinparam defaultFontName Arial
+skinparam componentStyle rectangle
+skinparam node {
+  BackgroundColor #5DADE2
+  BorderColor #000000
+}
+skinparam component {
+  BackgroundColor #5DADE2
+  BorderColor #000000
+}
+
+node "localhost" as CLIENT {
+  component "<<component>>\nBrowser" as BROWSER {
+    component "<<component>>\nUI" as UI
+  }
+}
+
+node "server2" as WEB {
+  component "<<component>>\nHTTP Server" as WEBHTTP
+}
+
+node "server1" as APP {
+  component "<<component>>\nBackend App" as API
+  component "<<component>>\nPlaneamento" as PLAN
+}
+
+node "authentication" as AUTH {
+  component "<<component>>\nAuth Service" as AUTH2
+}
+
+API -down- PLAN
+
+BROWSER -[#1b4b5a]-> WEBHTTP : http/s
+BROWSER -[#1b4b5a]-> APP : http/s
+BROWSER -[#1b4b5a]-> AUTH
+APP -up[#1b4b5a]-> AUTH 
+
+
+@enduml

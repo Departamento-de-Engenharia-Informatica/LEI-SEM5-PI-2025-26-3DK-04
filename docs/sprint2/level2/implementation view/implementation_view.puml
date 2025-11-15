@@ -1,0 +1,25 @@
+@startuml
+title Level 2 Implementation View
+
+!define RECTANGLE class
+
+skinparam package {
+  BackgroundColor #87cefaff
+  BorderColor black
+}
+
+package "Port Management System" {
+  package UI
+  package Planning_Service
+  package Data_Service
+  package Auth_Service
+
+  UI .down.> Planning_Service
+  UI .down.> Data_Service
+  UI .down.> Auth_Service
+
+  Data_Service .up.> Auth_Service
+
+  Planning_Service .down.> Data_Service
+}
+@enduml
