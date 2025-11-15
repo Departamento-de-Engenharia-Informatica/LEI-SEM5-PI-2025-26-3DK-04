@@ -6,71 +6,137 @@
       <div class="role-card" style="cursor:pointer;">
         <h3>{{ t('manageOrganizations.create') }}</h3>
         <p>{{ t('manageOrganizations.createDesc') }}</p>
+
         <form (ngSubmit)="saveOrganization()">
+
+          <!-- ORG ID -->
           <div class="form-group">
             <label>{{ t('manageOrganizations.id') }}</label>
             <input [(ngModel)]="orgForm.id" name="id" required />
+            <div class="field-error" *ngIf="errors.orgId" style="color: red; margin-top:4px;">
+              {{ errors.orgId }}
+            </div>
           </div>
 
+          <!-- LEGAL NAME -->
           <div class="form-group">
             <label>{{ t('manageOrganizations.legalName') }}</label>
             <input [(ngModel)]="orgForm.legalName" name="legalName" required />
+            <div class="field-error" *ngIf="errors.legalName" style="color: red; margin-top:4px;">
+              {{ errors.legalName }}
+            </div>
           </div>
 
+          <!-- ALTERNATIVE NAME -->
           <div class="form-group">
             <label>{{ t('manageOrganizations.alternativeName') }}</label>
             <input [(ngModel)]="orgForm.alternativeName" name="alternativeName" />
           </div>
 
+          <!-- ADDRESS -->
           <div class="form-group">
             <label>{{ t('manageOrganizations.address') }}</label>
             <input [(ngModel)]="orgForm.address" name="address" required />
           </div>
 
+          <!-- TAX NUMBER -->
           <div class="form-group">
             <label>{{ t('manageOrganizations.taxNumber') }}</label>
-            <input [(ngModel)]="orgForm.taxNumber" name="taxNumber" required />
+            <div class="inline-input" style="display:flex; gap:8px; align-items:center;">
+              <select [(ngModel)]="orgForm.taxCountry" name="taxCountry">
+                <option *ngFor="let nat of nationalities" [value]="nat">{{ nat }}</option>
+              </select>
+              <input [(ngModel)]="orgForm.taxNumber" name="taxNumber" required />
+            </div>
+            <div class="field-error" *ngIf="errors.taxNumber" style="color: red; margin-top:4px;">
+              {{ errors.taxNumber }}
+            </div>
           </div>
 
+          <!-- REPRESENTATIVES -->
           <h3>{{ t('manageOrganizations.representativeSection') }}</h3>
-          <div *ngFor="let rep of orgForm.representatives; let i = index" class="representative-block">
+
+          <div *ngFor="let rep of orgForm.representatives; let i = index" class="representative-block" style="margin-bottom:12px; padding:8px; border:1px solid #eee; border-radius:6px;">
+
+            <!-- NAME -->
             <div class="form-group">
               <label>{{ t('manageOrganizations.name') }}</label>
               <input [(ngModel)]="rep.name" [name]="'name' + i" required />
+              <div class="field-error" *ngIf="errors.reps[i]?.name" style="color: red; margin-top:4px;">
+                {{ errors.reps[i]?.name }}
+              </div>
             </div>
+
+            <!-- CITIZEN ID -->
             <div class="form-group">
               <label>{{ t('manageOrganizations.citizenId') }}</label>
               <input [(ngModel)]="rep.citizenId" [name]="'citizenId' + i" required />
+              <div class="field-error" *ngIf="errors.reps[i]?.citizenId" style="color: red; margin-top:4px;">
+                {{ errors.reps[i]?.citizenId }}
+              </div>
             </div>
+
+            <!-- NATIONALITY -->
             <div class="form-group">
               <label>{{ t('manageOrganizations.nationality') }}</label>
-              <input [(ngModel)]="rep.nationality" [name]="'nationality' + i" required />
+              <div class="inline-input">
+                <select [(ngModel)]="rep.nationality" [name]="'nationality' + i">
+                  <option *ngFor="let nat of nationalities" [value]="nat">{{ nat }}</option>
+                </select>
+              </div>
             </div>
+
+            <!-- EMAIL -->
             <div class="form-group">
               <label>{{ t('manageOrganizations.email') }}</label>
               <input [(ngModel)]="rep.email" [name]="'email' + i" required />
+              <div class="field-error" *ngIf="errors.reps[i]?.email" style="color: red; margin-top:4px;">
+                {{ errors.reps[i]?.email }}
+              </div>
             </div>
+
+            <!-- PHONE -->
             <div class="form-group">
               <label>{{ t('manageOrganizations.phoneNumber') }}</label>
-              <input [(ngModel)]="rep.phoneNumber" [name]="'phoneNumber' + i" required />
+
+              <div class="inline-input" style="display:flex; gap:8px; align-items:center;">
+                <select [(ngModel)]="rep.phoneCountry" [name]="'repPhoneCountry' + i">
+                  <option *ngFor="let c of countryCodes" [ngValue]="c">
+                    {{ c.flag }} {{ c.code }}
+                  </option>
+                </select>
+
+                <input [(ngModel)]="rep.phoneNumber" [name]="'repPhoneNumber' + i" required />
+              </div>
+
+              <div class="field-error" *ngIf="errors.reps[i]?.phoneNumber" style="color: red; margin-top:4px;">
+                {{ errors.reps[i]?.phoneNumber }}
+              </div>
             </div>
 
-            <button type="button" class="secondary" (click)="removeRepresentative(i)">
-              {{ t('manageOrganizations.removeRepresentative') }}
-            </button>
-            <hr />
+            <div style="display:flex; gap:8px; margin-top:8px;">
+              <button type="button" class="secondary" (click)="removeRepresentative(i)">
+                {{ t('manageOrganizations.removeRepresentative') }}
+              </button>
+            </div>
           </div>
 
-          <button type="button" (click)="addRepresentative()">
-            {{ t('manageOrganizations.addRepresentative') }}
-          </button>
+          <div style="margin-top:8px;">
+            <button type="button" (click)="addRepresentative()">{{ t('manageOrganizations.addRepresentative') }}</button>
+          </div>
 
-          <div class="form-buttons">
+          <div class="form-buttons" style="margin-top:12px; display:flex; gap:8px; align-items:center;">
             <button type="submit">{{ t('manageOrganizations.create') }}</button>
             <button type="button" class="secondary" (click)="resetForm()">
               {{ t('manageOrganizations.cancel') }}
             </button>
           </div>
+
+          <!-- global error message -->
+          <div *ngIf="globalErrorMessage" style="color: red; margin-top:12px;">
+            {{ globalErrorMessage }}
+          </div>
+
         </form>
       </div>
     </div>

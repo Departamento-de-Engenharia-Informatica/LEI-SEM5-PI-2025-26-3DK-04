@@ -1,5 +1,5 @@
-﻿
-@use 'sass:color';
+﻿@use 'sass:color';
+
 $accent: #26327C;
 $panel: #f8f9fa;
 $shadow: 0 1px 3px rgba(0,0,0,0.08);
@@ -24,17 +24,7 @@ $shadow: 0 1px 3px rgba(0,0,0,0.08);
     margin-bottom: 30px;
   }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-    }
-  }
-
+  /* =================== FORM =================== */
   .form-group {
     margin-bottom: 15px;
 
@@ -44,22 +34,73 @@ $shadow: 0 1px 3px rgba(0,0,0,0.08);
       margin-bottom: 5px;
     }
 
-    input {
+    input, select {
       width: 100%;
       padding: 10px;
       border-radius: 4px;
       border: 1px solid #ccc;
+      box-sizing: border-box;
     }
   }
 
-  .form-buttons {
-    margin-top: 20px;
+  /* =================== INLINE INPUTS (select + input) =================== */
+  .inline-input {
+    display: flex;
+    gap: 10px;
 
-    button {
-      margin-right: 10px;
+    select {
+      flex: 0 0 40%;
+    }
+
+    input {
+      flex: 1;
     }
   }
 
+  /* =================== COLLAPSIBLE REPRESENTATIVE CARD =================== */
+  .rep-card {
+    background: white;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.08);
+  }
+
+  .rep-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+
+    h4 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .arrow {
+      transition: transform 0.2s ease;
+      font-size: 22px;
+      user-select: none;
+
+      &.open {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .rep-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease, padding 0.25s ease;
+
+    &.open {
+      max-height: 800px;
+      padding-top: 15px;
+    }
+  }
+
+  /* =================== BUTTONS =================== */
   button {
     background: $accent;
     color: white;
@@ -74,10 +115,25 @@ $shadow: 0 1px 3px rgba(0,0,0,0.08);
 
     &.secondary {
       background: #bbb;
+
       &:hover {
         background: color.adjust(#bbb, $lightness: -10%);
       }
     }
   }
-}
 
+  .form-buttons {
+    margin-top: 20px;
+
+    button {
+      margin-right: 10px;
+    }
+  }
+
+  /* ERROR TEXT */
+  .field-error {
+    color: #c62828;
+    font-size: 14px;
+    margin-top: 4px;
+  }
+}
