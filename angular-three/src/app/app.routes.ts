@@ -19,10 +19,6 @@ import { ManageQualifications } from './admin/manageQualifications/manageQualifi
 import { ActivationSuccess } from './admin/activation-success/activation-success';
 import { ManageOrganizations } from './admin/manage-organizations/manage-organizations';
 import { ManageRepresentatives } from './admin/manage-representatives/manage-representatives';
-import { ActivateRepresentative } from './admin/manage-representatives/activate-representative/activate-representative';
-import { DeactivateRepresentative } from './admin/manage-representatives/deactivate-representative/deactivate-representative';
-import { EditRepresentative } from './admin/manage-representatives/edit-representative/edit-representative';
-import { AddRepresentative } from './admin/manage-representatives/add-representative/add-representative';
 import { EditUser } from './admin/manageUsers/edit-user/edit-user';
 import { AddUser } from './admin/manageUsers/add-user/add-user';
 import { ManagePhysicalResources } from './admin/managePhysicalResources/managePhysicalResources';
@@ -72,30 +68,6 @@ export const routes: Routes = [
   {
     path: 'admin/manage-representatives',
     component: ManageRepresentatives,
-    canActivate: [RoleGuard],
-    data: { roles: ['admin'] }
-  },
-  {
-    path: 'admin/manage-representatives/add-representative',
-    component: AddRepresentative,
-    canActivate: [RoleGuard],
-    data: { roles: ['admin'] }
-  },
-  {
-    path: 'admin/manage-representatives/edit-representative',
-    component: EditRepresentative,
-    canActivate: [RoleGuard],
-    data: { roles: ['admin'] }
-  },
-  {
-    path: 'admin/manage-representatives/deactivate-representative',
-    component: DeactivateRepresentative,
-    canActivate: [RoleGuard],
-    data: { roles: ['admin'] }
-  },
-  {
-    path: 'admin/manage-representatives/activate-representative',
-    component: ActivateRepresentative,
     canActivate: [RoleGuard],
     data: { roles: ['admin'] }
   },

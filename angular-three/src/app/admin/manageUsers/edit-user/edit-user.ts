@@ -1,4 +1,4 @@
-﻿import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+﻿import {ChangeDetectorRef, Component, Inject, OnInit, PLATFORM_ID} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -26,6 +26,7 @@ export class EditUser implements OnInit {
     private adminService: AdminService,
     private translation: TranslationService,
     private router: Router,
+    private cdr: ChangeDetectorRef,
     private auth: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
@@ -60,6 +61,7 @@ export class EditUser implements OnInit {
         );
 
         this.filteredUsers = [...this.users];
+        this.cdr.detectChanges();
       },
       error: err => {
         console.error('Load users error', err);

@@ -1,32 +1,241 @@
-﻿<section class="manage-representatives-dashboard">
+﻿<section class="manage-representatives">
   <div class="container">
-    <h1>{{ t('manageRepresentatives.dashboardTitle') }}</h1>
-    <p>{{ t('manageRepresentatives.dashboardSubtitle') }}</p>
 
-    <div class="dashboard-cards">
-      <!-- Adicionar -->
-      <div class="dashboard-card" routerLink="/admin/manage-representatives/add-representative" style="cursor: pointer;">
-        <h3>{{ t('cards.add') }}</h3>
-        <p>{{ t('cards.addDesc') }}</p>
+    <!-- TÍTULO -->
+    <h1>{{ t('manageRepresentatives.title') }}</h1>
+
+    <!-- ================= ORGANIZAÇÕES ================= -->
+    <div class="filters-section">
+      <h3>{{ t('manageRepresentatives.organizationsTitle') }}</h3>
+
+      <div class="filter-group">
+        <label>{{ t('manageRepresentatives.searchOrganizationPlaceholder') }}</label>
+        <input type="text"
+               [(ngModel)]="orgSearchTerm"
+               (input)="applyOrgFilter()"
+               placeholder="{{ t('manageRepresentatives.searchOrganizationPlaceholder') }}">
       </div>
 
-      <!-- Editar -->
-      <div class="dashboard-card" routerLink="/admin/manage-representatives/edit-representative" style="cursor: pointer;">
-        <h3>{{ t('cards.edit') }}</h3>
-        <p>{{ t('cards.editDesc') }}</p>
+      <p *ngIf="loadingOrgs">{{ t('common.loading') }}...</p>
+
+      <!-- WRAPPER COM SCROLL -->
+      <div class="table-scroll" *ngIf="!loadingOrgs && filteredOrganizations.length > 0">
+        <table>
+          <thead>
+          <tr>
+            <th>{{ t('manageRepresentatives.organizationId') }}</th>
+            <th>{{ t('manageRepresentatives.organizationName') }}</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let org of filteredOrganizations">
+            <td>{{ org.id }}</td>
+            <td>{{ org.legalName }}</td>
+          </tr>
+          </tbody>
+        </table>
       </div>
 
-      <!-- Ativar -->
-      <div class="dashboard-card" routerLink="/admin/manage-representatives/activate-representative" style="cursor: pointer;">
-        <h3>{{ t('cards.activate') }}</h3>
-        <p>{{ t('cards.activateDesc') }}</p>
+      <p *ngIf="!loadingOrgs && filteredOrganizations.length === 0">
+        {{ t('manageRepresentatives.noOrganizations') }}
+      </p>
+    </div>
+
+    <hr>
+
+    <!-- ================= REPRESENTANTES ================= -->
+    <div class="filters-section">
+      <h3>{{ t('manageRepresentatives.listTitle') }}</h3>
+
+      <div class="filter-group">
+        <label>{{ t('manageRepresentatives.searchPlaceholder') }}</label>
+        <input type="text"
+               [(ngModel)]="repSearchTerm"
+               (input)="applyRepFilter()"
+               placeholder="{{ t('manageRepresentatives.searchPlaceholder') }}">
       </div>
 
-      <!-- Desativar -->
-      <div class="dashboard-card" routerLink="/admin/manage-representatives/deactivate-representative" style="cursor: pointer;">
-        <h3>{{ t('cards.deactivate') }}</h3>
-        <p>{{ t('cards.deactivateDesc') }}</p>
+      <div class="filter-buttons">
+        <button (click)="applyRepFilter()">{{ t('adminUI.filter') }}</button>
+        <button class="secondary" (click)="clearRepFilter()">{{ t('adminUI.clear') }}</button>
+        <button (click)="loadRepresentatives()">{{ t('adminUI.refresh') }}</button>
       </div>
+
+      <p *ngIf="loadingReps">{{ t('common.loading') }}...</p>
+
+      <!-- WRAPPER COM SCROLL -->
+      <div class="table-scroll" *ngIf="!loadingReps && filteredRepresentatives.length > 0">
+        <table>
+          <thead>
+          <tr>
+            <th>{{ t('manageRepresentatives.name') }}</th>
+            <th>{{ t('manageRepresentatives.email') }}</th>
+            <th>{{ t('manageRepresentatives.citizenId') }}</th>
+            <th>{{ t('manageRepresentatives.organizationId') }}</th>
+            <th>{{ t('manageRepresentatives.status') }}</th>
+            <th>{{ t('actions') }}</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr *ngFor="let r of filteredRepresentatives">
+            <td>{{ r.name }}</td>
+            <td>{{ r.email }}</td>
+            <td>{{ r.citizenId }}</td>
+            <td>{{ r.organizationId }}</td>
+            <td>
+              <span class="status-badge"
+                    [ngClass]="{
+                      'active': r.status === 'Active',
+                      'inactive': r.status === 'Inactive'
+                    }">
+                {{ r.status }}
+              </span>
+            </td>
+            <td>
+              <button (click)="editRepresentative(r)">
+                {{ t('edit') }}
+              </button>
+              <button class="secondary" (click)="openChangeStatusDialog(r)">
+                {{ t('manageRepresentatives.changeStatus') }}
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p *ngIf="!loadingReps && filteredRepresentatives.length === 0">
+        {{ t('manageRepresentatives.noRepresentatives') }}
+      </p>
+    </div>
+
+    <hr>
+
+    <!-- FORMULÁRIO -->
+    <div class="form-section">
+      <h3 *ngIf="!editingRep">{{ t('manageRepresentatives.createTitle') }}</h3>
+      <h3 *ngIf="editingRep">{{ t('manageRepresentatives.editTitle') }}</h3>
+
+      <form #repNgForm="ngForm" (ngSubmit)="saveRepresentative()" novalidate>
+
+        <!-- NAME -->
+        <div class="form-group">
+          <label>{{ t('manageRepresentatives.name') }}</label>
+          <input [(ngModel)]="repForm.name" name="name" required>
+        </div>
+
+        <!-- CITIZEN ID -->
+        <div class="form-group">
+          <label>{{ t('manageRepresentatives.citizenId') }}</label>
+          <input [(ngModel)]="repForm.citizenId"
+                 name="citizenId"
+                 required
+                 [disabled]="editingRep"
+                 (blur)="validateCitizenId(repForm.citizenId)">
+          <div class="field-error" *ngIf="errors.citizenId">
+            {{ errors.citizenId }}
+          </div>
+        </div>
+
+        <!-- NATIONALITY -->
+        <div class="form-group">
+          <label>{{ t('manageRepresentatives.nationality') }}</label>
+          <select [(ngModel)]="repForm.nationality" name="nationality">
+            <option *ngFor="let n of nationalities" [value]="n">{{ n }}</option>
+          </select>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="form-group">
+          <label>{{ t('manageRepresentatives.email') }}</label>
+          <input [(ngModel)]="repForm.email"
+                 name="email"
+                 type="email"
+                 required
+                 (blur)="validateEmail(repForm.email)">
+          <div class="field-error" *ngIf="errors.email">
+            {{ errors.email }}
+          </div>
+        </div>
+
+        <!-- PHONE -->
+        <div class="form-group phone-group">
+          <label>{{ t('manageRepresentatives.phone') }}</label>
+          <div class="phone-with-country">
+            <select [(ngModel)]="repForm.phoneCountry"
+                    name="phoneCountry"
+                    [compareWith]="compareCountryCode">
+              <option *ngFor="let c of countryCodes"
+                      [ngValue]="c">
+                {{ c.flag }} {{ c.name }} ({{ c.code }})
+              </option>
+            </select>
+
+            <input [(ngModel)]="repForm.phoneNumber"
+                   name="phoneNumber"
+                   required
+                   (blur)="validatePhone(repForm.phoneCountry.code, repForm.phoneNumber)">
+          </div>
+          <div class="field-error" *ngIf="errors.phoneNumber">
+            {{ errors.phoneNumber }}
+          </div>
+        </div>
+
+        <!-- ORG ID -->
+        <div class="form-group">
+          <label>{{ t('manageRepresentatives.organizationId') }}</label>
+          <input [(ngModel)]="repForm.organizationId"
+                 name="organizationId"
+                 required
+                 [disabled]="editingRep"
+                 (blur)="validateOrgId(repForm.organizationId)">
+          <div class="field-error" *ngIf="errors.organizationId">
+            {{ errors.organizationId }}
+          </div>
+        </div>
+
+        <!-- BUTTONS -->
+        <div class="form-buttons">
+          <button type="submit" [disabled]="isSaving">
+            {{ editingRep ? t('saveChanges') : t('create') }}
+          </button>
+          <button type="button"
+                  class="secondary"
+                  (click)="resetForm()">
+            {{ t('clear') }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-backdrop" *ngIf="statusModalOpen">
+    <div class="modal-box">
+
+      <h3>{{ t('manageRepresentatives.changeStatusTitle') }}</h3>
+
+      <p>{{ t('manageRepresentatives.currentStatus') }}:
+        <strong>{{ statusTarget?.status }}</strong>
+      </p>
+
+      <select [(ngModel)]="statusSelected">
+        <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+      </select>
+
+      <div class="modal-buttons">
+        <button (click)="confirmChangeStatus()">
+          {{ t('confirm') }}
+        </button>
+        <button class="secondary" (click)="closeStatusModal()">
+          {{ t('cancel') }}
+        </button>
+      </div>
+
     </div>
   </div>
+
 </section>
