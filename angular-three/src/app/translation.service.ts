@@ -107,6 +107,9 @@ export class TranslationService {
 
         addUserDesc: "Add a new system user",
         editUserDesc: "Edit existing user details and role",
+
+        manageVessels: "Manage Vessels",
+        manageVesselsDesc: "Create, edit or manage vessels and their information",
       },
 
       roles: {
@@ -277,6 +280,66 @@ export class TranslationService {
 
         editTitle: "Edit Staff Member",
         saveChanges: "Save Changes",
+      },
+
+      manageVessels: {
+        title: "Manage Vessels",
+        listTitle: "Vessels List",
+        refresh: "Refresh",
+        filters: "Filters",
+        filterBySearch: "Search",
+        filterBySearchPlaceholder: "Search vessels...",
+        filterByName: "Filter by Name",
+        filterByNamePlaceholder: "Search by name...",
+        filterByOwner: "Filter by Owner",
+        filterByOwnerPlaceholder: "Search by owner...",
+        filterByOperator: "Filter by Operator",
+        filterByOperatorPlaceholder: "Search by operator...",
+        applyFilters: "Apply Filters",
+        clearFilters: "Clear Filters",
+        
+        imoNumber: "IMO Number",
+        imoNumberPlaceholder: "7 digits",
+        name: "Name",
+        namePlaceholder: "Vessel name",
+        vesselType: "Vessel Type",
+        selectVesselType: "Select vessel type",
+        owner: "Owner",
+        ownerPlaceholder: "Owner name",
+        operator: "Operator",
+        operatorPlaceholder: "Operator name",
+        status: "Status",
+        active: "Active",
+        inactive: "Inactive",
+        actions: "Actions",
+        
+        createTitle: "Create Vessel",
+        editTitle: "Edit Vessel",
+        create: "Create Vessel",
+        edit: "Edit",
+        saveChanges: "Save Changes",
+        cancel: "Cancel",
+        deactivate: "Deactivate",
+        reactivate: "Reactivate",
+        
+        noVessels: "No vessels found",
+        
+        imoRequired: "IMO Number is required",
+        imoInvalid: "IMO Number must be 7 digits",
+        nameRequired: "Name is required",
+        vesselTypeRequired: "Vessel Type is required",
+        ownerRequired: "Owner is required",
+        operatorRequired: "Operator is required",
+        
+        createSuccess: "Vessel created successfully",
+        createError: "Error creating vessel",
+        updateSuccess: "Vessel updated successfully",
+        updateError: "Error updating vessel",
+        deactivateSuccess: "Vessel deactivated successfully",
+        reactivateSuccess: "Vessel reactivated successfully",
+        confirmDeactivate: "Are you sure you want to deactivate this vessel?",
+        confirmReactivate: "Are you sure you want to reactivate this vessel?",
+        loadVesselTypesError: "Error loading vessel types",
       },
 
       manageStorageAreas: {
@@ -574,6 +637,9 @@ export class TranslationService {
 
         addUserDesc: "Adicionar um novo utilizador ao sistema",
         editUserDesc: "Editar detalhes e função de um utilizador existente",
+
+        manageVessels: "Gerir Navios",
+        manageVesselsDesc: "Criar, editar ou gerir navios e suas informações",
       },
 
       roles: {
@@ -821,6 +887,66 @@ export class TranslationService {
 
         editTitle: "Editar Membro do Staff",
         saveChanges: "Guardar Alterações",
+      },
+
+      manageVessels: {
+        title: "Gerir Navios",
+        listTitle: "Lista de Navios",
+        refresh: "Atualizar",
+        filters: "Filtros",
+        filterBySearch: "Pesquisar",
+        filterBySearchPlaceholder: "Pesquisar navios...",
+        filterByName: "Filtrar por Nome",
+        filterByNamePlaceholder: "Procurar por nome...",
+        filterByOwner: "Filtrar por Proprietário",
+        filterByOwnerPlaceholder: "Procurar por proprietário...",
+        filterByOperator: "Filtrar por Operador",
+        filterByOperatorPlaceholder: "Procurar por operador...",
+        applyFilters: "Aplicar Filtros",
+        clearFilters: "Limpar Filtros",
+        
+        imoNumber: "Número IMO",
+        imoNumberPlaceholder: "7 dígitos",
+        name: "Nome",
+        namePlaceholder: "Nome do navio",
+        vesselType: "Tipo de Navio",
+        selectVesselType: "Selecione o tipo de navio",
+        owner: "Proprietário",
+        ownerPlaceholder: "Nome do proprietário",
+        operator: "Operador",
+        operatorPlaceholder: "Nome do operador",
+        status: "Estado",
+        active: "Ativo",
+        inactive: "Inativo",
+        actions: "Ações",
+        
+        createTitle: "Criar Navio",
+        editTitle: "Editar Navio",
+        create: "Criar Navio",
+        edit: "Editar",
+        saveChanges: "Guardar Alterações",
+        cancel: "Cancelar",
+        deactivate: "Desativar",
+        reactivate: "Reativar",
+        
+        noVessels: "Nenhum navio encontrado",
+        
+        imoRequired: "Número IMO é obrigatório",
+        imoInvalid: "Número IMO deve ter 7 dígitos",
+        nameRequired: "Nome é obrigatório",
+        vesselTypeRequired: "Tipo de Navio é obrigatório",
+        ownerRequired: "Proprietário é obrigatório",
+        operatorRequired: "Operador é obrigatório",
+        
+        createSuccess: "Navio criado com sucesso",
+        createError: "Erro ao criar navio",
+        updateSuccess: "Navio atualizado com sucesso",
+        updateError: "Erro ao atualizar navio",
+        deactivateSuccess: "Navio desativado com sucesso",
+        reactivateSuccess: "Navio reativado com sucesso",
+        confirmDeactivate: "Tem certeza que deseja desativar este navio?",
+        confirmReactivate: "Tem certeza que deseja reativar este navio?",
+        loadVesselTypesError: "Erro ao carregar tipos de navios",
       },
 
       manageStorageAreas: {

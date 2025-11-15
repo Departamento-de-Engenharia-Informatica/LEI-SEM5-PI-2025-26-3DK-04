@@ -23,6 +23,8 @@ import { EditUser } from './admin/manageUsers/edit-user/edit-user';
 import { AddUser } from './admin/manageUsers/add-user/add-user';
 import { ManagePhysicalResources } from './admin/managePhysicalResources/managePhysicalResources';
 import { ManageVesselVisitNotifications } from './admin/manageVesselVisitNotifications/manageVesselVisitNotifications';
+import { Vessels } from './PortAuthorityOfficer/vessels/vessels';
+
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'cube', component: Cube },
@@ -117,6 +119,13 @@ export const routes: Routes = [
   {
     path: 'port-officer',
     component: PortAuthorityUI,
+    canActivate: [RoleGuard],
+    data: { roles: ['portauthorityofficer','admin'] }
+  },
+
+  {
+    path: 'port-officer/vessels',
+    component: Vessels,
     canActivate: [RoleGuard],
     data: { roles: ['portauthorityofficer','admin'] }
   },

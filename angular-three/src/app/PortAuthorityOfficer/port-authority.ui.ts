@@ -1,13 +1,14 @@
 ﻿import { Component, Inject, PLATFORM_ID } from '@angular/core';
 import { TranslationService } from '../translation.service';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-port-authority-ui',
   standalone: true,
   templateUrl: './port-authority.ui.html',
   styleUrl: './port-authority.ui.scss',
-  imports: [CommonModule]
+  imports: [CommonModule, RouterLink]
 })
 export class PortAuthorityUI {
   currentLang = 'en';

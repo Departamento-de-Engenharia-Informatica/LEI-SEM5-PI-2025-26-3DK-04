@@ -1,0 +1,172 @@
+<section class="manage-vessels">
+  <div class="container">
+    <h1>{{ t('manageVessels.title') }}</h1>
+
+    <div>
+      <h2>{{ t('manageVessels.listTitle') }}</h2>
+      <button (click)="loadVessels()">{{ t('manageVessels.refresh') }}</button>
+
+      <div class="filters-section">
+        <h3>{{ t('manageVessels.filters') }}</h3>
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label>{{ t('manageVessels.filterBySearch') }}</label>
+            <input
+              type="text"
+              [(ngModel)]="filters.search"
+              name="filterSearch"
+              placeholder="{{ t('manageVessels.filterBySearchPlaceholder') }}"
+              (keyup.enter)="applyFilters()"
+            />
+          </div>
+
+          <div class="filter-group">
+            <label>{{ t('manageVessels.filterByName') }}</label>
+            <input
+              type="text"
+              [(ngModel)]="filters.name"
+              name="filterName"
+              placeholder="{{ t('manageVessels.filterByNamePlaceholder') }}"
+              (keyup.enter)="applyFilters()"
+            />
+          </div>
+
+          <div class="filter-group">
+            <label>{{ t('manageVessels.filterByOwner') }}</label>
+            <input
+              type="text"
+              [(ngModel)]="filters.owner"
+              name="filterOwner"
+              placeholder="{{ t('manageVessels.filterByOwnerPlaceholder') }}"
+              (keyup.enter)="applyFilters()"
+            />
+          </div>
+
+          <div class="filter-group">
+            <label>{{ t('manageVessels.filterByOperator') }}</label>
+            <input
+              type="text"
+              [(ngModel)]="filters.operator"
+              name="filterOperator"
+              placeholder="{{ t('manageVessels.filterByOperatorPlaceholder') }}"
+              (keyup.enter)="applyFilters()"
+            />
+          </div>
+        </div>
+
+        <div class="filter-buttons">
+          <button class="primary" (click)="applyFilters()">{{ t('manageVessels.applyFilters') }}</button>
+          <button class="secondary" (click)="clearFilters()">{{ t('manageVessels.clearFilters') }}</button>
+        </div>
+      </div>
+
+      <table *ngIf="vessels.length > 0">
+        <thead>
+        <tr>
+          <th>{{ t('manageVessels.imoNumber') }}</th>
+          <th>{{ t('manageVessels.name') }}</th>
+          <th>{{ t('manageVessels.vesselType') }}</th>
+          <th>{{ t('manageVessels.owner') }}</th>
+          <th>{{ t('manageVessels.operator') }}</th>
+          <th>{{ t('manageVessels.status') }}</th>
+          <th>{{ t('manageVessels.actions') }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let vessel of vessels">
+          <td>{{ vessel.imoNumber }}</td>
+          <td>{{ vessel.name }}</td>
+          <td>{{ vessel.vesselTypeName }}</td>
+          <td>{{ vessel.owner }}</td>
+          <td>{{ vessel.operator }}</td>
+          <td>
+            <span [class]="getStatusClass(vessel.active)">
+              {{ vessel.active ? (t('manageVessels.active') || 'Active') : (t('manageVessels.inactive') || 'Inactive') }}
+            </span>
+          </td>
+          <td>
+            <button (click)="editVessel(vessel)">{{ t('manageVessels.edit') }}</button>
+            <button *ngIf="vessel.active" class="warning" (click)="deactivateVessel(vessel.id)">
+              {{ t('manageVessels.deactivate') }}
+            </button>
+            <button *ngIf="!vessel.active" class="success" (click)="reactivateVessel(vessel.id)">
+              {{ t('manageVessels.reactivate') }}
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <p *ngIf="vessels.length === 0">
+        {{ t('manageVessels.noVessels') }}
+      </p>
+    </div>
+
+    <hr />
+
+    <form (ngSubmit)="saveVessel()">
+      <h2>{{ editing ? t('manageVessels.editTitle') : t('manageVessels.createTitle') }}</h2>
+
+      <div class="form-group">
+        <label>{{ t('manageVessels.imoNumber') }}</label>
+        <input 
+          [(ngModel)]="vesselForm.imoNumber" 
+          name="imoNumber" 
+          placeholder="{{ t('manageVessels.imoNumberPlaceholder') }}" 
+          required 
+          maxlength="7"
+          pattern="[0-9]{7}"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('manageVessels.name') }}</label>
+        <input 
+          [(ngModel)]="vesselForm.name" 
+          name="name" 
+          placeholder="{{ t('manageVessels.namePlaceholder') }}" 
+          required 
+        />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('manageVessels.vesselType') }}</label>
+        <select [(ngModel)]="vesselForm.vesselTypeId" name="vesselTypeId" required>
+          <option value="">{{ t('manageVessels.selectVesselType') }}</option>
+          <option *ngFor="let type of vesselTypes" [value]="type.id">{{ type.name }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('manageVessels.owner') }}</label>
+        <input 
+          [(ngModel)]="vesselForm.owner" 
+          name="owner" 
+          placeholder="{{ t('manageVessels.ownerPlaceholder') }}" 
+          required 
+        />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('manageVessels.operator') }}</label>
+        <input 
+          [(ngModel)]="vesselForm.operator" 
+          name="operator" 
+          placeholder="{{ t('manageVessels.operatorPlaceholder') }}" 
+          required 
+        />
+      </div>
+
+      <div class="form-buttons">
+        <button type="submit">
+          {{ editing
+          ? t('manageVessels.saveChanges')
+          : t('manageVessels.create') }}
+        </button>
+        <button type="button" class="secondary" (click)="resetForm()">
+          {{ t('manageVessels.cancel') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
