@@ -556,7 +556,27 @@ export class TranslationService {
         createSuccess: "Notification created successfully",
         createError: "Error creating notification",
         submitSuccess: "Notification submitted successfully",
-        submitError: "Error submitting notification"
+        submitError: "Error submitting notification",
+        
+        // Review (Approve/Reject)
+        approve: "Approve",
+        reject: "Reject",
+        approveTitle: "Approve Vessel Visit Notification",
+        rejectTitle: "Reject Vessel Visit Notification",
+        assignDock: "Assign Dock",
+        officerId: "Officer ID",
+        officerIdPlaceholder: "Enter officer ID",
+        rejectReason: "Rejection Reason",
+        rejectReasonPlaceholder: "Enter reason for rejection",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        dockRequired: "Dock is required for approval",
+        officerRequired: "Officer ID is required",
+        reasonRequired: "Rejection reason is required",
+        approveSuccess: "Notification approved successfully",
+        approveError: "Error approving notification",
+        rejectSuccess: "Notification rejected successfully",
+        rejectError: "Error rejecting notification"
       },
 
       // NEW/UPDATED MANAGE USERS
@@ -956,7 +976,27 @@ export class TranslationService {
         createSuccess: "Notificação criada com sucesso",
         createError: "Erro ao criar a notificação",
         submitSuccess: "Notificação submetida com sucesso",
-        submitError: "Erro ao submeter a notificação"
+        submitError: "Erro ao submeter a notificação",
+        
+        // Review (Aprovar/Rejeitar)
+        approve: "Aprovar",
+        reject: "Rejeitar",
+        approveTitle: "Aprovar Notificação de Visita de Navio",
+        rejectTitle: "Rejeitar Notificação de Visita de Navio",
+        assignDock: "Atribuir Cais",
+        officerId: "ID do Oficial",
+        officerIdPlaceholder: "Introduza o ID do oficial",
+        rejectReason: "Motivo da Rejeição",
+        rejectReasonPlaceholder: "Introduza o motivo da rejeição",
+        confirm: "Confirmar",
+        cancel: "Cancelar",
+        dockRequired: "O cais é obrigatório para aprovação",
+        officerRequired: "O ID do oficial é obrigatório",
+        reasonRequired: "O motivo da rejeição é obrigatório",
+        approveSuccess: "Notificação aprovada com sucesso",
+        approveError: "Erro ao aprovar a notificação",
+        rejectSuccess: "Notificação rejeitada com sucesso",
+        rejectError: "Erro ao rejeitar a notificação"
       },
 
       vesselScheduling: {

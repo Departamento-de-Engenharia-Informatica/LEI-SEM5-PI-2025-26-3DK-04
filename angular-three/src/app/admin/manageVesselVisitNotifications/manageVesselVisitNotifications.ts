@@ -20,6 +20,16 @@ export class ManageVesselVisitNotifications implements OnInit {
 
   submittedNotifications: any[] = [];
   selectedNotification: any = null;
+  
+  // Review modal state
+  showReviewModal: boolean = false;
+  reviewAction: 'approve' | 'reject' | null = null;
+  reviewNotification: any = null;
+  reviewForm: any = {
+    dockId: null,
+    officerId: '',
+    reason: ''
+  };
 
   // Form model aligned with CreateNotificationDto
   form: any = {
@@ -112,6 +122,83 @@ export class ManageVesselVisitNotifications implements OnInit {
         alert('Error: ' + (err?.error?.message || err));
       }
     });
+  }
+
+  /* -------------------
+     REVIEW (APPROVE/REJECT)
+  ------------------- */
+  openReviewModal(notification: any, action: 'approve' | 'reject') {
+    this.reviewNotification = notification;
+    this.reviewAction = action;
+    this.showReviewModal = true;
+    this.reviewForm = {
+      dockId: notification.dockId || null,
+      officerId: '',
+      reason: ''
+    };
+  }
+
+  closeReviewModal() {
+    this.showReviewModal = false;
+    this.reviewNotification = null;
+    this.reviewAction = null;
+    this.reviewForm = { dockId: null, officerId: '', reason: '' };
+  }
+
+  confirmReview() {
+    if (!this.reviewNotification || !this.reviewAction) return;
+
+    if (this.reviewAction === 'approve') {
+      if (!this.reviewForm.dockId) {
+        alert(this.t('vesselVisitNotifications.dockRequired'));
+        return;
+      }
+      if (!this.reviewForm.officerId) {
+        alert(this.t('vesselVisitNotifications.officerRequired'));
+        return;
+      }
+
+      this.adminService.approveVesselVisitNotification(
+        this.reviewNotification.id,
+        this.reviewForm.dockId,
+        this.reviewForm.officerId
+      ).subscribe({
+        next: () => {
+          alert(this.t('vesselVisitNotifications.approveSuccess'));
+          this.closeReviewModal();
+          this.loadSubmittedNotifications();
+        },
+        error: err => {
+          console.error('Error approving notification', err);
+          alert(this.t('vesselVisitNotifications.approveError') + ': ' + (err?.error?.Message || err?.message || err));
+        }
+      });
+    } else if (this.reviewAction === 'reject') {
+      if (!this.reviewForm.reason) {
+        alert(this.t('vesselVisitNotifications.reasonRequired'));
+        return;
+      }
+      if (!this.reviewForm.officerId) {
+        alert(this.t('vesselVisitNotifications.officerRequired'));
+        return;
+      }
+
+      this.adminService.rejectVesselVisitNotification(
+        this.reviewNotification.id,
+        this.reviewForm.reason,
+        this.reviewForm.officerId
+      ).subscribe({
+        next: () => {
+          alert(this.t('vesselVisitNotifications.rejectSuccess'));
+          this.closeReviewModal();
+          this.loadSubmittedNotifications();
+        },
+        error: err => {
+          console.error('Error rejecting notification', err);
+          alert(this.t('vesselVisitNotifications.rejectError') + ': ' + (err?.error?.Message || err?.message || err));
+        }
+      });
+    }
   }
 
 

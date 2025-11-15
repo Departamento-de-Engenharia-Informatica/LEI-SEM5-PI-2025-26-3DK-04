@@ -290,7 +290,7 @@ export class AdminService {
     );
   }
   // VESSEL VISIT NOTIFICATION management
-  private vesselVisitNotificationBaseUrl = 'https://localhost:5001/api/VesselVisitNotification';
+  private vesselVisitNotificationBaseUrl = 'https://localhost:5001/api/VesselVisitNotifications';
 
   createVesselVisitNotification(dto: any): Observable<any> {
     return this.http.post(`${this.vesselVisitNotificationBaseUrl}`, dto);
@@ -307,6 +307,22 @@ export class AdminService {
 // GET submitted vessel visit notifications
   getSubmittedVesselVisitNotifications() {
     return this.http.get<any[]>(`${this.baseUrl}/VesselVisitNotifications/submitted`);
+  }
+
+  // APPROVE vessel visit notification
+  approveVesselVisitNotification(id: string, dockId: string, officerId: string): Observable<any> {
+    return this.http.put(`${this.vesselVisitNotificationBaseUrl}/${id}/approve`, {
+      DockId: dockId,
+      OfficerId: officerId
+    });
+  }
+
+  // REJECT vessel visit notification
+  rejectVesselVisitNotification(id: string, reason: string, officerId: string): Observable<any> {
+    return this.http.put(`${this.vesselVisitNotificationBaseUrl}/${id}/reject`, {
+      Reason: reason,
+      OfficerId: officerId
+    });
   }
 
   getVessels(): Observable<any[]> { return this.http.get<any[]>(this.vesselTypeBaseUrl); }
