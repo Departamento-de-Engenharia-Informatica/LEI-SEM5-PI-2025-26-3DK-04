@@ -77,7 +77,7 @@ namespace DDDSample1.Infrastructure.Organizations
         public async Task<Representative> GetRepresentativeByCitizenCardAsync(string citizenCard)
         {
             return await _objs
-                .FirstOrDefaultAsync(r => r.Id.AsString() == citizenCard);
+                .FirstOrDefaultAsync(r => r.Id.Value == citizenCard);
         }
 
         public async Task<Representative> GetRepresentativeByPhoneAsync(string phone)

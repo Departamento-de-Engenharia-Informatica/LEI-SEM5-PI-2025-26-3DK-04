@@ -98,8 +98,6 @@ namespace DDDSample1.Controllers
         public async Task<ActionResult<RepresentativeDto>> GetById(string id)
         {
             var rep = await _service.GetByIdAsync(id);
-            if (rep == null)
-                return NotFound(new { Message = $"Representative with ID {id} not found." });
 
             return Ok(rep);
         }

@@ -16,6 +16,7 @@ namespace DDDSample1.Domain.Organizations
         // Buscar representante por email (opcional, útil para validação)
         Task<Representative> GetByEmailAsync(string email);
         Task<bool> ExistsWithEmailAsync(string email);
+        Task<Representative> GetByCitizenIdAsync(string citizenId);
         Task<bool> ExistsWithPhoneAsync(string phoneNumber);
         Task<bool> ExistsWithCidAsync(string cid);
         Task DeleteAsync(Representative rep);

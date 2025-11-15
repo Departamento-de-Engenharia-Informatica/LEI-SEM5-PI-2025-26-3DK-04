@@ -30,9 +30,12 @@ namespace DDDSample1.Domain.Organizations
             if (existingById != null)
                 throw new BusinessRuleValidationException($"An organization with ID '{dto.Id}' already exists.");
 
-            if (await _repo.ExistsWithLegalNameAsync(dto.LegalName))
+            if (await _repo.GetByLegalNameAsync(dto.LegalName) != null)
                 throw new BusinessRuleValidationException("An organization with this legal name already exists.");
-
+            
+            if (await _repo.GetByTaxNumberAsync(dto.TaxNumber) != null)
+                throw new BusinessRuleValidationException("An organization with this tax number already exists.");
+            
             var org = new Organization(dto.Id, dto.LegalName, dto.AlternativeName, dto.Address, dto.TaxNumber);
 
 
@@ -80,7 +83,7 @@ namespace DDDSample1.Domain.Organizations
         
         public async Task<bool> LegalNameExistsAsync(string legalName)
         {
-            var org = await _repo.ExistsWithLegalNameAsync(legalName);
+            var org = await _repo.GetByLegalNameAsync(legalName);
             return org != null;
         }
         public async Task<bool> TaxNumberExistsAsync(string taxNumber)

@@ -43,10 +43,7 @@ namespace DDDSample1.Controllers
             try
             {
                 var org = await _service.GetByIdAsync(id);
-
-                if (org == null)
-                    return NotFound(new { Message = $"Organization with ID {id} not found." });
-
+                
                 return Ok(org);
             }
             catch (BusinessRuleValidationException ex)

@@ -203,7 +203,7 @@ namespace DDDSample1.Domain.Organizations
 
         public async Task<bool> CitizenIdExistsAsync(string cid)
         {
-            var rep = await _repo.GetRepresentativeByCitizenCardAsync(cid);
+            var rep = await _repo.GetByCitizenIdAsync(cid);
             return rep != null;
         }
 

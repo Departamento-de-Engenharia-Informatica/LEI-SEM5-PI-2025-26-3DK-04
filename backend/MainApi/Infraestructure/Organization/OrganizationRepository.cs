@@ -14,14 +14,14 @@ namespace DDDSample1.Infrastructure.Organizations
         {
         }
 
-        public async Task<bool> ExistsWithLegalNameAsync(string legalName)
+        public async Task<Organization> GetByLegalNameAsync(string legalName)
         {
-            return await _objs.AnyAsync(o => o.LegalName == legalName);
+            return await _objs.FirstOrDefaultAsync(o => o.LegalName == legalName);
         }
         
-        public async Task<bool> GetByTaxNumberAsync(string taxNumber)
+        public async Task<Organization> GetByTaxNumberAsync(string taxNumber)
         {
-            return await _objs.AnyAsync(o => o.TaxNumber == taxNumber);
+            return await _objs.FirstOrDefaultAsync(o => o.TaxNumber == taxNumber);
         }
 
         public async Task<List<Organization>> GetAllAsync()
