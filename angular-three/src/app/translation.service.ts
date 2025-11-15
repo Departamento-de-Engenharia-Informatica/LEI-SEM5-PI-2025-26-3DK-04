@@ -411,7 +411,7 @@ export class TranslationService {
 
         createTitle: "Create New Notification",
         createSubmit: "Create & Submit",
-
+        addCrew: "Add Crew",
         vessel: "Vessel",
         selectVessel: "Select a vessel",
         representative: "Representative",
@@ -598,6 +598,8 @@ export class TranslationService {
           manageQualificationsDesc: "Criar, editar ou eliminar qualificações para membros do staff",
           manageVesselVisitNotificationsDesc: "Criar, editar ou gerir notificações de visitas de navios",
           manageVesselVisitNotifications: "Gerir Notificações de Visitas de Navios",
+          managePhysicalResources: "Gerir Recursos Fisicos",
+          managePhysicalResourcesDesc: "Criar, editar ou gerir recursos fisicos e os seus estados",
         },
         // NEW KEYS
         filter: "Filtrar",
@@ -803,6 +805,7 @@ export class TranslationService {
         createTitle: "Criar Nova Notificação",
         createSubmit: "Criar & Submeter",
 
+        addCrew: "Adicionar Tripulação",
         vessel: "Navio",
         selectVessel: "Selecionar um navio",
         representative: "Representante",
