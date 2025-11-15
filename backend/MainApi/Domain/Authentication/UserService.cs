@@ -149,6 +149,13 @@ namespace DDDSample1.Domain.Authentication
             var users = await _repo.GetAllAsync();
             return users.Select(ToDto);
         }
+        
+        public async Task<UserDto> GetUserByIdAsync(string email)
+        {
+            var user = await _repo.GetByEmailAsync(email);
+            return ToDto(user);
+        }
+        
 
         private UserDto ToDto(User u)
         {

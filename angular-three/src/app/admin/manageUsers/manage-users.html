@@ -1,20 +1,124 @@
-﻿<section class="manage-users-dashboard">
+﻿<section class="manage-users">
   <div class="container">
-    <h1>{{ t('manageUsers.dashboardTitle') }}</h1>
-    <p>{{ t('manageUsers.dashboardSubtitle') }}</p>
 
-    <div class="dashboard-cards">
-      <!-- Adicionar -->
-      <div class="dashboard-card" routerLink="/admin/manage-users/add-user" style="cursor: pointer;">
-        <h3>{{ t('cards.add') }}</h3>
-        <p>{{ t('cards.addUserDesc') }}</p>
+    <h1>{{ t('manageUsers.title') || 'Gerir Usuários' }}</h1>
+
+    <div class="list-section">
+      <h3>{{ t('manageUsers.listTitle') || 'Usuários Registados' }}</h3>
+
+      <div class="list-controls">
+        <input type="text"
+               [(ngModel)]="searchTerm"
+               (input)="applyFilter()"
+               placeholder="{{ t('manageUsers.searchPlaceholder') || 'Pesquisar por Nome, Email ou Role...' }}">
+        <button (click)="loadUsers()">{{ t('adminUI.refresh') || 'Atualizar' }}</button>
       </div>
 
-      <!-- Editar -->
-      <div class="dashboard-card" routerLink="/admin/manage-users/edit-user" style="cursor: pointer;">
-        <h3>{{ t('cards.edit') }}</h3>
-        <p>{{ t('cards.editUserDesc') }}</p>
+      <p *ngIf="loadingUsers">{{ t('common.loading') || 'A carregar' }}...</p>
+
+      <div class="message success" *ngIf="messageSuccess">{{ messageSuccess }}</div>
+      <div class="message error" *ngIf="messageError">{{ messageError }}</div>
+
+      <div class="table-scroll" *ngIf="!loadingUsers && filteredUsers.length > 0">
+        <table>
+          <thead>
+          <tr>
+            <th>{{ t('manageUsers.name') || 'Nome' }}</th>
+            <th>{{ t('manageUsers.email') || 'Email' }}</th>
+            <th>{{ t('manageUsers.role') || 'Role' }}</th>
+            <th>{{ t('manageUsers.actions') || 'Ações' }}</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let u of paginatedUsers">
+            <td>{{ u.name }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ t('roles.' + u.role) || u.role }}</td>
+            <td>
+              <button (click)="selectUser(u)">
+                {{ t('manageUsers.edit') || 'Editar' }}
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p *ngIf="!loadingUsers && filteredUsers.length === 0">
+        {{ t('manageUsers.noUsers') || 'Nenhum usuário encontrado.' }}
+      </p>
+
+      <div class="pagination-controls" *ngIf="filteredUsers.length > pageSize">
+        <button (click)="currentPage = currentPage - 1"
+                [disabled]="currentPage === 1">
+          &lt; {{ t('common.previous') || 'Anterior' }}
+        </button>
+        <span>{{ t('common.page') || 'Página' }} {{ currentPage }} / {{ (filteredUsers.length / pageSize) | number:'1.0-0' }}</span>
+        <button (click)="currentPage = currentPage + 1"
+                [disabled]="currentPage * pageSize >= filteredUsers.length">
+          {{ t('common.next') || 'Próximo' }} &gt;
+        </button>
       </div>
     </div>
+
+    <hr>
+
+    <div class="form-section" id="userFormSection">
+      <h3 *ngIf="!editingUser">{{ t('manageUsers.createTitle') || 'Adicionar Novo Usuário' }}</h3>
+      <h3 *ngIf="editingUser">{{ t('manageUsers.editTitle') || 'Editar Role do Usuário' }}</h3>
+
+      <form #userNgForm="ngForm" (ngSubmit)="saveUser()" novalidate>
+
+        <div class="form-group">
+          <label>{{ t('manageUsers.email') || 'Email' }}</label>
+          <input [(ngModel)]="userForm.email"
+                 name="email"
+                 type="email"
+                 required
+                 [disabled]="editingUser"
+                 (blur)="!editingUser && validateEmail(userForm.email, editingUser)">
+          <div class="field-error" *ngIf="errors.email">{{ errors.email }}</div>
+          <p class="form-hint" *ngIf="editingUser">
+            {{ t('manageUsers.emailReadOnly') || 'O Email não pode ser alterado.' }}
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label>{{ t('manageUsers.name') || 'Nome' }}</label>
+          <input [(ngModel)]="userForm.name"
+                 name="name"
+                 required
+                 [disabled]="editingUser">
+          <div class="field-error" *ngIf="errors.name">{{ errors.name }}</div>
+          <p class="form-hint" *ngIf="editingUser">
+            {{ t('manageUsers.nameReadOnly') || 'O Nome não pode ser alterado.' }}
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label>{{ t('manageUsers.role') || 'Role' }}</label>
+          <select [(ngModel)]="userForm.role"
+                  name="role"
+                  required>
+            <option *ngFor="let role of roles" [value]="role">
+              {{ t('roles.' + role) || role }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-buttons">
+          <button type="submit" [disabled]="isSaving">
+            {{ editingUser ? t('saveChanges') : t('create') }}
+          </button>
+          <button type="button"
+                  class="secondary"
+                  (click)="resetForm()">
+            {{ editingUser ? t('manageUsers.cancelEdit') : t('clear') }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+
   </div>
 </section>

@@ -19,8 +19,6 @@ import { ManageQualifications } from './admin/manageQualifications/manageQualifi
 import { ActivationSuccess } from './admin/activation-success/activation-success';
 import { ManageOrganizations } from './admin/manage-organizations/manage-organizations';
 import { ManageRepresentatives } from './admin/manage-representatives/manage-representatives';
-import { EditUser } from './admin/manageUsers/edit-user/edit-user';
-import { AddUser } from './admin/manageUsers/add-user/add-user';
 import { ManagePhysicalResources } from './admin/managePhysicalResources/managePhysicalResources';
 import { ManageVesselVisitNotifications } from './admin/manageVesselVisitNotifications/manageVesselVisitNotifications';
 export const routes: Routes = [
@@ -42,18 +40,6 @@ export const routes: Routes = [
   {
     path: 'admin/manage-users',
     component: ManageUsers,
-    canActivate: [RoleGuard],
-    data: { roles: ['admin'] }
-  },
-  {
-    path: 'admin/manage-users/edit-user',
-    component: EditUser,
-    canActivate: [RoleGuard],
-    data: { roles: ['admin'] }
-  },
-  {
-    path: 'admin/manage-users/add-user',
-    component: AddUser,
     canActivate: [RoleGuard],
     data: { roles: ['admin'] }
   },

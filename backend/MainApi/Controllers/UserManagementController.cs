@@ -82,5 +82,12 @@ namespace DDDSample1.Controllers
             var list = await _service.GetAllUsersAsync();
             return Ok(list);
         }
+        
+        [HttpGet("get/{email}")]
+        public async Task<IActionResult> GetUserByEmail(string email)
+        {
+            var user = await _service.GetUserByIdAsync(email);
+            return Ok(user);
+        }
     }
 }
