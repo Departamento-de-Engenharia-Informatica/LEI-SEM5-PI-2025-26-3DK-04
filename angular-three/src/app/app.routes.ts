@@ -22,6 +22,7 @@ import { ManageRepresentatives } from './admin/manage-representatives/manage-rep
 import { ManagePhysicalResources } from './admin/managePhysicalResources/managePhysicalResources';
 import { ManageVesselVisitNotifications } from './admin/manageVesselVisitNotifications/manageVesselVisitNotifications';
 import { Vessels } from './PortAuthorityOfficer/vessels/vessels';
+import { VesselTypes } from './PortAuthorityOfficer/vessel-types/vessel-types';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -112,6 +113,13 @@ export const routes: Routes = [
   {
     path: 'port-officer/vessels',
     component: Vessels,
+    canActivate: [RoleGuard],
+    data: { roles: ['portauthorityofficer','admin'] }
+  },
+
+  {
+    path: 'port-officer/vessel-types',
+    component: VesselTypes,
     canActivate: [RoleGuard],
     data: { roles: ['portauthorityofficer','admin'] }
   },

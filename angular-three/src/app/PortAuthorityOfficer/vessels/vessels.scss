@@ -114,6 +114,12 @@ $warning: #ffc107;
       color: #dc3545;
       font-weight: bold;
     }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
   }
 
   .no-data {

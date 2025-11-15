@@ -123,6 +123,9 @@ export class TranslationService {
 
         manageVessels: "Manage Vessels",
         manageVesselsDesc: "Create, edit or manage vessels and their information",
+
+        manageVesselTypes: "Manage Vessel Types",
+        manageVesselTypesDesc: "Create, edit or manage vessel types and their specifications",
       },
 
       roles: {
@@ -374,6 +377,53 @@ export class TranslationService {
         confirmDeactivate: "Are you sure you want to deactivate this vessel?",
         confirmReactivate: "Are you sure you want to reactivate this vessel?",
         loadVesselTypesError: "Error loading vessel types",
+      },
+
+      manageVesselTypes: {
+        title: "Manage Vessel Types",
+        vesselTypesList: "Vessel Types List",
+        filters: "Filters",
+        search: "Search",
+        searchPlaceholder: "Search vessel types...",
+        name: "Name",
+        namePlaceholder: "Vessel type name...",
+        description: "Description",
+        descriptionPlaceholder: "Description...",
+        capacity: "Capacity",
+        maxRows: "Max Rows",
+        maxBays: "Max Bays",
+        maxTiers: "Max Tiers",
+        status: "Status",
+        active: "Active",
+        inactive: "Inactive",
+        actions: "Actions",
+        applyFilters: "Apply Filters",
+        clearFilters: "Clear Filters",
+        
+        createVesselType: "Create Vessel Type",
+        editVesselType: "Edit Vessel Type",
+        create: "Create",
+        update: "Update",
+        cancel: "Cancel",
+        edit: "Edit",
+        deactivate: "Deactivate",
+        reactivate: "Reactivate",
+        
+        noData: "No vessel types found",
+        
+        nameRequired: "Name is required",
+        descriptionRequired: "Description is required",
+        capacityInvalid: "Capacity must be greater than 0",
+        maxRowsInvalid: "Max Rows must be greater than 0",
+        maxBaysInvalid: "Max Bays must be greater than 0",
+        maxTiersInvalid: "Max Tiers must be greater than 0",
+        
+        createSuccess: "Vessel type created successfully",
+        updateSuccess: "Vessel type updated successfully",
+        deactivateSuccess: "Vessel type deactivated successfully",
+        reactivateSuccess: "Vessel type reactivated successfully",
+        confirmDeactivate: "Are you sure you want to deactivate this vessel type?",
+        confirmReactivate: "Are you sure you want to reactivate this vessel type?",
       },
 
       manageStorageAreas: {
@@ -730,6 +780,9 @@ export class TranslationService {
 
         manageVessels: "Gerir Navios",
         manageVesselsDesc: "Criar, editar ou gerir navios e suas informações",
+
+        manageVesselTypes: "Gerir Tipos de Navios",
+        manageVesselTypesDesc: "Criar, editar ou gerir tipos de navios e suas especificações",
       },
 
 
@@ -1051,6 +1104,53 @@ export class TranslationService {
         confirmDeactivate: "Tem certeza que deseja desativar este navio?",
         confirmReactivate: "Tem certeza que deseja reativar este navio?",
         loadVesselTypesError: "Erro ao carregar tipos de navios",
+      },
+
+      manageVesselTypes: {
+        title: "Gerir Tipos de Navios",
+        vesselTypesList: "Lista de Tipos de Navios",
+        filters: "Filtros",
+        search: "Pesquisar",
+        searchPlaceholder: "Pesquisar tipos de navios...",
+        name: "Nome",
+        namePlaceholder: "Nome do tipo de navio...",
+        description: "Descrição",
+        descriptionPlaceholder: "Descrição...",
+        capacity: "Capacidade",
+        maxRows: "Máximo de Filas",
+        maxBays: "Máximo de Baías",
+        maxTiers: "Máximo de Níveis",
+        status: "Estado",
+        active: "Ativo",
+        inactive: "Inativo",
+        actions: "Ações",
+        applyFilters: "Aplicar Filtros",
+        clearFilters: "Limpar Filtros",
+        
+        createVesselType: "Criar Tipo de Navio",
+        editVesselType: "Editar Tipo de Navio",
+        create: "Criar",
+        update: "Atualizar",
+        cancel: "Cancelar",
+        edit: "Editar",
+        deactivate: "Desativar",
+        reactivate: "Reativar",
+        
+        noData: "Nenhum tipo de navio encontrado",
+        
+        nameRequired: "Nome é obrigatório",
+        descriptionRequired: "Descrição é obrigatória",
+        capacityInvalid: "Capacidade deve ser maior que 0",
+        maxRowsInvalid: "Máximo de Filas deve ser maior que 0",
+        maxBaysInvalid: "Máximo de Baías deve ser maior que 0",
+        maxTiersInvalid: "Máximo de Níveis deve ser maior que 0",
+        
+        createSuccess: "Tipo de navio criado com sucesso",
+        updateSuccess: "Tipo de navio atualizado com sucesso",
+        deactivateSuccess: "Tipo de navio desativado com sucesso",
+        reactivateSuccess: "Tipo de navio reativado com sucesso",
+        confirmDeactivate: "Tem certeza que deseja desativar este tipo de navio?",
+        confirmReactivate: "Tem certeza que deseja reativar este tipo de navio?",
       },
 
       manageStorageAreas: {

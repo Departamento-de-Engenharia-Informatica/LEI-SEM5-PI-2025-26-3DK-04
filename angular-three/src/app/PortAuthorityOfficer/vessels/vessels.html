@@ -84,7 +84,7 @@
               {{ vessel.active ? (t('manageVessels.active') || 'Active') : (t('manageVessels.inactive') || 'Inactive') }}
             </span>
           </td>
-          <td>
+          <td class="actions">
             <button (click)="editVessel(vessel)">{{ t('manageVessels.edit') }}</button>
             <button *ngIf="vessel.active" class="warning" (click)="deactivateVessel(vessel.id)">
               {{ t('manageVessels.deactivate') }}

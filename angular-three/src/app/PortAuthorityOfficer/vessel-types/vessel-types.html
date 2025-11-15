@@ -1,0 +1,186 @@
+<section class="manage-vessel-types">
+  <div class="container">
+    <h1>{{ t('manageVesselTypes.title') }}</h1>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+    <h3>{{ t('manageVesselTypes.filters') }}</h3>
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label>{{ t('manageVesselTypes.search') }}</label>
+        <input
+          type="text"
+          [(ngModel)]="filters.search"
+          [placeholder]="t('manageVesselTypes.searchPlaceholder')"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label>{{ t('manageVesselTypes.name') }}</label>
+        <input
+          type="text"
+          [(ngModel)]="filters.name"
+          [placeholder]="t('manageVesselTypes.namePlaceholder')"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label>{{ t('manageVesselTypes.description') }}</label>
+        <input
+          type="text"
+          [(ngModel)]="filters.description"
+          [placeholder]="t('manageVesselTypes.descriptionPlaceholder')"
+        />
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button class="btn-primary" (click)="applyFilters()">
+        {{ t('manageVesselTypes.applyFilters') }}
+      </button>
+      <button class="btn-secondary" (click)="clearFilters()">
+        {{ t('manageVesselTypes.clearFilters') }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Vessel Types Table -->
+  <div class="table-section">
+    <h3>{{ t('manageVesselTypes.vesselTypesList') }}</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>{{ t('manageVesselTypes.name') }}</th>
+          <th>{{ t('manageVesselTypes.description') }}</th>
+          <th>{{ t('manageVesselTypes.capacity') }}</th>
+          <th>{{ t('manageVesselTypes.maxRows') }}</th>
+          <th>{{ t('manageVesselTypes.maxBays') }}</th>
+          <th>{{ t('manageVesselTypes.maxTiers') }}</th>
+          <th>{{ t('manageVesselTypes.status') }}</th>
+          <th>{{ t('manageVesselTypes.actions') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let vesselType of vesselTypes">
+          <td>{{ vesselType.name }}</td>
+          <td>{{ vesselType.description }}</td>
+          <td>{{ vesselType.capacity }}</td>
+          <td>{{ vesselType.maxRows }}</td>
+          <td>{{ vesselType.maxBays }}</td>
+          <td>{{ vesselType.maxTiers }}</td>
+          <td>
+            <span [class]="getStatusClass(vesselType.active)">
+              {{ vesselType.active ? t('manageVesselTypes.active') : t('manageVesselTypes.inactive') }}
+            </span>
+          </td>
+          <td class="actions">
+            <button class="btn-edit" (click)="editVesselType(vesselType)">
+              {{ t('manageVesselTypes.edit') }}
+            </button>
+            <button
+              *ngIf="vesselType.active"
+              class="btn-deactivate"
+              (click)="deactivateVesselType(vesselType.id)"
+            >
+              {{ t('manageVesselTypes.deactivate') }}
+            </button>
+            <button
+              *ngIf="!vesselType.active"
+              class="btn-reactivate"
+              (click)="reactivateVesselType(vesselType.id)"
+            >
+              {{ t('manageVesselTypes.reactivate') }}
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="vesselTypes.length === 0">
+          <td colspan="8" class="no-data">{{ t('manageVesselTypes.noData') }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Create/Edit Form -->
+  <div class="form-section">
+    <h3>{{ editing ? t('manageVesselTypes.editVesselType') : t('manageVesselTypes.createVesselType') }}</h3>
+    <form (ngSubmit)="saveVesselType()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>{{ t('manageVesselTypes.name') }} *</label>
+          <input
+            type="text"
+            [(ngModel)]="vesselTypeForm.name"
+            name="name"
+            required
+            [placeholder]="t('manageVesselTypes.namePlaceholder')"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>{{ t('manageVesselTypes.description') }} *</label>
+          <input
+            type="text"
+            [(ngModel)]="vesselTypeForm.description"
+            name="description"
+            required
+            [placeholder]="t('manageVesselTypes.descriptionPlaceholder')"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>{{ t('manageVesselTypes.capacity') }} *</label>
+          <input
+            type="number"
+            [(ngModel)]="vesselTypeForm.capacity"
+            name="capacity"
+            required
+            min="1"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>{{ t('manageVesselTypes.maxRows') }} *</label>
+          <input
+            type="number"
+            [(ngModel)]="vesselTypeForm.maxRows"
+            name="maxRows"
+            required
+            min="1"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>{{ t('manageVesselTypes.maxBays') }} *</label>
+          <input
+            type="number"
+            [(ngModel)]="vesselTypeForm.maxBays"
+            name="maxBays"
+            required
+            min="1"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>{{ t('manageVesselTypes.maxTiers') }} *</label>
+          <input
+            type="number"
+            [(ngModel)]="vesselTypeForm.maxTiers"
+            name="maxTiers"
+            required
+            min="1"
+          />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">
+          {{ editing ? t('manageVesselTypes.update') : t('manageVesselTypes.create') }}
+        </button>
+        <button type="button" class="btn-secondary" (click)="resetForm()">
+          {{ t('manageVesselTypes.cancel') }}
+        </button>
+      </div>
+    </form>
+  </div>
+  </div>
+</section>
