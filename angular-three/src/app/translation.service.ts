@@ -34,6 +34,15 @@ export class TranslationService {
         { name: "Student Five", number: "Number 5" }
       ],
 
+      // GLOBAL ACTIONS (Used directly via t('edit'), t('create'), etc.)
+      actions: "Actions",
+      edit: "Edit",
+      create: "Create",
+      saveChanges: "Save Changes",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      clear: "Clear",
+
       userSection: { title: "User", name: "Name", email: "Email", role: "Role", status: "Status", picture: "Picture" },
 
       adminUI: {
@@ -48,7 +57,11 @@ export class TranslationService {
           managePhysicalResourcesDesc: "Create, edit or manage physical resources and their statuses",
           manageVesselVisitNotifications: "Manage Vessel Visit Notifications",
           manageVesselVisitNotificationsDesc: "Create, edit or manage vessel visit notifications"
-        }
+        },
+        // NEW KEYS
+        filter: "Filter",
+        clear: "Clear",
+        refresh: "Refresh"
       },
       representativeUI: { title: "Representative Dashboard", subtitle: "Overview of your assigned tasks" },
       portAuthorityUI: { title: "Port Authority Dashboard", subtitle: "Port operational management" },
@@ -113,10 +126,10 @@ export class TranslationService {
       },
 
       roles: {
-        representative: "Representative",
-        portAuthority: "Port Authority Officer",
-        logistics: "Logistics Operator",
-        projectManager: "Project Manager"
+        Representative: "Representative",
+        PortAuthorityOfficer: "Port Authority Officer",
+        LogisticsOperator: "Logistics Operator",
+        ProjectManager: "Project Manager"
       },
 
       manageOrganizations: {
@@ -139,17 +152,29 @@ export class TranslationService {
         cancel: "Cancel",
         missingFields: "Please fill in all required fields",
         createSuccess: "Organization created successfully",
-        createError: "Error creating organization"
+        createError: "Error creating organization",
+        // NEW KEY
+        createdSuccess: "Organization created successfully."
       },
 
       manageRepresentatives: {
+        // NEW/UPDATED KEYS
+        title: "Manage Representatives",
+        organizationsTitle: "Organizations",
+        listTitle: "Representatives List",
+        changeStatus: "Change Status",
+        changeStatusTitle: "Change Representative Status",
+        currentStatus: "Current Status",
+
         name: "Name",
         citizenId: "Citizen ID",
         nationality: "Nationality",
         email: "Email",
+        // Old keys for activation/deactivation are kept for compatibility, but the new list management keys are superior
         activateTitle: "Activate Representative",
         activateSubtitle: "Activate an inactive representative",
-        searchPlaceholder: "Search representative...",
+        searchPlaceholder: "Search representative...", // Used in old file
+        searchOrganizationPlaceholder: "Search Organization by ID or Name...", // Used in new file
         refresh: "Refresh",
         status: "Status",
         noInactive: "No inactive representatives",
@@ -162,14 +187,13 @@ export class TranslationService {
 
         createTitle: "Create Representative",
         createSubtitle: "Add a new representative",
-        searchOrganizationPlaceholder: "Search organization...",
         organizationId: "Organization ID",
         organizationName: "Organization Name",
         noOrganizations: "No organizations available",
         phone: "Phone",
         loadOrganizationsError: "Error loading organizations",
         organizationRequired: "Organization is required",
-        createSuccess: "Representative created successfully",
+        createSuccess: "Representative created successfully.", // Updated value
         createError: "Error creating representative",
 
         deactivateTitle: "Deactivate Representative",
@@ -187,12 +211,22 @@ export class TranslationService {
         loadRepresentative: "Load representative data",
         saveChanges: "Save Changes",
         cancel: "Cancel",
-        updateSuccess: "Representative updated successfully",
+        updateSuccess: "Representative updated successfully.", // Updated value
         updateError: "Error updating representative",
         dashboardTitle: "Representative Dashboard",
         dashboardSubtitle: "Overview of assigned tasks",
 
         create: "Create Representative",
+
+        // NEW SUB-OBJECTS
+        statusSuccess: {
+          activate: "Representative activated successfully.",
+          deactivate: "Representative deactivated successfully."
+        },
+        statusError: {
+          activate: "Error activating representative",
+          deactivate: "Error deactivating representative"
+        }
       },
 
       vesselScheduling: {
@@ -422,14 +456,8 @@ export class TranslationService {
         changeStatus: "Change Status",
         changeStatusTitle: "Change Resource Status"
       },
-      filter: "Apply Filter",
-      clear: "Clear",
-      edit: "Edit",
-      cancel: "Cancel",
-      saveChanges: "Save Changes",
-      create: "Create",
-      actions: "Actions",
-      confirm: "Confirm",
+      // REMOVED REDUNDANT ROOT-LEVEL KEYS
+
       vesselVisitNotifications: {
         title: "Manage Vessel Visit Notifications",
         submittedListTitle: "Submitted Notifications",
@@ -446,7 +474,7 @@ export class TranslationService {
 
         createTitle: "Create New Notification",
         createSubmit: "Create & Submit",
-
+        addCrew: "Add Crew",
         vessel: "Vessel",
         selectVessel: "Select a vessel",
         representative: "Representative",
@@ -480,8 +508,34 @@ export class TranslationService {
         submitSuccess: "Notification submitted successfully",
         submitError: "Error submitting notification"
       },
+
+      // NEW/UPDATED MANAGE USERS
       manageUsers: {
         title: "User Management",
+        // NEW KEYS FROM FILE ANALYSIS
+        listTitle: "Registered Users",
+        searchPlaceholder: "Search by Name, Email or Role...",
+        name: "Name",
+        email: "Email",
+        role: "Role",
+        actions: "Actions",
+        edit: "Edit",
+        noUsers: "No user found.",
+        createTitle: "Add New User",
+        editTitle: "Edit User Role",
+        emailReadOnly: "Email cannot be changed.",
+        nameReadOnly: "Name cannot be changed.",
+        cancelEdit: "Cancel Edit",
+        loadError: "Error loading users.",
+        emailRequired: "Email is required.",
+        emailMustBeGmail: "Email must end with @gmail.com",
+        emailExists: "This email is already registered.",
+        nameRequired: "Name is required.",
+        updateSuccessActivation: "User updated; activation email sent successfully.",
+        updateError: "Error updating user.",
+        createSuccessActivation: "User created; activation email sent successfully.",
+        createError: "Error creating user.",
+        // KEPT OLD KEYS FOR COMPATIBILITY (they may be redundant but in different parts of the UI)
         checkTitle: "Check if a user exists",
         emailPlaceholder: "User Email",
         checkButton: "Check",
@@ -489,50 +543,71 @@ export class TranslationService {
         userFound: "User found",
         updateButton: "Update Role",
         backButton: "Back",
-        createTitle: "Create New User",
         namePlaceholder: "Name",
         picturePlaceholder: "Picture URL",
         createButton: "Create User",
         cancel: "Cancel",
-
         emailEmpty: "Email cannot be empty",
         selfModifyError: "You cannot modify your own role",
         serverError: "Server error occurred",
         createSuccess: "User created successfully",
-        createError: "Error creating user",
         updateSuccess: "User role updated successfully",
-        updateError: "Error updating user role",
-
-        editTitle: "Edit User",
         editSubtitle: "Update user details and role",
-        searchPlaceholder: "Search user...",
         refresh: "Refresh",
-        name: "Name",
-        email: "Email",
-        role: "Role",
-        actions: "Actions",
-        edit: "Edit",
         saveChanges: "Save Changes",
         addTitle: "Add New User",
         dashboardTitle: "User Dashboard",
         dashboardSubtitle: "Overview of your user management access",
-
-        noUsers: "No users found",
       },
 
-      common: { back: "Back" },
+      // NEW VALIDATION SECTION
+      validation: {
+        orgIdFormat: "Organization ID must be 1-10 alphanumeric characters.",
+        required: "Field is required.",
+        taxNumberMinLength: "Tax number too short.",
+        citizenIdFormat: "Citizen ID must be 5-20 alphanumeric characters.",
+        emailFormat: "Invalid email format.",
+        phoneFormat: "Phone number must have 9 digits.",
+        duplicateCitizenIdInForm: "Duplicate citizen ID in the form.",
+        duplicateEmailInForm: "Duplicate email in the form.",
+        duplicatePhoneInForm: "Duplicate phone number in the form.",
+        citizenIdExists: "Citizen ID already exists.",
+        serverErrorCitizenId: "Server error validating citizen ID.",
+        emailMustBeGmail: "Email must be a gmail.com address.",
+        emailExists: "Email already exists.",
+        serverErrorEmail: "Server error validating email.",
+        phoneNumberFormat: "Phone must be 9 digits.",
+        phoneNumberExists: "Phone already exists.",
+        serverErrorPhone: "Server error validating phone.",
+        formInvalid: "Please fix validation errors.",
+        orgIdExists: "Organization ID already exists.",
+        serverError: "Server error.",
+        legalNameExists: "Legal name already exists.",
+        taxNumberExists: "Tax number already exists.",
+        orgIdNotExists: "Organization ID does not exist."
+      },
+
+      common: {
+        back: "Back",
+        // NEW KEYS
+        loading: "Loading",
+        formInvalid: "Please fix validation errors.",
+        formValidationFailed: "Form validation failed.",
+        saveError: "Error while saving",
+        previous: "Previous",
+        page: "Page",
+        next: "Next",
+      },
 
       activation: {
         success: "Account Activated!",
         successMessage: "Your account has been successfully verified and activated. You can now log in to the platform.",
         afterActivation: "You can now return to the login page to access your account.",
         backHome: "Go to Login Page",
-        // NOVAS CHAVES ADICIONADAS
         error: "Activation Error",
-        errorMessage: "The activation link is invalid or expired. Please check your email or contact support.",
+        errorMessage: "The activation link is invalid or has expired. Please check your email or contact support.",
       },
 
-      // NOVAS CHAVES ADICIONADAS
       accessDenied: {
         title: "Access Denied",
         message: "You do not have the necessary permissions to view this page.",
@@ -565,6 +640,15 @@ export class TranslationService {
         { name: "Aluno Cinco", number: "Número 5" }
       ],
 
+      // GLOBAL ACTIONS (Used directly via t('edit'), t('create'), etc.)
+      actions: "Ações",
+      edit: "Editar",
+      create: "Criar",
+      saveChanges: "Guardar Alterações",
+      confirm: "Confirmar",
+      cancel: "Cancelar",
+      clear: "Limpar",
+
       userSection: { title: "Utilizador", name: "Nome", email: "Email", role: "Função", status: "Estado", picture: "Foto" },
 
       adminUI: {
@@ -577,7 +661,13 @@ export class TranslationService {
           manageQualificationsDesc: "Criar, editar ou eliminar qualificações para membros do staff",
           manageVesselVisitNotificationsDesc: "Criar, editar ou gerir notificações de visitas de navios",
           manageVesselVisitNotifications: "Gerir Notificações de Visitas de Navios",
-        }
+          managePhysicalResources: "Gerir Recursos Fisicos",
+          managePhysicalResourcesDesc: "Criar, editar ou gerir recursos fisicos e os seus estados",
+        },
+        // NEW KEYS
+        filter: "Filtrar",
+        clear: "Limpar",
+        refresh: "Atualizar"
       },
       representativeUI: { title: "Painel de Representante", subtitle: "Resumo das suas tarefas atribuídas" },
       portAuthorityUI: { title: "Painel da Autoridade Portuária", subtitle: "Gestão operacional do porto" },
@@ -642,11 +732,12 @@ export class TranslationService {
         manageVesselsDesc: "Criar, editar ou gerir navios e suas informações",
       },
 
+
       roles: {
-        representative: "Representante",
-        portAuthority: "Oficial da Autoridade Portuária",
-        logistics: "Operador Logístico",
-        projectManager: "Gestor de Projeto"
+        Representative: "Representante",
+        PortAuthorityOfficer: "Oficial da Autoridade Portuária",
+        LogisticsOperator: "Operador Logístico",
+        ProjectManager: "Gestor de Projeto"
       },
 
       manageOrganizations: {
@@ -669,10 +760,20 @@ export class TranslationService {
         cancel: "Cancelar",
         missingFields: "Preencha todos os campos obrigatórios",
         createSuccess: "Organização criada com sucesso",
-        createError: "Erro ao criar organização"
+        createError: "Erro ao criar organização",
+        // NEW KEY
+        createdSuccess: "Organização criada com sucesso."
       },
 
       manageRepresentatives: {
+        // NEW/UPDATED KEYS
+        title: "Gerir Representantes",
+        organizationsTitle: "Organizações",
+        listTitle: "Lista de Representantes",
+        changeStatus: "Alterar Estado",
+        changeStatusTitle: "Alterar Estado do Representante",
+        currentStatus: "Estado Atual",
+
         name: "Nome",
         citizenId: "Número de Identificação",
         nationality: "Nacionalidade",
@@ -680,6 +781,7 @@ export class TranslationService {
         activateTitle: "Ativar Representante",
         activateSubtitle: "Ativar um representante inativo",
         searchPlaceholder: "Procurar representante...",
+        searchOrganizationPlaceholder: "Pesquisar Organização por ID ou Nome...",
         refresh: "Atualizar",
         status: "Estado",
         noInactive: "Nenhum representante inativo",
@@ -692,14 +794,13 @@ export class TranslationService {
 
         createTitle: "Criar Representante",
         createSubtitle: "Adicionar um novo representante",
-        searchOrganizationPlaceholder: "Procurar organização...",
         organizationId: "ID da Organização",
         organizationName: "Nome da Organização",
         noOrganizations: "Nenhuma organização disponível",
         phone: "Telefone",
         loadOrganizationsError: "Erro ao carregar organizações",
         organizationRequired: "Organização é obrigatória",
-        createSuccess: "Representante criado com sucesso",
+        createSuccess: "Representante criado com sucesso.",
         createError: "Erro ao criar representante",
 
         deactivateTitle: "Desativar Representante",
@@ -717,12 +818,22 @@ export class TranslationService {
         loadRepresentative: "Carregar dados do representante",
         saveChanges: "Guardar Alterações",
         cancel: "Cancelar",
-        updateSuccess: "Representante atualizado com sucesso",
+        updateSuccess: "Representante atualizado com sucesso.",
         updateError: "Erro ao atualizar representante",
         dashboardTitle: "Painel de Representante",
         dashboardSubtitle: "Resumo das tarefas atribuídas",
 
         create: "Criar Representante",
+
+        // NEW SUB-OBJECTS
+        statusSuccess: {
+          activate: "Representante ativado com sucesso.",
+          deactivate: "Representante desativado com sucesso."
+        },
+        statusError: {
+          activate: "Erro ao ativar representante",
+          deactivate: "Erro ao desativar representante"
+        }
       },
       managePhysicalResources: {
         title: "Gerir Recursos Físicos",
@@ -760,6 +871,7 @@ export class TranslationService {
         createTitle: "Criar Nova Notificação",
         createSubmit: "Criar & Submeter",
 
+        addCrew: "Adicionar Tripulação",
         vessel: "Navio",
         selectVessel: "Selecionar um navio",
         representative: "Representante",
@@ -793,14 +905,6 @@ export class TranslationService {
         submitSuccess: "Notificação submetida com sucesso",
         submitError: "Erro ao submeter a notificação"
       },
-      filter: "Aplicar Filtro",
-      clear: "Limpar",
-      edit: "Editar",
-      cancel: "Cancelar",
-      saveChanges: "Guardar Alterações",
-      create: "Criar",
-      actions: "Ações",
-      confirm: "Confirmar",
 
       vesselScheduling: {
         title: "Agendamento de Navios - Mínimo Atraso",
@@ -960,7 +1064,7 @@ export class TranslationService {
         location: "Localização",
         locationPlaceholder: "Localização",
         capacity: "Capacidade (TEUs)",
-        initialDockAssignments: "Atribuições Iniciais de Docas",
+        initialDockAssignments: "Atribuições Iniciais de Cais",
         title: "Gerir Áreas de Armazenamento",
         listTitle: "Lista de Áreas de Armazenamento",
         filters: "Filtros",
@@ -974,7 +1078,7 @@ export class TranslationService {
         delete: "Eliminar",
         cancel: "Cancelar",
 
-        dockAssignments: "Atribuições de Docas",
+        dockAssignments: "Atribuições de Cais",
         create: "Criar Área de Armazenamento",
 
         editTitle: "Editar Área de Armazenamento",
@@ -996,7 +1100,7 @@ export class TranslationService {
         locationPlaceholder: "Localização ou coordenadas",
         length: "Comprimento (m)",
         depth: "Profundidade (m)",
-        maxDraft: "Calado Máximo (m)",
+        maxDraft: "Calado Máx (m)",
         coordinates: "Coordenadas (ex: 0,0)",
         vesselTypes: "Tipos de Navio",
         actions: "Ações",
@@ -1010,60 +1114,106 @@ export class TranslationService {
         editTitle: "Editar Doca",
         saveChanges: "Guardar Alterações",
       },
+      // REMOVED REDUNDANT ROOT-LEVEL KEYS
 
       manageUsers: {
-        title: "Gestão de Utilizadores",
-        checkTitle: "Verificar se um utilizador existe",
+        title: "Gerir Usuários",
+        // NEW KEYS FROM FILE ANALYSIS
+        listTitle: "Usuários Registados",
+        searchPlaceholder: "Pesquisar por Nome, Email ou Role...",
+        name: "Nome",
+        email: "Email",
+        role: "Role",
+        actions: "Ações",
+        edit: "Editar",
+        noUsers: "Nenhum usuário encontrado.",
+        createTitle: "Adicionar Novo Usuário",
+        editTitle: "Editar Role do Usuário",
+        emailReadOnly: "O Email não pode ser alterado.",
+        nameReadOnly: "O Nome não pode ser alterado.",
+        cancelEdit: "Cancelar Edição",
+        loadError: "Erro ao carregar usuários.",
+        emailRequired: "O email é obrigatório.",
+        emailMustBeGmail: "O email deve terminar em @gmail.com",
+        emailExists: "Este email já está registado.",
+        nameRequired: "O nome é obrigatório.",
+        updateSuccessActivation: "Usuário atualizado; email de ativação enviado com sucesso.",
+        updateError: "Erro ao atualizar o usuário.",
+        createSuccessActivation: "Usuário criado; email de ativação enviado com sucesso.",
+        createError: "Erro ao criar usuário.",
+        // KEPT OLD KEYS FOR COMPATIBILITY
+        checkTitle: "Verificar se um usuário existe",
         emailPlaceholder: "Email do Utilizador",
         checkButton: "Verificar",
         updateTitle: "Atualizar Função do Utilizador",
         userFound: "Utilizador encontrado",
         updateButton: "Atualizar Função",
         backButton: "Voltar",
-        createTitle: "Criar Novo Utilizador",
         namePlaceholder: "Nome",
-        picturePlaceholder: "URL da Foto",
+        picturePlaceholder: "URL da Imagem",
         createButton: "Criar Utilizador",
         cancel: "Cancelar",
-
         emailEmpty: "O email não pode estar vazio",
         selfModifyError: "Não pode modificar a sua própria função",
         serverError: "Ocorreu um erro no servidor",
         createSuccess: "Utilizador criado com sucesso",
-        createError: "Erro ao criar utilizador",
         updateSuccess: "Função do utilizador atualizada com sucesso",
-        updateError: "Erro ao atualizar a função do utilizador",
-
-        editTitle: "Editar Utilizador",
         editSubtitle: "Atualizar detalhes e função do utilizador",
-        searchPlaceholder: "Procurar utilizador...",
         refresh: "Atualizar",
-        name: "Nome",
-        email: "Email",
-        role: "Função",
-        actions: "Ações",
-        edit: "Editar",
         saveChanges: "Guardar Alterações",
         addTitle: "Adicionar Novo Utilizador",
         dashboardTitle: "Painel de Utilizador",
         dashboardSubtitle: "Visão geral do seu acesso à gestão de utilizadores",
-
-        noUsers: "Nenhum utilizador encontrado",
       },
 
-      common: { back: "Voltar" },
+      // NEW VALIDATION SECTION
+      validation: {
+        orgIdFormat: "O ID da Organização deve ter 1-10 caracteres alfanuméricos.",
+        required: "Campo de preenchimento obrigatório.",
+        taxNumberMinLength: "Número fiscal muito curto.",
+        citizenIdFormat: "O ID de Cidadão deve ter 5-20 caracteres alfanuméricos.",
+        emailFormat: "Formato de email inválido.",
+        phoneFormat: "O número de telefone deve ter 9 dígitos.",
+        duplicateCitizenIdInForm: "ID de Cidadão duplicado no formulário.",
+        duplicateEmailInForm: "Email duplicado no formulário.",
+        duplicatePhoneInForm: "Número de telefone duplicado no formulário.",
+        citizenIdExists: "O ID de Cidadão já existe.",
+        serverErrorCitizenId: "Erro do servidor ao validar o ID de Cidadão.",
+        emailMustBeGmail: "O email deve ser um endereço gmail.com.",
+        emailExists: "O email já existe.",
+        serverErrorEmail: "Erro do servidor ao validar o email.",
+        phoneNumberFormat: "O telefone deve ter 9 dígitos.",
+        phoneNumberExists: "O telefone já existe.",
+        serverErrorPhone: "Erro do servidor ao validar o telefone.",
+        formInvalid: "Por favor, corrija os erros de validação.",
+        orgIdExists: "O ID da Organização já existe.",
+        serverError: "Erro do servidor.",
+        legalNameExists: "O nome legal já existe.",
+        taxNumberExists: "O número fiscal já existe.",
+        orgIdNotExists: "O ID da Organização não existe."
+      },
+
+      common: {
+        back: "Voltar",
+        // NEW KEYS
+        loading: "A carregar",
+        formInvalid: "Por favor, corrija os erros de validação.",
+        formValidationFailed: "Falha na validação do formulário.",
+        saveError: "Erro ao gravar",
+        previous: "Anterior",
+        page: "Página",
+        next: "Próximo",
+      },
 
       activation: {
         success: "Conta Ativada!",
         successMessage: "A sua conta foi verificada e ativada com sucesso. Já pode iniciar sessão na plataforma.",
         afterActivation: "Pode agora regressar à página de início de sessão para aceder à sua conta.",
         backHome: "Ir para a Página de Login",
-        // NOVAS CHAVES ADICIONADAS
         error: "Erro de Ativação",
         errorMessage: "O link de ativação é inválido ou expirou. Por favor, verifique o seu email ou contacte o suporte.",
       },
 
-      // NOVAS CHAVES ADICIONADAS
       accessDenied: {
         title: "Acesso Negado",
         message: "Não tem as permissões necessárias para visualizar esta página.",
@@ -1085,16 +1235,16 @@ export class TranslationService {
 
   translate(key: string): any {
     const path = key.split('.');
-    let current = this.translations[this.currentLang];
+    let value = this.translations[this.currentLang];
 
     for (const segment of path) {
-      if (current[segment] === undefined) {
-        return key;
+      if (value && value[segment] !== undefined) {
+        value = value[segment];
+      } else {
+        return key; // Return the key if translation is not found
       }
-      current = current[segment];
     }
 
-    return current;
+    return value;
   }
-
 }

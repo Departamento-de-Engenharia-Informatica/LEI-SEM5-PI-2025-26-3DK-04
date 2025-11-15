@@ -51,6 +51,10 @@ export class AdminService {
     return this.http.put(`${this.userBaseUrl}/${email}/role`, { role });
   }
 
+  GetUserByEmail( email :string):Observable<any[]>{
+    return this.http.get<any[]>(`${this.userBaseUrl}/get/${email}`);
+  }
+
   /* ===============================
             DOCK MANAGEMENT
   =============================== */

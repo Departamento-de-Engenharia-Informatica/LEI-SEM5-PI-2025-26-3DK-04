@@ -1,0 +1,92 @@
+@startuml logical_view
+title Level 3 - Logical View
+
+skinparam componentStyle rectangle
+skinparam rectangle {
+    BackgroundColor<<RestAPI>> LightBlue
+    BackgroundColor<<DatabaseAPI>> LightBlue
+    BackgroundColor<<Routing>> Cyan
+    BackgroundColor<<Database>> Cyan
+    BackgroundColor<<Authentication>> Cyan
+    BackgroundColor<<Controller>> LightGreen
+    BackgroundColor<<Repository>> LightGreen
+    BackgroundColor<<Service>> LightCoral
+    BackgroundColor<<Domain>> Orange
+    BorderColor Black
+    FontSize 11
+}
+
+skinparam interface {
+    BackgroundColor White
+    BorderColor Black
+}
+
+() "RestAPI" as RestAPI
+() "DBAPI" as DatabaseAPI
+() "IAMAPI" as IAMAPI
+
+package "dotNetBackend" {
+    
+    package "FrameworksAndDriversLayer" <<container (C4)>> #438DD5 {
+        
+        component "Routing\n(ASP.NET Core)" as Routing <<component>> {
+        }
+        
+        component "Authentication\n(Keycloak/JWT)" as Authentication <<component>> {
+        }
+        
+        component "DataBase\n(Entity Framework\nCore + InMemory)" as Database <<component>> {
+        }
+    }
+
+    package "InterfaceAdaptersLayer" <<container (C4)>> #438DD5 {
+        
+        component "Controller" as Controller <<component>> {
+        }
+        
+        component "Repository" as Repository <<component>> {
+        }
+    }
+
+    package "ApplicationBusinessRules" <<container (C4)>> #438DD5 {
+        
+        component "Service" as Service <<component>> {
+        }
+    }
+
+    package "BusinessRules" <<container (C4)>> #438DD5 {
+        
+        component "Domain" as Domain <<component>> {
+        }
+    }
+
+    () "ControllerAPI" as ControllerAPI
+    () "PersistenceAPI" as PersistenceAPI
+    () "AppServiceAPI" as AppServiceAPI
+    () "RepoAPI" as RepoAPI
+    () "DomainAPI" as DomainAPI
+    () "AuthAPI" as AuthAPI
+
+    RestAPI -down- Routing
+    Routing -down-( ControllerAPI
+    ControllerAPI -down- Controller
+    
+    IAMAPI -down- Authentication
+    Authentication -down- AuthAPI
+    AuthAPI )-down- Controller
+    
+    Controller -down-( AppServiceAPI
+    AppServiceAPI -down- Service
+    
+    Service -down-( DomainAPI
+    DomainAPI -down- Domain
+    
+    Service -right-( RepoAPI
+    Repository -up- RepoAPI      
+
+    Repository -up-( PersistenceAPI
+    PersistenceAPI -up- Database
+    
+    DatabaseAPI -down- Database
+}
+@enduml
