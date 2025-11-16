@@ -8,10 +8,11 @@
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
-import { firstValueFrom, Observable } from 'rxjs';
+import {firstValueFrom, Observable, of} from 'rxjs';
 import { AdminService } from '../admin.service';
 import { TranslationService } from '../../translation.service';
 import { Router } from '@angular/router';
+import {catchError} from 'rxjs/operators';
 
 interface Representative {
   name: string;
@@ -259,45 +260,72 @@ export class ManageRepresentatives implements OnInit {
   /**
    * Validates Email uniqueness, skipping remote check if in edit mode and the value is unchanged.
    */
-  async validateEmail(email: string): Promise<boolean> {
+  async validateEmail(email: string, isEditing = false, originalEmail?: string): Promise<boolean> {
+    // inicializa erro
     this.errors['email'] = '';
 
-    const normalized = this.normalize(email);
-    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-    if (!regex.test(email)) {
-      this.errors['email'] = this.t('validation.emailFormat');
+    const normalized = (email || '').trim().toLowerCase();
+    if (!normalized) {
+      this.errors['email'] = this.t('manageUsers.emailRequired') || 'O email é obrigatório.';
       return false;
     }
 
-    if (!normalized.endsWith('@gmail.com')) {
-      this.errors['email'] = this.t('validation.emailMustBeGmail');
+    // 1. Validar formato @gmail.com
+    if (!/^[^\s@]+@gmail\.com$/i.test(normalized)) {
+      this.errors['email'] = this.t('manageUsers.emailMustBeGmail') || 'O email deve terminar em @gmail.com';
       return false;
     }
 
-    // New Logic: If editing and the value is the same as the original, it's valid.
-    if (this.editingRep && this.originalEmail) {
-      if (this.normalize(this.originalEmail) === normalized) {
-        return true;
+    // 2. Verificar unicidade dentro do formulário (outros reps do mesmo form)
+    if (this.repForm) {
+      const otherEmails = [this.repForm.email] // você pode ajustar se tiver array de reps
+        .map(e => (e || '').trim().toLowerCase())
+        .filter(e => e && e !== normalized);
+
+      if (otherEmails.includes(normalized)) {
+        this.errors['email'] = this.t('validation.duplicateEmailInForm') || 'Este email já existe no formulário.';
+        return false;
       }
+    }
+
+    // 3. Se estiver editando e o email não mudou, passa
+    if (isEditing && originalEmail && normalized === originalEmail.toLowerCase()) {
+      return true;
     }
 
     try {
-      // Perform remote existence check only if creating OR value has changed
-      const exists = await this.adminService
-        .checkRepresentativeEmailExists(email)
-        .toPromise();
+      // 4. Verificar se existe como representante
+      const repExists = await firstValueFrom(this.adminService.checkRepresentativeEmailExists(email));
 
-      if (exists) {
-        this.errors['email'] = this.t('validation.emailExists');
+      // 5. Verificar se existe como usuário
+      let existingUsers: any[] = [];
+      try {
+        const users = await firstValueFrom(
+          this.adminService.GetUserByEmail(normalized).pipe(
+            catchError(() => of([]))
+          )
+        );
+        existingUsers = users ? (Array.isArray(users) ? users : [users]) : [];
+      } catch {
+        existingUsers = [];
+      }
+
+      // 6. Se existir em qualquer fonte, retorna erro
+      if (repExists || (existingUsers && existingUsers.length > 0)) {
+        this.errors['email'] = this.t('validation.emailExists') || 'Este email já está registado.';
         return false;
       }
+
+      // 7. Email válido e único
       return true;
-    } catch {
-      this.errors['email'] = this.t('validation.serverErrorEmail');
+
+    } catch (e) {
+      console.error('Erro ao validar email:', e);
+      this.errors['email'] = this.t('validation.serverErrorEmail') || 'Erro ao comunicar com o servidor para verificar o email.';
       return false;
     }
   }
+
 
   /**
    * Validates Phone Number uniqueness, skipping remote check if in edit mode and the value is unchanged.
@@ -358,29 +386,33 @@ export class ManageRepresentatives implements OnInit {
   editRepresentative(rep: Representative) {
     this.editingRep = true;
 
-    // Find the country code part and the number part
+    // Encontrar o código do país
     const country = this.countryCodes.find(c => rep.phoneNumber.startsWith(c.code));
-    // Important: Use an empty string if country is not found, to avoid breaking logic if phone is stored without prefix
-    const number = country ? rep.phoneNumber.replace(country.code, '') : rep.phoneNumber;
+
+    // Extrair apenas os últimos 9 dígitos do número
+    const rawNumber = country
+      ? rep.phoneNumber.slice(country.code.length)
+      : rep.phoneNumber;
+    const number = rawNumber.slice(-9); // garante só os últimos 9 dígitos
 
     this.repForm = {
       name: rep.name,
       citizenId: rep.citizenId,
-      nationality: this.nationalities[0], // Assuming nationality is part of the representative's data, otherwise default
+      nationality: this.nationalities[0],
       email: rep.email,
       organizationId: rep.organizationId,
-      phoneCountry: country ?? this.countryCodes[0],
+      phoneCountry: country ?? this.countryCodes[0], // seleciona o dropdown corretamente
       phoneNumber: number
     };
 
-    // Store the ORIGINAL values for comparison during editing
+    // Armazenar valores originais
     this.originalCitizenId = rep.citizenId;
     this.originalEmail = rep.email;
-    this.originalPhone = rep.phoneNumber; // Store the full phone number (with country code)
+    this.originalPhone = rep.phoneNumber;
 
-    // Reset errors for editing
     this.errors = {};
   }
+
 
   async saveRepresentative() {
     if (!this.repNgForm.valid || this.isSaving) {

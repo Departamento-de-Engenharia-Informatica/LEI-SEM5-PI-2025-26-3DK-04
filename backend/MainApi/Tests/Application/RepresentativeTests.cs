@@ -31,6 +31,10 @@ namespace DDDNetCore.Tests.Application
             public void Remove(Organization obj) => _items.Remove(obj);
             public Task UpdateAsync(Organization obj) => Task.CompletedTask;
             public Task<List<Organization>> GetAllAsync() => Task.FromResult(_items.ToList());
+            public Task<Organization> GetByLegalNameAsync(string legalName)
+            {
+                throw new NotImplementedException();
+            }
 
             public Task<Organization> GetByIdAsync(OrganizationId id)
                 => Task.FromResult(_items.FirstOrDefault(o => o.Id.AsString() == id.AsString()));
@@ -81,6 +85,11 @@ namespace DDDNetCore.Tests.Application
             public Task<bool> ExistsWithEmailAsync(string email)
                 => Task.FromResult(_items.Any(r => r.Email == email));
 
+            public Task<Representative> GetByCitizenIdAsync(string citizenId)
+            {
+                throw new NotImplementedException();
+            }
+
             public Task<bool> ExistsWithPhoneAsync(string phone)
                 => Task.FromResult(_items.Any(r => r.PhoneNumber == phone));
 
@@ -91,6 +100,21 @@ namespace DDDNetCore.Tests.Application
             {
                 _items.Remove(rep);
                 return Task.CompletedTask;
+            }
+
+            public Task<Representative> GetRepresentativeByEmailAsync(string email)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<Representative> GetRepresentativeByCitizenCardAsync(string citizenCard)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<Representative> GetRepresentativeByPhoneAsync(string phone)
+            {
+                throw new NotImplementedException();
             }
         }
 

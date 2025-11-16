@@ -27,7 +27,16 @@ private readonly List<Organization> _items = new();
 
         public void Remove(Organization obj) => _items.Remove(obj);
         public Task UpdateAsync(Organization obj) => Task.CompletedTask;
+        Task<Organization> IOrganizationRepository.GetByTaxNumberAsync(string taxNumber)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<List<Organization>> GetAllAsync() => Task.FromResult(_items.ToList());
+        public Task<Organization> GetByLegalNameAsync(string legalName)
+        {
+            throw new NotImplementedException();
+        }
 
         public Task<Organization> GetByIdAsync(OrganizationId id)
         {
@@ -92,6 +101,11 @@ private readonly List<Organization> _items = new();
 
         public Task<bool> ExistsWithEmailAsync(string email) =>
             Task.FromResult(_items.Any(r => r.Email == email));
+
+        public Task<Representative> GetByCitizenIdAsync(string citizenId)
+        {
+            throw new NotImplementedException();
+        }
 
         public Task<bool> ExistsWithPhoneAsync(string phone) =>
             Task.FromResult(_items.Any(r => r.PhoneNumber == phone));

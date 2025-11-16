@@ -3,7 +3,8 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslationService } from '../../translation.service';
 import { AdminService } from '../admin.service';
-import { firstValueFrom } from 'rxjs';
+import {firstValueFrom, of} from 'rxjs';
+import {catchError} from 'rxjs/operators';
 
 interface RepresentativeForm {
   name: string;
@@ -55,12 +56,11 @@ export class ManageOrganizations {
   currentLang = 'en';
   isBrowser: boolean;
 
-  nationalities: string[] = ['PT', 'ES', 'FR', 'UK'];
+  nationalities: string[] = ['PT', 'ES', 'FR'];
   countryCodes = [
     { code: '+351', flag: '🇵🇹', name: 'Portugal' },
     { code: '+34', flag: '🇪🇸', name: 'Espanha' },
     { code: '+33', flag: '🇫🇷', name: 'França' },
-    { code: '+44', flag: '🇬🇧', name: 'Reino Unido' }
   ];
 
   orgForm: OrgForm = {
@@ -295,35 +295,70 @@ export class ManageOrganizations {
 
   async validateEmailAsync(email: string, index: number, isEditing = false, originalEmail?: string): Promise<boolean> {
     this.errors.reps[index].email = '';
-    const normalized = this.normalize(email);
-    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-    if (!regex.test(email)) {
-      this.errors.reps[index].email = this.t('validation.emailFormat') || 'Invalid email format.';
+    const normalized = (email || '').trim().toLowerCase();
+    if (!normalized) {
+      this.errors.reps[index].email = this.t('manageUsers.emailRequired') || 'O email é obrigatório.';
       return false;
     }
 
-    if (!normalized.endsWith('@gmail.com')) {
-      this.errors.reps[index].email = this.t('validation.emailMustBeGmail') || 'Email must be a gmail.com address.';
+    // 1. Validar formato @gmail.com
+    if (!/^[^\s@]+@gmail\.com$/i.test(normalized)) {
+      this.errors.reps[index].email = this.t('manageUsers.emailMustBeGmail') || 'O email deve terminar em @gmail.com';
       return false;
     }
 
-    if (isEditing && originalEmail && this.normalize(originalEmail) === normalized) {
+    // 2. Unicidade dentro do formulário (outros representantes)
+    const emailsInForm = this.orgForm.representatives
+      .filter((_, i) => i !== index)
+      .map(r => (r.email || '').trim().toLowerCase())
+      .filter(x => x);
+    if (emailsInForm.includes(normalized)) {
+      this.errors.reps[index].email = this.t('validation.duplicateEmailInForm') || 'Este email já existe no formulário.';
+      return false;
+    }
+
+    // 3. Se estiver editando e não mudou o email, passa
+    if (isEditing && originalEmail && normalized === originalEmail.toLowerCase()) {
       return true;
     }
 
     try {
-      const exists = await firstValueFrom(this.adminService.checkRepresentativeEmailExists(email));
-      if (exists) {
-        this.errors.reps[index].email = this.t('validation.emailExists') || 'Email already exists.';
+      // 4. Verificar se email existe como representante
+      const repExists = await firstValueFrom(this.adminService.checkRepresentativeEmailExists(email));
+
+      // 5. Verificar se email existe na base de usuários
+      let existingUsers: any[] = [];
+      try {
+        const users = await firstValueFrom(
+          this.adminService.GetUserByEmail(normalized).pipe(
+            catchError(error => {
+              console.warn('GetUserByEmail erro (tratado como não existente):', error);
+              return of([]);
+            })
+          )
+        );
+        existingUsers = users ? (Array.isArray(users) ? users : [users]) : [];
+      } catch (err) {
+        existingUsers = [];
+      }
+
+      // 6. Se existir em qualquer fonte, retorna erro
+      if (repExists ||( existingUsers && existingUsers.length > 0)) {
+        this.errors.reps[index].email = this.t('validation.emailExists') || 'Este email já está registado.';
         return false;
       }
+
+      // 7. Email válido e único
       return true;
+
     } catch (e) {
-      this.errors.reps[index].email = this.t('validation.serverErrorEmail') || 'Server error validating email.';
+      console.error('Erro ao validar email:', e);
+      this.errors.reps[index].email = this.t('validation.serverErrorEmail') || 'Erro ao comunicar com o servidor para verificar o email.';
       return false;
     }
   }
+
 
   async validatePhoneAsync(countryCode: string, phoneNumber: string, index: number, isEditing = false, originalPhone?: string): Promise<boolean> {
     this.errors.reps[index].phoneNumber = '';
