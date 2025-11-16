@@ -2,49 +2,50 @@
   <div class="container">
     <h1>{{ t('vesselVisitNotifications.title') }}</h1>
 
-    <!-- ========================================================= -->
-    <!-- ========== LIST OF IN-PROGRESS NOTIFICATIONS ============= -->
-    <!-- ========================================================= -->
     <div class="list-section">
       <h2>{{ t('vesselVisitNotifications.inProgressListTitle') }}</h2>
       <button (click)="loadInProgressNotifications()">
         {{ t('vesselVisitNotifications.refresh') }}
       </button>
 
-      <table *ngIf="inProgressNotifications.length > 0">
-        <thead>
-        <tr>
-          <th>{{ t('vesselVisitNotifications.id') }}</th>
-          <th>{{ t('vesselVisitNotifications.vesselName') }}</th>
-          <th>{{ t('vesselVisitNotifications.status') }}</th>
-          <th>{{ t('vesselVisitNotifications.arrival') }}</th>
-          <th>{{ t('vesselVisitNotifications.departure') }}</th>
-          <th>{{ t('vesselVisitNotifications.assignedDock') }}</th>
-          <th>{{ t('vesselVisitNotifications.actions') }}</th>
-        </tr>
-        </thead>
+      <div class="table-scroll-limit">
+        <table *ngIf="inProgressNotifications.length > 0">
+          <thead>
+          <tr>
+            <th>{{ t('vesselVisitNotifications.id') }}</th>
+            <th>{{ t('vesselVisitNotifications.vesselName') }}</th>
+            <th>{{ t('vesselVisitNotifications.status') }}</th>
+            <th>{{ t('vesselVisitNotifications.arrival') }}</th>
+            <th>{{ t('vesselVisitNotifications.departure') }}</th>
+            <th>{{ t('vesselVisitNotifications.actions') }}</th>
+          </tr>
+          </thead>
 
-        <tbody>
-        <tr *ngFor="let n of inProgressNotifications">
-          <td>{{ n.id }}</td>
-          <td>{{ n.vesselName }}</td>
-          <td>{{ n.status }}</td>
-          <td>{{ n.arrivalTime ? (n.arrivalTime | date:'short') : '-' }}</td>
-          <td>{{ n.departureTime ? (n.departureTime | date:'short') : '-' }}</td>
-          <td>{{ n.assignedDock || '-' }}</td>
-          <td>
-            <!-- Só aparece para IN PROGRESS -->
-            <button *ngIf="n.status === 'InProgress'" (click)="submitNotification(n)">
-              {{ t('vesselVisitNotifications.submit') }}
-            </button>
-
-            <button (click)="loadNotificationDetails(n)">
-              {{ t('vesselVisitNotifications.view') }}
-            </button>
-          </td>
-        </tr>
-        </tbody>
-      </table>
+          <tbody>
+          <tr *ngFor="let n of inProgressNotifications">
+            <td>{{ n.id }}</td>
+            <td>{{ n.vesselName }}</td>
+            <td>{{ n.status }}</td>
+            <td>{{ n.arrivalTime ? (n.arrivalTime | date:'short') : '-' }}</td>
+            <td>{{ n.departureTime ? (n.departureTime | date:'short') : '-' }}</td>
+            <td>
+              <button *ngIf="n.status === 'InProgress'" (click)="editNotification(n)">
+                {{ t('vesselVisitNotifications.edit') }}
+              </button>
+              <button *ngIf="n.status === 'InProgress'" (click)="submitNotification(n)">
+                {{ t('vesselVisitNotifications.submit') }}
+              </button>
+              <button class="secondary" (click)="withdrawNotification(n)">
+                {{ t('vesselVisitNotifications.withdraw') }}
+              </button>
+              <button (click)="loadNotificationDetails(n)">
+                {{ t('vesselVisitNotifications.view') }}
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
 
       <p *ngIf="inProgressNotifications.length === 0">
         {{ t('vesselVisitNotifications.noInProgress') }}
@@ -53,41 +54,41 @@
 
     <hr />
 
-    <!-- ========================================================= -->
-    <!-- ========== LIST OF SUBMITTED NOTIFICATIONS ============== -->
-    <!-- ========================================================= -->
     <div class="list-section">
       <h2>{{ t('vesselVisitNotifications.submittedListTitle') }}</h2>
       <button (click)="loadSubmittedNotifications()">{{ t('vesselVisitNotifications.refresh') }}</button>
 
-      <table *ngIf="submittedNotifications.length > 0">
-        <thead>
-        <tr>
-          <th>{{ t('vesselVisitNotifications.id') }}</th>
-          <th>{{ t('vesselVisitNotifications.vesselName') }}</th>
-          <th>{{ t('vesselVisitNotifications.status') }}</th>
-          <th>{{ t('vesselVisitNotifications.arrival') }}</th>
-          <th>{{ t('vesselVisitNotifications.departure') }}</th>
-          <th>{{ t('vesselVisitNotifications.assignedDock') }}</th>
-          <th>{{ t('vesselVisitNotifications.actions') }}</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let n of submittedNotifications">
-          <td>{{ n.id }}</td>
-          <td>{{ n.vesselName }}</td>
-          <td>{{ n.status }}</td>
-          <td>{{ n.arrivalTime ? (n.arrivalTime | date:'short') : '-' }}</td>
-          <td>{{ n.departureTime ? (n.departureTime | date:'short') : '-' }}</td>
-          <td>{{ n.assignedDock || '-' }}</td>
-          <td>
-            <button (click)="loadNotificationDetails(n)">
-              {{ t('vesselVisitNotifications.view') }}
-            </button>
-          </td>
-        </tr>
-        </tbody>
-      </table>
+      <div class="table-scroll-limit">
+        <table *ngIf="submittedNotifications.length > 0">
+          <thead>
+          <tr>
+            <th>{{ t('vesselVisitNotifications.id') }}</th>
+            <th>{{ t('vesselVisitNotifications.vesselName') }}</th>
+            <th>{{ t('vesselVisitNotifications.status') }}</th>
+            <th>{{ t('vesselVisitNotifications.arrival') }}</th>
+            <th>{{ t('vesselVisitNotifications.departure') }}</th>
+            <th>{{ t('vesselVisitNotifications.actions') }}</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let n of submittedNotifications">
+            <td>{{ n.id }}</td>
+            <td>{{ n.vesselName }}</td>
+            <td>{{ n.status }}</td>
+            <td>{{ n.arrivalTime ? (n.arrivalTime | date:'short') : '-' }}</td>
+            <td>{{ n.departureTime ? (n.departureTime | date:'short') : '-' }}</td>
+            <td>
+              <button class="secondary" (click)="withdrawNotification(n)">
+                {{ t('vesselVisitNotifications.withdraw') }}
+              </button>
+              <button (click)="loadNotificationDetails(n)">
+                {{ t('vesselVisitNotifications.view') }}
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
 
       <p *ngIf="submittedNotifications.length === 0">
         {{ t('vesselVisitNotifications.noSubmitted') }}
@@ -96,14 +97,58 @@
 
     <hr />
 
-    <!-- ========================================================= -->
-    <!-- ========== CREATE / SUBMIT FORM ========================= -->
-    <!-- ========================================================= -->
-    <form (ngSubmit)="createNotification()" class="form-section">
-      <h2>{{ t('vesselVisitNotifications.createTitle') }}</h2>
+    <div class="list-section">
+      <h2>{{ t('vesselVisitNotifications.withdrawnListTitle') }}</h2>
+      <button (click)="loadWithdrawnNotifications()">{{ t('vesselVisitNotifications.refresh') }}</button>
+
+      <div class="table-scroll-limit">
+        <table *ngIf="withdrawnNotifications.length > 0">
+          <thead>
+          <tr>
+            <th>{{ t('vesselVisitNotifications.id') }}</th>
+            <th>{{ t('vesselVisitNotifications.vesselName') }}</th>
+            <th>{{ t('vesselVisitNotifications.status') }}</th>
+            <th>{{ t('vesselVisitNotifications.arrival') }}</th>
+            <th>{{ t('vesselVisitNotifications.departure') }}</th>
+            <th>{{ t('vesselVisitNotifications.actions') }}</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let n of withdrawnNotifications">
+            <td>{{ n.id }}</td>
+            <td>{{ n.vesselName }}</td>
+            <td>{{ n.status }}</td>
+            <td>{{ n.arrivalTime ? (n.arrivalTime | date:'short') : '-' }}</td>
+            <td>{{ n.departureTime ? (n.departureTime | date:'short') : '-' }}</td>
+            <td>
+              <button (click)="resumeNotification(n)">
+                {{ t('vesselVisitNotifications.resume') }}
+              </button>
+              <button (click)="loadNotificationDetails(n)">
+                {{ t('vesselVisitNotifications.view') }}
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p *ngIf="withdrawnNotifications.length === 0">
+        {{ t('vesselVisitNotifications.noWithdrawn') }}
+      </p>
+    </div>
+
+    <hr />
+
+    <form (ngSubmit)="createOrUpdateNotification()" class="form-section">
+      <h2>
+        {{ editing ? t('vesselVisitNotifications.editTitle') : t('vesselVisitNotifications.createTitle') }}
+      </h2>
+      <p *ngIf="editing">
+        {{ t('vesselVisitNotifications.editingId') }}: <strong>{{ form.id }}</strong>
+      </p>
 
       <div class="form-grid">
-        <!-- Vessel -->
         <div class="form-group">
           <label>{{ t('vesselVisitNotifications.vessel') }}</label>
           <select [(ngModel)]="form.vesselId" name="vesselId" required>
@@ -114,14 +159,12 @@
           </select>
         </div>
 
-        <!-- Representative -->
         <div class="form-group">
           <label>{{ t('vesselVisitNotifications.representative') }}</label>
           <input [(ngModel)]="form.representativeId" name="representativeId"
                  placeholder="{{ t('vesselVisitNotifications.representativePlaceholder') }}" required />
         </div>
 
-        <!-- Arrival / Departure -->
         <div class="form-group">
           <label>{{ t('vesselVisitNotifications.arrivalTime') }}</label>
           <input type="datetime-local" [(ngModel)]="form.arrivalTime" name="arrivalTime" required />
@@ -132,7 +175,6 @@
           <input type="datetime-local" [(ngModel)]="form.departureTime" name="departureTime" required />
         </div>
 
-        <!-- Preferred Dock -->
         <div class="form-group">
           <label>{{ t('vesselVisitNotifications.preferredDock') }}</label>
           <select [(ngModel)]="form.dockId" name="dockId">
@@ -141,7 +183,6 @@
           </select>
         </div>
 
-        <!-- Physical Resource -->
         <div class="form-group">
           <label>{{ t('vesselVisitNotifications.physicalResource') }}</label>
           <select [(ngModel)]="form.physicalResourceId" name="physicalResourceId">
@@ -151,22 +192,20 @@
         </div>
       </div>
 
-      <!-- STAFF MEMBERS -->
       <div class="section-block">
         <h3>{{ t('vesselVisitNotifications.staffListTitle') }}</h3>
         <div class="staff-list">
           <div *ngFor="let s of staff" class="staff-item">
             <input type="checkbox"
-                   [id]="s.id"
+                   [id]="'staff-' + s.id"
                    [value]="s.id"
                    (change)="onStaffChange($event)"
                    [checked]="form.staffMemberIds.includes(s.id)" />
-            <label [for]="s.id">{{ s.name }}</label>
+            <label [for]="'staff-' + s.id">{{ s.name }}</label>
           </div>
         </div>
       </div>
 
-      <!-- LOADING MANIFESTS -->
       <div class="section-block">
         <h3>{{ t('vesselVisitNotifications.loadingManifests') }}</h3>
 
@@ -214,7 +253,6 @@
         </button>
       </div>
 
-      <!-- UNLOADING MANIFESTS -->
       <div class="section-block">
         <h3>{{ t('vesselVisitNotifications.unloadingManifests') }}</h3>
 
@@ -262,7 +300,6 @@
         </button>
       </div>
 
-      <!-- CREW -->
       <div class="section-block">
         <h3>{{ t('vesselVisitNotifications.crew') }}</h3>
 
@@ -281,10 +318,9 @@
         </button>
       </div>
 
-      <!-- FORM BUTTONS -->
       <div class="form-buttons">
-        <button type="submit" class="primary">
-          {{ t('vesselVisitNotifications.createSubmit') }}
+        <button type="submit" class="primary" [disabled]="isSaving">
+          {{ editing ? t('vesselVisitNotifications.saveChanges') : t('vesselVisitNotifications.createSubmit') }}
         </button>
 
         <button type="button" class="secondary" (click)="resetForm()">

@@ -3,6 +3,38 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { TranslationService } from '../../translation.service';
 import { AdminService } from '../admin.service';
+import { Observable } from 'rxjs';
+// Interfaces para tipagem dos dados
+interface Container {
+  id?: string;
+  payloadWeight: number;
+  contentsDescription: string;
+}
+
+interface Manifest {
+  id?: string;
+  containers: Container[];
+}
+
+interface CrewMember {
+  name: string;
+  citizenId: string;
+  nationality: string;
+}
+
+interface NotificationForm {
+  id?: string; // ID da notificação se estiver a editar
+  vesselId: string | null;
+  representativeId: string;
+  loadingManifests: Manifest[];
+  unloadingManifests: Manifest[];
+  crew: CrewMember[];
+  arrivalTime: string;
+  departureTime: string;
+  staffMemberIds: string[];
+  physicalResourceId: string | null;
+  dockId: string | null;
+}
 
 @Component({
   selector: 'app-manage-vessel-visit-notifications',
@@ -13,52 +45,77 @@ import { AdminService } from '../admin.service';
 })
 export class ManageVesselVisitNotifications implements OnInit {
 
+  // Listas de Notificações
   notifications: any[] = [];
   inProgressNotifications: any[] = [];
   submittedNotifications: any[] = [];
+  withdrawnNotifications: any[] = []; // NOVO: Lista de retiradas
   selectedNotification: any = null;
 
+  // Dados de Apoio (Dropdowns, Checkboxes)
   vessels: any[] = [];
   docks: any[] = [];
   physicalResources: any[] = [];
   staff: any[] = [];
   representatives: any[] = [];
 
-  form: any = {
-    vesselId: null,
-    representativeId: '',
-    loadingManifests: [{ containers: [{ payloadWeight: 0, contentsDescription: '' }] }],
-    unloadingManifests: [{ containers: [{ payloadWeight: 0, contentsDescription: '' }] }],
-    crew: [],
-    arrivalTime: '',
-    departureTime: '',
-    staffMemberIds: [],
-    physicalResourceId: null,
-    dockId: null
-  };
+  // Gestão do Formulário
+  editing: boolean = false; // NOVO: Flag para alternar entre Create e Edit
+  isSaving: boolean = false; // Flag para prevenir duplo clique
+
+  form: NotificationForm;
 
   constructor(
     private adminService: AdminService,
     private translation: TranslationService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) {
+    this.form = this.getInitialForm();
+  }
 
   t(key: string) {
     return this.translation.translate(key);
   }
 
+  displayMessage(msg: string) {
+    if (typeof window !== 'undefined') alert(msg);
+    else console.log('MSG:', msg);
+  }
+
   ngOnInit() {
+    this.loadData();
+  }
+
+  /* -------------------
+       INITIALIZATION
+  ------------------- */
+
+  loadData() {
     this.loadVessels();
     this.loadDocks();
     this.loadPhysicalResources();
     this.loadStaff();
     this.loadRepresentatives();
-    this.loadSubmittedNotifications();
-    this.loadInProgressNotifications();
+    this.loadAllNotifications();
+  }
+
+  getInitialForm(): NotificationForm {
+    return {
+      vesselId: null,
+      representativeId: '',
+      loadingManifests: [{ containers: [{ payloadWeight: 0, contentsDescription: '' }] }],
+      unloadingManifests: [{ containers: [{ payloadWeight: 0, contentsDescription: '' }] }],
+      crew: [],
+      arrivalTime: '',
+      departureTime: '',
+      staffMemberIds: [],
+      physicalResourceId: null,
+      dockId: null
+    };
   }
 
   /* -------------------
-       LOAD DATA
+       LOAD UTILS
   ------------------- */
 
   loadVessels() {
@@ -91,13 +148,23 @@ export class ManageVesselVisitNotifications implements OnInit {
     });
   }
 
+  /* -------------------
+       LOAD NOTIFICATIONS
+  ------------------- */
+
+  loadAllNotifications() {
+    this.loadInProgressNotifications();
+    this.loadSubmittedNotifications();
+    this.loadWithdrawnNotifications(); // NOVO
+  }
+
   loadInProgressNotifications() {
     this.adminService.getInProgressVesselVisitNotifications().subscribe({
       next: res => {
         this.inProgressNotifications = res || [];
         this.cdr.detectChanges();
       },
-      error: () => alert('Error loading in-progress notifications')
+      error: () => this.displayMessage(this.t('vesselVisitNotifications.loadErrorInProgress') || 'Error loading in-progress notifications')
     });
   }
 
@@ -107,7 +174,18 @@ export class ManageVesselVisitNotifications implements OnInit {
         this.submittedNotifications = res || [];
         this.cdr.detectChanges();
       },
-      error: () => alert('Error loading submitted notifications')
+      error: () => this.displayMessage(this.t('vesselVisitNotifications.loadErrorSubmitted') || 'Error loading submitted notifications')
+    });
+  }
+
+  // NOVO: Carregar notificações com status Withdrawn
+  loadWithdrawnNotifications() {
+    this.adminService.getWithdrawnVesselVisitNotifications().subscribe({
+      next: res => {
+        this.withdrawnNotifications = res || [];
+        this.cdr.detectChanges();
+      },
+      error: () => this.displayMessage(this.t('vesselVisitNotifications.loadErrorWithdrawn') || 'Error loading withdrawn notifications')
     });
   }
 
@@ -121,49 +199,152 @@ export class ManageVesselVisitNotifications implements OnInit {
   }
 
   /* -------------------
-       SUBMIT
+       AÇÕES (SUBMIT, WITHDRAW, RESUME)
   ------------------- */
 
+  // AÇÃO 1: Submeter (de InProgress para Submitted)
   submitNotification(notification: any) {
     if (notification.status !== 'InProgress') {
-      return alert('Only In Progress notifications can be submitted.');
+      return this.displayMessage(this.t('vesselVisitNotifications.submitOnlyInProgress'));
     }
 
     this.adminService.submitVesselVisitNotification(notification.id).subscribe({
       next: () => {
-        alert('Notification submitted successfully!');
-        this.loadInProgressNotifications();
-        this.loadSubmittedNotifications();
+        this.displayMessage(this.t('vesselVisitNotifications.submitSuccess'));
+        this.loadAllNotifications();
       },
-      error: err => alert('Error: ' + (err?.error?.message || err))
+      error: err => this.displayMessage(this.t('vesselVisitNotifications.submitError') + ': ' + (err?.error?.message || err))
     });
   }
 
-  /* -------------------
-       CREATE
-  ------------------- */
+  // AÇÃO 2: Withdraw (de InProgress/Submitted para Withdrawn)
+  withdrawNotification(notification: any) {
+    if (!confirm(this.t('vesselVisitNotifications.confirmWithdraw'))) return;
 
-  createNotification() {
-    if (!this.form.vesselId || !this.form.representativeId) {
-      return alert('Required fields missing');
+    this.adminService.withdrawVesselVisitNotification(notification.id).subscribe({
+      next: () => {
+        this.displayMessage(this.t('vesselVisitNotifications.withdrawSuccess'));
+        this.loadAllNotifications();
+      },
+      error: err => this.displayMessage(this.t('vesselVisitNotifications.withdrawError') + ': ' + (err?.error?.message || err))
+    });
+  }
+
+  // AÇÃO 3: Resume (de Withdrawn para InProgress)
+  resumeNotification(notification: any) {
+    if (notification.status !== 'WithdrawnRequest') {
+      return this.displayMessage(this.t('vesselVisitNotifications.resumeOnlyWithdrawn'));
     }
 
-    const dto = {
+    this.adminService.resumeVesselVisitNotification(notification.id).subscribe({
+      next: () => {
+        this.displayMessage(this.t('vesselVisitNotifications.resumeSuccess'));
+        this.loadAllNotifications();
+      },
+      error: err => this.displayMessage(this.t('vesselVisitNotifications.resumeError') + ': ' + (err?.error?.message || err))
+    });
+  }
+
+
+  /* -------------------
+       EDIÇÃO (REQUISITO 1)
+  ------------------- */
+
+  // Função para preencher o formulário para edição
+  editNotification(notification: any) {
+    this.editing = true;
+    this.selectedNotification = notification;
+
+    // Formatar ArrivalTime e DepartureTime para o formato local da input type="datetime-local"
+    const formatDateTimeLocal = (isoString: string): string => {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+      return date.toISOString().slice(0, 16);
+    };
+
+    // Mapear a notificação para a estrutura do formulário
+    this.form = {
+      id: notification.id,
+      vesselId: notification.vesselId,
+      representativeId: notification.representativeId,
+      arrivalTime: formatDateTimeLocal(notification.arrivalTime),
+      departureTime: formatDateTimeLocal(notification.departureTime),
+      staffMemberIds: notification.staffMemberIds || [],
+      physicalResourceId: notification.physicalResourceId || null,
+      dockId: notification.dockId || null,
+      crew: notification.crew || [],
+      // Mapeamento de Manifests (simplificado para estruturas com ID)
+      loadingManifests: notification.loadingCargo?.manifests || [{ containers: [{ payloadWeight: 0, contentsDescription: '' }] }],
+      unloadingManifests: notification.unloadingCargo?.manifests || [{ containers: [{ payloadWeight: 0, contentsDescription: '' }] }],
+    };
+
+    // Scroll para o formulário
+    document.querySelector('.form-section')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+
+  /* -------------------
+       SAVE (CREATE / UPDATE)
+  ------------------- */
+
+  createOrUpdateNotification() {
+    if (!this.form.vesselId || !this.form.representativeId || this.isSaving) {
+      return this.displayMessage(this.t('vesselVisitNotifications.requiredFields'));
+    }
+
+    this.isSaving = true;
+
+    const dto = this.mapFormToDto();
+    let request$: Observable<any>;
+    let successMessage: string;
+    let errorMessage: string;
+
+    if (this.editing && this.form.id) {
+      // É EDIÇÃO
+      request$ = this.adminService.updateVesselVisitNotificationInProgress(this.form.id, dto);
+      successMessage = this.t('vesselVisitNotifications.updateSuccess');
+      errorMessage = this.t('vesselVisitNotifications.updateError');
+    } else {
+      // É CRIAÇÃO
+      request$ = this.adminService.createVesselVisitNotification(dto);
+      successMessage = this.t('vesselVisitNotifications.createSuccess');
+      errorMessage = this.t('vesselVisitNotifications.createError');
+    }
+
+    request$.subscribe({
+      next: () => {
+        this.displayMessage(successMessage);
+        this.resetForm();
+        this.loadAllNotifications();
+        this.isSaving = false;
+      },
+      error: err => {
+        this.displayMessage(errorMessage + ': ' + (err?.error?.message || JSON.stringify(err)));
+        this.isSaving = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private mapFormToDto() {
+    return {
       VesselId: this.form.vesselId,
       RepresentativeId: this.form.representativeId,
-      LoadingManifests: this.form.loadingManifests.map((m: any) => ({
-        Containers: m.containers.map((c: any) => ({
+      // Mapeamento de Manifests: Assegurar que payloadWeight é Number e remover IDs (se existirem)
+      LoadingManifests: this.form.loadingManifests.map(m => ({
+        Containers: m.containers.map(c => ({
           PayloadWeight: Number(c.payloadWeight),
           ContentsDescription: c.contentsDescription
         }))
       })),
-      UnloadingManifests: this.form.unloadingManifests.map((m: any) => ({
-        Containers: m.containers.map((c: any) => ({
+      UnloadingManifests: this.form.unloadingManifests.map(m => ({
+        Containers: m.containers.map(c => ({
           PayloadWeight: Number(c.payloadWeight),
           ContentsDescription: c.contentsDescription
         }))
       })),
-      Crew: this.form.crew.map((cr: any) => ({
+      Crew: this.form.crew.map(cr => ({
         Name: cr.name,
         CitizenId: cr.citizenId,
         Nationality: cr.nationality
@@ -174,34 +355,18 @@ export class ManageVesselVisitNotifications implements OnInit {
       PhysicalResourceId: this.form.physicalResourceId,
       DockId: this.form.dockId
     };
-
-    this.adminService.createVesselVisitNotification(dto).subscribe({
-      next: () => {
-        alert('Notification created');
-        this.resetForm();
-        this.loadInProgressNotifications();
-      },
-      error: err => alert('Error: ' + (err?.error?.message || err))
-    });
   }
+
 
   /* -------------------
        FORM HELPERS
   ------------------- */
 
   resetForm() {
-    this.form = {
-      vesselId: null,
-      representativeId: '',
-      loadingManifests: [{ containers: [{ payloadWeight: 0, contentsDescription: '' }] }],
-      unloadingManifests: [{ containers: [{ payloadWeight: 0, contentsDescription: '' }] }],
-      crew: [],
-      arrivalTime: '',
-      departureTime: '',
-      staffMemberIds: [],
-      physicalResourceId: null,
-      dockId: null
-    };
+    this.editing = false;
+    this.form = this.getInitialForm();
+    this.selectedNotification = null;
+    this.isSaving = false;
   }
 
   onStaffChange(event: any) {
@@ -210,7 +375,7 @@ export class ManageVesselVisitNotifications implements OnInit {
       if (!this.form.staffMemberIds.includes(id))
         this.form.staffMemberIds.push(id);
     } else {
-      this.form.staffMemberIds = this.form.staffMemberIds.filter((s: any) => s !== id);
+      this.form.staffMemberIds = this.form.staffMemberIds.filter((s: string) => s !== id);
     }
   }
 
@@ -223,7 +388,9 @@ export class ManageVesselVisitNotifications implements OnInit {
   }
 
   removeLoadingManifest(i: number) {
-    this.form.loadingManifests.splice(i, 1);
+    if (this.form.loadingManifests.length > 1) {
+      this.form.loadingManifests.splice(i, 1);
+    }
   }
 
   addLoadingContainer(mi: number) {
@@ -231,7 +398,9 @@ export class ManageVesselVisitNotifications implements OnInit {
   }
 
   removeLoadingContainer(mi: number, ci: number) {
-    this.form.loadingManifests[mi].containers.splice(ci, 1);
+    if (this.form.loadingManifests[mi].containers.length > 1) {
+      this.form.loadingManifests[mi].containers.splice(ci, 1);
+    }
   }
 
   addUnloadingManifest() {
@@ -239,7 +408,9 @@ export class ManageVesselVisitNotifications implements OnInit {
   }
 
   removeUnloadingManifest(i: number) {
-    this.form.unloadingManifests.splice(i, 1);
+    if (this.form.unloadingManifests.length > 1) {
+      this.form.unloadingManifests.splice(i, 1);
+    }
   }
 
   addUnloadingContainer(mi: number) {
@@ -247,7 +418,9 @@ export class ManageVesselVisitNotifications implements OnInit {
   }
 
   removeUnloadingContainer(mi: number, ci: number) {
-    this.form.unloadingManifests[mi].containers.splice(ci, 1);
+    if (this.form.unloadingManifests[mi].containers.length > 1) {
+      this.form.unloadingManifests[mi].containers.splice(ci, 1);
+    }
   }
 
   /* -------------------

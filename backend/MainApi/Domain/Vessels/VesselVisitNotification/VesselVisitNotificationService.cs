@@ -182,6 +182,14 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
             return notifications.Select(n => MapToDto(n)).ToList();
         }
+        
+        public async Task<List<VesselVisitNotificationDto>> GetWithdrawnAsync()
+        {
+            var notifications = await _repo.GetByStateAsync(NotificationStatus.WithdrawnRequest);
+
+            return notifications.Select(n => MapToDto(n)).ToList();
+        }
+
 
         // Procurar notificação por ID
         public async Task<VesselVisitNotificationDto> GetByIdAsync(Guid id)

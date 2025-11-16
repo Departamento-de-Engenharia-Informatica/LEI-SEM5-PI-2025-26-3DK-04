@@ -54,6 +54,13 @@ namespace DDDSample1.Controllers
             var notifications = await _service.GetApprovedNotificationsAsync();
             return Ok(notifications);
         }
+        [HttpGet("withdrawn")]
+        [AuthorizeRole(Roles.Admin)]
+        public async Task<ActionResult<List<VesselVisitNotificationDto>>> GetWithdrawnNotifications()
+        {
+            var notifications = await _service.GetWithdrawnAsync();
+            return Ok(notifications);
+        }
 
         [HttpGet("{id}")]
         [AuthorizeRole(Roles.Admin)]

@@ -20,6 +20,7 @@ export class AdminService {
 
   private organizationBaseUrl = 'https://localhost:5001/api/Organizations';
   private representativeBaseUrl = 'https://localhost:5001/api/Representatives';
+  private vesselVisitNotificationBaseUrl = 'https://localhost:5001/api/VesselVisitNotifications';
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
@@ -289,8 +290,9 @@ export class AdminService {
       { status }
     );
   }
-  // VESSEL VISIT NOTIFICATION management
-  private vesselVisitNotificationBaseUrl = 'https://localhost:5001/api/VesselVisitNotifications';
+  /* ===============================
+    VESSEL VISIT NOTIFICATION MANAGEMENT
+  =============================== */
 
   createVesselVisitNotification(dto: any): Observable<any> {
     return this.http.post(`${this.vesselVisitNotificationBaseUrl}`, dto);
@@ -304,12 +306,12 @@ export class AdminService {
   submitVesselVisitNotification(id: string): Observable<any> {
     return this.http.put(`${this.vesselVisitNotificationBaseUrl}/${id}/submit`, {});
   }
-// GET submitted vessel visit notifications
   getSubmittedVesselVisitNotifications() {
     return this.http.get<any[]>(`${this.baseUrl}/VesselVisitNotifications/submitted`);
   }
 
-  // APPROVE vessel visit notification
+
+  // APROVAR notificação
   approveVesselVisitNotification(id: string, dockId: string, officerId: string): Observable<any> {
     return this.http.put(`${this.vesselVisitNotificationBaseUrl}/${id}/approve`, {
       DockId: dockId,
@@ -317,7 +319,7 @@ export class AdminService {
     });
   }
 
-  // REJECT vessel visit notification
+  // REJEITAR notificação
   rejectVesselVisitNotification(id: string, reason: string, officerId: string): Observable<any> {
     return this.http.put(`${this.vesselVisitNotificationBaseUrl}/${id}/reject`, {
       Reason: reason,
@@ -326,11 +328,28 @@ export class AdminService {
   }
 
   getVessels(): Observable<any[]> { return this.http.get<any[]>(this.vesselTypeBaseUrl); }
+
   getInProgressVesselVisitNotifications() {
     return this.http.get<any[]>(`${this.baseUrl}/VesselVisitNotifications/in-progress`);
   }
+
+  getWithdrawnVesselVisitNotifications() {
+    return this.http.get<any[]>(`${this.vesselVisitNotificationBaseUrl}/withdrawn`);
+  }
+
+  // FUNÇÃO NECESSÁRIA PARA O REQUISITO 1 (EDIÇÃO)
   updateVesselVisitNotificationInProgress(id: string, dto: any): Observable<any> {
     return this.http.put(`${this.vesselVisitNotificationBaseUrl}/${id}/update`, dto);
+  }
+
+  // FUNÇÃO NECESSÁRIA PARA O REQUISITO 1 (WITHDRAW)
+  withdrawVesselVisitNotification(id: string): Observable<any> {
+    return this.http.put(`${this.vesselVisitNotificationBaseUrl}/${id}/withdraw`, {});
+  }
+
+  // FUNÇÃO NECESSÁRIA PARA O REQUISITO 2 (RESUME)
+  resumeVesselVisitNotification(id: string): Observable<any> {
+    return this.http.put(`${this.vesselVisitNotificationBaseUrl}/${id}/resume`, {});
   }
 
 }
