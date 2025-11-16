@@ -333,7 +333,4 @@ export class AdminService {
     return this.http.put(`${this.vesselVisitNotificationBaseUrl}/${id}/update`, dto);
   }
 
-
-
-
 }
