@@ -456,7 +456,7 @@ namespace DDDNetCore.Tests.Integration
 
         if (response.StatusCode == HttpStatusCode.BadRequest)
         {
-            _testOutputHelper.WriteLine("⚠️ DEBUG ERROR RESPONSE: " + await response.Content.ReadAsStringAsync());
+            _testOutputHelper.WriteLine(" DEBUG ERROR RESPONSE: " + await response.Content.ReadAsStringAsync());
         }
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);

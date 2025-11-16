@@ -23,7 +23,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/Dock
         [HttpGet]
-        //[AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<IEnumerable<DockDetailsDto>>> GetAll()
         {
             return await _service.GetAllAsync();
@@ -31,7 +31,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/Dock/{id}
         [HttpGet("{id}")]
-        //[AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<DockDetailsDto>> GetById(string id)
         {
             var dock = await _service.GetByIdAsync(new DockID(id));
@@ -46,7 +46,7 @@ namespace DDDSample1.Controllers
 
         // POST: api/Dock
         [HttpPost]
-        //[AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<DockDetailsDto>> Create(DockDto dto)
         {
             try{
@@ -66,7 +66,7 @@ namespace DDDSample1.Controllers
 
         // PUT: api/Dock/{id}
         [HttpPut("{id}")]
-        //[AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<DockDetailsDto>> Update(string id, DockDto dto)
         {
             try
@@ -88,7 +88,7 @@ namespace DDDSample1.Controllers
 
         // DELETE: api/Dock/{id}
         [HttpDelete("{id}")]
-        //[AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<DockDetailsDto>> SoftDelete(string id)
         {
             var dock = await _service.InactivateAsync(new DockID(id));
@@ -103,7 +103,7 @@ namespace DDDSample1.Controllers
 
         // DELETE: api/Dock/{id}/hard
         [HttpDelete("{id}/hard")]
-        //[AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<DockDetailsDto>> HardDelete(string id)
         {
             try
@@ -126,7 +126,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/Dock/search/by-name?name=...
         [HttpGet("search/by-name")]
-        //[AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<IEnumerable<DockDetailsDto>>> SearchByName([FromQuery] string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -138,7 +138,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/Dock/search/by-vessel-type?typeId=...
         [HttpGet("search/by-vessel-type")]
-        //[AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<IEnumerable<DockDetailsDto>>> FilterByVesselType([FromQuery] Guid typeId)
         {
             if (typeId == Guid.Empty)
@@ -150,7 +150,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/Dock/search/by-location?query=...
         [HttpGet("search/by-location")]
-        //[AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<IEnumerable<DockDetailsDto>>> FilterByLocation([FromQuery] string query)
         {
             if (string.IsNullOrWhiteSpace(query))

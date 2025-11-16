@@ -22,15 +22,14 @@ using Xunit.Abstractions;
 
 namespace DDDSample1.Tests.System
 {
-    public class VesselVisitNotificationSystemTests : IClassFixture<WebApplicationFactory<DDDSample1.Program>>
+    public class VesselVisitNotificationSystemTests : IClassFixture<TestApplicationFactory>
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private readonly WebApplicationFactory<DDDSample1.Program> _factory;
+       private readonly TestApplicationFactory _factory;
 
-        public VesselVisitNotificationSystemTests(ITestOutputHelper testOutputHelper)
+        public VesselVisitNotificationSystemTests(TestApplicationFactory factory)
         {
-            _testOutputHelper = testOutputHelper;
-            _factory = new TestApplicationFactory();
+            _factory = factory;
         }
 
         private CargoManifest CreateManifestWithContainer(double weight)
@@ -571,17 +570,6 @@ namespace DDDSample1.Tests.System
         ((string)dto.status).Should().Be("InProgress");
         }
 
-
-
-        private class TestApplicationFactory : WebApplicationFactory<DDDSample1.Program>
-        {
-            protected override void ConfigureWebHost(IWebHostBuilder builder)
-            {
-                builder.UseEnvironment("Testing");
-                var projectRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
-                builder.UseContentRoot(projectRoot);
-            }
-        }
     }
 }
 */

@@ -25,7 +25,7 @@ namespace DDDSample1.Controllers
         /// Obtém todas as organizações registradas.
         /// </summary>
         [HttpGet]
-        //[AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<List<OrganizationDto>>> GetAll()
         {
             var orgs = await _service.GetAllAsync();
@@ -37,7 +37,7 @@ namespace DDDSample1.Controllers
         /// Obtém uma organização específica por ID.
         /// </summary>
         [HttpGet("{id}")]
-        //[AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<OrganizationDto>> GetById(string id)
         {
             try
@@ -57,7 +57,7 @@ namespace DDDSample1.Controllers
         /// Regista uma nova organização.
         /// </summary>
         [HttpPost]
-        //[AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<OrganizationDto>> Register([FromBody] OrganizationDto dto)
         {
             try
@@ -74,12 +74,14 @@ namespace DDDSample1.Controllers
         
         // GET: api/Organizations/check-legalname/{name}
         [HttpGet("check-legalname/{name}")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<bool>> CheckLegalName(string name)
         {
             var exists = await _service.LegalNameExistsAsync(name);
             return Ok(exists);
         }
         [HttpGet("check-taxnumber")]
+        [AuthorizeRole(Roles.Admin)]
         public async Task<ActionResult<bool>> CheckTaxNumber(string taxNumber)
         {
             var exists = await _service.TaxNumberExistsAsync(taxNumber);

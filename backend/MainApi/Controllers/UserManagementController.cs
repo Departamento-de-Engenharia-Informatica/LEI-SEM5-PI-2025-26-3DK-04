@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace DDDSample1.Controllers
 {
     [ApiController]
+    
     [Route("api/[controller]")]
     public class UserManagementController : ControllerBase
     {
@@ -18,13 +19,14 @@ namespace DDDSample1.Controllers
         {
             _service = service;
         }
-
+        [AuthorizeRole(Roles.Admin)]
         [HttpGet("check/{email}")]
         public async Task<IActionResult> CheckUserPath(string email)
         {
             return await CheckUser(email);
         }
-
+        
+        [AuthorizeRole(Roles.Admin)]
         [HttpGet("check")]
         public async Task<IActionResult> CheckUser([FromQuery] string email)
         {
@@ -34,7 +36,8 @@ namespace DDDSample1.Controllers
 
             return Ok(new { exists = result.Exists });
         }
-
+        
+        [AuthorizeRole(Roles.Admin)]
         [HttpPost("create")]
         public async Task<IActionResult> CreateUser([FromBody] UserService.CreateUserDTO dto)
         {
@@ -45,7 +48,8 @@ namespace DDDSample1.Controllers
 
             return Ok(new { message = "User created. Activation email sent." });
         }
-
+        
+        [AuthorizeRole(Roles.Admin)]
         [HttpPut("{email}/role")]
         public async Task<IActionResult> UpdateRole(string email, [FromBody] UserService.UpdateRoleDTO dto)
         {
@@ -64,7 +68,8 @@ namespace DDDSample1.Controllers
             var url = await _service.ActivateUserAsync(token);
             return Redirect(url);
         }
-
+        
+        [AuthorizeRole(Roles.Admin)]
         [HttpPut("{email}/deactivate")]
         public async Task<IActionResult> Deactivate(string email)
         {
@@ -75,14 +80,14 @@ namespace DDDSample1.Controllers
 
             return Ok(new { message = "User deactivated" });
         }
-
+        [AuthorizeRole(Roles.Admin)]
         [HttpGet("get")]
         public async Task<IActionResult> GetAllUsers()
         {
             var list = await _service.GetAllUsersAsync();
             return Ok(list);
         }
-        
+        [AuthorizeRole(Roles.Admin)]
         [HttpGet("get/{email}")]
         public async Task<IActionResult> GetUserByEmail(string email)
         {

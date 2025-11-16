@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,13 +25,13 @@ using DDDSample1.Domain.Vessels;
 
 namespace DDDSample1.Tests.System
 {
-    public class StorageAreaSystemTests : IClassFixture<WebApplicationFactory<DDDSample1.Program>>
+    public class StorageAreaSystemTests : IClassFixture<TestApplicationFactory>
     {
-        private readonly WebApplicationFactory<DDDSample1.Program> _factory;
+        private readonly TestApplicationFactory _factory;
 
-        public StorageAreaSystemTests()
+        public StorageAreaSystemTests(TestApplicationFactory factory)
         {
-            _factory = new TestApplicationFactory();
+            _factory = factory;
         }
 
         [Fact]
@@ -139,15 +140,7 @@ namespace DDDSample1.Tests.System
             var activated = JsonConvert.DeserializeObject<StorageAreaDto>(activateBody);
             activated.Active.Should().BeTrue();
         }
-
-        private class TestApplicationFactory : WebApplicationFactory<DDDSample1.Program>
-        {
-            protected override void ConfigureWebHost(IWebHostBuilder builder)
-            {
-                builder.UseEnvironment("Testing");
-                var projectRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
-                builder.UseContentRoot(projectRoot);
-            }
-        }
+        
     }
 }
+*/

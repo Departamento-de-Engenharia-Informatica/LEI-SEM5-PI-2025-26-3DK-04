@@ -16,14 +16,15 @@ using System.IO;
 
 namespace DDDSample1.Tests.System
 {
-    public class RepresentativeSystemTests : IClassFixture<WebApplicationFactory<DDDSample1.Program>>
+    public class RepresentativeSystemTests : IClassFixture<TestApplicationFactory>
     {
-        private readonly WebApplicationFactory<DDDSample1.Program> _factory;
         private static readonly Random _rnd = new Random();
 
-        public RepresentativeSystemTests()
+        private readonly TestApplicationFactory _factory;
+
+        public RepresentativeSystemTests(TestApplicationFactory factory)
         {
-            _factory = new TestApplicationFactory();
+            _factory = factory;
         }
 
         [Fact]
@@ -130,16 +131,7 @@ namespace DDDSample1.Tests.System
             var dupResponse = await client.PostAsync("/api/Representatives", createContent);
             dupResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
-
-        private class TestApplicationFactory : WebApplicationFactory<DDDSample1.Program>
-        {
-            protected override void ConfigureWebHost(IWebHostBuilder builder)
-            {
-                builder.UseEnvironment("Testing");
-                var projectRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
-                builder.UseContentRoot(projectRoot);
-            }
-        }
+        
     }
 }
 */
