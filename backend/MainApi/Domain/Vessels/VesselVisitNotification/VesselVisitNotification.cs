@@ -8,18 +8,17 @@ using DDDSample1.Domain.Organizations;
 
 namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 {
-
     public class VesselVisitNotification : Entity<VesselVisitNotificationID>, IAggregateRoot
     {
         public Vessel Vessel { get; private set; }
-        
+
         public LoadingCargoMaterial? LoadingCargo { get; private set; }
-        
+
         public UnloadingCargoMaterial? UnloadingCargo { get; private set; }
 
         public string RejectedReason { get; private set; }
 
-        public DateTime? DecisionTimeStamp { get; private set; } 
+        public DateTime? DecisionTimeStamp { get; private set; }
 
         public string DecisionOutcome { get; private set; }
 
@@ -28,35 +27,34 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         public string AssignedDock { get; private set; }
 
         public string OfficerId { get; private set; }
-        
+
         public RepresentativeId RepresentativeId { get; private set; }
-        
+
         public DateTime CreatedAt { get; private set; }
-        
+
         // Novos atributos para integração com IARTI
         public DateTime? ArrivalTime { get; private set; }
         public DateTime? DepartureTime { get; private set; }
         public int? UnloadTime { get; private set; } // Em horas
         public int? LoadTime { get; private set; } // Em horas
-        
+
         // Associações necessárias
         private List<string> _staffMemberIds = new List<string>();
         public IReadOnlyCollection<string> StaffMemberIds => _staffMemberIds.AsReadOnly();
-        
+
         public string PhysicalResourceId { get; private set; } // Crane ID
         public string DockId { get; private set; }
-        
+
         //private List<CargoManifest> _cargoManifests;
 
         private VesselVisitNotification()
         {
-
         }
 
         public VesselVisitNotification(
-            Vessel vessel, 
-            LoadingCargoMaterial loadingCargo, 
-            UnloadingCargoMaterial unloadingCargo, 
+            Vessel vessel,
+            LoadingCargoMaterial loadingCargo,
+            UnloadingCargoMaterial unloadingCargo,
             RepresentativeId representativeId,
             DateTime arrivalTime,
             DateTime departureTime,
@@ -67,22 +65,22 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         {
             if (vessel == null)
                 throw new BusinessRuleValidationException("Vessel is required for a visit notification.");
-            
+
             if (representativeId == null)
                 throw new BusinessRuleValidationException("Representative is required for a visit notification.");
-            
+
             // Validar que arrival time não é no passado
             if (arrivalTime < DateTime.UtcNow)
                 throw new BusinessRuleValidationException("Arrival time cannot be in the past.");
-            
+
             // Validar que departure time não é no passado
             if (departureTime < DateTime.UtcNow)
                 throw new BusinessRuleValidationException("Departure time cannot be in the past.");
-            
+
             // Validar que departure é posterior ao arrival
             if (departureTime <= arrivalTime)
                 throw new BusinessRuleValidationException("Departure time must be after arrival time.");
-                
+
             this.Id = new VesselVisitNotificationID(Guid.NewGuid());
             this.Vessel = vessel;
             this.LoadingCargo = loadingCargo ?? new LoadingCargoMaterial(new List<CargoManifest>());
@@ -90,20 +88,20 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             this.RepresentativeId = representativeId;
             this.Status = NotificationStatus.InProgress;
             this.CreatedAt = DateTime.UtcNow;
-            
+
             // Definir tempos de chegada e partida
             this.ArrivalTime = arrivalTime;
             this.DepartureTime = departureTime;
-            
+
             // Associações opcionais
             if (staffMemberIds != null && staffMemberIds.Count > 0)
             {
                 this._staffMemberIds = new List<string>(staffMemberIds);
             }
-            
+
             this.PhysicalResourceId = physicalResourceId;
             this.DockId = dockId;
-            
+
             // Calcular tempos de carga e descarga
             CalculateLoadAndUnloadTimes(physicalResourceSetupTime);
         }
@@ -159,13 +157,13 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             this.DecisionOutcome = "Rejected";
             this.AssignedDock = null; // Limpar dock se foi aprovado antes
         }
-        
+
         public void ResetToPending()
         {
             if (this.Status != NotificationStatus.Rejected)
                 throw new BusinessRuleValidationException(
                     "Only rejected notifications can be reset to pending.");
-            
+
             this.Status = NotificationStatus.Pending;
             this.RejectedReason = null;
             this.OfficerId = null;
@@ -173,13 +171,17 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             this.DecisionOutcome = null;
             this.AssignedDock = null;
         }
-        public void UpdateInProgress(Vessel vessel,LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo)
+
+        public void UpdateInProgress(Vessel vessel, LoadingCargoMaterial loadingCargo,
+            UnloadingCargoMaterial unloadingCargo)
         {
             if (this.Status != NotificationStatus.InProgress)
-                throw new BusinessRuleValidationException("Only notifications in progress can be updated by a representative.");
-            
+                throw new BusinessRuleValidationException(
+                    "Only notifications in progress can be updated by a representative.");
+
             if (vessel == null && loadingCargo == null && unloadingCargo == null)
-                throw new BusinessRuleValidationException("At least one field (Vessel, LoadingCargo, or UnloadingCargo) must be provided for update.");
+                throw new BusinessRuleValidationException(
+                    "At least one field (Vessel, LoadingCargo, or UnloadingCargo) must be provided for update.");
             UpdateLoadingCargo(loadingCargo);
             UpdateVessel(vessel);
             UpdateUnloadingCargo(unloadingCargo);
@@ -188,11 +190,12 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         public void SubmitForApproval()
         {
             if (this.Status != NotificationStatus.InProgress)
-                throw new BusinessRuleValidationException("Only notifications in progress can be submitted for approval.");
+                throw new BusinessRuleValidationException(
+                    "Only notifications in progress can be submitted for approval.");
 
             this.Status = NotificationStatus.Submitted;
         }
-        
+
         public void Withdraw()
         {
             if (this.Status != NotificationStatus.InProgress)
@@ -200,7 +203,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                     "Only notifications in progress for approval can be withdrawn.");
             this.Status = NotificationStatus.WithdrawnRequest;
         }
-        
+
         public void Resume()
         {
             if (Status != NotificationStatus.WithdrawnRequest)
@@ -208,9 +211,9 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
             Status = NotificationStatus.InProgress;
         }
-        
+
         public void UpdateVessel(Vessel vessel)
-        {   
+        {
             if (vessel == null)
                 throw new BusinessRuleValidationException("Vessel cannot be null.");
             this.Vessel = vessel;
@@ -234,8 +237,8 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         private void CalculateLoadAndUnloadTimes(int? physicalResourceSetupTime)
         {
             // Se não houver setup time, usar 1 hora por container
-            int setupTime = (physicalResourceSetupTime.HasValue && physicalResourceSetupTime.Value > 0) 
-                ? physicalResourceSetupTime.Value 
+            int setupTime = (physicalResourceSetupTime.HasValue && physicalResourceSetupTime.Value > 0)
+                ? physicalResourceSetupTime.Value
                 : 1;
 
             // Calcular unload time baseado na quantidade de containers no UnloadingCargo
@@ -262,7 +265,69 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 this.LoadTime = 0;
             }
         }
+// Dentro da classe VesselVisitNotification
 
+// ... (métodos existentes)
+
+// --- Novos Métodos de Update para IARTI/Planejamento ---
+
+        public void UpdateSchedule(DateTime? arrivalTime, DateTime? departureTime)
+        {
+            if (this.Status != NotificationStatus.InProgress)
+                throw new BusinessRuleValidationException(
+                    "Only notifications in progress can be updated by a representative.");
+
+            if (arrivalTime.HasValue && arrivalTime.Value < DateTime.UtcNow)
+                throw new BusinessRuleValidationException("New arrival time cannot be in the past.");
+
+            if (departureTime.HasValue && departureTime.Value < DateTime.UtcNow)
+                throw new BusinessRuleValidationException("New departure time cannot be in the past.");
+
+            // Usar os valores atuais se os novos forem nulos
+            DateTime currentArrival = arrivalTime ?? this.ArrivalTime ?? DateTime.MinValue;
+            DateTime currentDeparture = departureTime ?? this.DepartureTime ?? DateTime.MinValue;
+
+            if (currentDeparture <= currentArrival)
+                throw new BusinessRuleValidationException("Departure time must be after arrival time.");
+
+            if (arrivalTime.HasValue)
+                this.ArrivalTime = arrivalTime;
+
+            if (departureTime.HasValue)
+                this.DepartureTime = departureTime;
+        }
+
+        public void UpdateResources(List<string> staffMemberIds, string physicalResourceId, string dockId,
+            int? physicalResourceSetupTime)
+        {
+            if (this.Status != NotificationStatus.InProgress)
+                throw new BusinessRuleValidationException(
+                    "Only notifications in progress can be updated by a representative.");
+
+            // Atualizar PhysicalResourceId e DockId se fornecidos
+            if (physicalResourceId != null)
+                this.PhysicalResourceId = physicalResourceId;
+
+            if (dockId != null)
+                this.DockId = dockId;
+
+            // Atualizar StaffMemberIds
+            if (staffMemberIds != null)
+            {
+                this._staffMemberIds = new List<string>(staffMemberIds);
+            }
+
+            // Recalcular tempos de carga/descarga, pois o setup time pode ter mudado
+            CalculateLoadAndUnloadTimes(physicalResourceSetupTime);
+        }
+
+        /// <summary>
+        /// Permite o recálculo dos tempos de carga/descarga após uma alteração no Vessel, Carga ou Physical Resource.
+        /// </summary>
+        public void RecalculateLoadAndUnloadTimes(int? physicalResourceSetupTime)
+        {
+            CalculateLoadAndUnloadTimes(physicalResourceSetupTime);
+        }
         
     }
 }

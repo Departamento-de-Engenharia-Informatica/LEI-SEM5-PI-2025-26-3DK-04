@@ -19,7 +19,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         private readonly IRepresentativeRepository _representativeRepo;
         private readonly IPhysicalResourceRepository _physicalResourceRepo;
         private readonly IStaffMemberRepository _staffMemberRepo;
-        
+
         public VesselVisitNotificationService(
             IUnitOfWork unitOfWork,
             IVesselVisitNotificationRepository repo,
@@ -37,22 +37,22 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             _physicalResourceRepo = physicalResourceRepo;
             _staffMemberRepo = staffMemberRepo;
         }
-        
+
         //Create new notification
         public async Task<VesselVisitNotificationDto> CreateAsync(CreateNotificationDto dto)
         {
             // Validar que arrival time não é no passado
             if (dto.ArrivalTime < DateTime.UtcNow)
                 throw new BusinessRuleValidationException("Arrival time cannot be in the past.");
-            
+
             // Validar que departure time não é no passado
             if (dto.DepartureTime < DateTime.UtcNow)
                 throw new BusinessRuleValidationException("Departure time cannot be in the past.");
-            
+
             // Validar que departure é posterior ao arrival
             if (dto.DepartureTime <= dto.ArrivalTime)
                 throw new BusinessRuleValidationException("Departure time must be after arrival time.");
-            
+
             //  Obter o vessel
             var vessel = await _vesselRepo.GetByIdAsync(new VesselId(dto.VesselId));
             if (vessel == null)
@@ -110,21 +110,23 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                     throw new BusinessRuleValidationException(
                         $"Unloading cargo weight ({totalUnloadWeight} kg) cannot exceed vessel capacity ({vesselType.Capacity} kg).");
             }
-            
+
             // Validar e obter Physical Resource (crane) se fornecido
             int? physicalResourceSetupTime = null;
             if (!string.IsNullOrWhiteSpace(dto.PhysicalResourceId))
             {
-                var physicalResource = await _physicalResourceRepo.GetByIdAsync(new PhysicalResourceId(Guid.Parse(dto.PhysicalResourceId)));
+                var physicalResource =
+                    await _physicalResourceRepo.GetByIdAsync(
+                        new PhysicalResourceId(Guid.Parse(dto.PhysicalResourceId)));
                 if (physicalResource == null)
                     throw new BusinessRuleValidationException("Physical Resource (crane) not found.");
-                
+
                 if (physicalResource.Type != "Crane")
                     throw new BusinessRuleValidationException("Physical Resource must be a Crane.");
-                
+
                 physicalResourceSetupTime = physicalResource.SetupTime;
             }
-            
+
             // Validar staff members se fornecidos
             if (dto.StaffMemberIds != null && dto.StaffMemberIds.Any())
             {
@@ -135,7 +137,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                         throw new BusinessRuleValidationException($"Staff member with ID {staffId} not found.");
                 }
             }
-            
+
             var notification = new VesselVisitNotification(
                 vessel,
                 loadingCargo,
@@ -156,58 +158,56 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         }
 
 
-
-
-
         // Listar notificações submetidas (prontas para review)
         public async Task<List<VesselVisitNotificationDto>> GetSubmittedNotificationsAsync()
         {
             var notifications = await _repo.GetSubmittedNotificationsAsync();
-            
+
             return notifications.Select(n => MapToDto(n)).ToList();
         }
+
         // Listar notificações InProgress
         public async Task<List<VesselVisitNotificationDto>> GetInProgressNotificationsAsync()
         {
             var notifications = await _repo.GetByStateAsync(NotificationStatus.InProgress);
-    
+
             return notifications.Select(n => MapToDto(n)).ToList();
         }
 
-        
+
         // Listar notificações aprovadas (prontas para scheduling)
         public async Task<List<VesselVisitNotificationDto>> GetApprovedNotificationsAsync()
         {
             var notifications = await _repo.GetByStateAsync(NotificationStatus.Approved);
-            
+
             return notifications.Select(n => MapToDto(n)).ToList();
         }
-        
+
         // Procurar notificação por ID
         public async Task<VesselVisitNotificationDto> GetByIdAsync(Guid id)
         {
             var notification = await _repo.GetByIdAsync(new VesselVisitNotificationID(id));
-            
+
             if (notification == null)
                 return null;
-            
+
             return MapToDto(notification);
         }
-        
+
         // Aprovar notificação
         public async Task<VesselVisitNotificationDto> ApproveAsync(Guid id, string dockId, string officerId)
         {
             var notification = await _repo.GetByIdAsync(new VesselVisitNotificationID(id));
-            
+
             if (notification == null)
                 throw new BusinessRuleValidationException("Vessel Visit Notification not found.");
-            
+
             // Chamar método de domínio que contém as regras de negócio
             notification.Approve(dockId, officerId);
-            
+
             // Persistir mudanças
             await _unitOfWork.CommitAsync();
-            
+
             return MapToDto(notification);
         }
 
@@ -227,7 +227,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
             return MapToDto(notification);
         }
-        
+
         // Helper method
         private VesselVisitNotificationDto MapToDto(VesselVisitNotification notification)
         {
@@ -256,16 +256,9 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             };
             return dto;
         }
-        
-         public async Task<VesselVisitNotificationDto> UpdateInProgressAsync(Guid Id,UpdateNotificationDto dto)
-        {
-            if (string.IsNullOrWhiteSpace(dto.VesselId)
-                && (dto.LoadingCargo == null || !dto.LoadingCargo.Manifests?.Any() == true)
-                && (dto.UnloadingCargo == null || !dto.UnloadingCargo.Manifests?.Any() == true))
-            {
-                throw new BusinessRuleValidationException("At least one field must be provided for update.");
-            }
 
+        public async Task<VesselVisitNotificationDto> UpdateInProgressAsync(Guid Id, UpdateNotificationDto dto)
+        {
             var notificationId = new VesselVisitNotificationID(Id);
             var notification = await _repo.GetByIdAsync(notificationId);
 
@@ -273,78 +266,161 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 throw new BusinessRuleValidationException("Vessel Visit Notification not found.");
 
             if (notification.Status != NotificationStatus.InProgress)
-                throw new BusinessRuleValidationException("Only notifications with 'InProgress' status can be updated.");
+                throw new BusinessRuleValidationException(
+                    "Only notifications with 'InProgress' status can be updated.");
 
-            
+            // Flag para determinar se é necessário recalcular tempos de carga/descarga no final
+            bool requiresTimeRecalculation = false;
+
+            // ------------------------------------
+            // 1. Atualizar Vessel e Crew (Se fornecidos)
+            // ------------------------------------
             Vessel vesselToUse = notification.Vessel;
-            bool vesselChanged = false;
 
             if (!string.IsNullOrWhiteSpace(dto.VesselId) && dto.VesselId != vesselToUse.Id.AsString())
             {
                 var newVessel = await _vesselRepo.GetByIdAsync(new VesselId(Guid.Parse(dto.VesselId)));
                 if (newVessel == null)
                     throw new BusinessRuleValidationException("Vessel not found.");
+
                 vesselToUse = newVessel;
-                vesselChanged = true;
+                notification.UpdateVessel(vesselToUse);
+                // O VesselType e capacidade serão verificados mais abaixo
             }
 
-            // --- Reconstruct LoadingCargo ---
+            if (dto.Crew != null)
+            {
+                if (dto.Crew.Any())
+                {
+                    var crewMembers = dto.Crew.Select(c => new CrewMember(c.Name, c.CitizenId, c.Nationality)).ToList();
+                    vesselToUse.setCrew(crewMembers);
+                }
+                else
+                {
+                    // Se o DTO vier com uma lista vazia, pode-se assumir a intenção de limpar a crew
+                    vesselToUse.setCrew(new List<CrewMember>());
+                }
+
+                await _vesselRepo.UpdateAsync(vesselToUse); // Persistir mudança na entidade Vessel
+            }
+
+            // ------------------------------------
+            // 2. Atualizar Carga (Se fornecida)
+            // ------------------------------------
             LoadingCargoMaterial? loadingToUse = notification.LoadingCargo;
-            if (dto.LoadingCargo != null && dto.LoadingCargo.Manifests != null)
-            {
-                var manifests = new List<CargoManifest>();
-                foreach (var manifestDto in dto.LoadingCargo.Manifests)
-                {
-                    var containers = manifestDto.Containers.Select(containerDto =>
-                        new Container( containerDto.PayloadWeight, containerDto.ContentsDescription)
-                    ).ToList();
-
-                    var manifest = new CargoManifest(containers);
-                    manifests.Add(manifest);
-                }
-                loadingToUse = new LoadingCargoMaterial(manifests);
-            }
-            
             UnloadingCargoMaterial? unloadingToUse = notification.UnloadingCargo;
-            if (dto.UnloadingCargo != null && dto.UnloadingCargo.Manifests != null)
-            {
-                var manifests = new List<CargoManifest>();
-                foreach (var manifestDto in dto.UnloadingCargo.Manifests)
-                {
-                    var containers = manifestDto.Containers.Select(containerDto =>
-                       
-                         new Container( containerDto.PayloadWeight, containerDto.ContentsDescription)
-                    ).ToList();
 
-                    var manifest = new CargoManifest(containers);
-                    manifests.Add(manifest);
-                }
-                unloadingToUse = new UnloadingCargoMaterial(manifests);
+            if (dto.LoadingCargo != null)
+            {
+                requiresTimeRecalculation = true;
+                var manifests = dto.LoadingCargo.Manifests.Select(manifestDto =>
+                    new CargoManifest(manifestDto.Containers.Select(containerDto =>
+                        new Container(containerDto.PayloadWeight, containerDto.ContentsDescription)
+                    ).ToList())
+                ).ToList();
+                loadingToUse = new LoadingCargoMaterial(manifests);
+                notification.UpdateLoadingCargo(loadingToUse);
             }
-            
+
+            if (dto.UnloadingCargo != null)
+            {
+                requiresTimeRecalculation = true;
+                var manifests = dto.UnloadingCargo.Manifests.Select(manifestDto =>
+                    new CargoManifest(manifestDto.Containers.Select(containerDto =>
+                        new Container(containerDto.PayloadWeight, containerDto.ContentsDescription)
+                    ).ToList())
+                ).ToList();
+                unloadingToUse = new UnloadingCargoMaterial(manifests);
+                notification.UpdateUnloadingCargo(unloadingToUse);
+            }
+
+            // ------------------------------------
+            // 3. Atualizar IARTI/Agendamento
+            // ------------------------------------
+
+            // Atualiza Arrival/Departure
+            if (dto.ArrivalTime.HasValue || dto.DepartureTime.HasValue)
+            {
+                notification.UpdateSchedule(dto.ArrivalTime, dto.DepartureTime);
+            }
+
+            // Variáveis para atualização de recursos
+            string physicalResourceId = dto.PhysicalResourceId ?? notification.PhysicalResourceId;
+            int? physicalResourceSetupTime = null;
+
+            // Validação e obtenção de SetupTime para Physical Resource (Crane)
+            if (!string.IsNullOrWhiteSpace(physicalResourceId))
+            {
+                var physicalResource =
+                    await _physicalResourceRepo.GetByIdAsync(new PhysicalResourceId(Guid.Parse(physicalResourceId)));
+                if (physicalResource == null)
+                    throw new BusinessRuleValidationException("Physical Resource (crane) not found.");
+
+                if (physicalResource.Type != "Crane")
+                    throw new BusinessRuleValidationException("Physical Resource must be a Crane.");
+
+                physicalResourceSetupTime = physicalResource.SetupTime;
+                requiresTimeRecalculation = true;
+            }
+            else if (dto.PhysicalResourceId == "") // Se for passado explicitamente vazio (limpar)
+            {
+                physicalResourceId = null;
+                physicalResourceSetupTime = 1; // Usar setup time default para recalcular
+                requiresTimeRecalculation = true;
+            }
+
+
+            // Validar staff members se fornecidos no DTO
+            if (dto.StaffMemberIds != null)
+            {
+                foreach (var staffId in dto.StaffMemberIds)
+                {
+                    var staffMember = await _staffMemberRepo.GetByIdAsync(new StaffMemberID(Guid.Parse(staffId)));
+                    if (staffMember == null)
+                        throw new BusinessRuleValidationException($"Staff member with ID {staffId} not found.");
+                }
+            }
+
+            // Atualiza Dock, Staff e Physical Resource
+            if (dto.StaffMemberIds != null || dto.PhysicalResourceId != null || dto.DockId != null)
+            {
+                notification.UpdateResources(
+                    dto.StaffMemberIds,
+                    physicalResourceId,
+                    dto.DockId ?? notification.DockId,
+                    physicalResourceSetupTime
+                );
+            }
+
+            // ------------------------------------
+            // 4. Validação Final de Capacidade e Recálculo
+            // ------------------------------------
+
+            // Validação de Capacidade
             var vesselType = await _vesselTypeRepo.GetByIdAsync(vesselToUse.VesselTypeId);
             if (vesselType == null)
                 throw new BusinessRuleValidationException("Vessel type not found for the specified vessel.");
 
-            double totalWeight = loadingToUse.TotalWeightKg() + unloadingToUse.TotalWeightKg();
+            // Usar os valores de carga mais recentes (se foram atualizados, já estão no `notification`)
+            double totalWeight =
+                notification.LoadingCargo.TotalWeightKg() + notification.UnloadingCargo.TotalWeightKg();
 
             if (totalWeight > vesselType.Capacity)
                 throw new BusinessRuleValidationException(
                     $"Total cargo weight ({totalWeight} kg) exceeds vessel capacity ({vesselType.Capacity} kg).");
-            
-            if (vesselChanged)
-                notification.UpdateVessel(vesselToUse);
 
-            if (dto.LoadingCargo != null)
-                notification.UpdateLoadingCargo(loadingToUse);
-
-            if (dto.UnloadingCargo != null)
-                notification.UpdateUnloadingCargo(unloadingToUse);
+            // Se a carga mudou, ou o physical resource mudou, ou se for uma limpeza de physical resource
+            if (requiresTimeRecalculation)
+            {
+                notification.RecalculateLoadAndUnloadTimes(physicalResourceSetupTime);
+            }
 
             await _unitOfWork.CommitAsync();
 
             return MapToDto(notification);
         }
+        
+        
 
         public async Task<VesselVisitNotificationDto> SubmitForApprovalAsync(Guid id)
         {
@@ -358,7 +434,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             await _unitOfWork.CommitAsync();
             return MapToDto(notification);
         }
-        
+
         public async Task<VesselVisitNotificationDto> WithdrawRequestAsync(Guid id)
         {
             var notification = await _repo.GetByIdAsync(new VesselVisitNotificationID(id));
@@ -382,7 +458,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
 
             return MapToDto(notification);
         }
-        
+
         public async Task<VesselVisitNotificationDto> ResetToInProgressAsync(Guid id)
         {
             var notification = await _repo.GetByIdAsync(new VesselVisitNotificationID(id));
@@ -395,14 +471,18 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             await _unitOfWork.CommitAsync();
             return MapToDto(notification);
         }
-        
+
         // US 2.2.10: Search and filter notifications
         public async Task<List<VesselVisitNotificationDto>> SearchNotificationsAsync(NotificationFilterDto filter)
         {
             VesselId vesselId = filter.VesselId.HasValue ? new VesselId(filter.VesselId.Value) : null;
-            RepresentativeId representativeId = !string.IsNullOrWhiteSpace(filter.RepresentativeId) ? new RepresentativeId(filter.RepresentativeId) : null;
-            OrganizationId organizationId = filter.OrganizationId.HasValue ? new OrganizationId(filter.OrganizationId.Value.ToString()) : null;
-            
+            RepresentativeId representativeId = !string.IsNullOrWhiteSpace(filter.RepresentativeId)
+                ? new RepresentativeId(filter.RepresentativeId)
+                : null;
+            OrganizationId organizationId = filter.OrganizationId.HasValue
+                ? new OrganizationId(filter.OrganizationId.Value.ToString())
+                : null;
+
             var notifications = await _repo.SearchNotificationsAsync(
                 vesselId,
                 filter.Status,
@@ -410,7 +490,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 organizationId,
                 filter.StartDate,
                 filter.EndDate);
-            
+
             return notifications.Select(n => MapToDto(n)).ToList();
         }
     }

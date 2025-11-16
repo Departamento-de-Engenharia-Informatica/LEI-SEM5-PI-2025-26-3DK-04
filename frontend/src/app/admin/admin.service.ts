@@ -329,6 +329,10 @@ export class AdminService {
   getInProgressVesselVisitNotifications() {
     return this.http.get<any[]>(`${this.baseUrl}/VesselVisitNotifications/in-progress`);
   }
+  updateVesselVisitNotificationInProgress(id: string, dto: any): Observable<any> {
+    return this.http.put(`${this.vesselVisitNotificationBaseUrl}/${id}/update`, dto);
+  }
+
 
 
 
