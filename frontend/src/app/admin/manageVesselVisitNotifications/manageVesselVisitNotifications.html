@@ -67,6 +67,7 @@
             <th>{{ t('vesselVisitNotifications.status') }}</th>
             <th>{{ t('vesselVisitNotifications.arrival') }}</th>
             <th>{{ t('vesselVisitNotifications.departure') }}</th>
+            <th>{{ t('vesselVisitNotifications.assignedDock') }}</th>
             <th>{{ t('vesselVisitNotifications.actions') }}</th>
           </tr>
           </thead>
@@ -77,12 +78,19 @@
             <td>{{ n.status }}</td>
             <td>{{ n.arrivalTime ? (n.arrivalTime | date:'short') : '-' }}</td>
             <td>{{ n.departureTime ? (n.departureTime | date:'short') : '-' }}</td>
+            <td>{{ n.assignedDock || '-' }}</td>
             <td>
-              <button class="secondary" (click)="withdrawNotification(n)">
-                {{ t('vesselVisitNotifications.withdraw') }}
-              </button>
               <button (click)="loadNotificationDetails(n)">
                 {{ t('vesselVisitNotifications.view') }}
+              </button>
+              <button class="primary" (click)="openReviewModal(n, 'approve')" *ngIf="n.status === 'Submitted'">
+                {{ t('vesselVisitNotifications.approve') }}
+              </button>
+              <button class="danger" (click)="openReviewModal(n, 'reject')" *ngIf="n.status === 'Submitted'">
+                {{ t('vesselVisitNotifications.reject') }}
+              </button>
+              <button class="secondary" (click)="withdrawNotification(n)">
+                {{ t('vesselVisitNotifications.withdraw') }}
               </button>
             </td>
           </tr>
@@ -334,6 +342,59 @@
         </button>
       </div>
     </form>
+
+    <!-- ========== REVIEW MODAL (APPROVE/REJECT) ========== -->
+    <div class="modal-overlay" *ngIf="showReviewModal" (click)="closeReviewModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h2 *ngIf="reviewAction === 'approve'">{{ t('vesselVisitNotifications.approveTitle') }}</h2>
+        <h2 *ngIf="reviewAction === 'reject'">{{ t('vesselVisitNotifications.rejectTitle') }}</h2>
+
+        <div class="review-info">
+          <p><strong>{{ t('vesselVisitNotifications.vesselName') }}:</strong> {{ reviewNotification?.vesselName }}</p>
+          <p><strong>{{ t('vesselVisitNotifications.arrival') }}:</strong> {{ reviewNotification?.arrivalTime | date:'short' }}</p>
+          <p><strong>{{ t('vesselVisitNotifications.departure') }}:</strong> {{ reviewNotification?.departureTime | date:'short' }}</p>
+        </div>
+
+        <div class="review-form">
+          <!-- APPROVE FORM -->
+          <div *ngIf="reviewAction === 'approve'">
+            <div class="form-group">
+              <label>{{ t('vesselVisitNotifications.assignDock') }}</label>
+              <select [(ngModel)]="reviewForm.dockId" name="reviewDockId" required>
+                <option [ngValue]="null">{{ t('vesselVisitNotifications.selectDock') }}</option>
+                <option *ngFor="let d of docks" [ngValue]="d.id">{{ d.name }}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>{{ t('vesselVisitNotifications.officerId') }}</label>
+              <input [(ngModel)]="reviewForm.officerId" name="reviewOfficerId"
+                     placeholder="{{ t('vesselVisitNotifications.officerIdPlaceholder') }}" required />
+            </div>
+          </div>
+
+          <!-- REJECT FORM -->
+          <div *ngIf="reviewAction === 'reject'">
+            <div class="form-group">
+              <label>{{ t('vesselVisitNotifications.rejectReason') }}</label>
+              <textarea [(ngModel)]="reviewForm.reason" name="reviewReason" rows="4"
+                        placeholder="{{ t('vesselVisitNotifications.rejectReasonPlaceholder') }}" required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>{{ t('vesselVisitNotifications.officerId') }}</label>
+              <input [(ngModel)]="reviewForm.officerId" name="reviewOfficerId"
+                     placeholder="{{ t('vesselVisitNotifications.officerIdPlaceholder') }}" required />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-buttons">
+          <button class="primary" (click)="confirmReview()">{{ t('vesselVisitNotifications.confirm') }}</button>
+          <button class="secondary" (click)="closeReviewModal()">{{ t('vesselVisitNotifications.cancel') }}</button>
+        </div>
+      </div>
+    </div>
 
   </div>
 </section>
