@@ -537,6 +537,7 @@ export class TranslationService {
         preferredDock: "Preferred Dock",
         selectDock: "Select a dock",
         physicalResource: "Physical Resource",
+        physicalResources: "Physical Resources",
         selectPhysicalResource: "Select a physical resource",
 
         staffListTitle: "Staff Members",
@@ -959,6 +960,7 @@ export class TranslationService {
         preferredDock: "Cais Preferencial",
         selectDock: "Selecionar um cais",
         physicalResource: "Recurso Físico",
+        physicalResources: "Recursos Físicos",
         selectPhysicalResource: "Selecionar um recurso físico",
 
         staffListTitle: "Membros da Equipa",
