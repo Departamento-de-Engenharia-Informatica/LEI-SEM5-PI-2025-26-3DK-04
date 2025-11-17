@@ -9,11 +9,14 @@
 
 % Carregar US 3.4.2
 :- consult('PrologCode/US 3.4.2.pl').
+% Carregar US 3.4.4
+:- consult('PrologCode/US 3.4.4.pl').
 
 :- http_handler('/lapr5', responde_ola, []).
 :- http_handler('/register_user', register_user, []).
 :- http_handler('/send_file_post', send_file_post, []).
 :- http_handler('/shortest_delay', handle_shortest_delay, []).
+:- http_handler('/heuristic_schedule', handle_heuristic_schedule, []).
 
 % Enable CORS for all routes
 :- set_setting(http:cors, [*]).
@@ -336,3 +339,131 @@ print_vessel_line(Current, Arrival, TInUnload, TEndLoad, MaxTime) :-
     ),
     Next is Current + 1,
     print_vessel_line(Next, Arrival, TInUnload, TEndLoad, MaxTime).
+
+% ============================================
+% US 3.4.4 - Heuristic Schedule Endpoint (EAT)
+% ============================================
+% GET http://localhost:5003/heuristic_schedule?date=2025-11-09&format=json
+% GET http://localhost:5003/heuristic_schedule?date=2025-11-09&format=text (default)
+
+% Main handler that dispatches based on HTTP method
+handle_heuristic_schedule(Request) :-
+    memberchk(method(Method), Request),
+    !,
+    (   Method = options
+    ->  handle_cors_preflight(Request)
+    ;   Method = get
+    ->  get_heuristic_schedule(Request)
+    ;   % Unsupported method
+        format('Status: 405~n'),
+        format('Content-type: text/plain~n~n'),
+        format('Method not allowed~n')
+    ).
+
+get_heuristic_schedule(Request) :-
+    % Send CORS headers first
+    format('Access-Control-Allow-Origin: *~n'),
+    format('Access-Control-Allow-Methods: GET, OPTIONS~n'),
+    format('Access-Control-Allow-Headers: Content-Type, Authorization~n'),
+    
+    % Read query parameters
+    http_parameters(Request,
+                    [ date(Date, [optional(true), default('2025-11-09')]),
+                      format(Format, [optional(true), default('text'), oneof([json, text])])
+                    ]),
+
+    % Validate that the date is not in the past
+    get_time(Now),
+    stamp_date_time(Now, date(YearNow, MonthNow, DayNow, _, _, _, _, _, _), local),
+    (   atom(Date) -> atom_string(Date, DateStr) ; DateStr = Date ),
+    % Parse the requested date (format: YYYY-MM-DD)
+    split_string(DateStr, "-", "", [YearStr, MonthStr, DayStr]),
+    atom_number(YearStr, Year),
+    atom_number(MonthStr, Month),
+    atom_number(DayStr, Day),
+    % Compare dates
+    (   (Year < YearNow ; (Year =:= YearNow, Month < MonthNow) ; (Year =:= YearNow, Month =:= MonthNow, Day < DayNow))
+    ->  % Date is in the past
+        format(user_error, '[ERROR] Cannot schedule for past date: ~w (today is ~w-~w-~w)~n', [DateStr, YearNow, MonthNow, DayNow]),
+        (   Format = json
+        ->  reply_json(json([error='Cannot schedule for a date in the past', requestedDate=Date]))
+        ;   format('Content-type: text/plain~n~n'),
+            format('ERROR: Cannot schedule for a date in the past.~n'),
+            format('Requested date: ~w~n', [Date]),
+            format('Current date: ~w-~w-~w~n', [YearNow, MonthNow, DayNow])
+        )
+    ;   % Date is valid, proceed with heuristic scheduling
+        heuristic_schedule_for_date(Request, Date, DateStr, Format)
+    ).
+
+% Helper predicate to handle the actual heuristic scheduling logic
+heuristic_schedule_for_date(_Request, Date, DateStr, Format) :-
+    % Fetch approved vessel visit notifications from MainApi
+    MainApiUrl = 'http://localhost:5000/api/VesselVisitNotifications/approved',
+    format(user_error, '[INFO] Heuristic - Fetching approved notifications from: ~w~n', [MainApiUrl]),
+    catch(
+        (http_get(MainApiUrl, JsonData, [json_object(dict)]),
+         format(user_error, '[DEBUG] Heuristic - HTTP GET successful~n', [])),
+        E,
+        (format(user_error, '[ERROR] Heuristic - Failed to fetch notifications: ~w~n', [E]), 
+         format(user_error, '[ERROR] Make sure MainApi is running on port 5000~n', []),
+         JsonData = [])
+    ),
+
+    % JsonData is already a list of dicts
+    (   is_list(JsonData) -> JsonList = JsonData ; JsonList = [] ),
+    length(JsonList, TotalCount),
+    format(user_error, '[INFO] Heuristic - Received ~w notifications from API~n', [TotalCount]),
+
+    % Remove any existing vessel facts
+    retractall(vessel(_,_,_,_,_,_)),
+    format(user_error, '[INFO] Heuristic - Cleared existing vessel facts~n', []),
+
+    % Assert notifications for the requested date (reuse same logic)
+    assert_notifications_for_date(JsonList, Date, 1, CountAsserted),
+    format(user_error, '[INFO] Heuristic - Asserted ~w vessel facts for date ~w~n', [CountAsserted, Date]),
+
+    % If no vessels were asserted, return error message
+    (   findall(V, vessel(V,_,_,_,_,_), Vs), Vs = []
+    ->  (format(user_error, '[ERROR] Heuristic - No approved vessels found for date ~w~n', [Date]),
+         (   Format = json
+         ->  reply_json(json([error='No approved vessel visit notifications found for the selected date', requestedDate=Date]))
+         ;   format('Content-type: text/plain~n~n'),
+             format('ERROR: No approved vessel visit notifications found for the selected date.~n'),
+             format('Requested date: ~w~n', [Date])
+         ))
+    ;   (format(user_error, '[INFO] Heuristic - Running EAT scheduling algorithm...~n', []),
+         % Record start time for performance metrics
+         get_time(StartTime),
+         heuristic_early_arrival_time(SeqTripletsH, SDelaysH),
+         get_time(EndTime),
+         ComputationTime is EndTime - StartTime,
+         format(user_error, '[INFO] Heuristic - Scheduling complete. Total delay: ~w, Time: ~3f seconds~n', [SDelaysH, ComputationTime]),
+         % Return results
+         (   Format = json
+         ->  build_heuristic_json_response(Date, SDelaysH, ComputationTime, SeqTripletsH, JsonResponse),
+             reply_json(JsonResponse)
+         ;   format('Content-type: text/plain~n~n'),
+             format('========================================~n'),
+             format('  HEURISTIC SCHEDULING (EAT)~n'),
+             format('========================================~n~n'),
+             format('Algorithm: Early Arrival Time (EAT)~n'),
+             format('Target Date: ~w~n', [Date]),
+             format('Total Delay: ~w time units~n', [SDelaysH]),
+             format('Computation Time: ~3f seconds~n~n', [ComputationTime]),
+             print_summary_table(SeqTripletsH),
+             format('~n'),
+             print_timeline(SeqTripletsH)
+         ))
+    ).
+
+% Build JSON response for heuristic algorithm with performance metrics
+build_heuristic_json_response(Date, TotalDelay, ComputationTime, SeqTriplets, JsonResponse) :-
+    maplist(triplet_to_json, SeqTriplets, ScheduleList),
+    JsonResponse = json([
+        algorithm='Early Arrival Time (EAT)',
+        date=Date,
+        totalDelay=TotalDelay,
+        computationTime=ComputationTime,
+        schedule=ScheduleList
+    ]).
