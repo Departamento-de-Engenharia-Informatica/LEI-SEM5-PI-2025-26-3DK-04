@@ -32,7 +32,7 @@ interface NotificationForm {
   arrivalTime: string;
   departureTime: string;
   staffMemberIds: string[];
-  physicalResourceId: string | null;
+  physicalResourceIds: string[];
   dockId: string | null;
 }
 
@@ -109,7 +109,7 @@ export class ManageVesselVisitNotifications implements OnInit {
       arrivalTime: '',
       departureTime: '',
       staffMemberIds: [],
-      physicalResourceId: null,
+      physicalResourceIds: [],
       dockId: null
     };
   }
@@ -271,7 +271,7 @@ export class ManageVesselVisitNotifications implements OnInit {
       arrivalTime: formatDateTimeLocal(notification.arrivalTime),
       departureTime: formatDateTimeLocal(notification.departureTime),
       staffMemberIds: notification.staffMemberIds || [],
-      physicalResourceId: notification.physicalResourceId || null,
+      physicalResourceIds: notification.physicalResourceIds || [],
       dockId: notification.dockId || null,
       crew: notification.crew || [],
       // Mapeamento de Manifests (simplificado para estruturas com ID)
@@ -352,7 +352,7 @@ export class ManageVesselVisitNotifications implements OnInit {
       ArrivalTime: new Date(this.form.arrivalTime).toISOString(),
       DepartureTime: new Date(this.form.departureTime).toISOString(),
       StaffMemberIds: this.form.staffMemberIds,
-      PhysicalResourceId: this.form.physicalResourceId,
+      PhysicalResourceIds: this.form.physicalResourceIds,
       DockId: this.form.dockId
     };
   }
@@ -376,6 +376,16 @@ export class ManageVesselVisitNotifications implements OnInit {
         this.form.staffMemberIds.push(id);
     } else {
       this.form.staffMemberIds = this.form.staffMemberIds.filter((s: string) => s !== id);
+    }
+  }
+
+  onPhysicalResourceChange(event: any) {
+    const id = event.target.value;
+    if (event.target.checked) {
+      if (!this.form.physicalResourceIds.includes(id))
+        this.form.physicalResourceIds.push(id);
+    } else {
+      this.form.physicalResourceIds = this.form.physicalResourceIds.filter((p: string) => p !== id);
     }
   }
 

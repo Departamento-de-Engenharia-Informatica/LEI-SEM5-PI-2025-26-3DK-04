@@ -182,13 +182,19 @@
             <option *ngFor="let d of docks" [ngValue]="d.id">{{ d.name }}</option>
           </select>
         </div>
+      </div>
 
-        <div class="form-group">
-          <label>{{ t('vesselVisitNotifications.physicalResource') }}</label>
-          <select [(ngModel)]="form.physicalResourceId" name="physicalResourceId">
-            <option [ngValue]="null">{{ t('vesselVisitNotifications.selectPhysicalResource') }}</option>
-            <option *ngFor="let p of physicalResources" [ngValue]="p.id">{{ p.name }}</option>
-          </select>
+      <div class="section-block">
+        <h3>{{ t('vesselVisitNotifications.physicalResources') }}</h3>
+        <div class="physical-resources-list">
+          <div *ngFor="let p of physicalResources" class="physical-resource-item">
+            <input type="checkbox"
+                   [id]="'resource-' + p.id"
+                   [value]="p.id"
+                   (change)="onPhysicalResourceChange($event)"
+                   [checked]="form.physicalResourceIds.includes(p.id)" />
+            <label [for]="'resource-' + p.id">{{ p.name }} ({{ p.type }})</label>
+          </div>
         </div>
       </div>
 

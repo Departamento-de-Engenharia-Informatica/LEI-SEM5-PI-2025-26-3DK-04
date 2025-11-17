@@ -33,7 +33,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         public int? LoadTime { get; set; } // Em horas
         
         public List<string> StaffMemberIds { get; set; }
-        public string PhysicalResourceId { get; set; } // Crane ID
+        public List<string> PhysicalResourceIds { get; set; } // Crane IDs
         public string DockId { get; set; }
 
         public VesselVisitNotificationDto(LoadingCargoMaterial loadingCargo, UnloadingCargoMaterial unloadingCargo)
