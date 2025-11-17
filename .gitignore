@@ -491,3 +491,6 @@ obj/
 
 # Ignore NuGet-generated files
 project.assets.json
+
+# exeption for .obj files
+!/frontend/public/assets/**/*.obj
