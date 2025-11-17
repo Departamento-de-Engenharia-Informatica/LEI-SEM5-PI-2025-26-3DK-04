@@ -150,6 +150,36 @@ $warning: #ffc107;
       border: 1px solid #ccc;
       box-sizing: border-box;
     }
+
+    .imo-input-wrapper {
+      display: flex;
+      align-items: center;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      overflow: hidden;
+
+      .imo-prefix {
+        background: #f0f0f0;
+        padding: 10px 12px;
+        font-weight: bold;
+        color: $accent;
+        border-right: 1px solid #ccc;
+        user-select: none;
+      }
+
+      input {
+        border: none;
+        flex: 1;
+        padding: 10px;
+        outline: none;
+        width: auto;
+      }
+
+      &:focus-within {
+        border-color: $accent;
+        box-shadow: 0 0 0 2px rgba(38, 50, 124, 0.1);
+      }
+    }
   }
 
   .form-buttons {

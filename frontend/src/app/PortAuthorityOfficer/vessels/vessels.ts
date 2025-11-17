@@ -158,8 +158,11 @@ export class Vessels implements OnInit {
   editVessel(vessel: Vessel) {
     this.editing = true;
     this.editingId = vessel.id;
+    const imoWithoutPrefix = vessel.imoNumber.startsWith('IMO') 
+      ? vessel.imoNumber.substring(3) 
+      : vessel.imoNumber;
     this.vesselForm = {
-      imoNumber: vessel.imoNumber,
+      imoNumber: imoWithoutPrefix,
       name: vessel.name,
       vesselTypeId: vessel.vesselTypeId,
       owner: vessel.owner,
@@ -207,9 +210,12 @@ export class Vessels implements OnInit {
       return;
     }
 
+    // Add IMO prefix to the number before sending to backend
+    const imoNumberWithPrefix = `IMO${this.vesselForm.imoNumber}`;
+
     if (this.editing && this.editingId) {
       const updateDto: UpdateVesselDto = {
-        imoNumber: this.vesselForm.imoNumber,
+        imoNumber: imoNumberWithPrefix,
         name: this.vesselForm.name,
         vesselTypeId: this.vesselForm.vesselTypeId,
         owner: this.vesselForm.owner,
@@ -229,7 +235,7 @@ export class Vessels implements OnInit {
       });
     } else {
       const createDto: CreateVesselDto = {
-        imoNumber: this.vesselForm.imoNumber,
+        imoNumber: imoNumberWithPrefix,
         name: this.vesselForm.name,
         vesselTypeId: this.vesselForm.vesselTypeId,
         owner: this.vesselForm.owner,
