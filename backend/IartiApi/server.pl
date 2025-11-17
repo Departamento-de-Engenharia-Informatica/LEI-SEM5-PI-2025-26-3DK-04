@@ -13,7 +13,7 @@
 :- http_handler('/lapr5', responde_ola, []).
 :- http_handler('/register_user', register_user, []).
 :- http_handler('/send_file_post', send_file_post, []).
-:- http_handler('/shortest_delay', get_shortest_delay, [method(get)]).
+:- http_handler('/shortest_delay', handle_shortest_delay, []).
 
 % Enable CORS for all routes
 :- set_setting(http:cors, [*]).
@@ -50,11 +50,37 @@ send_file_post(Request) :-
 % ============================================
 % US 3.4.2 - Shortest Delay Endpoint
 % ============================================
-% GET http://localhost:5000/shortest_delay?date=2025-11-09&format=json
-% GET http://localhost:5000/shortest_delay?date=2025-11-09&format=text (default)
+% GET http://localhost:5003/shortest_delay?date=2025-11-09&format=json
+% GET http://localhost:5003/shortest_delay?date=2025-11-09&format=text (default)
+
+% Main handler that dispatches based on HTTP method
+handle_shortest_delay(Request) :-
+    memberchk(method(Method), Request),
+    !,
+    (   Method = options
+    ->  handle_cors_preflight(Request)
+    ;   Method = get
+    ->  get_shortest_delay(Request)
+    ;   % Unsupported method
+        format('Status: 405~n'),
+        format('Content-type: text/plain~n~n'),
+        format('Method not allowed~n')
+    ).
+
+% Handle CORS preflight OPTIONS request
+handle_cors_preflight(_Request) :-
+    format('Access-Control-Allow-Origin: *~n'),
+    format('Access-Control-Allow-Methods: GET, OPTIONS~n'),
+    format('Access-Control-Allow-Headers: Content-Type, Authorization~n'),
+    format('Access-Control-Max-Age: 86400~n'),
+    format('Status: 204~n'),
+    format('~n').
+
 get_shortest_delay(Request) :-
-    % Enable CORS
-    cors_enable(Request, [methods([get])]),
+    % Send CORS headers first
+    format('Access-Control-Allow-Origin: *~n'),
+    format('Access-Control-Allow-Methods: GET, OPTIONS~n'),
+    format('Access-Control-Allow-Headers: Content-Type, Authorization~n'),
     
     % Read query parameters
     http_parameters(Request,
