@@ -63,6 +63,16 @@ export class ManageVesselVisitNotifications implements OnInit {
   editing: boolean = false; // NOVO: Flag para alternar entre Create e Edit
   isSaving: boolean = false; // Flag para prevenir duplo clique
 
+  // Review modal state (APPROVE/REJECT)
+  showReviewModal: boolean = false;
+  reviewAction: 'approve' | 'reject' | null = null;
+  reviewNotification: any = null;
+  reviewForm: any = {
+    dockId: null,
+    officerId: '',
+    reason: ''
+  };
+
   form: NotificationForm;
 
   constructor(
@@ -243,6 +253,78 @@ export class ManageVesselVisitNotifications implements OnInit {
       },
       error: err => this.displayMessage(this.t('vesselVisitNotifications.resumeError') + ': ' + (err?.error?.message || err))
     });
+  }
+
+  /* -------------------
+       REVIEW (APPROVE/REJECT)
+  ------------------- */
+
+  openReviewModal(notification: any, action: 'approve' | 'reject') {
+    this.reviewNotification = notification;
+    this.reviewAction = action;
+    this.showReviewModal = true;
+    this.reviewForm = {
+      dockId: notification.dockId || null,
+      officerId: '',
+      reason: ''
+    };
+  }
+
+  closeReviewModal() {
+    this.showReviewModal = false;
+    this.reviewNotification = null;
+    this.reviewAction = null;
+    this.reviewForm = { dockId: null, officerId: '', reason: '' };
+  }
+
+  confirmReview() {
+    if (!this.reviewNotification || !this.reviewAction) return;
+
+    if (this.reviewAction === 'approve') {
+      if (!this.reviewForm.dockId) {
+        return this.displayMessage(this.t('vesselVisitNotifications.dockRequired'));
+      }
+      if (!this.reviewForm.officerId) {
+        return this.displayMessage(this.t('vesselVisitNotifications.officerRequired'));
+      }
+
+      this.adminService.approveVesselVisitNotification(
+        this.reviewNotification.id,
+        this.reviewForm.dockId,
+        this.reviewForm.officerId
+      ).subscribe({
+        next: () => {
+          this.displayMessage(this.t('vesselVisitNotifications.approveSuccess'));
+          this.closeReviewModal();
+          this.loadAllNotifications();
+        },
+        error: err => {
+          this.displayMessage(this.t('vesselVisitNotifications.approveError') + ': ' + (err?.error?.Message || err?.message || err));
+        }
+      });
+    } else if (this.reviewAction === 'reject') {
+      if (!this.reviewForm.reason) {
+        return this.displayMessage(this.t('vesselVisitNotifications.reasonRequired'));
+      }
+      if (!this.reviewForm.officerId) {
+        return this.displayMessage(this.t('vesselVisitNotifications.officerRequired'));
+      }
+
+      this.adminService.rejectVesselVisitNotification(
+        this.reviewNotification.id,
+        this.reviewForm.reason,
+        this.reviewForm.officerId
+      ).subscribe({
+        next: () => {
+          this.displayMessage(this.t('vesselVisitNotifications.rejectSuccess'));
+          this.closeReviewModal();
+          this.loadAllNotifications();
+        },
+        error: err => {
+          this.displayMessage(this.t('vesselVisitNotifications.rejectError') + ': ' + (err?.error?.Message || err?.message || err));
+        }
+      });
+    }
   }
 
 
