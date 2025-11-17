@@ -263,6 +263,12 @@ $white: #ffffff;
           color: $accent;
         }
 
+        &.dock-name {
+          font-weight: 500;
+          color: $dark;
+          font-size: 0.9rem;
+        }
+
         &.delay-cell {
           text-align: center;
 

@@ -72,6 +72,7 @@
               <tr>
                 <th>{{ translate('vesselScheduling.table.status') }}</th>
                 <th>{{ translate('vesselScheduling.table.vessel') }}</th>
+                <th>{{ translate('vesselScheduling.table.dock') }}</th>
                 <th>{{ translate('vesselScheduling.table.arrival') }}</th>
                 <th>{{ translate('vesselScheduling.table.departure') }}</th>
                 <th>{{ translate('vesselScheduling.table.startTime') }}</th>
@@ -86,6 +87,7 @@
                   <span class="icon">{{ getStatusIcon(vessel.delay) }}</span>
                 </td>
                 <td class="vessel-name">{{ vessel.vessel }}</td>
+                <td class="dock-name">{{ vessel.dockId }}</td>
                 <td>{{ vessel.arrival }}</td>
                 <td>{{ vessel.departure }}</td>
                 <td>{{ vessel.startTime }}</td>

@@ -7,6 +7,7 @@ import { TranslationService } from '../translation.service';
 
 interface VesselSchedule {
   vessel: string;
+  dockId: string;
   arrival: number;
   departure: number;
   startTime: number;

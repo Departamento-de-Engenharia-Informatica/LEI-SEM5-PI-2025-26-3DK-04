@@ -107,7 +107,7 @@ schedule_for_date(_Request, Date, DateStr, Format) :-
     format(user_error, '[INFO] Received ~w notifications from API~n', [TotalCount]),
 
     % Remove any existing vessel facts (we will assert the ones from the DB)
-    retractall(vessel(_,_,_,_,_)),
+    retractall(vessel(_,_,_,_,_,_)),
     format(user_error, '[INFO] Cleared existing vessel facts~n', []),
 
     % Iterate notifications and assert vessel facts only for the requested date
@@ -115,7 +115,7 @@ schedule_for_date(_Request, Date, DateStr, Format) :-
     format(user_error, '[INFO] Asserted ~w vessel facts for date ~w~n', [CountAsserted, Date]),
 
     % If no vessels were asserted, return error message
-    (   findall(V, vessel(V,_,_,_,_), Vs), Vs = []
+    (   findall(V, vessel(V,_,_,_,_,_), Vs), Vs = []
     ->  (format(user_error, '[ERROR] No approved vessels found for date ~w~n', [Date]),
          (   Format = json
          ->  reply_json(json([error='No approved vessel visit notifications found for the selected date', requestedDate=Date]))
@@ -180,11 +180,16 @@ assert_notifications_for_date([D|Rest], Date, N, Count) :-
             atomic_list_concat([v, N], IdAtom),
             % Get vessel name if available
             (   get_dict(vesselName, D, VesselName) -> true ; VesselName = 'Unknown' ),
+            % Get dockId if available (CRITICAL: needed for dock-based scheduling)
+            (   get_dict(assignedDock, D, DockId) -> true 
+            ;   get_dict(dockId, D, DockId) -> true
+            ;   DockId = 'unknown_dock'
+            ),
             % Log the vessel being added
-            format(user_error, '[INFO] Adding vessel ~w: ~w (Arrival=~w, Departure=~w, Unload=~w hours, Load=~w hours)~n', 
-                   [IdAtom, VesselName, ArrivalHour, DepartureHour, UnloadTime, LoadTime]),
-            % Assert vessel(Id, ArrivalHour, DepartureHour, UnloadTime, LoadTime)
-            assertz(vessel(IdAtom, ArrivalHour, DepartureHour, UnloadTime, LoadTime)),
+            format(user_error, '[INFO] Adding vessel ~w: ~w (Dock=~w, Arrival=~w, Departure=~w, Unload=~w hours, Load=~w hours)~n', 
+                   [IdAtom, VesselName, DockId, ArrivalHour, DepartureHour, UnloadTime, LoadTime]),
+            % Assert vessel(Id, DockId, ArrivalHour, DepartureHour, UnloadTime, LoadTime)
+            assertz(vessel(IdAtom, DockId, ArrivalHour, DepartureHour, UnloadTime, LoadTime)),
             N1 is N + 1,
             assert_notifications_for_date(Rest, Date, N1, Count)
         ;   % not match date -> skip
@@ -207,12 +212,13 @@ build_json_response(Date, TotalDelay, SeqTriplets, JsonResponse) :-
 
 % Convert a triplet (V, TInUnload, TEndLoad) to JSON object
 triplet_to_json((V, TInUnload, TEndLoad), Json) :-
-    vessel(V, Arrival, Departure, Unload, Load),
+    vessel(V, DockId, Arrival, Departure, Unload, Load),
     Duration is Unload + Load,
     TPossibleDep is TEndLoad + 1,
     (TPossibleDep > Departure -> Delay is TPossibleDep - Departure ; Delay is 0),
     Json = json([
         vessel=V,
+        dockId=DockId,
         arrival=Arrival,
         departure=Departure,
         startTime=TInUnload,
@@ -233,7 +239,7 @@ print_summary_table(SeqTriplets) :-
 % Print each row of the table
 print_table_rows([]).
 print_table_rows([(V, TInUnload, TEndLoad)|Rest]) :-
-    vessel(V, Arrival, Departure, Unload, Load),
+    vessel(V, _DockId, Arrival, Departure, Unload, Load),
     Duration is Unload + Load,
     TPossibleDep is TEndLoad + 1,
     (TPossibleDep > Departure -> Delay is TPossibleDep - Departure ; Delay is 0),
@@ -281,7 +287,7 @@ print_time_line(T, MaxTime) :-
 % Print timeline for each vessel
 print_vessel_timelines([], _).
 print_vessel_timelines([(V, TInUnload, TEndLoad)|Rest], MaxTime) :-
-    vessel(V, Arrival, _, _, _),
+    vessel(V, _DockId, Arrival, _, _, _),
     format('~w:     ', [V]),
     print_vessel_line(0, Arrival, TInUnload, TEndLoad, MaxTime),
     format('~n'),
