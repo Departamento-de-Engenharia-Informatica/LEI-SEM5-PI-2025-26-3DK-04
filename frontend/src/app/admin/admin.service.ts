@@ -22,6 +22,7 @@ export class AdminService {
   private representativeBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/Representatives';
   private vesselVisitNotificationBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/VesselVisitNotifications';
 
+  private vesselBaseUrl = 'https://localhost:5001/api/Vessels';
   constructor(private http: HttpClient, private auth: AuthService) {}
 
   /* ===============================
@@ -327,7 +328,7 @@ export class AdminService {
     });
   }
 
-  getVessels(): Observable<any[]> { return this.http.get<any[]>(this.vesselTypeBaseUrl); }
+  getVessels(): Observable<any[]> { return this.http.get<any[]>(this.vesselBaseUrl); }
 
   getInProgressVesselVisitNotifications() {
     return this.http.get<any[]>(`${this.baseUrl}/VesselVisitNotifications/in-progress`);

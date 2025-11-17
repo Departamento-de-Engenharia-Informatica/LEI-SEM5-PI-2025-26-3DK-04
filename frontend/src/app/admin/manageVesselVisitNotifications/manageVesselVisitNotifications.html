@@ -201,7 +201,9 @@
                    [value]="p.id"
                    (change)="onPhysicalResourceChange($event)"
                    [checked]="form.physicalResourceIds.includes(p.id)" />
-            <label [for]="'resource-' + p.id">{{ p.name }} ({{ p.type }})</label>
+            <label [for]="'resource-' + p.id">
+              {{ p.description }} ({{ p.type }})
+            </label>
           </div>
         </div>
       </div>

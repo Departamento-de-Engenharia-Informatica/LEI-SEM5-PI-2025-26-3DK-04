@@ -158,8 +158,8 @@ export class Vessels implements OnInit {
   editVessel(vessel: Vessel) {
     this.editing = true;
     this.editingId = vessel.id;
-    const imoWithoutPrefix = vessel.imoNumber.startsWith('IMO') 
-      ? vessel.imoNumber.substring(3) 
+    const imoWithoutPrefix = vessel.imoNumber.startsWith('IMO')
+      ? vessel.imoNumber.substring(3)
       : vessel.imoNumber;
     this.vesselForm = {
       imoNumber: imoWithoutPrefix,
@@ -262,8 +262,8 @@ export class Vessels implements OnInit {
       return false;
     }
 
-    if (!/^\d{7}$/.test(this.vesselForm.imoNumber)) {
-      alert(this.t('manageVessels.imoInvalid') || 'IMO Number must be 7 digits');
+    if (!/^IMO\d{7}$/.test(this.vesselForm.imoNumber)) {
+      alert(this.t('manageVessels.imoInvalid') || 'IMO Number must follow the format IMO1234567');
       return false;
     }
 

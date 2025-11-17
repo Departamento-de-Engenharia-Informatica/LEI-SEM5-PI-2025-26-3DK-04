@@ -109,26 +109,23 @@
 
       <div class="form-group">
         <label>{{ t('manageVessels.imoNumber') }}</label>
-        <div class="imo-input-wrapper">
-          <span class="imo-prefix">IMO</span>
-          <input 
-            [(ngModel)]="vesselForm.imoNumber" 
-            name="imoNumber" 
-            placeholder="{{ t('manageVessels.imoNumberPlaceholder') }}" 
-            required 
-            maxlength="7"
-            pattern="[0-9]{7}"
-          />
-        </div>
+        <input
+          [(ngModel)]="vesselForm.imoNumber"
+          name="imoNumber"
+          placeholder="{{ t('manageVessels.imoNumberPlaceholder') }}"
+          required
+          maxlength="10"
+          pattern="[0-9]{7}"
+        />
       </div>
 
       <div class="form-group">
         <label>{{ t('manageVessels.name') }}</label>
-        <input 
-          [(ngModel)]="vesselForm.name" 
-          name="name" 
-          placeholder="{{ t('manageVessels.namePlaceholder') }}" 
-          required 
+        <input
+          [(ngModel)]="vesselForm.name"
+          name="name"
+          placeholder="{{ t('manageVessels.namePlaceholder') }}"
+          required
         />
       </div>
 
@@ -142,21 +139,21 @@
 
       <div class="form-group">
         <label>{{ t('manageVessels.owner') }}</label>
-        <input 
-          [(ngModel)]="vesselForm.owner" 
-          name="owner" 
-          placeholder="{{ t('manageVessels.ownerPlaceholder') }}" 
-          required 
+        <input
+          [(ngModel)]="vesselForm.owner"
+          name="owner"
+          placeholder="{{ t('manageVessels.ownerPlaceholder') }}"
+          required
         />
       </div>
 
       <div class="form-group">
         <label>{{ t('manageVessels.operator') }}</label>
-        <input 
-          [(ngModel)]="vesselForm.operator" 
-          name="operator" 
-          placeholder="{{ t('manageVessels.operatorPlaceholder') }}" 
-          required 
+        <input
+          [(ngModel)]="vesselForm.operator"
+          name="operator"
+          placeholder="{{ t('manageVessels.operatorPlaceholder') }}"
+          required
         />
       </div>
 
