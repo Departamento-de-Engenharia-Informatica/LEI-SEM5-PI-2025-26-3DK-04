@@ -1,0 +1,16 @@
+@startuml system_sequence_diagram_create
+actor "System User" as User
+participant "SPA (Frontend)" as Frontend
+participant "Backend Module(s)" as Backend
+activate User
+User -> Frontend: Fills form and clicks "Create"
+activate Frontend
+Frontend -> Backend: POST /api/resource {data}
+activate Backend
+Backend -> Backend: Validate data
+Backend --> Frontend: 201 Created {new resource data}
+deactivate Backend
+Frontend --> User: Show success message and new resource details
+deactivate Frontend
+deactivate User
+@enduml
