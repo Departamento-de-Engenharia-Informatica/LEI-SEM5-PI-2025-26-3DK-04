@@ -16,7 +16,7 @@ namespace DDDSample1.Domain.Vessels
         public DateTime ArrivalTime { get; set; }
         public DateTime DepartureTime { get; set; }
         public List<string> StaffMemberIds { get; set; } // Optional
-        public string PhysicalResourceId { get; set; } // Crane ID - Optional
+        public List<string> PhysicalResourceIds { get; set; } // Crane IDs - Optional
         public string DockId { get; set; } // Optional
     }
 

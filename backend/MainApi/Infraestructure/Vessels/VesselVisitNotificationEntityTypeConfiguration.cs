@@ -58,8 +58,12 @@ namespace DDDSample1.Infrastructure.Vessels
             
             builder.Property(b => b.LoadTime);
             
-            builder.Property(b => b.PhysicalResourceId)
-                .HasMaxLength(100);
+            // Propriedade de coleção para Physical Resource IDs (armazenada como string separada por vírgulas)
+            builder.Property(b => b.PhysicalResourceIds)
+                .HasConversion(
+                    v => string.Join(',', v),
+                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                .HasMaxLength(1000);
             
             builder.Property(b => b.DockId)
                 .HasMaxLength(100);

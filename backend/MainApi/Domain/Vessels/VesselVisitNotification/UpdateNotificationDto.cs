@@ -18,7 +18,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         public DateTime? ArrivalTime { get; set; }
         public DateTime? DepartureTime { get; set; }
         public List<string>? StaffMemberIds { get; set; }
-        public string? PhysicalResourceId { get; set; } // Crane ID
+        public List<string>? PhysicalResourceIds { get; set; } // Crane IDs
         public string? DockId { get; set; } // Dock ID para IARTI
         
         // Informação do Vessel (Crew)

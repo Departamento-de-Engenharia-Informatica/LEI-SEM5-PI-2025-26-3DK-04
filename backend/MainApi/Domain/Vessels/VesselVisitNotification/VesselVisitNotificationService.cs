@@ -111,20 +111,28 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                         $"Unloading cargo weight ({totalUnloadWeight} kg) cannot exceed vessel capacity ({vesselType.Capacity} kg).");
             }
 
-            // Validar e obter Physical Resource (crane) se fornecido
+            // Validar e obter Physical Resources (cranes) se fornecidos
             int? physicalResourceSetupTime = null;
-            if (!string.IsNullOrWhiteSpace(dto.PhysicalResourceId))
+            if (dto.PhysicalResourceIds != null && dto.PhysicalResourceIds.Any())
             {
-                var physicalResource =
-                    await _physicalResourceRepo.GetByIdAsync(
-                        new PhysicalResourceId(Guid.Parse(dto.PhysicalResourceId)));
-                if (physicalResource == null)
-                    throw new BusinessRuleValidationException("Physical Resource (crane) not found.");
+                foreach (var prId in dto.PhysicalResourceIds)
+                {
+                    if (!string.IsNullOrWhiteSpace(prId))
+                    {
+                        var physicalResource =
+                            await _physicalResourceRepo.GetByIdAsync(
+                                new PhysicalResourceId(Guid.Parse(prId)));
+                        if (physicalResource == null)
+                            throw new BusinessRuleValidationException($"Physical Resource (crane) with ID {prId} not found.");
 
-                if (physicalResource.Type != "Crane")
-                    throw new BusinessRuleValidationException("Physical Resource must be a Crane.");
+                        if (physicalResource.Type != "Crane")
+                            throw new BusinessRuleValidationException($"Physical Resource {prId} must be a Crane.");
 
-                physicalResourceSetupTime = physicalResource.SetupTime;
+                        // Usar o setup time do primeiro recurso ou o maior
+                        if (!physicalResourceSetupTime.HasValue || physicalResource.SetupTime > physicalResourceSetupTime.Value)
+                            physicalResourceSetupTime = physicalResource.SetupTime;
+                    }
+                }
             }
 
             // Validar staff members se fornecidos
@@ -146,7 +154,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 dto.ArrivalTime,
                 dto.DepartureTime,
                 dto.StaffMemberIds,
-                dto.PhysicalResourceId,
+                dto.PhysicalResourceIds,
                 physicalResourceSetupTime,
                 dto.DockId
             );
@@ -259,7 +267,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 UnloadTime = notification.UnloadTime,
                 LoadTime = notification.LoadTime,
                 StaffMemberIds = notification.StaffMemberIds?.ToList(),
-                PhysicalResourceId = notification.PhysicalResourceId,
+                PhysicalResourceIds = notification.PhysicalResourceIds?.ToList(),
                 DockId = notification.DockId
             };
             return dto;
@@ -353,26 +361,35 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             }
 
             // Variáveis para atualização de recursos
-            string physicalResourceId = dto.PhysicalResourceId ?? notification.PhysicalResourceId;
+            List<string> physicalResourceIds = dto.PhysicalResourceIds ?? notification.PhysicalResourceIds?.ToList();
             int? physicalResourceSetupTime = null;
 
-            // Validação e obtenção de SetupTime para Physical Resource (Crane)
-            if (!string.IsNullOrWhiteSpace(physicalResourceId))
+            // Validação e obtenção de SetupTime para Physical Resources (Cranes)
+            if (physicalResourceIds != null && physicalResourceIds.Any())
             {
-                var physicalResource =
-                    await _physicalResourceRepo.GetByIdAsync(new PhysicalResourceId(Guid.Parse(physicalResourceId)));
-                if (physicalResource == null)
-                    throw new BusinessRuleValidationException("Physical Resource (crane) not found.");
+                foreach (var prId in physicalResourceIds)
+                {
+                    if (!string.IsNullOrWhiteSpace(prId))
+                    {
+                        var physicalResource =
+                            await _physicalResourceRepo.GetByIdAsync(new PhysicalResourceId(Guid.Parse(prId)));
+                        if (physicalResource == null)
+                            throw new BusinessRuleValidationException($"Physical Resource (crane) with ID {prId} not found.");
 
-                if (physicalResource.Type != "Crane")
-                    throw new BusinessRuleValidationException("Physical Resource must be a Crane.");
+                        if (physicalResource.Type != "Crane")
+                            throw new BusinessRuleValidationException($"Physical Resource {prId} must be a Crane.");
 
-                physicalResourceSetupTime = physicalResource.SetupTime;
-                requiresTimeRecalculation = true;
+                        // Usar o setup time do primeiro recurso ou o maior
+                        if (!physicalResourceSetupTime.HasValue || physicalResource.SetupTime > physicalResourceSetupTime.Value)
+                            physicalResourceSetupTime = physicalResource.SetupTime;
+                        
+                        requiresTimeRecalculation = true;
+                    }
+                }
             }
-            else if (dto.PhysicalResourceId == "") // Se for passado explicitamente vazio (limpar)
+            else if (dto.PhysicalResourceIds != null && !dto.PhysicalResourceIds.Any()) // Se for passado explicitamente vazio (limpar)
             {
-                physicalResourceId = null;
+                physicalResourceIds = new List<string>();
                 physicalResourceSetupTime = 1; // Usar setup time default para recalcular
                 requiresTimeRecalculation = true;
             }
@@ -389,12 +406,12 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 }
             }
 
-            // Atualiza Dock, Staff e Physical Resource
-            if (dto.StaffMemberIds != null || dto.PhysicalResourceId != null || dto.DockId != null)
+            // Atualiza Dock, Staff e Physical Resources
+            if (dto.StaffMemberIds != null || dto.PhysicalResourceIds != null || dto.DockId != null)
             {
                 notification.UpdateResources(
                     dto.StaffMemberIds,
-                    physicalResourceId,
+                    physicalResourceIds,
                     dto.DockId ?? notification.DockId,
                     physicalResourceSetupTime
                 );

@@ -42,7 +42,9 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
         private List<string> _staffMemberIds = new List<string>();
         public IReadOnlyCollection<string> StaffMemberIds => _staffMemberIds.AsReadOnly();
 
-        public string PhysicalResourceId { get; private set; } // Crane ID
+        private List<string> _physicalResourceIds = new List<string>();
+        public IReadOnlyCollection<string> PhysicalResourceIds => _physicalResourceIds.AsReadOnly();
+
         public string DockId { get; private set; }
 
         //private List<CargoManifest> _cargoManifests;
@@ -59,7 +61,7 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
             DateTime arrivalTime,
             DateTime departureTime,
             List<string> staffMemberIds = null,
-            string physicalResourceId = null,
+            List<string> physicalResourceIds = null,
             int? physicalResourceSetupTime = null,
             string dockId = null)
         {
@@ -99,7 +101,11 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 this._staffMemberIds = new List<string>(staffMemberIds);
             }
 
-            this.PhysicalResourceId = physicalResourceId;
+            if (physicalResourceIds != null && physicalResourceIds.Count > 0)
+            {
+                this._physicalResourceIds = new List<string>(physicalResourceIds);
+            }
+
             this.DockId = dockId;
 
             // Calcular tempos de carga e descarga
@@ -297,16 +303,18 @@ namespace DDDSample1.Domain.Vessels.VesselVisitNotification
                 this.DepartureTime = departureTime;
         }
 
-        public void UpdateResources(List<string> staffMemberIds, string physicalResourceId, string dockId,
+        public void UpdateResources(List<string> staffMemberIds, List<string> physicalResourceIds, string dockId,
             int? physicalResourceSetupTime)
         {
             if (this.Status != NotificationStatus.InProgress)
                 throw new BusinessRuleValidationException(
                     "Only notifications in progress can be updated by a representative.");
 
-            // Atualizar PhysicalResourceId e DockId se fornecidos
-            if (physicalResourceId != null)
-                this.PhysicalResourceId = physicalResourceId;
+            // Atualizar PhysicalResourceIds e DockId se fornecidos
+            if (physicalResourceIds != null && physicalResourceIds.Count > 0)
+            {
+                this._physicalResourceIds = new List<string>(physicalResourceIds);
+            }
 
             if (dockId != null)
                 this.DockId = dockId;
