@@ -493,4 +493,4 @@ obj/
 project.assets.json
 
 # exeption for .obj files
-!/frontend/public/assets.obj
+!/frontend/public/assets/**/*.obj
