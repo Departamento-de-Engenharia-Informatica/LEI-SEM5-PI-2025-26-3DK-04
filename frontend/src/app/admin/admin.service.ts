@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+﻿﻿﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { AuthService } from '../auth.service';
@@ -6,21 +6,21 @@ import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
-  private userBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/UserManagement';
+  private userBaseUrl = 'https://localhost:5001/api/UserManagement';
 
-  private baseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api';
+  private baseUrl = 'https://localhost:5001/api';
   // DOCK management routes
-  private dockBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/Dock';
-  private vesselTypeBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/VesselTypes';
+  private dockBaseUrl = 'https://localhost:5001/api/Dock';
+  private vesselTypeBaseUrl = 'https://localhost:5001/api/VesselTypes';
 
-  private storageAreaBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/StorageArea';
+  private storageAreaBaseUrl = 'https://localhost:5001/api/StorageArea';
 
-  private staffMembersBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/StaffMembers';
-  private qualificationsBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/Qualifications';
+  private staffMembersBaseUrl = 'https://localhost:5001/api/StaffMembers';
+  private qualificationsBaseUrl = 'https://localhost:5001/api/Qualifications';
 
-  private organizationBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/Organizations';
-  private representativeBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/Representatives';
-  private vesselVisitNotificationBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/VesselVisitNotifications';
+  private organizationBaseUrl = 'https://localhost:5001/api/Organizations';
+  private representativeBaseUrl = 'https://localhost:5001/api/Representatives';
+  private vesselVisitNotificationBaseUrl = 'https://localhost:5001/api/VesselVisitNotifications';
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
@@ -266,7 +266,7 @@ export class AdminService {
     PHYSICAL RESOURCES MANAGEMENT
 =============================== */
 
-  private physicalResourcesBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/PhysicalResources';
+  private physicalResourcesBaseUrl = 'https://localhost:5001/api/PhysicalResources';
 
   getAllPhysicalResources(): Observable<any[]> {
     return this.http.get<any[]>(`${this.physicalResourcesBaseUrl}`);
