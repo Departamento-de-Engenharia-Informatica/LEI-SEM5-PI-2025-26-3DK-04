@@ -9,7 +9,7 @@ import { PortBuilder } from '../scene/PortBuilder';
 import { WarehouseBuilder } from '../scene/WarehouseBuilder';
 import { YardBuilder } from '../scene/YardBuilder';
 import { ContainerBuilder } from '../scene/ContainerBuilder';
-
+import { YardGantryCraneBuilder, YardCraneType } from '../scene/YardGantryCraneBuilder';
 import { StsCraneBuilder } from '../scene/StsCraneBuilder';
 import { StorageAreaBuilder, StorageAreaType } from '../scene/StorageAreaBuilder';
 
@@ -92,8 +92,10 @@ export class DockView implements AfterViewInit, OnDestroy {
     this.scene.add(warehouse1);
 
     // === Yard ===
+    const yardWidth = 60;
+    const yardDepth = 40;
     const yard1 = YardBuilder.createYard(
-      60, 40,
+      yardWidth, yardDepth,
       new THREE.Vector3(-40, 0, 30),
       1
     );
@@ -123,7 +125,22 @@ export class DockView implements AfterViewInit, OnDestroy {
     crane3.rotation.y = Math.PI / 2;
 
     this.scene.add(crane1, crane2, crane3);
+
+  // Criar a Yard Gantry Crane sobre a yard1
+
+    // Criar a Yard Gantry Crane sobre a yard1
+    const yardCrane = YardGantryCraneBuilder.createCrane(
+      YardBuilder.lastYardSize.width,   // largura real da yard (X) → influencia perna lateral, cabina se quiseres
+      YardBuilder.lastYardSize.depth,   // profundidade real da yard (Z) → comprimento do girder
+      18,                               // altura das pernas
+      YardBuilder.lastYardCenter,       // centro real da yard
+      1                                 // id da grua
+    );
+
+    this.scene.add(yardCrane);
+
   }
+
 
 
   private onCanvasClick(event: MouseEvent): void {
@@ -356,3 +373,10 @@ export class DockView implements AfterViewInit, OnDestroy {
   }
 
 }
+function getYardCenter(yard: THREE.Group): THREE.Vector3 {
+  const box = new THREE.Box3().setFromObject(yard);
+  const center = new THREE.Vector3();
+  box.getCenter(center);
+  return center;
+}
+
