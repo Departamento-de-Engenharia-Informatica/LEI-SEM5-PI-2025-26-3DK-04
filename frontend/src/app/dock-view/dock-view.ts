@@ -1,6 +1,9 @@
 import { Component, AfterViewInit, ElementRef, ViewChild, Input, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { DockBuilder } from '../scene/DockBuilder';
+import { PortBuilder } from '../scene/PortBuilder';
+import { StorageAreaBuilder, StorageAreaType } from '../scene/StorageAreaBuilder';
 
 @Component({
   selector: 'app-dock-view',
@@ -29,13 +32,14 @@ export class DockView implements AfterViewInit, OnDestroy {
   private controls!: OrbitControls;
 
   private docks: THREE.Mesh[] = [];
+  private storageAreas: THREE.Mesh[] = [];
   private water!: THREE.Mesh;
   private waterMaterial!: THREE.MeshStandardMaterial;
   private resizeObserver!: ResizeObserver;
   private textureLoader: THREE.TextureLoader = new THREE.TextureLoader();
   private raycaster: THREE.Raycaster = new THREE.Raycaster();
   private mouse: THREE.Vector2 = new THREE.Vector2();
-  
+
   // Animation properties
   private targetPosition: THREE.Vector3 = new THREE.Vector3();
   private currentTarget: THREE.Vector3 = new THREE.Vector3();
@@ -49,37 +53,40 @@ export class DockView implements AfterViewInit, OnDestroy {
   }
 
   private createPortStructure(): void {
-    // Create 3 distinct docks
-    const dockMaterial1 = new THREE.MeshStandardMaterial({ color: 0x8B7355 });
-    const dockMaterial2 = new THREE.MeshStandardMaterial({ color: 0xA0826D });
-    const dockMaterial3 = new THREE.MeshStandardMaterial({ color: 0x9B7653 });
-    
-    // Dock 1 - Left
-    const dock1Geometry = new THREE.BoxGeometry(30, 1, 20);
-    const dock1 = new THREE.Mesh(dock1Geometry, dockMaterial1);
-    dock1.position.set(-40, 0, 0);
-    dock1.name = 'Dock 1';
-    dock1.userData = { dockId: 1 };
-    this.scene.add(dock1);
-    this.docks.push(dock1);
+    const port = PortBuilder.createPort(200, 150);
+    port.position.set(0, 0, 0);
+    this.scene.add(port);
 
-    // Dock 2 - Center
-    const dock2Geometry = new THREE.BoxGeometry(30, 1, 20);
-    const dock2 = new THREE.Mesh(dock2Geometry, dockMaterial2);
-    dock2.position.set(0, 0, 0);
-    dock2.name = 'Dock 2';
-    dock2.userData = { dockId: 2 };
-    this.scene.add(dock2);
-    this.docks.push(dock2);
+    // 2) Criar Docks – encostadas ao limite inferior do porto (junto ao mar)
+    const dockOffsetZ = -75; // extremo inferior do porto
+    const dockY = 0.5;
 
-    // Dock 3 - Right
-    const dock3Geometry = new THREE.BoxGeometry(30, 1, 20);
-    const dock3 = new THREE.Mesh(dock3Geometry, dockMaterial3);
-    dock3.position.set(40, 0, 0);
-    dock3.name = 'Dock 3';
-    dock3.userData = { dockId: 3 };
-    this.scene.add(dock3);
-    this.docks.push(dock3);
+    const dock1 = DockBuilder.createDock(30, 10, new THREE.Vector3(-60, dockY, dockOffsetZ), 1);
+    const dock2 = DockBuilder.createDock(30, 10, new THREE.Vector3(0, dockY, dockOffsetZ), 2);
+    const dock3 = DockBuilder.createDock(30, 10, new THREE.Vector3(60, dockY, dockOffsetZ), 3);
+
+    this.scene.add(dock1, dock2, dock3);
+    this.docks.push(dock1, dock2, dock3);
+
+    // 3) Criar Storage Areas dentro do terreno
+    const yard = StorageAreaBuilder.createStorageArea(
+      35, 20, new THREE.Vector3(-40, 0.5, 30), 1, StorageAreaType.Yard
+    );
+
+    const warehouse = StorageAreaBuilder.createStorageArea(
+      40, 25, new THREE.Vector3(40, 0.5, 25), 2, StorageAreaType.Warehouse
+    );
+
+    const refrigerated = StorageAreaBuilder.createStorageArea(
+      20, 20, new THREE.Vector3(0, 0.5, 50), 3, StorageAreaType.Refrigerated
+    );
+
+    const other = StorageAreaBuilder.createStorageArea(
+      40, 15, new THREE.Vector3(40, 0.5, 60), 4, StorageAreaType.Other
+    );
+
+    this.scene.add(yard, warehouse, refrigerated, other);
+    this.storageAreas.push(yard, warehouse, refrigerated, other);
   }
 
   private onCanvasClick(event: MouseEvent): void {
@@ -97,7 +104,7 @@ export class DockView implements AfterViewInit, OnDestroy {
     if (intersects.length > 0) {
       const clickedDock = intersects[0].object as THREE.Mesh;
       const dockPosition = clickedDock.position;
-      
+
       // Start smooth animation to new target
       this.currentTarget.copy(this.controls.target);
       this.targetPosition.copy(dockPosition);
@@ -105,7 +112,7 @@ export class DockView implements AfterViewInit, OnDestroy {
       this.animationProgress = 0;
 
       console.log(`Clicked on ${clickedDock.name} at position:`, dockPosition);
-      
+
       // Add visual feedback
       this.highlightDock(clickedDock);
     }
@@ -141,14 +148,14 @@ export class DockView implements AfterViewInit, OnDestroy {
     }
 
     const easedProgress = this.easeInOutCubic(this.animationProgress);
-    
+
     // Interpolate between current and target position
     this.controls.target.lerpVectors(
       this.currentTarget,
       this.targetPosition,
       easedProgress
     );
-    
+
     this.controls.update();
   }
 
@@ -169,13 +176,13 @@ export class DockView implements AfterViewInit, OnDestroy {
 
     // Water plane with normal map
     const waterGeometry = new THREE.PlaneGeometry(500, 500);
-    
+
     // Load water normal texture
     const waterNormals = this.textureLoader.load('assets/textures/water/waternormals.jpg');
     waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
     waterNormals.repeat.set(50, 50);
 
-    this.waterMaterial = new THREE.MeshStandardMaterial({ 
+    this.waterMaterial = new THREE.MeshStandardMaterial({
       color: 0x1E90FF,
       normalMap: waterNormals,
       normalScale: new THREE.Vector2(0.5, 0.5),
@@ -183,9 +190,9 @@ export class DockView implements AfterViewInit, OnDestroy {
       metalness: 0.1,
       transparent: true,
       opacity: 0.7,
-      side: THREE.DoubleSide 
+      side: THREE.DoubleSide
     });
-    
+
     this.water = new THREE.Mesh(waterGeometry, this.waterMaterial);
     this.water.rotation.x = -Math.PI / 2;
     this.water.position.y = -0.5;
@@ -205,18 +212,18 @@ export class DockView implements AfterViewInit, OnDestroy {
 
   private animateScene(): void {
     requestAnimationFrame(() => this.animateScene());
-    
+
     const deltaTime = this.clock.getDelta();
-    
+
     // Animate water normal map
     if (this.waterMaterial.normalMap) {
       this.waterMaterial.normalMap.offset.x += 0.0009;
       this.waterMaterial.normalMap.offset.y += 0.0006;
     }
-    
+
     // Update camera animation
     this.updateCameraAnimation(deltaTime);
-    
+
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   }
@@ -224,7 +231,7 @@ export class DockView implements AfterViewInit, OnDestroy {
   private onWindowResize(): void {
     const width = this.canvas.clientWidth;
     const height = this.canvas.clientHeight;
-    
+
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height, false);
@@ -232,7 +239,7 @@ export class DockView implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.createScene();
-    this.renderer = new THREE.WebGLRenderer({ 
+    this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
       antialias: true,
       alpha: true
