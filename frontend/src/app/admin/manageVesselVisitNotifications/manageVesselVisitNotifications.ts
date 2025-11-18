@@ -25,7 +25,7 @@ interface CrewMember {
 interface NotificationForm {
   id?: string; // ID da notificação se estiver a editar
   vesselId: string | null;
-  representativeId: string;
+  representativeId: string | null;
   loadingManifests: Manifest[];
   unloadingManifests: Manifest[];
   crew: CrewMember[];
@@ -112,7 +112,7 @@ export class ManageVesselVisitNotifications implements OnInit {
   getInitialForm(): NotificationForm {
     return {
       vesselId: null,
-      representativeId: '',
+      representativeId: null,
       loadingManifests: [{ containers: [{ payloadWeight: 0, contentsDescription: '' }] }],
       unloadingManifests: [{ containers: [{ payloadWeight: 0, contentsDescription: '' }] }],
       crew: [],

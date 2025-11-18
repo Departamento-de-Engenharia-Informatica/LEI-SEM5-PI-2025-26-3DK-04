@@ -1,4 +1,4 @@
-﻿﻿﻿import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { AuthService } from '../auth.service';
@@ -22,7 +22,9 @@ export class AdminService {
   private representativeBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/Representatives';
   private vesselVisitNotificationBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/VesselVisitNotifications';
 
-  private vesselBaseUrl = 'https://localhost:5001/api/Vessels';
+  private vesselBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/Vessels';
+  private physicalResourcesBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/PhysicalResources';
+
   constructor(private http: HttpClient, private auth: AuthService) {}
 
   /* ===============================
@@ -266,8 +268,6 @@ export class AdminService {
   /* ===============================
     PHYSICAL RESOURCES MANAGEMENT
 =============================== */
-
-  private physicalResourcesBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/PhysicalResources';
 
   getAllPhysicalResources(): Observable<any[]> {
     return this.http.get<any[]>(`${this.physicalResourcesBaseUrl}`);

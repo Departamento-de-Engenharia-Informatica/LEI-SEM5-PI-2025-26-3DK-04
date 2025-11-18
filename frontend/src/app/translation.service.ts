@@ -535,7 +535,12 @@ export class TranslationService {
         assignedDock: "Assigned Dock",
         actions: "Actions",
         view: "View Details",
-
+        edit: "Edit",
+        submit: "Submit",
+        withdraw: "Withdraw",
+        withdrawnListTitle: "Withdrawn Notifications",
+        noWithdrawn: "No withdrawn notifications available",
+        selectRepresentative: "Select Representative",
         createTitle: "Create New Notification",
         createSubmit: "Create",
         cancel: "Cancel",
@@ -575,7 +580,7 @@ export class TranslationService {
         createError: "Error creating notification",
         submitSuccess: "Notification submitted successfully",
         submitError: "Error submitting notification",
-
+        resume: "Resume",
         // Review (Approve/Reject)
         approve: "Approve",
         reject: "Reject",
@@ -976,7 +981,13 @@ export class TranslationService {
         physicalResource: "Recurso Físico",
         physicalResources: "Recursos Físicos",
         selectPhysicalResource: "Selecionar um recurso físico",
-
+        edit: "Editar",
+        submit: "Submeter",
+        withdraw: "Retirar",
+        withdrawnListTitle: "Notificações Retiradas",
+        noWithdrawn: "Não existem notificações retiradas",
+        selectRepresentative: "Selecionar Representante",
+        resume: "Resumir",
         staffListTitle: "Membros da Equipa",
         loadingManifests: "Manifestos de Carga",
         unloadingManifests: "Manifestos de Descarga",
