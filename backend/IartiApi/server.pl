@@ -11,12 +11,15 @@
 :- consult('PrologCode/US 3.4.2.pl').
 % Carregar US 3.4.4
 :- consult('PrologCode/US 3.4.4.pl').
+% Carregar US 3.4.5
+:- consult('PrologCode/US 3.4.5.pl').
 
 :- http_handler('/lapr5', responde_ola, []).
 :- http_handler('/register_user', register_user, []).
 :- http_handler('/send_file_post', send_file_post, []).
 :- http_handler('/shortest_delay', handle_shortest_delay, []).
 :- http_handler('/heuristic_schedule', handle_heuristic_schedule, []).
+:- http_handler('/multi_crane_schedule', handle_multi_crane_schedule, []).
 
 % Enable CORS for all routes
 :- set_setting(http:cors, [*]).
@@ -546,3 +549,248 @@ build_heuristic_json_response(Date, TotalDelay, ComputationTime, SeqTriplets, Js
         computationTime=ComputationTime,
         schedule=ScheduleList
     ]).
+
+% ============================================
+% US 3.4.5 - Multi-Crane Schedule Endpoint
+% ============================================
+% GET http://localhost:5003/multi_crane_schedule?date=2025-11-09&format=json
+% GET http://localhost:5003/multi_crane_schedule?date=2025-11-09&format=text (default)
+
+% Main handler that dispatches based on HTTP method
+handle_multi_crane_schedule(Request) :-
+    memberchk(method(Method), Request),
+    !,
+    (   Method = options
+    ->  handle_cors_preflight(Request)
+    ;   Method = get
+    ->  get_multi_crane_schedule(Request)
+    ;   % Unsupported method
+        format('Status: 405~n'),
+        format('Content-type: text/plain~n~n'),
+        format('Method not allowed~n')
+    ).
+
+get_multi_crane_schedule(Request) :-
+    % Send CORS headers first
+    catch(
+        get_multi_crane_schedule_impl(Request),
+        E,
+        (format('Access-Control-Allow-Origin: *~n'),
+         format('Access-Control-Allow-Methods: GET, OPTIONS~n'),
+         format('Access-Control-Allow-Headers: Content-Type, Authorization~n'),
+         format('Content-type: application/json~n~n'),
+         format(user_error, '[ERROR] Multi-crane - Exception caught: ~w~n', [E]),
+         reply_json(json([error='Internal server error', details=E])))
+    ).
+
+get_multi_crane_schedule_impl(Request) :-
+    % Send CORS headers
+    format('Access-Control-Allow-Origin: *~n'),
+    format('Access-Control-Allow-Methods: GET, OPTIONS~n'),
+    format('Access-Control-Allow-Headers: Content-Type, Authorization~n'),
+    
+    % Read query parameters
+    http_parameters(Request,
+                    [date(Date, [optional(false)]),
+                     format(Format, [optional(true), default(text)])
+                    ]),
+
+    % Validate that the date is not in the past
+    get_time(Now),
+    stamp_date_time(Now, date(YearNow, MonthNow, DayNow, _, _, _, _, _, _), local),
+    (   atom(Date) -> atom_string(Date, DateStr) ; DateStr = Date ),
+    % Parse the requested date (format: YYYY-MM-DD)
+    split_string(DateStr, "-", "", [YearStr, MonthStr, DayStr]),
+    atom_number(YearStr, Year),
+    atom_number(MonthStr, Month),
+    atom_number(DayStr, Day),
+    % Compare dates
+    (   (Year < YearNow ; (Year =:= YearNow, Month < MonthNow) ; (Year =:= YearNow, Month =:= MonthNow, Day < DayNow))
+    ->  % Date is in the past
+        (   Format = json
+        ->  reply_json(json([error='Cannot schedule for past dates', requestedDate=Date]))
+        ;   format('Content-type: text/plain~n~n'),
+            format('ERROR: Cannot schedule for past dates.~n'),
+            format('Requested date: ~w~n', [Date])
+        )
+    ;   % Date is valid, proceed with multi-crane scheduling
+        multi_crane_schedule_for_date(Request, Date, DateStr, Format)
+    ).
+
+% Helper predicate to handle the actual multi-crane scheduling logic
+multi_crane_schedule_for_date(_Request, Date, DateStr, Format) :-
+    % Fetch max cranes from PhysicalResources API
+    PhysicalResourcesUrl = 'https://localhost:5001/api/PhysicalResources',
+    format(user_error, '[INFO] Multi-crane - Fetching physical resources from: ~w~n', [PhysicalResourcesUrl]),
+    catch(
+        (http_get(PhysicalResourcesUrl, ResourcesData, [json_object(dict), cert_verify_hook(cert_accept_any)]),
+         format(user_error, '[DEBUG] Multi-crane - Physical resources GET successful~n', [])),
+        E,
+        (format(user_error, '[WARN] Multi-crane - Failed to fetch physical resources: ~w~n', [E]),
+         ResourcesData = [])
+    ),
+    
+    format(user_error, '[DEBUG] Multi-crane - ResourcesData type: ~w~n', [ResourcesData]),
+    
+    % Count cranes in the physical resources
+    catch(
+        (   is_list(ResourcesData)
+        ->  (format(user_error, '[DEBUG] Multi-crane - ResourcesData is a list~n', []),
+             findall(1, (member(R, ResourcesData), get_dict(type, R, Type), Type = 'Crane'), CraneList),
+             length(CraneList, MaxCranes),
+             format(user_error, '[DEBUG] Multi-crane - CraneList length: ~w~n', [MaxCranes]))
+        ;   (format(user_error, '[DEBUG] Multi-crane - ResourcesData is NOT a list, using default~n', []),
+             MaxCranes = 2)  % fallback
+        ),
+        CraneCountError,
+        (format(user_error, '[ERROR] Multi-crane - Error counting cranes: ~w~n', [CraneCountError]),
+         MaxCranes = 2)
+    ),
+    
+    (   MaxCranes > 0
+    ->  format(user_error, '[INFO] Multi-crane - Found ~w cranes in database~n', [MaxCranes])
+    ;   (format(user_error, '[WARN] Multi-crane - No cranes found, using default max=2~n', []),
+         MaxCranesFixed = 2)
+    ),
+    
+    % Use the correct variable
+    (   var(MaxCranesFixed)
+    ->  MaxCranesFinal = MaxCranes
+    ;   MaxCranesFinal = MaxCranesFixed
+    ),
+    
+    % Set as global variable for use in generate_crane_allocation
+    nb_setval(max_cranes, MaxCranesFinal),
+    format(user_error, '[INFO] Multi-crane - Set max_cranes global variable to: ~w~n', [MaxCranesFinal]),
+    
+    % Fetch approved vessel visit notifications from MainApi
+    MainApiUrl = 'https://localhost:5001/api/VesselVisitNotifications/approved',
+    format(user_error, '[INFO] Multi-crane - Fetching approved notifications from: ~w~n', [MainApiUrl]),
+    catch(
+        (http_get(MainApiUrl, JsonData, [json_object(dict), cert_verify_hook(cert_accept_any)]),
+         format(user_error, '[DEBUG] Multi-crane - HTTP GET successful~n', [])),
+        E,
+        (format(user_error, '[ERROR] Multi-crane - Failed to fetch notifications: ~w~n', [E]), 
+         format(user_error, '[ERROR] Make sure MainApi is running on port 5001 (HTTPS)~n', []),
+         format(user_error, '[ERROR] If authentication is required, the endpoint must allow anonymous access~n', []),
+         JsonData = [])
+    ),
+
+    % JsonData is already a list of dicts
+    (   is_list(JsonData) -> JsonList = JsonData ; JsonList = [] ),
+    length(JsonList, TotalCount),
+    format(user_error, '[INFO] Multi-crane - Received ~w notifications from API~n', [TotalCount]),
+
+    % Remove any existing vessel facts
+    retractall(vessel(_,_,_,_,_,_)),
+    format(user_error, '[INFO] Multi-crane - Cleared existing vessel facts~n', []),
+
+    % Iterate notifications and assert vessel facts only for the requested date
+    catch(
+        (assert_notifications_for_date(JsonList, Date, 1, CountAsserted),
+         format(user_error, '[INFO] Multi-crane - Asserted ~w vessel facts for date ~w~n', [CountAsserted, Date])),
+        Error,
+        (format(user_error, '[ERROR] Multi-crane - Failed during notification processing: ~w~n', [Error]),
+         CountAsserted = 0)
+    ),
+
+    % If no vessels were asserted, return error message
+    (   findall(V, vessel(V,_,_,_,_,_), Vs), Vs = []
+    ->  (format(user_error, '[ERROR] Multi-crane - No approved vessels found for date ~w~n', [Date]),
+         (   Format = json
+         ->  reply_json(json([error='No approved vessel visit notifications found for the selected date', requestedDate=Date]))
+         ;   format('Content-type: text/plain~n~n'),
+             format('ERROR: No approved vessel visit notifications found for the selected date.~n'),
+             format('Requested date: ~w~n', [Date])
+         ))
+    ;   (format(user_error, '[INFO] Multi-crane - Running multi-crane scheduling algorithm...~n', []),
+         % Record start time for performance metrics
+         get_time(StartTime),
+         obtain_seq_multi_crane(SeqTriplets, TotalDelay, CraneAllocation),
+         get_time(EndTime),
+         ComputationTime is EndTime - StartTime,
+         format(user_error, '[INFO] Multi-crane - Scheduling complete. Total delay: ~w, Time: ~3f seconds~n', [TotalDelay, ComputationTime]),
+         % Return results
+         (   Format = json
+         ->  build_multi_crane_json_response(Date, TotalDelay, ComputationTime, SeqTriplets, CraneAllocation, JsonResponse),
+             reply_json(JsonResponse)
+         ;   format('Content-type: text/plain~n~n'),
+             format('========================================~n'),
+             format('  MULTI-CRANE SCHEDULING~n'),
+             format('========================================~n~n'),
+             format('Algorithm: Multi-Crane Optimization~n'),
+             format('Target Date: ~w~n', [Date]),
+             format('Total Delay: ~w time units~n', [TotalDelay]),
+             format('Computation Time: ~3f seconds~n~n', [ComputationTime]),
+             print_multi_crane_summary(SeqTriplets, CraneAllocation),
+             format('~n'),
+             print_timeline(SeqTriplets)
+         ))
+    ).
+
+% Build JSON response for multi-crane algorithm
+build_multi_crane_json_response(Date, TotalDelay, ComputationTime, SeqTriplets, CraneAllocation, JsonResponse) :-
+    maplist(triplet_crane_to_json(CraneAllocation), SeqTriplets, ScheduleList),
+    % Convert CraneAllocation to JSON-serializable format
+    maplist(crane_alloc_to_json, CraneAllocation, CraneAllocJson),
+    JsonResponse = json([
+        algorithm='Multi-Crane Optimization',
+        date=Date,
+        totalDelay=TotalDelay,
+        computationTime=ComputationTime,
+        schedule=ScheduleList,
+        craneAllocation=CraneAllocJson
+    ]).
+
+% Convert crane allocation tuple to JSON object
+crane_alloc_to_json((Vessel, NumCranes), json([vessel=Vessel, cranes=NumCranes])).
+
+% Convert a triplet with crane info to JSON
+triplet_crane_to_json(CraneAllocation, (V, TInUnload, TEndLoad), Json) :-
+    vessel(V, DockId, Arrival, Departure, Unload, Load),
+    Duration is (TEndLoad - TInUnload + 1),
+    TPossibleDep is TEndLoad + 1,
+    (   TPossibleDep > Departure
+    ->  Delay is TPossibleDep - Departure
+    ;   Delay is 0
+    ),
+    % Find number of cranes for this vessel
+    (   member((V, NumCranes), CraneAllocation)
+    ->  true
+    ;   NumCranes = 1
+    ),
+    Json = json([
+        vessel=V,
+        dockId=DockId,
+        arrival=Arrival,
+        departure=Departure,
+        startTime=TInUnload,
+        endTime=TEndLoad,
+        duration=Duration,
+        delay=Delay,
+        cranes=NumCranes
+    ]).
+
+% Print summary table for multi-crane schedule
+print_multi_crane_summary(SeqTriplets, CraneAllocation) :-
+    format('~w~t~w~30|~t~w~40|~t~w~50|~t~w~60|~t~w~70|~n', 
+           ['Vessel', 'Start', 'End', 'Duration', 'Delay', 'Cranes']),
+    format('~`-t~70|~n'),
+    print_multi_crane_rows(SeqTriplets, CraneAllocation).
+
+print_multi_crane_rows([], _).
+print_multi_crane_rows([(V, TInUnload, TEndLoad)|Rest], CraneAllocation) :-
+    vessel(V, _, _, Departure, _, _),
+    Duration is (TEndLoad - TInUnload + 1),
+    TPossibleDep is TEndLoad + 1,
+    (   TPossibleDep > Departure
+    ->  Delay is TPossibleDep - Departure
+    ;   Delay is 0
+    ),
+    (   member((V, NumCranes), CraneAllocation)
+    ->  true
+    ;   NumCranes = 1
+    ),
+    format('~w~t~w~30|~t~w~40|~t~w~50|~t~w~60|~t~w~70|~n', 
+           [V, TInUnload, TEndLoad, Duration, Delay, NumCranes]),
+    print_multi_crane_rows(Rest, CraneAllocation).

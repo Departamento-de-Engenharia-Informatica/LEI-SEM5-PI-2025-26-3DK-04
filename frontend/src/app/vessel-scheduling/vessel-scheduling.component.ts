@@ -15,6 +15,7 @@ interface VesselSchedule {
   endTime: number;
   duration: number;
   delay: number;
+  cranes?: number; // Number of cranes used (for multi-crane)
 }
 
 interface ScheduleResponse {
@@ -51,6 +52,12 @@ export class VesselSchedulingComponent {
   shortestDelayResult: AlgorithmResult | null = null;
   heuristicResult: AlgorithmResult | null = null;
   showComparison: boolean = false;
+
+  // Multi-crane support
+  multiCraneResult: AlgorithmResult | null = null;
+  showMultiCraneOption: boolean = false;
+  isCalculatingMultiCrane: boolean = false;
+  multiCraneScheduleData: ScheduleResponse | null = null;
 
   constructor(
     private http: HttpClient,
@@ -122,6 +129,8 @@ export class VesselSchedulingComponent {
             
             if (this.algorithm === 'shortest_delay') {
               this.shortestDelayResult = result;
+              // Check if there are delays to show multi-crane option
+              this.showMultiCraneOption = response.totalDelay > 0;
             } else {
               this.heuristicResult = result;
             }
@@ -156,6 +165,9 @@ export class VesselSchedulingComponent {
     this.shortestDelayResult = null;
     this.heuristicResult = null;
     this.showComparison = false;
+    this.showMultiCraneOption = false;
+    this.multiCraneResult = null;
+    this.multiCraneScheduleData = null;
   }
 
   getDelayClass(delay: number): string {
@@ -220,5 +232,113 @@ export class VesselSchedulingComponent {
     if (!this.shortestDelayResult || !this.heuristicResult || this.shortestDelayResult.totalDelay === 0) return 0;
     const diff = this.heuristicResult.totalDelay - this.shortestDelayResult.totalDelay;
     return (diff / this.shortestDelayResult.totalDelay) * 100;
+  }
+
+  // Multi-crane methods
+  calculateMultiCraneSchedule(): void {
+    if (!this.targetDate) {
+      this.errorMessage = this.translate('Please select a date');
+      return;
+    }
+
+    this.isCalculatingMultiCrane = true;
+    this.errorMessage = '';
+    const startTime = performance.now();
+
+    const url = `http://localhost:5003/multi_crane_schedule?date=${this.targetDate}&format=json`;
+    console.log('Making multi-crane request to:', url);
+
+    this.http.get<ScheduleResponse>(url).subscribe({
+      next: (response) => {
+        console.log('✅ Multi-crane response received:', response);
+        const endTime = performance.now();
+        const computationTime = endTime - startTime;
+        
+        this.ngZone.run(() => {
+          if ((response as any).error) {
+            this.errorMessage = (response as any).error;
+            this.isCalculatingMultiCrane = false;
+            console.log('❌ Error from server:', this.errorMessage);
+            this.cdr.detectChanges();
+          } else {
+            this.multiCraneScheduleData = response;
+            
+            // Store multi-crane result
+            this.multiCraneResult = {
+              algorithm: 'multi_crane',
+              totalDelay: response.totalDelay,
+              vesselCount: response.schedule.length,
+              computationTime: computationTime,
+              timestamp: new Date()
+            };
+            
+            // Load dock names for multi-crane results
+            this.loadDockNamesForMultiCrane();
+            this.isCalculatingMultiCrane = false;
+            console.log('✅ Multi-crane calculation complete');
+            this.cdr.markForCheck();
+            setTimeout(() => this.cdr.detectChanges(), 0);
+          }
+        });
+      },
+      error: (error) => {
+        console.error('❌ Multi-crane error occurred:', error);
+        this.ngZone.run(() => {
+          this.errorMessage = this.translate('Error calculating multi-crane schedule:') + ' ' + error.message;
+          this.isCalculatingMultiCrane = false;
+          this.cdr.detectChanges();
+        });
+      }
+    });
+  }
+
+  loadDockNamesForMultiCrane(): void {
+    if (!this.multiCraneScheduleData) return;
+
+    const uniqueDockIds = [...new Set(this.multiCraneScheduleData.schedule.map(v => v.dockId))];
+
+    this.http.get<any[]>('https://localhost:5001/api/Dock').subscribe({
+      next: (docks) => {
+        docks.forEach(dock => {
+          this.dockNames[dock.id] = dock.name;
+        });
+        if (this.multiCraneScheduleData) {
+          this.multiCraneScheduleData.schedule.forEach(vessel => {
+            vessel.dockName = this.dockNames[vessel.dockId] || vessel.dockId;
+          });
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading dock names for multi-crane:', err);
+        if (this.multiCraneScheduleData) {
+          this.multiCraneScheduleData.schedule.forEach(vessel => {
+            vessel.dockName = vessel.dockId;
+          });
+        }
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  getMultiCraneDelayImprovement(): number {
+    if (!this.shortestDelayResult || !this.multiCraneResult) return 0;
+    return this.shortestDelayResult.totalDelay - this.multiCraneResult.totalDelay;
+  }
+
+  getMultiCraneDelayPercentageImprovement(): number {
+    if (!this.shortestDelayResult || !this.multiCraneResult || this.shortestDelayResult.totalDelay === 0) return 0;
+    const improvement = this.shortestDelayResult.totalDelay - this.multiCraneResult.totalDelay;
+    return (improvement / this.shortestDelayResult.totalDelay) * 100;
+  }
+
+  getTotalCranesUsed(): number {
+    if (!this.multiCraneScheduleData) return 0;
+    return this.multiCraneScheduleData.schedule.reduce((sum, vessel) => sum + (vessel.cranes || 1), 0);
+  }
+
+  getMultiCraneVesselsCount(): number {
+    if (!this.multiCraneScheduleData) return 0;
+    return this.multiCraneScheduleData.schedule.filter(v => (v.cranes || 1) > 1).length;
   }
 }

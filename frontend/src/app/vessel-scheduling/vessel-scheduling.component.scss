@@ -150,6 +150,262 @@ $white: #ffffff;
   border-top: 2px solid #e0e0e0;
 }
 
+// Multi-Crane Alert Section
+.multi-crane-alert {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border: 2px solid #ffc107;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+
+  .alert-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    .alert-icon {
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .alert-text {
+      flex: 1;
+
+      strong {
+        display: block;
+        font-size: 1.1rem;
+        color: #856404;
+        margin-bottom: 0.5rem;
+      }
+
+      p {
+        margin: 0;
+        color: #856404;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+    }
+  }
+
+  .btn-multi-crane {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Multi-Crane Comparison Section
+.multi-crane-comparison {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  h3 {
+    margin: 0 0 1.5rem 0;
+    color: $dark;
+    font-size: 1.5rem;
+    text-align: center;
+    font-weight: 700;
+  }
+
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+
+    .comparison-card {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-top: 4px solid;
+
+      &.single-crane {
+        border-top-color: #ffc107;
+      }
+
+      &.multi-crane-card {
+        border-top-color: #28a745;
+      }
+
+      h4 {
+        margin: 0 0 1rem 0;
+        color: $dark;
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+
+      .metric {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e0e0e0;
+
+        &:last-of-type {
+          border-bottom: none;
+          margin-bottom: 1rem;
+        }
+
+        .metric-label {
+          font-size: 0.9rem;
+          color: #666;
+          font-weight: 500;
+        }
+
+        .metric-value {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: $dark;
+
+          &.delay-value {
+            color: #dc3545;
+          }
+
+          &.success-value {
+            color: #28a745;
+          }
+        }
+      }
+
+      .metric-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-align: center;
+        width: 100%;
+
+        &.success-badge {
+          background: #d4edda;
+          color: #155724;
+        }
+      }
+    }
+  }
+
+  .comparison-summary {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .summary-metric {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      &.positive {
+        background: #d4edda;
+        border-left: 4px solid #28a745;
+      }
+
+      &.info {
+        background: #d1ecf1;
+        border-left: 4px solid #17a2b8;
+      }
+
+      .metric-icon {
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+
+      .metric-text {
+        flex: 1;
+        font-size: 0.95rem;
+        color: #333;
+
+        strong {
+          font-weight: 600;
+          margin-right: 0.5rem;
+        }
+
+        .percentage {
+          color: #28a745;
+          font-size: 0.9rem;
+          margin-left: 0.5rem;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+// Multi-Crane Table Styles
+.multi-crane-table {
+  background: linear-gradient(135deg, #f0f8ff 0%, #e6f2ff 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  h3 {
+    color: $dark;
+    margin-bottom: 1rem;
+  }
+
+  .cranes-cell {
+    text-align: center;
+
+    .crane-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      background: #e3f2fd;
+      color: $accent;
+      font-weight: 600;
+      font-size: 0.85rem;
+
+      &.multi-crane {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        animation: pulse 2s infinite;
+      }
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
 // Comparison Section
 .comparison-section {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);

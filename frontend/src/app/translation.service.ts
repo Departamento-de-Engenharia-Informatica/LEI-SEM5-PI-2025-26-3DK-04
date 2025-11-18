@@ -271,7 +271,22 @@ export class TranslationService {
           duration: "Duration",
           delay: "Delay"
         },
-        timeline: { title: "Visual Timeline" }
+        timeline: { title: "Visual Timeline" },
+        multiCrane: {
+          delayDetected: "Delays Detected!",
+          suggestion: "The single-crane schedule has delays. Try using multiple cranes to minimize delays.",
+          calculate: "Calculate Multi-Crane Schedule",
+          comparisonTitle: "Single-Crane vs Multi-Crane Comparison",
+          singleCrane: "Single Crane",
+          multiCrane: "Multi-Crane",
+          totalCranes: "Total Cranes",
+          optimized: "Optimized Solution",
+          delayReduction: "Delay Reduction",
+          vesselsWithMultipleCranes: "Vessels Using Multiple Cranes",
+          outOf: "out of",
+          scheduleTitle: "Multi-Crane Schedule",
+          cranes: "Cranes"
+        }
       },
 
       manageQualifications: {
@@ -1070,7 +1085,22 @@ export class TranslationService {
           duration: "Duração",
           delay: "Atraso"
         },
-        timeline: { title: "Linha do Tempo Visual" }
+        timeline: { title: "Linha do Tempo Visual" },
+        multiCrane: {
+          delayDetected: "Atrasos Detetados!",
+          suggestion: "O agendamento com um guindaste tem atrasos. Tente usar múltiplos guindastes para minimizar os atrasos.",
+          calculate: "Calcular Agendamento Multi-Guindaste",
+          comparisonTitle: "Comparação: Guindaste Único vs Múltiplos Guindastes",
+          singleCrane: "Guindaste Único",
+          multiCrane: "Múltiplos Guindastes",
+          totalCranes: "Total de Guindastes",
+          optimized: "Solução Otimizada",
+          delayReduction: "Redução de Atraso",
+          vesselsWithMultipleCranes: "Navios com Múltiplos Guindastes",
+          outOf: "de",
+          scheduleTitle: "Agendamento Multi-Guindaste",
+          cranes: "Guindastes"
+        }
       },
 
       manageQualifications: {

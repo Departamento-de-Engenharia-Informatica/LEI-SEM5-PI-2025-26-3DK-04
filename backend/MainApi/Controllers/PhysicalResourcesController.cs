@@ -79,7 +79,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpGet]
-        [AuthorizeRole(Roles.Admin)]
+        [Microsoft.AspNetCore.Authorization.AllowAnonymous] // Allow Prolog server to access this endpoint
         public async Task<ActionResult<List<PhysicalResourceDto>>> Search(
             [FromQuery] string? description,
             [FromQuery] string? type,

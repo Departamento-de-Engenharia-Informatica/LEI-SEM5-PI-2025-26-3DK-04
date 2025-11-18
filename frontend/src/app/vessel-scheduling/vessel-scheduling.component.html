@@ -63,6 +63,88 @@
 
       <!-- Results Section -->
       <div *ngIf="scheduleData" class="results-section">
+        <!-- Multi-Crane Option (shown only when shortest_delay has delays) -->
+        <div *ngIf="showMultiCraneOption && algorithm === 'shortest_delay' && !multiCraneScheduleData" class="multi-crane-alert">
+          <div class="alert-content">
+            <span class="alert-icon">⚠️</span>
+            <div class="alert-text">
+              <strong>{{ translate('vesselScheduling.multiCrane.delayDetected') || 'Delays Detected!' }}</strong>
+              <p>{{ translate('vesselScheduling.multiCrane.suggestion') || 'The single-crane schedule has delays. Try using multiple cranes to minimize delays.' }}</p>
+            </div>
+          </div>
+          <button 
+            class="btn btn-multi-crane" 
+            (click)="calculateMultiCraneSchedule()"
+            [disabled]="isCalculatingMultiCrane"
+          >
+            <span *ngIf="!isCalculatingMultiCrane">🏗️ {{ translate('vesselScheduling.multiCrane.calculate') || 'Calculate Multi-Crane Schedule' }}</span>
+            <span *ngIf="isCalculatingMultiCrane">
+              <span class="spinner"></span> {{ translate('vesselScheduling.calculating') }}
+            </span>
+          </button>
+        </div>
+
+        <!-- Multi-Crane Results Comparison -->
+        <div *ngIf="multiCraneScheduleData && shortestDelayResult" class="multi-crane-comparison">
+          <h3>{{ translate('vesselScheduling.multiCrane.comparisonTitle') || 'Single-Crane vs Multi-Crane Comparison' }}</h3>
+          <div class="comparison-grid">
+            <div class="comparison-card single-crane">
+              <h4>{{ translate('vesselScheduling.multiCrane.singleCrane') || 'Single Crane' }}</h4>
+              <div class="metric">
+                <span class="metric-label">{{ translate('vesselScheduling.comparison.totalDelay') }}:</span>
+                <span class="metric-value delay-value">{{ shortestDelayResult.totalDelay }} {{ translate('vesselScheduling.timeUnits') }}</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Total de Guindastes:</span>
+                <span class="metric-value">{{ scheduleData.schedule.length }}</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">{{ translate('vesselScheduling.comparison.computationTime') }}:</span>
+                <span class="metric-value">{{ (shortestDelayResult.computationTime || 0).toFixed(2) }} ms</span>
+              </div>
+            </div>
+            
+            <div class="comparison-card multi-crane-card">
+              <h4>{{ translate('vesselScheduling.multiCrane.multiCrane') || 'Multi-Crane' }}</h4>
+              <div class="metric">
+                <span class="metric-label">{{ translate('vesselScheduling.comparison.totalDelay') }}:</span>
+                <span class="metric-value success-value">{{ multiCraneScheduleData.totalDelay }} {{ translate('vesselScheduling.timeUnits') }}</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">{{ translate('vesselScheduling.multiCrane.totalCranes') || 'Total Cranes' }}:</span>
+                <span class="metric-value">{{ getTotalCranesUsed() }}</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">{{ translate('vesselScheduling.comparison.computationTime') }}:</span>
+                <span class="metric-value">{{ (multiCraneResult?.computationTime || 0).toFixed(2) }} ms</span>
+              </div>
+              <div class="metric-badge success-badge">
+                {{ translate('vesselScheduling.multiCrane.optimized') || 'Optimized Solution' }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="comparison-summary">
+            <div class="summary-metric positive">
+              <span class="metric-icon">✓</span>
+              <span class="metric-text">
+                <strong>{{ translate('vesselScheduling.multiCrane.delayReduction') || 'Delay Reduction' }}:</strong>
+                {{ getMultiCraneDelayImprovement() }} {{ translate('vesselScheduling.timeUnits') }}
+                <span *ngIf="shortestDelayResult.totalDelay !== 0" class="percentage">
+                  (-{{ getMultiCraneDelayPercentageImprovement().toFixed(1) }}%)
+                </span>
+              </span>
+            </div>
+            <div class="summary-metric info">
+              <span class="metric-icon">🏗️</span>
+              <span class="metric-text">
+                <strong>{{ translate('vesselScheduling.multiCrane.vesselsWithMultipleCranes') || 'Vessels Using Multiple Cranes' }}:</strong>
+                {{ getMultiCraneVesselsCount() }} {{ translate('vesselScheduling.multiCrane.outOf') || 'out of' }} {{ multiCraneScheduleData.schedule.length }}
+              </span>
+            </div>
+          </div>
+        </div>
+
         <!-- Algorithm Comparison (shown when both algorithms have been run) -->
         <div *ngIf="showComparison" class="comparison-section">
           <h3>{{ translate('vesselScheduling.comparison.title') }}</h3>
@@ -168,6 +250,51 @@
                 <td class="delay-cell">
                   <span class="delay-badge" [class.has-delay]="vessel.delay > 0">
                     {{ vessel.delay }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Multi-Crane Schedule Table -->
+        <div *ngIf="multiCraneScheduleData" class="table-container multi-crane-table">
+          <h3>{{ translate('vesselScheduling.multiCrane.scheduleTitle') || 'Multi-Crane Schedule' }}</h3>
+          <table class="vessels-table">
+            <thead>
+              <tr>
+                <th>{{ translate('vesselScheduling.table.status') }}</th>
+                <th>{{ translate('vesselScheduling.table.vessel') }}</th>
+                <th>{{ translate('vesselScheduling.table.dock') }}</th>
+                <th>{{ translate('vesselScheduling.table.arrival') }}</th>
+                <th>{{ translate('vesselScheduling.table.departure') }}</th>
+                <th>{{ translate('vesselScheduling.table.startTime') }}</th>
+                <th>{{ translate('vesselScheduling.table.endTime') }}</th>
+                <th>{{ translate('vesselScheduling.table.duration') }}</th>
+                <th>{{ translate('vesselScheduling.table.delay') }}</th>
+                <th>{{ translate('vesselScheduling.multiCrane.cranes') || 'Cranes' }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let vessel of multiCraneScheduleData.schedule" [ngClass]="getDelayClass(vessel.delay)">
+                <td class="status-icon">
+                  <span class="icon">{{ getStatusIcon(vessel.delay) }}</span>
+                </td>
+                <td class="vessel-name">{{ vessel.vessel }}</td>
+                <td class="dock-name">{{ vessel.dockName || vessel.dockId }}</td>
+                <td>{{ vessel.arrival }}</td>
+                <td>{{ vessel.departure }}</td>
+                <td>{{ vessel.startTime }}</td>
+                <td>{{ vessel.endTime }}</td>
+                <td>{{ vessel.duration }}</td>
+                <td class="delay-cell">
+                  <span class="delay-badge" [class.has-delay]="vessel.delay > 0">
+                    {{ vessel.delay }}
+                  </span>
+                </td>
+                <td class="cranes-cell">
+                  <span class="crane-badge" [class.multi-crane]="(vessel.cranes || 1) > 1">
+                    {{ vessel.cranes || 1 }} 🏗️
                   </span>
                 </td>
               </tr>
