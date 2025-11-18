@@ -48,7 +48,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpGet("approved")]
-        [AuthorizeRole(Roles.Admin)]
+        [Microsoft.AspNetCore.Authorization.AllowAnonymous] // Allow Prolog server to access this endpoint
         public async Task<ActionResult<List<VesselVisitNotificationDto>>> GetApprovedNotifications()
         {
             var notifications = await _service.GetApprovedNotificationsAsync();

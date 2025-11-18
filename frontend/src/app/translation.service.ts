@@ -236,6 +236,9 @@ export class TranslationService {
         title: "Vessel Scheduling - Shortest Delay",
         subtitle: "Calculate optimal vessel scheduling to minimize delays",
         targetDate: "Target Date",
+        algorithm: "Algorithm",
+        shortestDelay: "Shortest Delay (Exhaustive Search)",
+        earlyArrivalTime: "Early Arrival Time (Heuristic)",
         calculateSchedule: "Calculate Schedule",
         calculating: "Calculating...",
         clearResults: "Clear Results",
@@ -246,6 +249,16 @@ export class TranslationService {
           totalDelay: "Total Delay"
         },
         timeUnits: "time units",
+        comparison: {
+          title: "Algorithm Comparison",
+          totalDelay: "Total Delay",
+          computationTime: "Computation Time",
+          optimalSolution: "Optimal Solution",
+          heuristicApproximation: "Heuristic Approximation",
+          delayDifference: "Delay Difference (Heuristic - Optimal)",
+          timeSaved: "Time Saved",
+          fasterComputation: "Heuristic is faster"
+        },
         table: {
           title: "Vessel Schedule Details",
           status: "Status",
@@ -1011,6 +1024,9 @@ export class TranslationService {
         title: "Agendamento de Navios - Mínimo Atraso",
         subtitle: "Calcular agendamento ótimo de navios para minimizar atrasos",
         targetDate: "Data Alvo",
+        algorithm: "Algoritmo",
+        shortestDelay: "Menor Atraso (Busca Exaustiva)",
+        earlyArrivalTime: "Hora de Chegada Antecipada (Heurística)",
         calculateSchedule: "Calcular Agendamento",
         calculating: "A Calcular...",
         clearResults: "Limpar Resultados",
@@ -1021,6 +1037,16 @@ export class TranslationService {
           totalDelay: "Atraso Total"
         },
         timeUnits: "unidades de tempo",
+        comparison: {
+          title: "Comparação de Algoritmos",
+          totalDelay: "Atraso Total",
+          computationTime: "Tempo de Computação",
+          optimalSolution: "Solução Ótima",
+          heuristicApproximation: "Aproximação Heurística",
+          delayDifference: "Diferença de Atraso (Heurística - Ótima)",
+          timeSaved: "Tempo Poupado",
+          fasterComputation: "Heurística é mais rápida"
+        },
         table: {
           title: "Detalhes do Agendamento de Navios",
           status: "Estado",

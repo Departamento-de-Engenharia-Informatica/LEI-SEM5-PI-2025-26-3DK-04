@@ -150,6 +150,157 @@ $white: #ffffff;
   border-top: 2px solid #e0e0e0;
 }
 
+// Comparison Section
+.comparison-section {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  h3 {
+    margin: 0 0 1.5rem 0;
+    color: $dark;
+    font-size: 1.5rem;
+    text-align: center;
+    font-weight: 700;
+  }
+
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+
+    .comparison-card {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-top: 4px solid;
+
+      &.optimal {
+        border-top-color: #28a745;
+      }
+
+      &.heuristic {
+        border-top-color: $accent;
+      }
+
+      h4 {
+        margin: 0 0 1rem 0;
+        color: $dark;
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+
+      .metric {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e0e0e0;
+
+        &:last-of-type {
+          border-bottom: none;
+          margin-bottom: 1rem;
+        }
+
+        .metric-label {
+          font-size: 0.9rem;
+          color: #666;
+          font-weight: 500;
+        }
+
+        .metric-value {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: $dark;
+        }
+      }
+
+      .metric-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-align: center;
+        width: 100%;
+
+        &.optimal-badge {
+          background: #d4edda;
+          color: #155724;
+        }
+
+        &.heuristic-badge {
+          background: #d1ecf1;
+          color: #0c5460;
+        }
+      }
+    }
+  }
+
+  .comparison-summary {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .summary-metric {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      &.positive {
+        background: #d4edda;
+        border-left: 4px solid #28a745;
+      }
+
+      &.negative {
+        background: #f8d7da;
+        border-left: 4px solid #dc3545;
+      }
+
+      .metric-icon {
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+
+      .metric-text {
+        flex: 1;
+        font-size: 0.95rem;
+        color: #333;
+
+        strong {
+          font-weight: 600;
+          margin-right: 0.5rem;
+        }
+
+        .percentage {
+          color: #666;
+          font-size: 0.9rem;
+          margin-left: 0.5rem;
+        }
+
+        .note {
+          display: block;
+          font-size: 0.85rem;
+          color: #666;
+          margin-top: 0.25rem;
+        }
+      }
+    }
+  }
+}
+
 // Summary Card
 .summary-card {
   display: grid;
@@ -398,6 +549,14 @@ $white: #ffffff;
 
   .summary-card {
     grid-template-columns: 1fr;
+  }
+
+  .comparison-section {
+    padding: 1.5rem;
+
+    .comparison-grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   .vessels-table {
