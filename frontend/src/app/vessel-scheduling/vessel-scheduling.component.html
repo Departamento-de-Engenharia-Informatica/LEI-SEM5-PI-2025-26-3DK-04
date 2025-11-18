@@ -19,6 +19,21 @@
         />
       </div>
 
+      <!-- Algorithm Selection -->
+      <div class="form-group">
+        <label for="algorithm">{{ translate('vesselScheduling.algorithm') }}:</label>
+        <select 
+          id="algorithm" 
+          name="algorithm"
+          [(ngModel)]="algorithm"
+          class="form-control"
+          [disabled]="isLoading"
+        >
+          <option value="shortest_delay">{{ translate('vesselScheduling.shortestDelay') }}</option>
+          <option value="heuristic">{{ translate('vesselScheduling.earlyArrivalTime') }}</option>
+        </select>
+      </div>
+
       <!-- Action Buttons -->
       <div class="button-group">
         <button 
@@ -48,6 +63,63 @@
 
       <!-- Results Section -->
       <div *ngIf="scheduleData" class="results-section">
+        <!-- Algorithm Comparison (shown when both algorithms have been run) -->
+        <div *ngIf="showComparison" class="comparison-section">
+          <h3>{{ translate('vesselScheduling.comparison.title') }}</h3>
+          <div class="comparison-grid">
+            <div class="comparison-card optimal">
+              <h4>{{ translate('vesselScheduling.shortestDelay') }}</h4>
+              <div class="metric">
+                <span class="metric-label">{{ translate('vesselScheduling.comparison.totalDelay') }}:</span>
+                <span class="metric-value">{{ shortestDelayResult?.totalDelay }} {{ translate('vesselScheduling.timeUnits') }}</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">{{ translate('vesselScheduling.comparison.computationTime') }}:</span>
+                <span class="metric-value">{{ (shortestDelayResult?.computationTime || 0).toFixed(2) }} ms</span>
+              </div>
+              <div class="metric-badge optimal-badge">
+                {{ translate('vesselScheduling.comparison.optimalSolution') }}
+              </div>
+            </div>
+            
+            <div class="comparison-card heuristic">
+              <h4>{{ translate('vesselScheduling.earlyArrivalTime') }}</h4>
+              <div class="metric">
+                <span class="metric-label">{{ translate('vesselScheduling.comparison.totalDelay') }}:</span>
+                <span class="metric-value">{{ heuristicResult?.totalDelay }} {{ translate('vesselScheduling.timeUnits') }}</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">{{ translate('vesselScheduling.comparison.computationTime') }}:</span>
+                <span class="metric-value">{{ (heuristicResult?.computationTime || 0).toFixed(2) }} ms</span>
+              </div>
+              <div class="metric-badge heuristic-badge">
+                {{ translate('vesselScheduling.comparison.heuristicApproximation') }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="comparison-summary">
+            <div class="summary-metric" [class.positive]="getDelayDifference() <= 0" [class.negative]="getDelayDifference() > 0">
+              <span class="metric-icon">{{ getDelayDifference() <= 0 ? '✓' : '⚠' }}</span>
+              <span class="metric-text">
+                <strong>{{ translate('vesselScheduling.comparison.delayDifference') }}:</strong>
+                {{ getDelayDifference() > 0 ? '+' : '' }}{{ getDelayDifference() }} {{ translate('vesselScheduling.timeUnits') }}
+                <span *ngIf="shortestDelayResult?.totalDelay !== 0" class="percentage">
+                  ({{ getDelayPercentageDifference() > 0 ? '+' : '' }}{{ getDelayPercentageDifference().toFixed(1) }}%)
+                </span>
+              </span>
+            </div>
+            <div class="summary-metric positive">
+              <span class="metric-icon">⚡</span>
+              <span class="metric-text">
+                <strong>{{ translate('vesselScheduling.comparison.timeSaved') }}:</strong>
+                {{ getTimeDifference().toFixed(2) }} ms
+                <span class="note">({{ translate('vesselScheduling.comparison.fasterComputation') }})</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
         <!-- Summary Card -->
         <div class="summary-card">
           <div class="summary-item">
@@ -87,7 +159,7 @@
                   <span class="icon">{{ getStatusIcon(vessel.delay) }}</span>
                 </td>
                 <td class="vessel-name">{{ vessel.vessel }}</td>
-                <td class="dock-name">{{ vessel.dockId }}</td>
+                <td class="dock-name">{{ vessel.dockName || vessel.dockId }}</td>
                 <td>{{ vessel.arrival }}</td>
                 <td>{{ vessel.departure }}</td>
                 <td>{{ vessel.startTime }}</td>
