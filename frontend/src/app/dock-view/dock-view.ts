@@ -56,6 +56,15 @@ export class DockView implements AfterViewInit, OnDestroy {
   private animationDuration = 1.5;
   private clock: THREE.Clock = new THREE.Clock();
 
+  private movementSpeed = 1.0;
+  private movement = {
+    forward: false,
+    backward: false,
+    left: false,
+    right: false,
+    up: false,
+    down: false
+  };
 
   private createPortStructure(): void {
 
@@ -181,6 +190,28 @@ export class DockView implements AfterViewInit, OnDestroy {
     if (t >= 1) this.isAnimating = false;
   }
 
+  private updateCameraMovement(dt: number): void {
+    const dir = new THREE.Vector3();
+    this.camera.getWorldDirection(dir);
+
+    const right = new THREE.Vector3();
+    right.crossVectors(dir, this.camera.up).normalize();
+
+    const speed = this.movementSpeed * dt * 15;
+
+    if (this.movement.forward) this.camera.position.addScaledVector(dir, speed);
+    if (this.movement.backward) this.camera.position.addScaledVector(dir, -speed);
+    if (this.movement.left) this.camera.position.addScaledVector(right, -speed);
+    if (this.movement.right) this.camera.position.addScaledVector(right, speed);
+
+    if (this.movement.up) this.camera.position.y += speed;
+    if (this.movement.down) this.camera.position.y -= speed;
+
+    // manter a target sincronizada
+    this.controls.target.addScaledVector(dir, 0);
+    this.controls.update();
+  }
+
 
   private createScene(): void {
 
@@ -238,6 +269,7 @@ export class DockView implements AfterViewInit, OnDestroy {
     }
 
     this.updateCameraAnimation(dt);
+    this.updateCameraMovement(dt);
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   }
@@ -261,24 +293,33 @@ export class DockView implements AfterViewInit, OnDestroy {
       antialias: true,
       alpha: true
     });
+
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight, false);
 
+    // 1) Criar OrbitControls ANTES de usar
     this.controls = new OrbitControls(this.camera, this.canvas);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
     this.controls.screenSpacePanning = false;
     this.controls.minDistance = 5;
-    this.controls.maxDistance = 50;
+    this.controls.maxDistance = 300;
     this.controls.maxPolarAngle = Math.PI / 2;
 
+    // 2) Só agora adicionamos os controlos de teclado
+    this.addKeyboardControls();
+
+    // 3) Click p/ animar câmera
     this.canvas.addEventListener('click', (event) => this.onCanvasClick(event));
 
+    // 4) Resize
     this.resizeObserver = new ResizeObserver(() => this.onWindowResize());
     this.resizeObserver.observe(this.canvas);
 
+    // 5) Start animation
     this.animateScene();
   }
+
 
 
   ngOnDestroy(): void {
@@ -289,4 +330,29 @@ export class DockView implements AfterViewInit, OnDestroy {
     if (this.controls) this.controls.dispose();
     if (this.renderer) this.renderer.dispose();
   }
+
+  private addKeyboardControls(): void {
+    window.addEventListener('keydown', (e) => {
+      switch (e.key.toLowerCase()) {
+        case 'w': this.movement.forward = true; break;
+        case 's': this.movement.backward = true; break;
+        case 'a': this.movement.left = true; break;
+        case 'd': this.movement.right = true; break;
+        case ' ': this.movement.up = true; break;
+        case 'shift': this.movement.down = true; break;
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      switch (e.key.toLowerCase()) {
+        case 'w': this.movement.forward = false; break;
+        case 's': this.movement.backward = false; break;
+        case 'a': this.movement.left = false; break;
+        case 'd': this.movement.right = false; break;
+        case ' ': this.movement.up = false; break;
+        case 'shift': this.movement.down = false; break;
+      }
+    });
+  }
+
 }
