@@ -80,7 +80,17 @@ handle_cors_preflight(_Request) :-
     format('~n').
 
 get_shortest_delay(Request) :-
-    % Send CORS headers first
+    % Send CORS headers first - ALWAYS send these regardless of errors
+    catch(
+        get_shortest_delay_impl(Request),
+        Error,
+        (format(user_error, '[FATAL ERROR] Unhandled exception in get_shortest_delay: ~w~n', [Error]),
+         format('Content-type: application/json~n~n'),
+         format('{"error": "Internal server error", "details": "~w"}~n', [Error]))
+    ).
+
+get_shortest_delay_impl(Request) :-
+    % Send CORS headers
     format('Access-Control-Allow-Origin: *~n'),
     format('Access-Control-Allow-Methods: GET, OPTIONS~n'),
     format('Access-Control-Allow-Headers: Content-Type, Authorization~n'),
@@ -119,14 +129,16 @@ get_shortest_delay(Request) :-
 schedule_for_date(_Request, Date, DateStr, Format) :-
     % Fetch approved vessel visit notifications from MainApi
     % NOTE: MainApi runs on port 5000 (HTTP) or 5001 (HTTPS)
-    MainApiUrl = 'http://localhost:5000/api/VesselVisitNotifications/approved',
+    % Using HTTPS and disabling certificate verification for local development
+    MainApiUrl = 'https://localhost:5001/api/VesselVisitNotifications/approved',
     format(user_error, '[INFO] Fetching approved notifications from: ~w~n', [MainApiUrl]),
     catch(
-        (http_get(MainApiUrl, JsonData, [json_object(dict)]),
+        (http_get(MainApiUrl, JsonData, [json_object(dict), cert_verify_hook(cert_accept_any)]),
          format(user_error, '[DEBUG] HTTP GET successful~n', [])),
         E,
         (format(user_error, '[ERROR] Failed to fetch notifications: ~w~n', [E]), 
-         format(user_error, '[ERROR] Make sure MainApi is running on port 5000~n', []),
+         format(user_error, '[ERROR] Make sure MainApi is running on port 5001 (HTTPS)~n', []),
+         format(user_error, '[ERROR] If authentication is required, the endpoint must allow anonymous access~n', []),
          JsonData = [])
     ),
 
@@ -140,8 +152,13 @@ schedule_for_date(_Request, Date, DateStr, Format) :-
     format(user_error, '[INFO] Cleared existing vessel facts~n', []),
 
     % Iterate notifications and assert vessel facts only for the requested date
-    assert_notifications_for_date(JsonList, Date, 1, CountAsserted),
-    format(user_error, '[INFO] Asserted ~w vessel facts for date ~w~n', [CountAsserted, Date]),
+    catch(
+        (assert_notifications_for_date(JsonList, Date, 1, CountAsserted),
+         format(user_error, '[INFO] Asserted ~w vessel facts for date ~w~n', [CountAsserted, Date])),
+        Error,
+        (format(user_error, '[ERROR] Failed during notification processing: ~w~n', [Error]),
+         CountAsserted = 0)
+    ),
 
     % If no vessels were asserted, return error message
     (   findall(V, vessel(V,_,_,_,_,_), Vs), Vs = []
@@ -175,60 +192,106 @@ schedule_for_date(_Request, Date, DateStr, Format) :-
 assert_notifications_for_date([], _Date, Count, Count) :-
     format(user_error, '[INFO] Finished processing notifications~n', []).
 assert_notifications_for_date([D|Rest], Date, N, Count) :-
-    (   get_dict(arrivalTime, D, ArrivalAtom)
-    ->  (   atom(ArrivalAtom) -> atom_string(ArrivalAtom, ArrivalStr)
-        ;   string(ArrivalAtom) -> ArrivalStr = ArrivalAtom
-        ;   format(user_error, '[WARNING] arrivalTime is not atom/string: ~w~n', [ArrivalAtom]), fail
-        ),
-        % Extract date (first 10 chars) from ISO8601 like 2025-11-13T05:00:00Z
-        sub_string(ArrivalStr, 0, 10, _, ArrivalDateStr),
-        % Convert Date parameter to string for comparison
-        (   atom(Date) -> atom_string(Date, DateStr) ; DateStr = Date ),
-        format(user_error, '[DEBUG] Processing notification: ArrivalDate=~w, RequestedDate=~w (types: ~w vs ~w)~n', 
-               [ArrivalDateStr, DateStr, ArrivalDateStr, DateStr]),
-        (   ArrivalDateStr = DateStr
-        ->  % extract hour from ISO8601 (position 11-12)
-            (   sub_string(ArrivalStr, 11, 2, _, Hs) -> atom_number(Hs, ArrivalHour) ; ArrivalHour = 0 ),
-            % Get departure time
-            (   get_dict(departureTime, D, DepAtom) 
-            ->  (atom(DepAtom) -> atom_string(DepAtom, DepStr) ; DepStr = DepAtom),
-                (sub_string(DepStr, 11, 2, _, Ds) -> atom_number(Ds, DepartureHour) ; DepartureHour = ArrivalHour + 6)
-            ;   DepartureHour is ArrivalHour + 6
-            ),
-            % UnloadTime and LoadTime are in HOURS from backend DTO
-            % Use them directly as time units in the Prolog scheduling logic
-            (   get_dict(unloadTime, D, UnloadHours), number(UnloadHours) 
-            ->  UnloadTime = UnloadHours
-            ;   UnloadTime = 1
-            ),
-            (   get_dict(loadTime, D, LoadHours), number(LoadHours) 
-            ->  LoadTime = LoadHours
-            ;   LoadTime = 1
-            ),
-            % Build an id atom like v1, v2, ...
-            atomic_list_concat([v, N], IdAtom),
-            % Get vessel name if available
-            (   get_dict(vesselName, D, VesselName) -> true ; VesselName = 'Unknown' ),
-            % Get dockId if available (CRITICAL: needed for dock-based scheduling)
-            (   get_dict(assignedDock, D, DockId) -> true 
-            ;   get_dict(dockId, D, DockId) -> true
-            ;   DockId = 'unknown_dock'
-            ),
-            % Log the vessel being added
-            format(user_error, '[INFO] Adding vessel ~w: ~w (Dock=~w, Arrival=~w, Departure=~w, Unload=~w hours, Load=~w hours)~n', 
-                   [IdAtom, VesselName, DockId, ArrivalHour, DepartureHour, UnloadTime, LoadTime]),
-            % Assert vessel(Id, DockId, ArrivalHour, DepartureHour, UnloadTime, LoadTime)
-            assertz(vessel(IdAtom, DockId, ArrivalHour, DepartureHour, UnloadTime, LoadTime)),
-            N1 is N + 1,
-            assert_notifications_for_date(Rest, Date, N1, Count)
-        ;   % not match date -> skip
-            format(user_error, '[DEBUG] Skipping notification with arrival date ~w (requested: ~w)~n', [ArrivalDateStr, DateStr]),
-            assert_notifications_for_date(Rest, Date, N, Count)
-        )
-    ;   % no arrivalTime field -> skip
-        format(user_error, '[WARNING] Notification without arrivalTime field, skipping~n', []),
-        assert_notifications_for_date(Rest, Date, N, Count)
+    format(user_error, '[DEBUG] ========== Notification #~w ==========~n', [N]),
+    format(user_error, '[DEBUG] Dict keys: ~w~n', [D]),
+    catch(
+        (process_notification(D, Date, N, N1),
+         format(user_error, '[DEBUG] Processed, continuing to next...~n', [])),
+        Error,
+        (format(user_error, '[ERROR] Caught error in notification #~w: ~w~n', [N, Error]),
+         N1 = N)
+    ),
+    !,  % Cut to prevent backtracking
+    assert_notifications_for_date(Rest, Date, N1, Count).
+
+process_notification(D, Date, N, N1) :-
+    get_dict(arrivalTime, D, ArrivalAtom),
+    format(user_error, '[DEBUG] arrivalTime raw: ~w~n', [ArrivalAtom]),
+    
+    % Convert to string safely
+    (atom(ArrivalAtom) -> atom_string(ArrivalAtom, ArrivalStr) ; ArrivalStr = ArrivalAtom),
+    format(user_error, '[DEBUG] arrivalTime string: ~w~n', [ArrivalStr]),
+    
+    % Extract date
+    sub_string(ArrivalStr, 0, 10, _, ArrivalDateStr),
+    format(user_error, '[DEBUG] Extracted date: ~w~n', [ArrivalDateStr]),
+    
+    % Convert requested date to string
+    (atom(Date) -> atom_string(Date, DateStr) ; DateStr = Date),
+    format(user_error, '[DEBUG] Requested date: ~w~n', [DateStr]),
+    
+    % Compare dates
+    (ArrivalDateStr == DateStr ->
+        (format(user_error, '[DEBUG] ✓ MATCH! Extracting vessel info...~n', []),
+         extract_vessel_info(D, ArrivalStr, N),
+         N1 is N + 1)
+    ;
+        (format(user_error, '[DEBUG] ✗ NO MATCH, skipping~n', []),
+         N1 = N)
     ).
+
+extract_vessel_info(D, ArrivalStr, N) :-
+    format(user_error, '[DEBUG] Extracting arrival hour...~n', []),
+    % Extract arrival hour safely
+    (sub_string(ArrivalStr, 11, 2, _, HourStr) ->
+        (catch(atom_string(HourAtom, HourStr), _, HourAtom = '00'),
+         catch(atom_number(HourAtom, ArrivalHour), _, ArrivalHour = 0))
+    ;   ArrivalHour = 0
+    ),
+    format(user_error, '[DEBUG] Arrival hour: ~w~n', [ArrivalHour]),
+    
+    format(user_error, '[DEBUG] Extracting departure time...~n', []),
+    % Get departure hour
+    (get_dict(departureTime, D, DepAtom) ->
+        ((atom(DepAtom) -> atom_string(DepAtom, DepStr) ; DepStr = DepAtom),
+         (sub_string(DepStr, 11, 2, _, DepHourStr) ->
+             (catch(atom_string(DepHourAtom, DepHourStr), _, DepHourAtom = '00'),
+              catch(atom_number(DepHourAtom, DepartureHour), _, (DepartureHour is ArrivalHour + 6)))
+         ;   DepartureHour is ArrivalHour + 6))
+    ;   DepartureHour is ArrivalHour + 6
+    ),
+    format(user_error, '[DEBUG] Departure hour: ~w~n', [DepartureHour]),
+    
+    format(user_error, '[DEBUG] Extracting load/unload times...~n', []),
+    % Get unload/load times
+    (get_dict(unloadTime, D, UnloadHours), number(UnloadHours) ->
+        UnloadTime = UnloadHours
+    ;   UnloadTime = 1
+    ),
+    (get_dict(loadTime, D, LoadHours), number(LoadHours) ->
+        LoadTime = LoadHours
+    ;   LoadTime = 1
+    ),
+    format(user_error, '[DEBUG] Unload: ~w, Load: ~w~n', [UnloadTime, LoadTime]),
+    
+    format(user_error, '[DEBUG] Building vessel ID...~n', []),
+    % Build vessel ID
+    atom_concat(v, N, IdAtom),
+    format(user_error, '[DEBUG] Vessel ID: ~w~n', [IdAtom]),
+    
+    format(user_error, '[DEBUG] Getting vessel name...~n', []),
+    % Get vessel name
+    (get_dict(vesselName, D, VesselName) -> true ; VesselName = 'Unknown'),
+    format(user_error, '[DEBUG] Vessel name: ~w~n', [VesselName]),
+    
+    format(user_error, '[DEBUG] Getting dock ID...~n', []),
+    % Get dock ID
+    (get_dict(assignedDock, D, DockId) ->
+        format(user_error, '[DEBUG] Found assignedDock: ~w~n', [DockId])
+    ;   (get_dict(dockId, D, DockId) ->
+            format(user_error, '[DEBUG] Found dockId: ~w~n', [DockId])
+        ;   (DockId = 'unknown_dock',
+             format(user_error, '[DEBUG] No dock ID, using default~n', []))
+        )
+    ),
+    
+    format(user_error, '[INFO] ✓ ASSERTING vessel ~w: ~w (Dock=~w, Arr=~w, Dep=~w, Unl=~w, Ld=~w)~n',
+           [IdAtom, VesselName, DockId, ArrivalHour, DepartureHour, UnloadTime, LoadTime]),
+    
+    % Assert the vessel
+    assertz(vessel(IdAtom, DockId, ArrivalHour, DepartureHour, UnloadTime, LoadTime)),
+    
+    format(user_error, '[INFO] ✓✓ VESSEL ASSERTED SUCCESSFULLY!~n', []).
 
 % Build JSON response from schedule data
 build_json_response(Date, TotalDelay, SeqTriplets, JsonResponse) :-
@@ -361,7 +424,17 @@ handle_heuristic_schedule(Request) :-
     ).
 
 get_heuristic_schedule(Request) :-
-    % Send CORS headers first
+    % Send CORS headers first - ALWAYS send these regardless of errors
+    catch(
+        get_heuristic_schedule_impl(Request),
+        Error,
+        (format(user_error, '[FATAL ERROR] Unhandled exception in get_heuristic_schedule: ~w~n', [Error]),
+         format('Content-type: application/json~n~n'),
+         format('{"error": "Internal server error", "details": "~w"}~n', [Error]))
+    ).
+
+get_heuristic_schedule_impl(Request) :-
+    % Send CORS headers
     format('Access-Control-Allow-Origin: *~n'),
     format('Access-Control-Allow-Methods: GET, OPTIONS~n'),
     format('Access-Control-Allow-Headers: Content-Type, Authorization~n'),
@@ -399,14 +472,15 @@ get_heuristic_schedule(Request) :-
 % Helper predicate to handle the actual heuristic scheduling logic
 heuristic_schedule_for_date(_Request, Date, DateStr, Format) :-
     % Fetch approved vessel visit notifications from MainApi
-    MainApiUrl = 'http://localhost:5000/api/VesselVisitNotifications/approved',
+    MainApiUrl = 'https://localhost:5001/api/VesselVisitNotifications/approved',
     format(user_error, '[INFO] Heuristic - Fetching approved notifications from: ~w~n', [MainApiUrl]),
     catch(
-        (http_get(MainApiUrl, JsonData, [json_object(dict)]),
+        (http_get(MainApiUrl, JsonData, [json_object(dict), cert_verify_hook(cert_accept_any)]),
          format(user_error, '[DEBUG] Heuristic - HTTP GET successful~n', [])),
         E,
         (format(user_error, '[ERROR] Heuristic - Failed to fetch notifications: ~w~n', [E]), 
-         format(user_error, '[ERROR] Make sure MainApi is running on port 5000~n', []),
+         format(user_error, '[ERROR] Make sure MainApi is running on port 5001 (HTTPS)~n', []),
+         format(user_error, '[ERROR] If authentication is required, the endpoint must allow anonymous access~n', []),
          JsonData = [])
     ),
 
@@ -419,9 +493,14 @@ heuristic_schedule_for_date(_Request, Date, DateStr, Format) :-
     retractall(vessel(_,_,_,_,_,_)),
     format(user_error, '[INFO] Heuristic - Cleared existing vessel facts~n', []),
 
-    % Assert notifications for the requested date (reuse same logic)
-    assert_notifications_for_date(JsonList, Date, 1, CountAsserted),
-    format(user_error, '[INFO] Heuristic - Asserted ~w vessel facts for date ~w~n', [CountAsserted, Date]),
+    % Iterate notifications and assert vessel facts only for the requested date (reuse same logic)
+    catch(
+        (assert_notifications_for_date(JsonList, Date, 1, CountAsserted),
+         format(user_error, '[INFO] Heuristic - Asserted ~w vessel facts for date ~w~n', [CountAsserted, Date])),
+        Error,
+        (format(user_error, '[ERROR] Heuristic - Failed during notification processing: ~w~n', [Error]),
+         CountAsserted = 0)
+    ),
 
     % If no vessels were asserted, return error message
     (   findall(V, vessel(V,_,_,_,_,_), Vs), Vs = []
