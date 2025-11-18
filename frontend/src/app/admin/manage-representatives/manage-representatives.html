@@ -175,7 +175,7 @@
             <input [(ngModel)]="repForm.phoneNumber"
                    name="phoneNumber"
                    required
-                   (blur)="validatePhone(repForm.phoneCountry.code, repForm.phoneNumber)">
+                   (blur)="validatePhone(repForm.phoneCountry.code, repForm.phoneNumber)" [maxLength]="9">
           </div>
           <div class="field-error" *ngIf="errors.phoneNumber">
             {{ errors.phoneNumber }}

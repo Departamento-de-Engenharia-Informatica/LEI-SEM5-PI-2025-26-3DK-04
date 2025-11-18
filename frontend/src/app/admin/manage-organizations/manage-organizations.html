@@ -106,7 +106,7 @@
                   </option>
                 </select>
 
-                <input [(ngModel)]="rep.phoneNumber" [name]="'repPhoneNumber' + i" required />
+                <input [(ngModel)]="rep.phoneNumber" [name]="'repPhoneNumber' + i" required  [maxLength]="9"/>
               </div>
 
               <div class="field-error" *ngIf="errors.reps[i]?.phoneNumber" style="color: red; margin-top:4px;">
