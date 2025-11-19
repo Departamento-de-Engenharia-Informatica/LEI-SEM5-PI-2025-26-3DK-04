@@ -73,62 +73,43 @@ export class DockView implements AfterViewInit, OnDestroy {
   // 2. NOVO MÉTODO PARA CARREGAR DADOS ASINCRONAMENTE
   private async loadPortStructure(): Promise<void> {
     try {
-      // Obter todas as Docas (Docks)
-      const docks = await this.adminService.getAllDocks().toPromise();
-      const numDocks = docks ? docks.length : 0;
-
-      // Obter todas as Áreas de Armazenamento (Storage Areas)
+      const docks = await firstValueFrom(this.adminService.getAllDocks());
       const storageAreas = await firstValueFrom(this.adminService.getAllStorageAreas());
-      console.log("StorageAreas recebidas:", storageAreas);
+      const resources = await firstValueFrom(this.adminService.getAllPhysicalResources());
 
-      // Inicializa contadores
-      let numYards = 0;
-      let numWarehouses = 0;
+      const yards = storageAreas.filter(a => a.storageAreaType === "Yard");
+      const warehouses = storageAreas.filter(a => a.storageAreaType === "Warehouse");
 
-
-      if (storageAreas) {
-        numYards = storageAreas.filter(area => area.storageAreaType === 'Yard').length;
-        numWarehouses = storageAreas.filter(area => area.storageAreaType === 'Warehouse').length;
-      }
-
-      console.log(`Pátios (Yard, Tipo 0) encontrados: ${numYards}`);
-      console.log(`Armazéns (Warehouse, Tipo 1) encontrados: ${numWarehouses}`);
-      // Criar a estrutura com base nos números obtidos
-      this.createPortStructure(numDocks, numYards, numWarehouses);
-
-      // Código para Gruas (Cranes) - Mantido à parte, mas pode ser integrado aqui
-      // Se precisar de criar gruas em função das docas, o código deve vir aqui
-      const dockOffsetZ = -75; // Valor de offset Z hardcoded anteriormente
-
-      // Exemplo de como as gruas (STS Cranes) estariam a ser criadas
-      // Se não for para mexer, mantenha o código original abaixo, senão crie um loop aqui
-      // Se as gruas estiverem 1:1 com as docas, use numDocks
-
-      /*
-      // AQUI PODE USAR UM LOOP, caso as gruas sejam 1:1 com as docas
-      for(let i = 0; i < numDocks; i++){
-          // ... lógica para posicionar gruas baseada na posição da Doca i
-      }
-      */
-
-      // O código original (hardcoded) para as gruas é mantido no final de createPortStructure
-
-    } catch (error) {
-      console.error('Erro ao carregar dados do porto:', error);
-      // Opcional: Chamar createPortStructure(0, 0, 0) para mostrar um porto vazio
-      this.createPortStructure(0, 0, 0);
+      const stsCranes = resources.filter(r => r.type === "STS_CRANE");
+      console.log(stsCranes);
+      const yardCranes = resources.filter(r => r.type === "YARD_CRANE");
+      console.log(yardCranes);
+      await this.createPortStructure(
+        docks,
+        yards,
+        warehouses,
+        stsCranes,
+        yardCranes
+      );
+    } catch (err) {
+      console.error("Erro ao carregar estruturas:", err);
     }
   }
 
-
   // 3. REFACTORIZAÇÃO DE createPortStructure
   // O método passa a receber o número de estruturas como argumento
-  private createPortStructure(numDocks: number, numYards: number, numWarehouses: number): void {
+  private async createPortStructure(
+    docks: any[],
+    yards: any[],
+    warehouses: any[],
+    stsCranes: any[],
+    yardCranes: any[]
+  ): Promise<void> {
 
     const port = PortBuilder.createPort(200, 150);
     this.scene.add(port);
 
-    // Variáveis de layout e dimensões padrão (Hardcoded)
+    // SETUP ----------------------------------------------------
     const DOCK_WIDTH = 30;
     const DOCK_DEPTH = 10;
     const DOCK_SPACING_X = 5;
@@ -137,121 +118,139 @@ export class DockView implements AfterViewInit, OnDestroy {
     const YARD_DEPTH = 40;
     const YARD_SPACING_X = 10;
 
-    const WAREHOUSE_WIDTH = 40;
-    const WAREHOUSE_DEPTH = 25;
-    const WAREHOUSE_SPACING_X = 10;
+    const WH_WIDTH = 40;
+    const WH_DEPTH = 25;
+    const WH_SPACING_X = 10;
 
-    // --- 1. ZONA DAS DOCAS (Z = -70) ---
+    // -----------------------------------------------------------
+    // 1) DOCKS
+    // -----------------------------------------------------------
 
+    const totalDockWidth = (DOCK_WIDTH + DOCK_SPACING_X) * docks.length - DOCK_SPACING_X;
+    let offsetX = -totalDockWidth / 2;
     const DOCK_Z = -70;
-    const DOCK_Y = 0.5;
 
-    // Cálculo da largura total das docas para centralização
-    const totalDockWidth = (DOCK_WIDTH + DOCK_SPACING_X) * numDocks - DOCK_SPACING_X;
-    let currentXOffset = -totalDockWidth / 2; // Ponto de partida X
+    docks.forEach((dock, i) => {
+      const x = offsetX + DOCK_WIDTH / 2;
 
-    for (let i = 0; i < numDocks; i++) {
-
-      const dockX = currentXOffset + DOCK_WIDTH / 2;
-
-      const dock = DockBuilder.createDock(
+      const dockGroup = DockBuilder.createDock(
         DOCK_WIDTH,
         DOCK_DEPTH,
-        new THREE.Vector3(dockX, DOCK_Y, DOCK_Z),
-        i + 1
+        new THREE.Vector3(x, 0, DOCK_Z),
+        dock.name
       );
-      this.scene.add(dock);
-      this.docks.push(dock);
 
-      currentXOffset += DOCK_WIDTH + DOCK_SPACING_X;
-    }
+      DockBuilder.builtDocks.set(dock.id, dockGroup);
+      this.scene.add(dockGroup);
+      this.docks.push(dockGroup);
 
+      offsetX += DOCK_WIDTH + DOCK_SPACING_X;
+    });
 
-    // --- 2. ZONA DOS PÁTIOS (Z = 30) ---
+    // -----------------------------------------------------------
+    // 2) YARDS
+    // -----------------------------------------------------------
 
+    const totalYardWidth = (YARD_WIDTH + YARD_SPACING_X) * yards.length - YARD_SPACING_X;
+    offsetX = -totalYardWidth / 2;
     const YARD_Z = 30;
 
-    // Novo ponto de partida X para os pátios (centralização)
-    const totalYardWidth = (YARD_WIDTH + YARD_SPACING_X) * numYards - YARD_SPACING_X;
-    currentXOffset = -totalYardWidth / 2;
+    yards.forEach((yard, i) => {
+      const x = offsetX + YARD_WIDTH / 2;
 
-    for (let i = 0; i < numYards; i++) {
-
-      const yardX = currentXOffset + YARD_WIDTH / 2;
-
-      const yard = YardBuilder.createYard(
+      const yardGroup = YardBuilder.createYard(
         YARD_WIDTH,
         YARD_DEPTH,
-        new THREE.Vector3(yardX, 0, YARD_Z),
-        i + 1
+        new THREE.Vector3(x, 0, YARD_Z),
+        yard.code
       );
-      this.scene.add(yard);
 
-      currentXOffset += YARD_WIDTH + YARD_SPACING_X;
-    }
+      this.scene.add(yardGroup);
+
+      // Guardar p/ depois criar Yard Cranes
+      const center = getYardCenter(yardGroup);
+      YardBuilder.lastBuiltYards.set(yard.id, {
+        group: yardGroup,
+        center,
+        width: YARD_WIDTH,
+        depth: YARD_DEPTH
+      });
 
 
-    // --- 3. ZONA DOS ARMAZÉNS (Z = 70) ---
+      offsetX += YARD_WIDTH + YARD_SPACING_X;
+    });
 
-    const WAREHOUSE_Z = 70;
+    // -----------------------------------------------------------
+    // 3) WAREHOUSES
+    // -----------------------------------------------------------
 
-    // Novo ponto de partida X para os armazéns (centralização)
-    const totalWarehouseWidth = (WAREHOUSE_WIDTH + WAREHOUSE_SPACING_X) * numWarehouses - WAREHOUSE_SPACING_X;
-    currentXOffset = -totalWarehouseWidth / 2;
+    const totalWhWidth = (WH_WIDTH + WH_SPACING_X) * warehouses.length - WH_SPACING_X;
+    offsetX = -totalWhWidth / 2;
+    const WH_Z = 70;
 
-    for (let i = 0; i < numWarehouses; i++) {
+    warehouses.forEach((wh, i) => {
+      const x = offsetX + WH_WIDTH / 2;
 
-      const warehouseX = currentXOffset + WAREHOUSE_WIDTH / 2;
-
-      const warehouse = WarehouseBuilder.createWarehouse(
-        WAREHOUSE_WIDTH,
-        WAREHOUSE_DEPTH,
-        new THREE.Vector3(warehouseX, 0, WAREHOUSE_Z),
-        i + 1
+      const whGroup = WarehouseBuilder.createWarehouse(
+        WH_WIDTH,
+        WH_DEPTH,
+        new THREE.Vector3(x, 0, WH_Z),
+        wh.id
       );
-      this.scene.add(warehouse);
 
-      currentXOffset += WAREHOUSE_WIDTH + WAREHOUSE_SPACING_X;
-    }
+      this.scene.add(whGroup);
 
-    // === STS Cranes (HARDCODED) ===
-    // Mantido o código original das gruas aqui, conforme pedido
-    const dockOffsetZ = -75;
+      offsetX += WH_WIDTH + WH_SPACING_X;
+    });
 
-    const crane1 = StsCraneBuilder.createCrane(
-      6, 25, 20,
-      new THREE.Vector3(-60, 0, dockOffsetZ + 10),
-      1
-    );
-    crane1.rotation.y = Math.PI / 2;
 
-    const crane2 = StsCraneBuilder.createCrane(
-      6, 25, 20,
-      new THREE.Vector3(0, 0, dockOffsetZ + 10),
-      2
-    );
-    crane2.rotation.y = Math.PI / 2;
+    // -----------------------------------------------------------
+    // 4) STS CRANES — agora baseadas diretamente nos docks
+    // -----------------------------------------------------------
 
-    const crane3 = StsCraneBuilder.createCrane(
-      6, 25, 20,
-      new THREE.Vector3(60, 0, dockOffsetZ + 10),
-      3
-    );
-    crane3.rotation.y = Math.PI / 2;
+    stsCranes.forEach(crane => {
+      const dock = DockBuilder.builtDocks.get(crane.assignedArea);
+      console.log(crane);
+      console.log(dock);
+      if (!dock) return;
 
-    this.scene.add(crane1, crane2, crane3);
+      const c = getDockCenter(dock);
 
-    const yardCrane = YardGantryCraneBuilder.createCrane(
-      YardBuilder.lastYardSize.width,   // largura real da yard (X) → influencia perna lateral, cabina se quiseres
-      YardBuilder.lastYardSize.depth,   // profundidade real da yard (Z) → comprimento do girder
-      18,                               // altura das pernas
-      YardBuilder.lastYardCenter,       // centro real da yard
-      1                                 // id da grua
-    );
+      //const dockTopY = getObjectTopY(dock);
+      const craneObj = StsCraneBuilder.createCrane(
+        6,
+        25,
+        20,
+        new THREE.Vector3(c.x, 0, c.z + (DOCK_DEPTH / 1.2)),
+        crane.id
+      );
 
-    this.scene.add(yardCrane);
+      craneObj.rotation.y = Math.PI / 2;
+      this.scene.add(craneObj);
+    });
 
+
+    // -----------------------------------------------------------
+    // 5) YARD CRANES — criadas com base nos yards já posicionados
+    // -----------------------------------------------------------
+
+    yardCranes.forEach(crane => {
+      const info = YardBuilder.lastBuiltYards.get(crane.assignedArea);
+      console.log(info);
+      if (!info) return;
+
+      const obj = YardGantryCraneBuilder.createCrane(
+        info.width,
+        info.depth,
+        18,
+        info.center,
+        crane.id
+      );
+
+      this.scene.add(obj);
+    });
   }
+
 
 
   private onCanvasClick(event: MouseEvent): void {
@@ -492,3 +491,14 @@ function getYardCenter(yard: THREE.Group): THREE.Vector3 {
   box.getCenter(center);
   return center;
 }
+function getDockCenter(dock: THREE.Group): THREE.Vector3 {
+  const box = new THREE.Box3().setFromObject(dock);
+  const center = new THREE.Vector3();
+  box.getCenter(center);
+  return center;
+}
+function getObjectTopY(object: THREE.Object3D): number {
+  const box = new THREE.Box3().setFromObject(object);
+  return box.max.y;
+}
+

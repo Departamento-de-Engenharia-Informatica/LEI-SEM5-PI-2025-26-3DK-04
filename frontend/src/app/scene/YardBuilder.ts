@@ -67,38 +67,53 @@ export class YardBuilder {
     group.name = `Yard_${id}`;
 
     // ---- Calcular centro da yard usando apenas rows e cols ----
-    const centerX = -width / 2 + (cols * spacing) / 2;
-    const centerZ = -depth / 2 + (rows * spacing) / 2;
-    YardBuilder.lastYardCenter = new THREE.Vector3(centerX, 0, centerZ).add(position);
-
+    //const centerX = -width / 2 + (cols * spacing) / 2;
+    //const centerZ = -depth / 2 + (rows * spacing) / 2;
+    //YardBuilder.lastYardCenter = new THREE.Vector3(centerX, 0, centerZ).add(position);
+    YardBuilder.lastYardCenter = position;
     // ---- Calcular tamanho real da yard (X = largura, Z = profundidade) ----
     YardBuilder.lastYardSize = { width: maxX - minX, depth: maxZ - minZ };
 
+    YardBuilder.lastBuiltYards.set(id, {
+      group: group,
+      center: YardBuilder.lastYardCenter.clone(),
+      width,
+      depth
+    });
+
     return group;
   }
+  static lastBuiltYards: Map<number, {
+    group: THREE.Group,
+    center: THREE.Vector3,
+    width: number,
+    depth: number
+  }> = new Map();
 
 
-/*
-static calculateCenter(yard: THREE.Group): THREE.Vector3 {
-  let minX = Infinity, maxX = -Infinity;
-  let minZ = Infinity, maxZ = -Infinity;
 
-  yard.children.forEach(obj => {
-    if (obj.name.startsWith('Container')) {
-      const worldPos = new THREE.Vector3();
-      obj.getWorldPosition(worldPos);
-      if (worldPos.x < minX) minX = worldPos.x;
-      if (worldPos.x > maxX) maxX = worldPos.x;
-      if (worldPos.z < minZ) minZ = worldPos.z;
-      if (worldPos.z > maxZ) maxZ = worldPos.z;
-    }
-  });
 
-  return new THREE.Vector3(
-    (minX + maxX) / 2,
-    0,
-    (minZ + maxZ) / 2
-  );
-}
-*/
+  /*
+  static calculateCenter(yard: THREE.Group): THREE.Vector3 {
+    let minX = Infinity, maxX = -Infinity;
+    let minZ = Infinity, maxZ = -Infinity;
+
+    yard.children.forEach(obj => {
+      if (obj.name.startsWith('Container')) {
+        const worldPos = new THREE.Vector3();
+        obj.getWorldPosition(worldPos);
+        if (worldPos.x < minX) minX = worldPos.x;
+        if (worldPos.x > maxX) maxX = worldPos.x;
+        if (worldPos.z < minZ) minZ = worldPos.z;
+        if (worldPos.z > maxZ) maxZ = worldPos.z;
+      }
+    });
+
+    return new THREE.Vector3(
+      (minX + maxX) / 2,
+      0,
+      (minZ + maxZ) / 2
+    );
+  }
+  */
 }
