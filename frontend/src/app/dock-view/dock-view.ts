@@ -96,8 +96,7 @@ export class DockView implements AfterViewInit, OnDestroy {
     }
   }
 
-  // 3. REFACTORIZAÇÃO DE createPortStructure
-  // O método passa a receber o número de estruturas como argumento
+  // 3. REFACTORIZAÇÃO: Correção do Espaço Vazio (Gap)
   private async createPortStructure(
     docks: any[],
     yards: any[],
@@ -106,151 +105,151 @@ export class DockView implements AfterViewInit, OnDestroy {
     yardCranes: any[]
   ): Promise<void> {
 
-    const port = PortBuilder.createPort(200, 150);
-    this.scene.add(port);
-
-    // SETUP ----------------------------------------------------
+    // --- CONFIGURAÇÕES ---
     const DOCK_WIDTH = 30;
     const DOCK_DEPTH = 10;
-    const DOCK_SPACING_X = 5;
+    const DOCK_GAP = 5;
 
     const YARD_WIDTH = 60;
     const YARD_DEPTH = 40;
-    const YARD_SPACING_X = 10;
 
     const WH_WIDTH = 40;
     const WH_DEPTH = 25;
-    const WH_SPACING_X = 10;
 
-    // -----------------------------------------------------------
-    // 1) DOCKS
-    // -----------------------------------------------------------
+    const COL_GAP = 15;
+    const ROW_GAP = 20;
+    const MARGIN_SIDE = 20;
+    const ROAD_FRONT = 40;
+    const ZONE_GAP = 40;
 
-    const totalDockWidth = (DOCK_WIDTH + DOCK_SPACING_X) * docks.length - DOCK_SPACING_X;
-    let offsetX = -totalDockWidth / 2;
-    const DOCK_Z = -70;
+    const numWH = warehouses.length;
+    const numYD = yards.length;
+
+    const colsWH = numWH > 0 ? Math.round(Math.sqrt(numWH)) : 0;
+    const colsYD = numYD > 0 ? Math.round(Math.sqrt(numYD)) : 0;
+
+    const finalColsWH = (numWH > 0 && colsWH === 0) ? 1 : colsWH;
+    const finalColsYD = (numYD > 0 && colsYD === 0) ? 1 : colsYD;
+
+    const widthBlockWH = finalColsWH > 0 ? finalColsWH * (WH_WIDTH + COL_GAP) - COL_GAP : 0;
+    const widthBlockYD = finalColsYD > 0 ? finalColsYD * (YARD_WIDTH + COL_GAP) - COL_GAP : 0;
+
+    let buildingsTotalWidth = widthBlockWH + widthBlockYD;
+    if (numWH > 0 && numYD > 0) {
+      buildingsTotalWidth += ZONE_GAP;
+    }
+
+    const docksTotalWidth = docks.length * (DOCK_WIDTH + DOCK_GAP) - DOCK_GAP;
+
+    let portWidth = Math.max(docksTotalWidth, buildingsTotalWidth) + (MARGIN_SIDE * 2);
+    portWidth = Math.ceil(portWidth / 10) * 10;
+
+    const rowsWH = finalColsWH > 0 ? Math.ceil(numWH / finalColsWH) : 0;
+    const rowsYD = finalColsYD > 0 ? Math.ceil(numYD / finalColsYD) : 0;
+
+    const depthBlockWH = rowsWH > 0 ? rowsWH * (WH_DEPTH + ROW_GAP) - ROW_GAP : 0;
+    const depthBlockYD = rowsYD > 0 ? rowsYD * (YARD_DEPTH + ROW_GAP) - ROW_GAP : 0;
+
+    let maxBuildingDepth = Math.max(depthBlockWH, depthBlockYD);
+    let physicalDepth = ROAD_FRONT + maxBuildingDepth + MARGIN_SIDE;
+
+    let squaredDepth = portWidth * 0.6;
+
+    let portDepth = Math.max(physicalDepth, squaredDepth);
+
+    portDepth = Math.max(portDepth, 140);
+
+    portDepth = Math.ceil(portDepth / 10) * 10;
+
+    console.log(`Layout: ${finalColsWH} cols WH | ${finalColsYD} cols YD`);
+    console.log(`Port Size: ${portWidth}x${portDepth}`);
+
+    const port = PortBuilder.createPort(portWidth, portDepth);
+    port.position.set(0, 0, portDepth / 2);
+    this.scene.add(port);
+
+    const startDocksX = -((docks.length * (DOCK_WIDTH + DOCK_GAP)) - DOCK_GAP) / 2 + (DOCK_WIDTH/2);
 
     docks.forEach((dock, i) => {
-      const x = offsetX + DOCK_WIDTH / 2;
-
+      const x = startDocksX + (i * (DOCK_WIDTH + DOCK_GAP));
       const dockGroup = DockBuilder.createDock(
-        DOCK_WIDTH,
-        DOCK_DEPTH,
-        new THREE.Vector3(x, 0, DOCK_Z),
+        DOCK_WIDTH, DOCK_DEPTH,
+        new THREE.Vector3(x, 0, -(DOCK_DEPTH / 2)),
         dock.name
       );
-
       DockBuilder.builtDocks.set(dock.id, dockGroup);
       this.scene.add(dockGroup);
       this.docks.push(dockGroup);
-
-      offsetX += DOCK_WIDTH + DOCK_SPACING_X;
     });
 
-    // -----------------------------------------------------------
-    // 2) YARDS
-    // -----------------------------------------------------------
+    const backLimitZ = portDepth - MARGIN_SIDE;
+    const totalContentWidth = buildingsTotalWidth;
+    let currentX = -(totalContentWidth / 2);
 
-    const totalYardWidth = (YARD_WIDTH + YARD_SPACING_X) * yards.length - YARD_SPACING_X;
-    offsetX = -totalYardWidth / 2;
-    const YARD_Z = 30;
+    if (numWH > 0) {
+      const startZ_WH = backLimitZ - depthBlockWH + (WH_DEPTH / 2);
+      let whCursorX = currentX + (WH_WIDTH / 2);
 
-    yards.forEach((yard, i) => {
-      const x = offsetX + YARD_WIDTH / 2;
+      warehouses.forEach((wh, index) => {
+        const colIndex = index % finalColsWH;
+        const rowIndex = Math.floor(index / finalColsWH);
 
-      const yardGroup = YardBuilder.createYard(
-        YARD_WIDTH,
-        YARD_DEPTH,
-        new THREE.Vector3(x, 0, YARD_Z),
-        yard.code
-      );
+        const x = whCursorX + (colIndex * (WH_WIDTH + COL_GAP));
+        const z = startZ_WH + (rowIndex * (WH_DEPTH + ROW_GAP));
 
-      this.scene.add(yardGroup);
-
-      // Guardar p/ depois criar Yard Cranes
-      const center = getYardCenter(yardGroup);
-      YardBuilder.lastBuiltYards.set(yard.id, {
-        group: yardGroup,
-        center,
-        width: YARD_WIDTH,
-        depth: YARD_DEPTH
+        const whGroup = WarehouseBuilder.createWarehouse(
+          WH_WIDTH, WH_DEPTH,
+          new THREE.Vector3(x, 0, z),
+          wh.id
+        );
+        this.scene.add(whGroup);
       });
 
+      currentX += widthBlockWH + ZONE_GAP;
+    }
 
-      offsetX += YARD_WIDTH + YARD_SPACING_X;
-    });
+    if (numYD > 0) {
+      const startZ_YD = backLimitZ - depthBlockYD + (YARD_DEPTH / 2);
+      let ydCursorX = currentX + (YARD_WIDTH / 2);
 
-    // -----------------------------------------------------------
-    // 3) WAREHOUSES
-    // -----------------------------------------------------------
+      yards.forEach((yd, index) => {
+        const colIndex = index % finalColsYD;
+        const rowIndex = Math.floor(index / finalColsYD);
 
-    const totalWhWidth = (WH_WIDTH + WH_SPACING_X) * warehouses.length - WH_SPACING_X;
-    offsetX = -totalWhWidth / 2;
-    const WH_Z = 70;
+        const x = ydCursorX + (colIndex * (YARD_WIDTH + COL_GAP));
+        const z = startZ_YD + (rowIndex * (YARD_DEPTH + ROW_GAP));
 
-    warehouses.forEach((wh, i) => {
-      const x = offsetX + WH_WIDTH / 2;
+        const yardGroup = YardBuilder.createYard(
+          YARD_WIDTH, YARD_DEPTH,
+          new THREE.Vector3(x, 0, z),
+          yd.code
+        );
+        this.scene.add(yardGroup);
 
-      const whGroup = WarehouseBuilder.createWarehouse(
-        WH_WIDTH,
-        WH_DEPTH,
-        new THREE.Vector3(x, 0, WH_Z),
-        wh.id
-      );
-
-      this.scene.add(whGroup);
-
-      offsetX += WH_WIDTH + WH_SPACING_X;
-    });
-
-
-    // -----------------------------------------------------------
-    // 4) STS CRANES — agora baseadas diretamente nos docks
-    // -----------------------------------------------------------
+        YardBuilder.lastBuiltYards.set(yd.id, {
+          group: yardGroup,
+          center: getYardCenter(yardGroup),
+          width: YARD_WIDTH, depth: YARD_DEPTH
+        });
+      });
+    }
 
     stsCranes.forEach(crane => {
       const dock = DockBuilder.builtDocks.get(crane.assignedArea);
-      console.log(crane);
-      console.log(dock);
       if (!dock) return;
-
       const c = getDockCenter(dock);
-
-      //const dockTopY = getObjectTopY(dock);
-      const craneObj = StsCraneBuilder.createCrane(
-        6,
-        25,
-        20,
-        new THREE.Vector3(c.x, 0, c.z + (DOCK_DEPTH / 1.2)),
-        crane.id
-      );
-
+      const craneObj = StsCraneBuilder.createCrane(6, 25, 20, new THREE.Vector3(c.x, 0, 6), crane.id);
       craneObj.rotation.y = Math.PI / 2;
       this.scene.add(craneObj);
     });
 
-
-    // -----------------------------------------------------------
-    // 5) YARD CRANES — criadas com base nos yards já posicionados
-    // -----------------------------------------------------------
-
     yardCranes.forEach(crane => {
       const info = YardBuilder.lastBuiltYards.get(crane.assignedArea);
-      console.log(info);
       if (!info) return;
-
-      const obj = YardGantryCraneBuilder.createCrane(
-        info.width,
-        info.depth,
-        18,
-        info.center,
-        crane.id
-      );
-
+      const obj = YardGantryCraneBuilder.createCrane(info.width, info.depth, 18, info.center, crane.id);
       this.scene.add(obj);
     });
   }
-
 
 
   private onCanvasClick(event: MouseEvent): void {
