@@ -84,6 +84,9 @@ export class DockBuilder {
 
     group.name = `Dock_${id}`;
 
+    DockBuilder.builtDocks.set(id, group);
+
     return group;
   }
+  static builtDocks: Map<number, THREE.Group> = new Map();
 }
