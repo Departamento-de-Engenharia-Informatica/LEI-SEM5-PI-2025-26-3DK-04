@@ -12,6 +12,7 @@ import { YardGantryCraneBuilder, YardCraneType } from '../scene/YardGantryCraneB
 // import { ContainerBuilder } from '../scene/ContainerBuilder'; // Não é usado diretamente aqui
 import { StsCraneBuilder } from '../scene/StsCraneBuilder'; // Não é usado diretamente aqui
 import { StorageAreaBuilder, StorageAreaType } from '../scene/StorageAreaBuilder'; // Importado mas não usado diretamente, mantido por segurança
+import { VesselBuilder } from '../scene/VesselBuilder';
 
 @Component({
   selector: 'app-dock-view',
@@ -84,12 +85,25 @@ export class DockView implements AfterViewInit, OnDestroy {
       console.log(stsCranes);
       const yardCranes = resources.filter(r => r.type === "YARD_CRANE");
       console.log(yardCranes);
+
+      const approvedVesselvisits = await firstValueFrom(this.adminService.getApprovedVesselVisitNotifications());
+      console.log(approvedVesselvisits);
+
+      const vessels = await firstValueFrom(this.adminService.getVessels());
+      console.log(vessels);
+
+      const vesselTypes = await firstValueFrom(this.adminService.getVesselTypes());
+      console.log(vesselTypes);
+
       await this.createPortStructure(
         docks,
         yards,
         warehouses,
         stsCranes,
-        yardCranes
+        yardCranes,
+        approvedVesselvisits,
+        vessels,
+        vesselTypes
       );
     } catch (err) {
       console.error("Erro ao carregar estruturas:", err);
@@ -102,7 +116,10 @@ export class DockView implements AfterViewInit, OnDestroy {
     yards: any[],
     warehouses: any[],
     stsCranes: any[],
-    yardCranes: any[]
+    yardCranes: any[],
+    approvedVesselVisits: any[],
+    vessels: any[],
+    vesselTypes: any[]
   ): Promise<void> {
 
     // --- CONFIGURAÇÕES ---
@@ -249,6 +266,42 @@ export class DockView implements AfterViewInit, OnDestroy {
       const obj = YardGantryCraneBuilder.createCrane(info.width, info.depth, 18, info.center, crane.id);
       this.scene.add(obj);
     });
+    //const vesselVisits = await firstValueFrom(this.adminService.getAllVesselVisitNotifications());
+    //console.log(vesselVisits);
+    //const approvedVisits = vesselVisits.filter(v => v.status === 'Approved');
+
+    approvedVesselVisits.forEach(visit => {
+      // Encontrar o dock pelo id
+      const dockInfo = docks.find(d => d.id === visit.assignedDock);
+      if (!dockInfo) return;
+
+      const dock = DockBuilder.builtDocks.get(dockInfo.name);
+      if (!dock) return;
+
+      const dockCenter = getDockCenter(dock);
+      // Encontrar o vessel pelo vesselId
+      const vesselData = vessels.find(v => v.id === visit.vesselId);
+      if (!vesselData) return;
+
+      const vesselTypeData = vesselTypes.find(vt => vt.id === vesselData.vesselTypeId);
+      if (!vesselTypeData) return;
+
+      // posição do vessel ao lado do dock
+      const vesselPosition = dockCenter.clone();
+      vesselPosition.z -= (DOCK_DEPTH * 2) ; // à frente do dock
+      vesselPosition.y = 0; // ao nível da água
+
+      const vessel = VesselBuilder.createVessel({
+        maxRows: vesselTypeData.maxRows,
+        maxTiers: vesselTypeData.maxTiers,
+        maxBays: vesselTypeData.maxBays,
+        vesselId: visit.vesselId,
+        position: vesselPosition
+      });
+
+      this.scene.add(vessel);
+    });
+
   }
 
 
