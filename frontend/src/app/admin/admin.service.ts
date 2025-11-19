@@ -113,6 +113,14 @@ export class AdminService {
     return this.http.patch(`${this.storageAreaBaseUrl}${id}/inactivate`, {});
   }
 
+  getAllYards(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.storageAreaBaseUrl}/yard`);
+  }
+
+  // NOVO MÉTODO: Obter apenas Armazéns (Warehouses)
+  getAllWarehouses(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.storageAreaBaseUrl}/warehouse`);
+  }
   /* ===============================
         STAFF MEMBERS MANAGEMENT
   =============================== */

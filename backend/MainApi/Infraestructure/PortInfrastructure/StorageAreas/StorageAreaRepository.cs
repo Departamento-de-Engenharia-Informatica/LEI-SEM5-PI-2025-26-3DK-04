@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using DDDNetCore.Domain.PortInfrastructure.StorageArea;
 using DDDSample1.Domain.Docks;
 using Microsoft.EntityFrameworkCore;
 using DDDSample1.Domain.PortInfrastructure.StorageArea;
@@ -22,6 +24,15 @@ namespace DDDSample1.Infrastructure.StorageAreas
             return await _objs
                 .Include(sa => sa.DockAssignments) // Include assignments if needed when fetching by code
                 .FirstOrDefaultAsync(sa => sa.Code == code);
+        }
+
+        public async Task<List<StorageArea>> GetByStorageTypeAsync(StorageAreaType storageType)
+        {
+            // Usar o DbSet para filtrar as StorageAreas onde o campo StorageAreaType 
+            // corresponde ao valor passado, e converter para lista.
+            return await _context.StorageAreas
+                .Where(sa => sa.StorageAreaType == storageType)
+                .ToListAsync();
         }
 
         public async Task<List<StorageArea>> GetAllAsync()

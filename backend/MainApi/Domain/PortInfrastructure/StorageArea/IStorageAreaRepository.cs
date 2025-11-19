@@ -1,6 +1,7 @@
 ﻿using DDDSample1.Domain.Shared;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DDDNetCore.Domain.PortInfrastructure.StorageArea;
 using DDDSample1.Domain.Docks;
 
 namespace DDDSample1.Domain.PortInfrastructure.StorageArea
@@ -13,5 +14,6 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
         Task<StorageArea> UpdateAsync(StorageArea area);
         void Remove(StorageArea area);
         Task<StorageArea?> GetByCodeAsync(string code);
+        Task<List<StorageArea>> GetByStorageTypeAsync(StorageAreaType storageType);
     }
 }

@@ -48,6 +48,11 @@ namespace DDDNetCore.Tests.Application
             public Task<StorageArea?> GetByCodeAsync(string code) =>
                 Task.FromResult(_items.FirstOrDefault(sa => sa.Code == code && sa.Active));
 
+            public Task<List<StorageArea>> GetByStorageTypeAsync(StorageAreaType storageType)
+            {
+                throw new NotImplementedException();
+            }
+
             public Task<StorageArea> GetByIdAsync(StorageAreaID id) =>
                 Task.FromResult(_items.FirstOrDefault(sa => sa.Id.Equals(id) && sa.Active));
         }

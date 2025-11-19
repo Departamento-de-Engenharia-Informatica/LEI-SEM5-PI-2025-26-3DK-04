@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DDDNetCore.Domain.PortInfrastructure.StorageArea;
 using DDDNetCore.Domain.PortInfrastructure.StorageArea.DTOs;
 // Using the correct DTO namespaces based on your provided files
 using DDDNetCore.Infraestructure.PortInfrastructure.DTOs; // For StorageAreaDto, DockAssignmentDto
@@ -43,6 +44,33 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
             }
             return dtoList;
         }
+        
+        public async Task<List<StorageAreaDto>> GetAllYardsAsync()
+        {
+            // 1. Chamar o repositório para obter apenas os YARDS (StorageAreaType.Yard é 0)
+            var yardAreas = await _repo.GetByStorageTypeAsync(StorageAreaType.Yard);
+            
+            var dtoList = new List<StorageAreaDto>();
+            foreach (var sa in yardAreas)
+            {
+                dtoList.Add(await ToDto(sa));
+            }
+
+            return dtoList;
+        }
+        
+        public async Task<List<StorageAreaDto>> GetAllWarehousesAsync()
+        {
+            // 1. Chamar o repositório para obter apenas os WAREHOUSES (StorageAreaType.Warehouse é 1)
+            var warehouseAreas = await _repo.GetByStorageTypeAsync(StorageAreaType.Warehouse);
+            var dtoList = new List<StorageAreaDto>();
+            foreach (var sa in warehouseAreas)
+            {
+                dtoList.Add(await ToDto(sa));
+            }
+
+            return dtoList;;
+        }
 
         // --- Get By ID (Active) ---
         public async Task<StorageAreaDto?> GetByIdAsync(StorageAreaID id)
@@ -55,6 +83,7 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
             }
             return await ToDto(area); // Use await with async ToDto
         }
+        
 
         // --- Add New Storage Area (using CreateStorageAreaDto) ---
         public async Task<StorageAreaDto> AddAsync(CreateStorageAreaDto dto) // Changed from RegisterAsync and uses Create DTO

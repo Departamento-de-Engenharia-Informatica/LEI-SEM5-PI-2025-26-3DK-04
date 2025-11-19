@@ -77,18 +77,6 @@ export class DockBuilder {
       group.add(ring);
     }
 
-    // -------------------------------------------------------
-    //                 ESCADA LATERAL
-    // -------------------------------------------------------
-    const stepGeom = new THREE.BoxGeometry(0.4, 0.15, 0.25);
-    const stepMat = new THREE.MeshStandardMaterial({ color: 0xbababa });
-
-    const stepCount = 6;
-    for (let i = 0; i < stepCount; i++) {
-      const step = new THREE.Mesh(stepGeom, stepMat);
-      step.position.set(width / 2 + 0.3, baseHeight - 0.2 - i * 0.6, depth / 4);
-      group.add(step);
-    }
 
     // ------ POSICIONAR ------
     group.position.copy(position);

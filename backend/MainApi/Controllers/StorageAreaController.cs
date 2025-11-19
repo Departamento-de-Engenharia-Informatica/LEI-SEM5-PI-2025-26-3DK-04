@@ -168,6 +168,21 @@ namespace DDDSample1.Controllers // Your controller namespace
                  return BadRequest(new { Message = ex.Message });
             }
         }
+        
+        [HttpGet("yard")] 
+        [AuthorizeRole(Roles.Admin)]
+        public async Task<ActionResult<IEnumerable<StorageAreaDto>>> GetAllYard()
+        {
+          
+            return await _service.GetAllYardsAsync();
+        }
+        [HttpGet("warehouse")] // Specify GUID constraint
+        [AuthorizeRole(Roles.Admin)]
+        public async Task<ActionResult<IEnumerable<StorageAreaDto>>> GetAllWarehouse()
+        {
+           
+            return await _service.GetAllWarehousesAsync();
+        }
 
         // Optional: Hard Delete (use cautiously)
         // [HttpDelete("{id:guid}")]
