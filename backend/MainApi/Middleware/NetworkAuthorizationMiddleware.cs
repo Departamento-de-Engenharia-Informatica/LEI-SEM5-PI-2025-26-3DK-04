@@ -31,14 +31,6 @@ namespace DDDNetCore.Middleware
         {
             var remoteIp = context.Connection.RemoteIpAddress;
 
-            // Skip check for development environment
-            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-            if (environment == "Development")
-            {
-                await _next(context);
-                return;
-            }
-
             // Check if IP is allowed
             if (!IsIpAllowed(remoteIp))
             {
