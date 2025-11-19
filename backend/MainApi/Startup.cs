@@ -28,6 +28,7 @@ using DDDSample1.Infrastructure.Organizations;
 using DDDSample1.Infrastructure.PhysicalResources;
 using DDDSample1.Infrastructure.StorageAreas;
 using DDDSample1.Infrastructure.Authentication;
+using DDDNetCore.Middleware;
 
 namespace DDDSample1
 {
@@ -114,6 +115,9 @@ namespace DDDSample1
             app.UseCors();
 
             app.UseRouting();
+
+            // Network authorization middleware - must be before authentication
+            app.UseMiddleware<NetworkAuthorizationMiddleware>();
 
             // Não é necessário middleware JWT
             // app.UseAuthentication(); 

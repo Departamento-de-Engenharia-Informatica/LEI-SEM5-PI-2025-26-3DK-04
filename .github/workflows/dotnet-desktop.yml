@@ -23,7 +23,7 @@ on:
 
 env:
   SSH_HOST: vsgate-ssh.dei.isep.ipp.pt
-  SSH_PORT: 10592
+  SSH_PORT: 11019
   DEPLOY_PATH: /root/mainapi
   DOTNET_VERSION: '8.0.x'
 
