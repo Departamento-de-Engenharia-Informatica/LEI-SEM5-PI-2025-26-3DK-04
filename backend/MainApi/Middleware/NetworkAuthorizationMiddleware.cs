@@ -13,9 +13,9 @@ namespace DDDNetCore.Middleware
         private readonly ILogger<NetworkAuthorizationMiddleware> _logger;
         private static readonly string[] AllowedNetworks = new[]
         {
-            // "10.0.0.0/8",           // DEI VPN
-            // "127.0.0.0/8",          // Localhost
-            "192.168.0.0/16",       // FOR TESTING - block everything
+            "10.0.0.0/8",           // DEI VPN
+            "127.0.0.0/8",          // Localhost
+            // "192.168.0.0/16",       // FOR TESTING - block everything
             "::1",                  // IPv6 localhost
         };
 
