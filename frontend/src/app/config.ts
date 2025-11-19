@@ -11,7 +11,7 @@ export const CONFIG = {
   frontendUrl: 'http://localhost:4200',
 
   // 🌐 DEI SERVER - Uncomment these instead:
-  apiUrl: 'http://vs592.dei.isep.ipp.pt:5000/api',
-  // authUrl: 'http://vs592.dei.isep.ipp.pt:5000/auth',
-  // frontendUrl: 'http://vs592.dei.isep.ipp.pt:4200',
+  apiUrl: 'http://vs1019.dei.isep.ipp.pt:5000/api',
+  // authUrl: 'http://vs1019.dei.isep.ipp.pt:5000/auth',
+  // frontendUrl: 'http://vs1019.dei.isep.ipp.pt:4200',
 };
