@@ -1,0 +1,125 @@
+@startuml SD_US3.2.6
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+title System Sequence Diagram - US 3.2.6: First Access via Activation Link
+
+autonumber
+
+actor "System User" as User
+participant "Browser" as Browser
+participant "UserManagementController" as Controller
+participant "UserService" as UserService
+participant "UserActivationRepository" as ActivationRepo
+participant "UserActivation" as Activation
+participant "UserRepository" as UserRepo
+participant "User" as UserEntity
+participant "ActivationSuccess" as Frontend
+database "Database" as DB
+
+== User Clicks Activation Link ==
+
+User -> Browser : Click activation link in email\n(https://localhost:5001/api/UserManagement/activate?token={token})
+activate Browser
+
+Browser -> Controller : GET /api/UserManagement/activate?token={token}
+activate Controller
+
+Controller -> UserService : ActivateUserAsync(token)
+activate UserService
+
+UserService -> ActivationRepo : GetByTokenAsync(token)
+activate ActivationRepo
+ActivationRepo -> DB : SELECT * FROM UserActivations WHERE Token = {token}
+ActivationRepo --> UserService : UserActivation or null
+deactivate ActivationRepo
+
+alt Token not found or expired
+    UserService -> Activation : IsValid(token)
+    activate Activation
+    alt activation == null
+        Activation --> UserService : false (token not found)
+    else DateTime.UtcNow > ExpiresAt
+        Activation --> UserService : false (token expired)
+    end
+    deactivate Activation
+    
+    UserService --> Controller : "http://localhost:4200/activate?status=error"
+    deactivate UserService
+    Controller -> Browser : Redirect(errorUrl)
+    deactivate Controller
+    
+    Browser -> Frontend : Navigate to /activate?status=error
+    activate Frontend
+    Frontend -> Frontend : Read query param status=error
+    Frontend -> Frontend : Set message = translate('activation.errorMessage')
+    Frontend -> User : Display error message\n"The activation link is invalid or has expired"
+    deactivate Frontend
+    
+else Token is valid
+    UserService -> Activation : IsValid(token)
+    activate Activation
+    Activation -> Activation : Check Token == token && DateTime.UtcNow <= ExpiresAt
+    Activation --> UserService : true
+    deactivate Activation
+    
+    UserService -> UserRepo : GetByIdAsync(activation.UserId)
+    activate UserRepo
+    UserRepo -> DB : SELECT * FROM Users WHERE Id = {userId}
+    UserRepo --> UserService : User or null
+    deactivate UserRepo
+    
+    alt User not found
+        UserService --> Controller : "http://localhost:4200/activate?status=error"
+        deactivate UserService
+        Controller -> Browser : Redirect(errorUrl)
+        deactivate Controller
+        
+        Browser -> Frontend : Navigate to /activate?status=error
+        activate Frontend
+        Frontend -> Frontend : Read query param status=error
+        Frontend -> Frontend : Set message = translate('activation.errorMessage')
+        Frontend -> User : Display error message\n"The activation link is invalid or has expired"
+        deactivate Frontend
+        
+    else User found - Complete activation
+        UserService -> UserEntity : Activate()
+        activate UserEntity
+        UserEntity -> UserEntity : Set Status = Status.Active
+        UserEntity --> UserService : OK
+        deactivate UserEntity
+        
+        UserService -> UserRepo : UpdateAsync(user)
+        activate UserRepo
+        UserRepo -> DB : UPDATE Users SET Status = 'Active' WHERE Id = {userId}
+        UserRepo --> UserService : OK
+        deactivate UserRepo
+        
+        UserService -> ActivationRepo : DeleteAsync(activation)
+        activate ActivationRepo
+        ActivationRepo -> DB : DELETE FROM UserActivations WHERE Token = {token}
+        ActivationRepo --> UserService : OK
+        deactivate ActivationRepo
+        
+        UserService -> DB : CommitAsync()
+        UserService --> Controller : "http://localhost:4200/activate?status=success"
+        deactivate UserService
+        
+        Controller -> Browser : Redirect(successUrl)
+        deactivate Controller
+        
+        Browser -> Frontend : Navigate to /activate?status=success
+        activate Frontend
+        Frontend -> Frontend : Read query param status=success
+        Frontend -> Frontend : Set message = translate('activation.successMessage')
+        Frontend -> User : Display success message\n"Your account has been activated successfully"
+        User -> Frontend : Click "Back to Home" button
+        Frontend -> Browser : Navigate to /
+        deactivate Frontend
+    end
+end
+
+deactivate Browser
+
+@enduml

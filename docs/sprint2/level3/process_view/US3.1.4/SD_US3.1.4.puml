@@ -1,0 +1,233 @@
+@startuml US3.1.4_FeedbackMechanisms
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+title System Sequence Diagram - US 3.1.4: User Feedback Mechanisms
+
+autonumber
+
+actor "System User" as User
+participant "SPA (Frontend)" as Frontend
+participant "ManageUsers" as ManageUsers
+participant "AdminService" as AdminService
+participant "UserManagementController" as UserController
+participant "UserService" as UserService
+participant "UserRepository" as UserRepo
+
+== Save Operation with Loading Indicator and Validation ==
+
+activate User
+User -> Frontend: Fills form and clicks "Save"
+activate Frontend
+
+Frontend -> ManageUsers: saveUser()
+activate ManageUsers
+
+ManageUsers -> ManageUsers: Set isSaving = true
+
+ManageUsers -> ManageUsers: Validate form fields
+
+alt Validation fails (client-side)
+    ManageUsers -> ManageUsers: Set errors object\n(e.g., errors.email = "Invalid format")
+    
+    ManageUsers -> ManageUsers: Set isSaving = false
+    ManageUsers -> Frontend: Update view with validation errors
+    Frontend --> User: Displays validation errors\nnear input fields
+    deactivate ManageUsers
+    deactivate Frontend
+else Validation passes
+    ManageUsers -> AdminService: updateUserRole(email, role)
+    activate AdminService
+    
+    AdminService -> UserController: PUT /api/UserManagement/{email}/role\n(Authorization: Bearer token)
+    activate UserController
+    
+    UserController -> UserController: Verify authorization\n(AuthorizeRoleAttribute)
+    
+    UserController -> UserService: UpdateRoleAsync(email, dto)
+    activate UserService
+    
+    UserService -> UserRepo: GetByIdAsync(email)
+    activate UserRepo
+    UserRepo --> UserService: User
+    deactivate UserRepo
+    
+    alt User not found
+        UserService --> UserController: (Success: false, Error: "User not found")
+        deactivate UserService
+        
+        UserController --> AdminService: 400 Bad Request\n{ error: "User not found" }
+        deactivate UserController
+        
+        AdminService --> ManageUsers: Observable error
+        deactivate AdminService
+        
+        ManageUsers -> ManageUsers: Set messageError\n= "Error updating user: User not found"
+        ManageUsers -> ManageUsers: Set isSaving = false
+        ManageUsers -> ManageUsers: displayMessage(messageError)
+        
+        ManageUsers -> Frontend: Update view
+        Frontend --> User: Displays error alert
+        deactivate ManageUsers
+        deactivate Frontend
+    else Network failure or server error
+        UserController --> AdminService: 500 Internal Server Error\n{ error: "Database connection failed" }
+        deactivate UserController
+        
+        AdminService --> ManageUsers: Observable error\n(HTTP error response)
+        deactivate AdminService
+        
+        ManageUsers -> ManageUsers: Catch error in subscribe callback
+        ManageUsers -> ManageUsers: Set messageError = "Error updating user:\nDatabase connection failed"
+        ManageUsers -> ManageUsers: Set isSaving = false
+        ManageUsers -> ManageUsers: displayMessage(messageError)
+        
+        ManageUsers -> Frontend: Update view
+        Frontend --> User: Displays error alert\nwith user-friendly message
+        deactivate ManageUsers
+        deactivate Frontend
+    else User found - Success
+        UserService -> UserService: user.SetRole(newRole)\nuser.SetStatus(Inactive)
+        
+        UserService -> UserRepo: UpdateAsync(user)
+        activate UserRepo
+        UserRepo --> UserService: Updated
+        deactivate UserRepo
+        
+        UserService -> UserService: Create activation token\nSend activation email
+        
+        UserService --> UserController: (Success: true)
+        deactivate UserService
+        
+        UserController --> AdminService: 200 OK\n{ message: "Role updated successfully" }
+        deactivate UserController
+        
+        AdminService --> ManageUsers: Observable success
+        deactivate AdminService
+        
+        ManageUsers -> ManageUsers: Set messageSuccess\n= "User role updated successfully"
+        ManageUsers -> ManageUsers: displayMessage(messageSuccess)
+        
+        ManageUsers -> ManageUsers: resetForm()
+        ManageUsers -> ManageUsers: loadUsers()
+        ManageUsers -> ManageUsers: Set isSaving = false
+        
+        ManageUsers -> Frontend: Update view with fresh data
+        Frontend --> User: Displays success message\nand refreshed user list
+        deactivate ManageUsers
+        deactivate Frontend
+    end
+end
+
+== Asynchronous Validation with Real-time Feedback ==
+
+User -> Frontend: Types email address in form
+activate Frontend
+
+Frontend -> ManageUsers: validateEmail(email)
+activate ManageUsers
+
+ManageUsers -> ManageUsers: Check email format\n(must end with @gmail.com)
+
+alt Invalid email format
+    ManageUsers -> ManageUsers: Set errors.email\n= "Email must be @gmail.com"
+    ManageUsers -> Frontend: Update view
+    Frontend --> User: Shows error message\nnear email field (red text)
+    deactivate ManageUsers
+    deactivate Frontend
+else Valid format
+    ManageUsers -> AdminService: checkUser(email)
+    activate AdminService
+    
+    AdminService -> UserController: GET /api/UserManagement/check?email={email}\n(Authorization: Bearer token)
+    activate UserController
+    
+    UserController -> UserService: CheckUserExistsAsync(email)
+    activate UserService
+    
+    UserService -> UserRepo: GetByIdAsync(email)
+    activate UserRepo
+    UserRepo --> UserService: User (or null)
+    deactivate UserRepo
+    
+    UserService --> UserController: (Exists: bool, IsValid: bool)
+    deactivate UserService
+    
+    alt User already exists
+        UserController --> AdminService: 200 OK\n{ exists: true }
+        deactivate UserController
+        
+        AdminService --> ManageUsers: Observable success
+        deactivate AdminService
+        
+        ManageUsers -> ManageUsers: Set errors.email\n= "Email already exists"
+        ManageUsers -> Frontend: Update view
+        Frontend --> User: Shows error message\nnear email field
+        deactivate ManageUsers
+        deactivate Frontend
+    else User does not exist
+        UserController --> AdminService: 200 OK\n{ exists: false }
+        deactivate UserController
+        
+        AdminService --> ManageUsers: Observable success
+        deactivate AdminService
+        
+        ManageUsers -> ManageUsers: Clear errors.email
+        ManageUsers -> Frontend: Update view
+        Frontend --> User: No error shown\n(field valid)
+        deactivate ManageUsers
+        deactivate Frontend
+    end
+end
+
+== Loading Indicator During Data Fetch ==
+
+User -> Frontend: Opens Manage Users page
+activate Frontend
+
+Frontend -> ManageUsers: ngOnInit()
+activate ManageUsers
+
+ManageUsers -> ManageUsers: loadUsers()
+ManageUsers -> ManageUsers: Set loadingUsers = true
+
+ManageUsers -> Frontend: Update view
+Frontend --> User: Displays "Loading..." message
+deactivate Frontend
+
+ManageUsers -> AdminService: getAllUsers()
+activate AdminService
+
+AdminService -> UserController: GET /api/UserManagement/get\n(Authorization: Bearer token)
+activate UserController
+
+UserController -> UserService: GetAllUsersAsync()
+activate UserService
+
+UserService -> UserRepo: GetAllAsync()
+activate UserRepo
+UserRepo --> UserService: List<User>
+deactivate UserRepo
+
+UserService --> UserController: List<UserDto>
+deactivate UserService
+
+UserController --> AdminService: 200 OK\n[ { email, name, role, status }, ... ]
+deactivate UserController
+
+AdminService --> ManageUsers: Observable<UserDto[]>
+deactivate AdminService
+
+ManageUsers -> ManageUsers: Set users = result
+ManageUsers -> ManageUsers: Set loadingUsers = false
+ManageUsers -> ManageUsers: applyFilter()
+
+ManageUsers -> Frontend: Update view with user data
+activate Frontend
+Frontend --> User: Displays user list\n(loading indicator removed)
+deactivate Frontend
+deactivate ManageUsers
+deactivate User
+
+@enduml

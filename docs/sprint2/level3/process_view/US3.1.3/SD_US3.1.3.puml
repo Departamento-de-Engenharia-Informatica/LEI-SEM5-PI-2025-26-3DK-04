@@ -1,0 +1,273 @@
+@startuml US3.1.3_RoleBasedMenuRendering
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+title System Sequence Diagram - US 3.1.3: Role-Based Menu Rendering
+
+autonumber
+
+actor "System User" as User
+participant "SPA (Frontend)" as Frontend
+participant "App" as App
+participant "AuthService" as AuthService
+participant "RoleGuard" as RoleGuard
+participant "Router" as Router
+participant "AuthController" as AuthController
+participant "GoogleAuthService" as GoogleAuthService
+participant "UserRepository" as UserRepo
+participant "Google IAM" as IAM
+
+== User Authentication via Google OAuth ==
+
+activate User
+User -> Frontend: Clicks "Login with Google"
+activate Frontend
+
+Frontend -> App: login()
+activate App
+
+App -> IAM: Redirect to Google OAuth\n(https://accounts.google.com/o/oauth2/v2/auth)
+activate IAM
+IAM --> User: Google login page
+deactivate App
+deactivate Frontend
+
+User -> IAM: Enters credentials
+IAM -> IAM: Validates credentials
+
+alt Authentication fails
+    IAM --> User: Authentication error
+else Authentication succeeds
+    IAM --> Frontend: Redirect with authorization code
+    deactivate IAM
+    
+    activate Frontend
+    Frontend -> App: handleGoogleCallback()
+    activate App
+    
+    App -> AuthController: POST /auth/google (code)
+    activate AuthController
+    
+    AuthController -> GoogleAuthService: ExchangeCodeForToken(code)
+    activate GoogleAuthService
+    
+    GoogleAuthService -> IAM: POST https://oauth2.googleapis.com/token
+    activate IAM
+    IAM --> GoogleAuthService: TokenResponse (id_token, access_token)
+    deactivate IAM
+    
+    GoogleAuthService --> AuthController: TokenResponse
+    deactivate GoogleAuthService
+    
+    AuthController --> App: 200 OK (id_token, access_token)
+    deactivate AuthController
+    
+    App -> AuthController: POST /auth/google/user (idToken)
+    activate AuthController
+    
+    AuthController -> GoogleAuthService: GetUser(tokenResponse)
+    activate GoogleAuthService
+    
+    GoogleAuthService -> GoogleAuthService: ReadJwtToken(idToken)
+    note right: Extracts email from token claims
+    
+    GoogleAuthService -> UserRepo: GetByEmailAsync(email)
+    activate UserRepo
+    UserRepo --> GoogleAuthService: User (or null)
+    deactivate UserRepo
+    
+    alt User not found in database
+        GoogleAuthService --> AuthController: throw Exception("User not on database")
+        AuthController --> App: 404 Not Found
+        App --> User: Displays "User not found" message
+        deactivate GoogleAuthService
+        deactivate AuthController
+        deactivate App
+        deactivate Frontend
+    else User found
+        GoogleAuthService --> AuthController: User
+        deactivate GoogleAuthService
+        
+        AuthController -> AuthController: Check user.GetRole() and user.GetStatus()
+        
+        alt User has no role (NoRole)
+            AuthController --> App: 401 Unauthorized\n("User has no assigned role")
+            App --> User: Displays "Access denied - No role assigned"
+            deactivate AuthController
+            deactivate App
+            deactivate Frontend
+        else User is inactive (Status.Inactive)
+            AuthController --> App: 401 Unauthorized\n("User account is Inactive")
+            App --> User: Displays "Account not activated"
+            deactivate AuthController
+            deactivate App
+            deactivate Frontend
+        else User is active with valid role
+            AuthController --> App: 200 OK\n{ email, name, picture, role, status }
+            deactivate AuthController
+            
+            App -> AuthService: setToken(idToken, name, email, picture, role, status)
+            activate AuthService
+            
+            AuthService -> AuthService: Store in signals and localStorage
+            note right: _token, _userName, _email,\n_picture, _role, _status
+            
+            AuthService --> App: Token and user data stored
+            deactivate AuthService
+            
+            App -> App: goToRoleUI()
+            note right: Navigates based on role:\nAdmin → /admin\nRepresentative → /representative\nPortAuthorityOfficer → /port-officer\nLogisticsOperator → /logistics\nProjectManager → /project-manager
+            
+            App -> Router: navigate([rolePath])
+            activate Router
+            Router --> App: Navigation initiated
+            deactivate Router
+            deactivate App
+            deactivate Frontend
+        end
+    end
+end
+
+== Role-Based Route Guard Validation ==
+
+activate Frontend
+Frontend -> RoleGuard: canActivate(route)
+activate RoleGuard
+
+RoleGuard -> RoleGuard: Check if browser (SSR detection)
+
+alt SSR detected
+    RoleGuard --> Router: true (allow route)
+    note right: SSR bypass for server-side rendering
+else Browser environment
+    RoleGuard -> RoleGuard: Get expected roles from route.data['roles']
+    note right: e.g., ['admin'], ['representative'],\n['portauthorityofficer', 'admin']
+    
+    RoleGuard -> AuthService: role
+    activate AuthService
+    AuthService --> RoleGuard: userRole (or null)
+    deactivate AuthService
+    
+    alt No role from AuthService
+        RoleGuard -> RoleGuard: Fallback to localStorage.getItem('role')
+    end
+    
+    alt User has no role
+        RoleGuard -> Router: navigate(['/access-denied'])
+        activate Router
+        Router --> RoleGuard: Redirected
+        deactivate Router
+        RoleGuard --> Frontend: false (access denied)
+        Frontend --> User: Displays "Access Denied" page
+        deactivate RoleGuard
+        deactivate Frontend
+    else User has role
+        RoleGuard -> RoleGuard: Normalize role to lowercase
+        RoleGuard -> RoleGuard: Check if normalized role in expectedRoles
+        
+        alt Role not allowed for route
+            RoleGuard -> Router: navigate(['/access-denied'])
+            activate Router
+            Router --> RoleGuard: Redirected
+            deactivate Router
+            RoleGuard --> Frontend: false (access denied)
+            Frontend --> User: Displays "Access Denied" page
+            deactivate RoleGuard
+            deactivate Frontend
+        else Role is allowed
+            RoleGuard --> Frontend: true (access granted)
+            deactivate RoleGuard
+        end
+    end
+end
+
+== Dynamic Menu Rendering Based on Role ==
+
+Frontend -> App: Render navigation menu
+activate App
+
+App -> AuthService: isLoggedIn
+activate AuthService
+AuthService --> App: true
+deactivate AuthService
+
+App -> AuthService: role
+activate AuthService
+AuthService --> App: userRole (e.g., "Admin")
+deactivate AuthService
+
+App -> App: Calculate rolePath based on role
+note right: Admin → /admin\nRepresentative → /representative\nPortAuthorityOfficer → /port-officer\nLogisticsOperator → /logistics\nProjectManager → /project-manager
+
+App -> Frontend: Render menu with role-specific link
+note right: Shows "Functionalities" button\npointing to role-specific UI
+
+Frontend --> User: Displays header with role-based menu
+deactivate App
+
+User -> Frontend: Clicks "Functionalities" menu
+activate Frontend
+
+Frontend -> Router: navigate([rolePath])
+activate Router
+
+Router -> RoleGuard: canActivate(route)
+activate RoleGuard
+note right: Re-validates permissions\nbefore rendering role UI
+
+RoleGuard -> RoleGuard: Validate user role matches route permissions
+
+RoleGuard --> Router: true (access granted)
+deactivate RoleGuard
+
+Router --> Frontend: Route to role-specific component
+deactivate Router
+
+alt User is Admin
+    Frontend --> User: Renders Admin UI\n(Manage Users, Docks, Storage Areas,\nStaff Members, Qualifications, etc.)
+else User is Representative
+    Frontend --> User: Renders Representative UI\n(Representative-specific features)
+else User is PortAuthorityOfficer
+    Frontend --> User: Renders Port Authority UI\n(Manage Vessels, Vessel Types, Inspections)
+else User is LogisticsOperator
+    Frontend --> User: Renders Logistics UI\n(Logistics-specific features)
+else User is ProjectManager
+    Frontend --> User: Renders Project Manager UI\n(Project management features)
+end
+
+deactivate Frontend
+
+== Manual URL Access Prevention ==
+
+User -> Frontend: Manually types unauthorized URL\n(e.g., /admin when role is Representative)
+activate Frontend
+
+Frontend -> Router: navigate(['/admin'])
+activate Router
+
+Router -> RoleGuard: canActivate(route)
+activate RoleGuard
+
+RoleGuard -> RoleGuard: Get expected roles: ['admin']
+
+RoleGuard -> AuthService: role
+activate AuthService
+AuthService --> RoleGuard: "Representative"
+deactivate AuthService
+
+RoleGuard -> RoleGuard: Check if "representative" in ['admin']
+note right: Role does not match
+
+RoleGuard -> Router: navigate(['/access-denied'])
+Router --> RoleGuard: Redirected
+deactivate Router
+
+RoleGuard --> Frontend: false (access denied)
+deactivate RoleGuard
+
+Frontend --> User: Displays "Access Denied" page
+deactivate Frontend
+deactivate User
+
+@enduml
