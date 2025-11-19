@@ -310,6 +310,9 @@ export class AdminService {
   getAllVesselVisitNotifications(): Observable<any[]> {
     return this.http.get<any[]>(`${this.vesselVisitNotificationBaseUrl}`);
   }
+  getApprovedVesselVisitNotifications(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.vesselVisitNotificationBaseUrl}/approved`);
+  }
   getVesselVisitNotificationById(id: string): Observable<any> {
     return this.http.get(`${this.vesselVisitNotificationBaseUrl}/${id}`);
   }
