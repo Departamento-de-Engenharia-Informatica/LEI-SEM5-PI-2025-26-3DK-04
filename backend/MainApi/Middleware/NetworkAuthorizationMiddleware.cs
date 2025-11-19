@@ -88,6 +88,11 @@ namespace DDDNetCore.Middleware
         {
             var parts = subnetMask.Split('/');
             var baseAddress = IPAddress.Parse(parts[0]);
+            
+            // If no prefix length specified, check exact match
+            if (parts.Length == 1)
+                return address.Equals(baseAddress);
+            
             var prefixLength = int.Parse(parts[1]);
 
             // Convert to bytes
