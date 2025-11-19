@@ -272,6 +272,10 @@ export class TranslationService {
           delay: "Delay"
         },
         timeline: { title: "Visual Timeline" },
+        ignoredNotifications: {
+          title: "Ignored Notifications",
+          subtitle: "The following vessel visit notifications were ignored due to missing required resources:"
+        },
         multiCrane: {
           delayDetected: "Delays Detected!",
           suggestion: "The single-crane schedule has delays. Try using multiple cranes to minimize delays.",
@@ -1086,6 +1090,10 @@ export class TranslationService {
           delay: "Atraso"
         },
         timeline: { title: "Linha do Tempo Visual" },
+        ignoredNotifications: {
+          title: "Notificações Ignoradas",
+          subtitle: "As seguintes notificações de visita de navios foram ignoradas devido à falta de recursos necessários:"
+        },
         multiCrane: {
           delayDetected: "Atrasos Detetados!",
           suggestion: "O agendamento com um guindaste tem atrasos. Tente usar múltiplos guindastes para minimizar os atrasos.",

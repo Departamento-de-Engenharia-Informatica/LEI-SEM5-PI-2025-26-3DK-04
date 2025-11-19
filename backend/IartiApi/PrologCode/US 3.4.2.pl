@@ -6,6 +6,7 @@
 % a partir da base de dados através do servidor (server.pl)
 % Declaração dinâmica para permitir assertz/retract em runtime
 :- dynamic vessel/6.
+:- dynamic ignored_notification/2.
 
 % ============================================
 % LÓGICA DE AGENDAMENTO POR DOCK

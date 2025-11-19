@@ -6,6 +6,7 @@
 % For each additional crane, unload/load times are divided by 2.
 
 :- dynamic vessel/6.
+:- dynamic ignored_notification/2.
 :- dynamic shortest_delay_multi/3.
 
 % ============================================

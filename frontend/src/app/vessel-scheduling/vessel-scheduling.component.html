@@ -202,6 +202,21 @@
           </div>
         </div>
 
+        <!-- Ignored Notifications Section -->
+        <div *ngIf="scheduleData.ignoredNotifications && scheduleData.ignoredNotifications.length > 0" class="ignored-notifications-section">
+          <h3>⚠️ {{ translate('vesselScheduling.ignoredNotifications.title') || 'Ignored Notifications' }}</h3>
+          <p class="subtitle">{{ translate('vesselScheduling.ignoredNotifications.subtitle') || 'The following vessel visit notifications were ignored due to missing required resources:' }}</p>
+          <div class="ignored-list">
+            <div *ngFor="let ignored of scheduleData.ignoredNotifications" class="ignored-item">
+              <div class="ignored-icon">🚫</div>
+              <div class="ignored-content">
+                <strong class="vessel-name">{{ ignored.vessel }}</strong>
+                <span class="reason">{{ ignored.reason }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Summary Card -->
         <div class="summary-card">
           <div class="summary-item">

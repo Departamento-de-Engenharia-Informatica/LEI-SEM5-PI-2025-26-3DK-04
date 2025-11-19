@@ -150,9 +150,10 @@ schedule_for_date(_Request, Date, DateStr, Format) :-
     length(JsonList, TotalCount),
     format(user_error, '[INFO] Received ~w notifications from API~n', [TotalCount]),
 
-    % Remove any existing vessel facts (we will assert the ones from the DB)
+    % Remove any existing vessel facts and ignored notifications
     retractall(vessel(_,_,_,_,_,_)),
-    format(user_error, '[INFO] Cleared existing vessel facts~n', []),
+    retractall(ignored_notification(_,_)),
+    format(user_error, '[INFO] Cleared existing vessel facts and ignored notifications~n', []),
 
     % Iterate notifications and assert vessel facts only for the requested date
     catch(
@@ -225,9 +226,17 @@ process_notification(D, Date, N, N1) :-
     
     % Compare dates
     (ArrivalDateStr == DateStr ->
-        (format(user_error, '[DEBUG] ✓ MATCH! Extracting vessel info...~n', []),
-         extract_vessel_info(D, ArrivalStr, N),
-         N1 is N + 1)
+        (format(user_error, '[DEBUG] ✓ MATCH! Validating resources...~n', []),
+         % Validate physical resources and staff members
+         (validate_notification_resources(D) ->
+             (format(user_error, '[DEBUG] ✓ Resources valid! Extracting vessel info...~n', []),
+              extract_vessel_info(D, ArrivalStr, N),
+              N1 is N + 1)
+         ;
+             (format(user_error, '[WARN] ✗ Resources invalid! Ignoring notification...~n', []),
+              record_ignored_notification(D),
+              N1 = N)
+         ))
     ;
         (format(user_error, '[DEBUG] ✗ NO MATCH, skipping~n', []),
          N1 = N)
@@ -296,13 +305,104 @@ extract_vessel_info(D, ArrivalStr, N) :-
     
     format(user_error, '[INFO] ✓✓ VESSEL ASSERTED SUCCESSFULLY!~n', []).
 
-% Build JSON response from schedule data
+% ============================================
+% VALIDATION PREDICATES
+% ============================================
+
+% validate_notification_resources(+Dict)
+% Validates that the notification has both physical resources and staff members
+validate_notification_resources(D) :-
+    format(user_error, '[DEBUG] Validating physical resources...~n', []),
+    % Check physical resources
+    (get_dict(physicalResourceIds, D, PhysicalResources) ->
+        (is_list(PhysicalResources) ->
+            (PhysicalResources = [] ->
+                (format(user_error, '[WARN] No physical resources assigned~n', []),
+                 fail)
+            ;
+                (length(PhysicalResources, PhysCount),
+                 format(user_error, '[DEBUG] Found ~w physical resource(s)~n', [PhysCount])))
+        ;
+            (format(user_error, '[DEBUG] Single physical resource found~n', []))
+        )
+    ;
+        (format(user_error, '[WARN] physicalResourceIds field missing~n', []),
+         fail)
+    ),
+    
+    format(user_error, '[DEBUG] Validating staff members...~n', []),
+    % Check staff members
+    (get_dict(staffMemberIds, D, StaffMembers) ->
+        (is_list(StaffMembers) ->
+            (StaffMembers = [] ->
+                (format(user_error, '[WARN] No staff members assigned~n', []),
+                 fail)
+            ;
+                (length(StaffMembers, StaffCount),
+                 format(user_error, '[DEBUG] Found ~w staff member(s)~n', [StaffCount])))
+        ;
+            (format(user_error, '[DEBUG] Single staff member found~n', []))
+        )
+    ;
+        (format(user_error, '[WARN] staffMemberIds field missing~n', []),
+         fail)
+    ),
+    
+    format(user_error, '[INFO] ✓ Notification has valid resources~n', []).
+
+% record_ignored_notification(+Dict)
+% Records a notification that was ignored due to missing resources
+record_ignored_notification(D) :-
+    % Get vessel name
+    (get_dict(vesselName, D, VesselName) -> true ; VesselName = 'Unknown'),
+    
+    % Determine reason
+    (get_dict(physicalResourceIds, D, PhysicalResources) ->
+        (is_list(PhysicalResources), PhysicalResources = [] ->
+            MissingPhys = true
+        ;
+            MissingPhys = false)
+    ;
+        MissingPhys = true
+    ),
+    
+    (get_dict(staffMemberIds, D, StaffMembers) ->
+        (is_list(StaffMembers), StaffMembers = [] ->
+            MissingStaff = true
+        ;
+            MissingStaff = false)
+    ;
+        MissingStaff = true
+    ),
+    
+    % Build reason message
+    (MissingPhys, MissingStaff ->
+        Reason = 'Missing physical resources and staff members'
+    ; MissingPhys ->
+        Reason = 'Missing physical resources'
+    ; MissingStaff ->
+        Reason = 'Missing staff members'
+    ;
+        Reason = 'Invalid resources configuration'
+    ),
+    
+    format(user_error, '[INFO] Recording ignored notification: ~w - ~w~n', [VesselName, Reason]),
+    assertz(ignored_notification(VesselName, Reason)).
+
+% ============================================
+% JSON RESPONSE BUILDERS
+% ============================================
+
+% Build JSON response from schedule data with ignored notifications
 build_json_response(Date, TotalDelay, SeqTriplets, JsonResponse) :-
     maplist(triplet_to_json, SeqTriplets, ScheduleList),
+    % Get list of ignored notifications
+    findall(json([vessel=VName, reason=Reason]), ignored_notification(VName, Reason), IgnoredList),
     JsonResponse = json([
         date=Date,
         totalDelay=TotalDelay,
-        schedule=ScheduleList
+        schedule=ScheduleList,
+        ignoredNotifications=IgnoredList
     ]).
 
 % Convert a triplet (V, TInUnload, TEndLoad) to JSON object
@@ -492,9 +592,10 @@ heuristic_schedule_for_date(_Request, Date, DateStr, Format) :-
     length(JsonList, TotalCount),
     format(user_error, '[INFO] Heuristic - Received ~w notifications from API~n', [TotalCount]),
 
-    % Remove any existing vessel facts
+    % Remove any existing vessel facts and ignored notifications
     retractall(vessel(_,_,_,_,_,_)),
-    format(user_error, '[INFO] Heuristic - Cleared existing vessel facts~n', []),
+    retractall(ignored_notification(_,_)),
+    format(user_error, '[INFO] Heuristic - Cleared existing vessel facts and ignored notifications~n', []),
 
     % Iterate notifications and assert vessel facts only for the requested date (reuse same logic)
     catch(
@@ -542,12 +643,15 @@ heuristic_schedule_for_date(_Request, Date, DateStr, Format) :-
 % Build JSON response for heuristic algorithm with performance metrics
 build_heuristic_json_response(Date, TotalDelay, ComputationTime, SeqTriplets, JsonResponse) :-
     maplist(triplet_to_json, SeqTriplets, ScheduleList),
+    % Get list of ignored notifications
+    findall(json([vessel=VName, reason=Reason]), ignored_notification(VName, Reason), IgnoredList),
     JsonResponse = json([
-        algorithm='Early Arrival Time (EAT)',
+        algorithm='Heuristic (Early Arrival Time)',
         date=Date,
         totalDelay=TotalDelay,
         computationTime=ComputationTime,
-        schedule=ScheduleList
+        schedule=ScheduleList,
+        ignoredNotifications=IgnoredList
     ]).
 
 % ============================================
@@ -681,9 +785,10 @@ multi_crane_schedule_for_date(_Request, Date, DateStr, Format) :-
     length(JsonList, TotalCount),
     format(user_error, '[INFO] Multi-crane - Received ~w notifications from API~n', [TotalCount]),
 
-    % Remove any existing vessel facts
+    % Remove any existing vessel facts and ignored notifications
     retractall(vessel(_,_,_,_,_,_)),
-    format(user_error, '[INFO] Multi-crane - Cleared existing vessel facts~n', []),
+    retractall(ignored_notification(_,_)),
+    format(user_error, '[INFO] Multi-crane - Cleared existing vessel facts and ignored notifications~n', []),
 
     % Iterate notifications and assert vessel facts only for the requested date
     catch(
@@ -733,13 +838,16 @@ build_multi_crane_json_response(Date, TotalDelay, ComputationTime, SeqTriplets, 
     maplist(triplet_crane_to_json(CraneAllocation), SeqTriplets, ScheduleList),
     % Convert CraneAllocation to JSON-serializable format
     maplist(crane_alloc_to_json, CraneAllocation, CraneAllocJson),
+    % Get list of ignored notifications
+    findall(json([vessel=VName, reason=Reason]), ignored_notification(VName, Reason), IgnoredList),
     JsonResponse = json([
         algorithm='Multi-Crane Optimization',
         date=Date,
         totalDelay=TotalDelay,
         computationTime=ComputationTime,
         schedule=ScheduleList,
-        craneAllocation=CraneAllocJson
+        craneAllocation=CraneAllocJson,
+        ignoredNotifications=IgnoredList
     ]).
 
 % Convert crane allocation tuple to JSON object

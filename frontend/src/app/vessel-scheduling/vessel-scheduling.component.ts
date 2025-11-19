@@ -18,10 +18,16 @@ interface VesselSchedule {
   cranes?: number; // Number of cranes used (for multi-crane)
 }
 
+interface IgnoredNotification {
+  vessel: string;
+  reason: string;
+}
+
 interface ScheduleResponse {
   date: string;
   totalDelay: number;
   schedule: VesselSchedule[];
+  ignoredNotifications?: IgnoredNotification[];
 }
 
 interface AlgorithmResult {
