@@ -6,6 +6,7 @@
 % using a greedy approach for computational efficiency.
 % Declaração dinâmica para permitir assertz/retract em runtime
 :- dynamic vessel/6.
+:- dynamic ignored_notification/2.
 
 % ============================================
 % HEURISTIC ALGORITHM - EARLY ARRIVAL TIME
