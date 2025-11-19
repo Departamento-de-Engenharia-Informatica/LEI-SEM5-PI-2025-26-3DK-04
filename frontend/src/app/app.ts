@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from "@angular/common";
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from "@angular/router";
 import { TranslationService } from "./translation.service";
 import { AuthService } from "./auth.service";
+import { CONFIG } from './config';
 
 @Component({
   selector: "app-root",
@@ -138,7 +139,7 @@ export class App implements OnInit, OnDestroy {
 
   login() {
     const clientId = '440853175141-2kp1hrvoe78b8pn597p8oc2b316dibq5.apps.googleusercontent.com';
-    const redirectUri = 'http://localhost:4200/';
+    const redirectUri = `${CONFIG.frontendUrl}/`;
     const scope = 'openid profile email';
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&prompt=consent`;
     window.location.href = authUrl;
@@ -174,7 +175,7 @@ export class App implements OnInit, OnDestroy {
     console.log("meu parametro code é:", code);
     if (code) {
       try {
-        const res = await fetch('https://localhost:5001/auth/google', {
+        const res = await fetch(`${CONFIG.authUrl}/google`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code })
@@ -183,7 +184,7 @@ export class App implements OnInit, OnDestroy {
         const data = await res.json();
         const idToken = data.idToken || '';
 
-        const userRes = await fetch('https://localhost:5001/auth/google/user', {
+        const userRes = await fetch(`${CONFIG.authUrl}/google/user`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ idToken })

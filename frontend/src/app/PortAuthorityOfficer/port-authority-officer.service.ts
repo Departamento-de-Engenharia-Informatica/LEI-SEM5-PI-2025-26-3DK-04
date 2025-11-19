@@ -58,11 +58,13 @@ export interface UpdateVesselTypeDto {
   maxTiers?: number;
 }
 
+import { CONFIG } from '../config';
+
 @Injectable({ providedIn: 'root' })
 export class PortAuthorityOfficerService {
-  private vesselsBaseUrl = 'https://localhost:5001/api/Vessels';
-  private vesselTypesBaseUrl = 'https://localhost:5001/api/VesselTypes';
-  private baseUrl = 'https://localhost:5001/api';
+  private vesselsBaseUrl = `${CONFIG.apiUrl}/Vessels`;
+  private vesselTypesBaseUrl = `${CONFIG.apiUrl}/VesselTypes`;
+  private baseUrl = CONFIG.apiUrl;
 
   constructor(private http: HttpClient) {}
 

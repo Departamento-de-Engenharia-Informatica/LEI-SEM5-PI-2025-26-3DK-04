@@ -3,27 +3,28 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { AuthService } from '../auth.service';
 import { map } from 'rxjs/operators';
+import { CONFIG } from '../config';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
-  private userBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/UserManagement';
+  private userBaseUrl = `${CONFIG.apiUrl}/UserManagement`;
 
-  private baseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api';
+  private baseUrl = CONFIG.apiUrl;
   // DOCK management routes
-  private dockBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/Dock';
-  private vesselTypeBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/VesselTypes';
+  private dockBaseUrl = `${CONFIG.apiUrl}/Dock`;
+  private vesselTypeBaseUrl = `${CONFIG.apiUrl}/VesselTypes`;
 
-  private storageAreaBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/StorageArea';
+  private storageAreaBaseUrl = `${CONFIG.apiUrl}/StorageArea`;
 
-  private staffMembersBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/StaffMembers';
-  private qualificationsBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/Qualifications';
+  private staffMembersBaseUrl = `${CONFIG.apiUrl}/StaffMembers`;
+  private qualificationsBaseUrl = `${CONFIG.apiUrl}/Qualifications`;
 
-  private organizationBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/Organizations';
-  private representativeBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/Representatives';
-  private vesselVisitNotificationBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/VesselVisitNotifications';
+  private organizationBaseUrl = `${CONFIG.apiUrl}/Organizations`;
+  private representativeBaseUrl = `${CONFIG.apiUrl}/Representatives`;
+  private vesselVisitNotificationBaseUrl = `${CONFIG.apiUrl}/VesselVisitNotifications`;
 
-  private vesselBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/Vessels';
-  private physicalResourcesBaseUrl = 'http://vs592.dei.isep.ipp.pt:5000/api/PhysicalResources';
+  private vesselBaseUrl = `${CONFIG.apiUrl}/Vessels`;
+  private physicalResourcesBaseUrl = `${CONFIG.apiUrl}/PhysicalResources`;
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 

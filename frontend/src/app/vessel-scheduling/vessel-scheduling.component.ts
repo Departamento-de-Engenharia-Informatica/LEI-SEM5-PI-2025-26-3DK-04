@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { TranslationService } from '../translation.service';
+import { CONFIG } from '../config';
 
 interface VesselSchedule {
   vessel: string;
@@ -193,7 +194,7 @@ export class VesselSchedulingComponent {
     const uniqueDockIds = [...new Set(this.scheduleData.schedule.map(v => v.dockId))];
 
     // Buscar nomes dos docks da API
-    this.http.get<any[]>('https://localhost:5001/api/Dock').subscribe({
+    this.http.get<any[]>(`${CONFIG.apiUrl}/Dock`).subscribe({
       next: (docks) => {
         // Criar mapa de id -> nome
         docks.forEach(dock => {
@@ -303,7 +304,7 @@ export class VesselSchedulingComponent {
 
     const uniqueDockIds = [...new Set(this.multiCraneScheduleData.schedule.map(v => v.dockId))];
 
-    this.http.get<any[]>('https://localhost:5001/api/Dock').subscribe({
+    this.http.get<any[]>(`${CONFIG.apiUrl}/Dock`).subscribe({
       next: (docks) => {
         docks.forEach(dock => {
           this.dockNames[dock.id] = dock.name;
