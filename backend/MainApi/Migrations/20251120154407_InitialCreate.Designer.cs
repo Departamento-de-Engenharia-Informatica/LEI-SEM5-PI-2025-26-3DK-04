@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DDDNetCore.Migrations
 {
     [DbContext(typeof(DDDSample1DbContext))]
-    [Migration("20251120114723_InitialCreate")]
+    [Migration("20251120154407_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -231,7 +231,7 @@ namespace DDDNetCore.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<int>("Heigth")
+                    b.Property<int>("Height")
                         .HasColumnType("integer");
 
                     b.Property<int>("Length")

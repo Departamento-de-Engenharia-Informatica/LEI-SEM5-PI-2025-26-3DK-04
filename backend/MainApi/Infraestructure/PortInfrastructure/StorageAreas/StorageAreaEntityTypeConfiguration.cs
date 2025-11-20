@@ -65,7 +65,7 @@ namespace DDDSample1.Infrastructure.StorageAreas
                    .IsRequired();
             builder.Property(sa => sa.Width)
                    .IsRequired();
-            builder.Property(sa => sa.Heigth)
+            builder.Property(sa => sa.Height)
                 .IsRequired();
         }
     }

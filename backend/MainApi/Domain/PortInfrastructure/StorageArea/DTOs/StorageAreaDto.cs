@@ -35,6 +35,6 @@ namespace DDDNetCore.Domain.PortInfrastructure.StorageArea.DTOs
         
         public int Length { get; set; }
         public int Width { get; set; }
-        public int Heigth { get; set; }
+        public int Height { get; set; }
     }
 }

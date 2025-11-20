@@ -99,7 +99,7 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
             var location = new Location(dto.Coordinates, dto.LocationDescription);
 
             // Use the StorageArea constructor matching your entity
-            var area = new StorageArea(dto.Code, dto.Designation, dto.StorageAreaType, location, dto.MaxCapacityTEUs, dto.Length, dto.Width, dto.Heigth);
+            var area = new StorageArea(dto.Code, dto.Designation, dto.StorageAreaType, location, dto.MaxCapacityTEUs, dto.Length, dto.Width, dto.Height);
 
             // Handle initial dock assignments if provided
             if (dto.InitialDockAssignments != null)
@@ -142,7 +142,7 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
             var location = new Location(dto.Coordinates, dto.LocationDescription);
 
             // Call the entity's update method matching your entity
-            area.UpdateDetails(dto.Code, dto.Designation, dto.StorageAreaType, location, dto.MaxCapacityTEUs, dto.CurrentOccupancyTEUs, dto.Length, dto.Width, dto.Heigth);
+            area.UpdateDetails(dto.Code, dto.Designation, dto.StorageAreaType, location, dto.MaxCapacityTEUs, dto.CurrentOccupancyTEUs, dto.Length, dto.Width, dto.Height);
 
             // Repository UpdateAsync might not be needed if UoW tracks changes
             // await _repo.UpdateAsync(area); // Check if needed based on BaseRepository/UoW implementation
@@ -250,7 +250,7 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
                 AssignedDocks = dockAssignmentsDto,
                 Length = area.Length,
                 Width = area.Width,
-                Heigth = area.Heigth
+                Height = area.Height
             };
         }
     }

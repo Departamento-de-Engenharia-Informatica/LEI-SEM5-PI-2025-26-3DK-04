@@ -24,7 +24,7 @@ namespace DDDNetCore.Tests.Domain
                 maxCapacityTEUs: 500,
                 length: 100,
                 width: 50,
-                heigth: 30
+                height: 30
             );
 
             storageArea.Code.Should().Be("SA01");
@@ -50,7 +50,7 @@ namespace DDDNetCore.Tests.Domain
                 maxCapacityTEUs: 500,
                 length: 100,
                 width: 50,
-                heigth: 30
+                height: 30
             );
 
             storageArea.UpdateDetails(
@@ -62,7 +62,7 @@ namespace DDDNetCore.Tests.Domain
                 currentOccupancyTEUs: 100,
                 length: 120,
                 depth: 60,
-                heigth: 40
+                height: 40
             );
 
             storageArea.Code.Should().Be("SA02");

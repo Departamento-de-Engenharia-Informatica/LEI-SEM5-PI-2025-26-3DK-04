@@ -22,7 +22,7 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
         
         public int Length { get; private set; }
         public int Width { get; private set; }
-        public int Heigth { get; private set; }
+        public int Height { get; private set; }
         
         
         private StorageArea()
@@ -31,7 +31,7 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
         }
 
         
-        public StorageArea(string code, string designation, StorageAreaType storageAreaType, Location location, int maxCapacityTEUs, int length, int width, int heigth)
+        public StorageArea(string code, string designation, StorageAreaType storageAreaType, Location location, int maxCapacityTEUs, int length, int width, int height)
         {
             this.Id = new StorageAreaID(Guid.NewGuid());
 
@@ -58,11 +58,11 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
             this.Active = true;
             this.Length = length;
             this.Width = width;
-            this.Heigth = heigth;
+            this.Height = height;
         }
 
         
-        public void UpdateDetails(string code, string designation, StorageAreaType storageAreaType, Location location, int maxCapacityTEUs, int currentOccupancyTEUs, int length, int depth, int heigth)
+        public void UpdateDetails(string code, string designation, StorageAreaType storageAreaType, Location location, int maxCapacityTEUs, int currentOccupancyTEUs, int length, int depth, int height)
         {
             
             if (string.IsNullOrWhiteSpace(code))
@@ -89,7 +89,7 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
             this.CurrentOccupancyTEUs = currentOccupancyTEUs;
             this.Length = length;
             this.Width = depth;
-            this.Heigth = heigth;
+            this.Height = height;
         }
 
         

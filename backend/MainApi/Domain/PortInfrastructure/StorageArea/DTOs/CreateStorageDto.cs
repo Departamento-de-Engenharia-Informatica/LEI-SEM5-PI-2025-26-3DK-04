@@ -34,6 +34,6 @@ namespace DDDSample1.Domain.StorageAreas.DTOs
         
         public int Length { get; set; }
         public int Width { get; set; }
-        public int Heigth { get; set; }
+        public int Height { get; set; }
     }
 }

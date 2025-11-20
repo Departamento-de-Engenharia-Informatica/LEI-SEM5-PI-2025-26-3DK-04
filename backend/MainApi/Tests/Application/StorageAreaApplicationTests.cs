@@ -135,7 +135,7 @@ namespace DDDNetCore.Tests.Application
                 InitialDockAssignments = null,
                 Length = 10,
                 Width = 15,
-                Heigth = 8
+                Height = 8
             };
 
             var result = await service.AddAsync(createDto);
@@ -171,7 +171,7 @@ namespace DDDNetCore.Tests.Application
                 CurrentOccupancyTEUs = 100,
                 Length = 10,
                 Width = 15,
-                Heigth = 8
+                Height = 8
             };
 
             var result = await service.UpdateAsync(area.Id, updateDto);
@@ -241,7 +241,7 @@ public async Task AddStorageArea_WithDuplicateCode_ShouldThrowException()
         MaxCapacityTEUs = 200,
         Length = 10,
         Width = 15,
-        Heigth = 8
+        Height = 8
     };
     await service.AddAsync(createDto1);
 
@@ -255,7 +255,7 @@ public async Task AddStorageArea_WithDuplicateCode_ShouldThrowException()
         MaxCapacityTEUs = 300,
         Length = 12,
         Width = 18,
-        Heigth = 9
+        Height = 9
     };
 
     Func<Task> act = async () => await service.AddAsync(createDto2);

@@ -105,7 +105,7 @@ namespace DDDNetCore.Migrations
                     Active = table.Column<bool>(type: "boolean", nullable: false),
                     Length = table.Column<int>(type: "integer", nullable: false),
                     Width = table.Column<int>(type: "integer", nullable: false),
-                    Heigth = table.Column<int>(type: "integer", nullable: false)
+                    Height = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
