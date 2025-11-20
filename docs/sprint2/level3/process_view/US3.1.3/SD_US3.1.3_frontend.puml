@@ -1,0 +1,109 @@
+@startuml US3.1.3_RoleBasedMenuRendering_Frontend
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+title System Sequence Diagram - US 3.1.3: Role-Based Menu Rendering (Frontend Only)
+
+autonumber
+
+actor "System User" as User
+participant "App Component" as App
+participant "AuthService" as AuthService
+participant "Router" as Router
+participant "RoleGuard" as RoleGuard
+
+== User Already Authenticated ==
+
+activate User
+User -> App: Access application
+activate App
+
+App -> AuthService: isLoggedIn()
+activate AuthService
+AuthService --> App: true
+deactivate AuthService
+
+App -> AuthService: Get user role
+activate AuthService
+AuthService --> App: userRole (e.g., "Admin")
+deactivate AuthService
+
+App -> App: Calculate rolePath based on role
+note right: Admin → /admin\nRepresentative → /representative\nPortAuthorityOfficer → /port-officer\nLogisticsOperator → /logistics\nProjectManager → /project-manager
+
+App --> User: Display role-based menu
+deactivate App
+
+== Role-Based Route Guard Validation ==
+
+User -> Router: Navigate to protected route
+activate Router
+
+Router -> RoleGuard: canActivate(route)
+activate RoleGuard
+
+RoleGuard -> RoleGuard: Get expected roles from route.data['roles']
+
+RoleGuard -> AuthService: Get user role
+activate AuthService
+AuthService --> RoleGuard: userRole
+deactivate AuthService
+
+alt User has no role
+    RoleGuard -> Router: navigate(['/access-denied'])
+    RoleGuard --> Router: return false
+    deactivate RoleGuard
+    Router --> User: Display "Access Denied" page
+    deactivate Router
+else Role not allowed
+    RoleGuard -> RoleGuard: Validate role matches expected roles
+    RoleGuard -> Router: navigate(['/access-denied'])
+    RoleGuard --> Router: return false
+    deactivate RoleGuard
+    Router --> User: Display "Access Denied" page
+    deactivate Router
+else Role is allowed
+    RoleGuard --> Router: return true
+    deactivate RoleGuard
+    Router --> User: Load role-specific component
+    deactivate Router
+end
+
+== User Navigates via Menu ==
+
+User -> App: Click menu option
+activate App
+
+App -> Router: Navigate to selected route
+activate Router
+
+Router -> RoleGuard: Validate access
+activate RoleGuard
+
+RoleGuard -> AuthService: Get user role
+activate AuthService
+AuthService --> RoleGuard: userRole
+deactivate AuthService
+
+RoleGuard -> RoleGuard: Check if role allowed
+
+alt Access granted
+    RoleGuard --> Router: return true
+    deactivate RoleGuard
+    Router --> App: Load component
+    deactivate Router
+    App --> User: Display requested page
+    deactivate App
+else Access denied
+    RoleGuard --> Router: return false + navigate('/access-denied')
+    deactivate RoleGuard
+    Router --> App: Redirect
+    deactivate Router
+    App --> User: Display "Access Denied" page
+    deactivate App
+end
+
+deactivate User
+
+@enduml
