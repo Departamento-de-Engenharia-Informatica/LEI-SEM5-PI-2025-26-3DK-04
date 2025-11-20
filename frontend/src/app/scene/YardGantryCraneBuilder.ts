@@ -149,11 +149,11 @@ export class YardGantryCraneBuilder {
     // --------------------------
     // 4) RAILS NO CHÃO (visual) — filhas da crane root (posicionadas no chão)
     // --------------------------
-    const railGeo = new THREE.BoxGeometry(girderLength + 12, 0.25, 0.6);
+    const railGeo = new THREE.BoxGeometry(girderLength + 12, 1.25, 0.6);
     const leftRail  = new THREE.Mesh(railGeo, darkMetal);
     const rightRail = leftRail.clone();
-    leftRail.position.set(0, 0.12, -2.2);
-    rightRail.position.set(0, 0.12,  2.2);
+    leftRail.position.set(0, 0.625, -2.2);
+    rightRail.position.set(0, 0.625,  2.2);
     crane.add(leftRail, rightRail);
 
     // --------------------------

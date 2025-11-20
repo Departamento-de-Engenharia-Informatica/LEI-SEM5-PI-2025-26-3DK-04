@@ -23,13 +23,14 @@ export class WarehouseBuilder {
       color: 0x444444,
       roughness: 0.6,
       metalness: 0.5,
-      side: THREE.DoubleSide                // 👈 corrige telhado invisível
+      side: THREE.DoubleSide
     });
 
     const gableMat = new THREE.MeshStandardMaterial({
       color: 0x999999,
       roughness: 0.8,
-      side: THREE.DoubleSide                 // 👈 para não desaparecer
+      metalness: 0.1,
+      side: THREE.DoubleSide
     });
 
     const frameMat = new THREE.MeshStandardMaterial({
@@ -50,17 +51,13 @@ export class WarehouseBuilder {
       roughness: 0.1
     });
 
-    // -----------------------------------------------------------------------
-    // ## Corpo Principal (Paredes)
-    // -----------------------------------------------------------------------
+
     const wallsGeom = new THREE.BoxGeometry(width, wallHeight, depth);
     const walls = new THREE.Mesh(wallsGeom, wallMat);
     walls.position.y = wallHeight / 2;
     group.add(walls);
 
-    // -----------------------------------------------------------------------
-    // ## Telhado de duas águas (correto)
-    // -----------------------------------------------------------------------
+
     const halfWidth = width / 2;
     const halfDepth = depth / 2;
     const roofBaseY = wallHeight;
@@ -70,7 +67,7 @@ export class WarehouseBuilder {
     const roofGeom = new THREE.BufferGeometry();
 
     const vertices = new Float32Array([
-      // Lado esquerdo
+
       -halfWidth - eaveOverlap, roofBaseY, -halfDepth - eaveOverlap,
       -halfWidth - eaveOverlap, roofBaseY,  halfDepth + eaveOverlap,
       0, roofPeakY, -halfDepth - eaveOverlap,

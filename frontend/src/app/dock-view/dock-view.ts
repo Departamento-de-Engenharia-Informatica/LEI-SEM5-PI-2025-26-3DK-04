@@ -234,7 +234,7 @@ export class DockView implements AfterViewInit, OnDestroy {
         const rowIndex = Math.floor(index / finalColsYD);
 
         const x = ydCursorX + (colIndex * (YARD_WIDTH + COL_GAP));
-        const z = startZ_YD + (rowIndex * (YARD_DEPTH + ROW_GAP));
+        const z = startZ_YD + (rowIndex * (YARD_DEPTH + ROW_GAP + 4));
 
         const yardGroup = YardBuilder.createYard(
           YARD_WIDTH, YARD_DEPTH,
