@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DDDNetCore.Migrations
 {
     [DbContext(typeof(DDDSample1DbContext))]
-    [Migration("20251117103939_UpdatePhysicalResourceToMultiple")]
-    partial class UpdatePhysicalResourceToMultiple
+    [Migration("20251120114723_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -231,10 +231,19 @@ namespace DDDNetCore.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<int>("Heigth")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Length")
+                        .HasColumnType("integer");
+
                     b.Property<int>("MaxCapacityTEUs")
                         .HasColumnType("integer");
 
                     b.Property<int>("StorageAreaType")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Width")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");

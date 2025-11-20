@@ -14,7 +14,7 @@ export class AdminService {
   private dockBaseUrl = `${CONFIG.apiUrl}/Dock`;
   private vesselTypeBaseUrl = `${CONFIG.apiUrl}/VesselTypes`;
 
-  private storageAreaBaseUrl = `${CONFIG.apiUrl}/StorageArea`;
+  private storageAreaBaseUrl = `${CONFIG.apiLocalUrl}/StorageArea`;
 
   private staffMembersBaseUrl = `${CONFIG.apiUrl}/StaffMembers`;
   private qualificationsBaseUrl = `${CONFIG.apiUrl}/Qualifications`;

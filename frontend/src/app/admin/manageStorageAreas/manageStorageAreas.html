@@ -34,6 +34,9 @@
           <th>{{ t('manageStorageAreas.location') }}</th>
           <th>{{ t('manageStorageAreas.capacity') }}</th>
           <th>{{ t('manageStorageAreas.dockAssignments') }}</th>
+          <th>{{ t('manageStorageAreas.length') }}</th>
+          <th>{{ t('manageStorageAreas.width') }}</th>
+          <th>{{ t('manageStorageAreas.height') }}</th>
           <th>{{ t('manageStorageAreas.actions') }}</th>
         </tr>
         </thead>
@@ -49,6 +52,9 @@
                 {{ vt }}<span *ngIf="!last">, </span>
               </span>
           </td>
+          <td>{{ area.length }}</td>
+          <td>{{ area.width }}</td>
+          <td>{{ area.height }}</td>
           <td>
             <button (click)="editStorageArea(area)">{{ t('manageStorageAreas.edit') }}</button>
             <button class="danger" (click)="softDeleteStorageArea(area.id)">{{ t('manageStorageAreas.delete') }}</button>
@@ -141,6 +147,39 @@
             />
           </div>
         </div>
+      </div>
+      <div class="form-group">
+        <label>{{ t('manageStorageAreas.length') }}</label>
+        <input
+          type="number"
+          [(ngModel)]="storageForm.length"
+          name="length"
+          min="1"
+          placeholder="{{ t('manageStorageAreas.lengthPlaceholder') }}"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label>{{ t('manageStorageAreas.width') }}</label>
+        <input
+          type="number"
+          [(ngModel)]="storageForm.width"
+          name="width"
+          min="1"
+          placeholder="{{ t('manageStorageAreas.widthPlaceholder') }}"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label>{{ t('manageStorageAreas.height') }}</label>
+        <input
+          type="number"
+          [(ngModel)]="storageForm.height"
+          name="height"
+          min="1"
+          placeholder="{{ t('manageStorageAreas.heightPlaceholder') }}"
+          required
+        />
       </div>
 
       <div class="form-buttons">

@@ -132,7 +132,10 @@ namespace DDDNetCore.Tests.Application
                 Coordinates = "41.123,-8.611",
                 LocationDescription = "North Terminal",
                 MaxCapacityTEUs = 500,
-                InitialDockAssignments = null
+                InitialDockAssignments = null,
+                Length = 10,
+                Width = 15,
+                Heigth = 8
             };
 
             var result = await service.AddAsync(createDto);
@@ -154,7 +157,7 @@ namespace DDDNetCore.Tests.Application
 
             var service = new StorageAreaService(uow, storageRepo, dockRepo);
 
-            var area = new StorageArea("SA01", "Old Storage", StorageAreaType.Yard, new Location("41.0,-8.0", "Old Loc"), 300);
+            var area = new StorageArea("SA01", "Old Storage", StorageAreaType.Yard, new Location("41.0,-8.0", "Old Loc"), 300, 5,5,5);
             await storageRepo.AddAsync(area);
 
             var updateDto = new UpdateStorageAreaDto
@@ -165,7 +168,10 @@ namespace DDDNetCore.Tests.Application
                 Coordinates = "41.123,-8.611",
                 LocationDescription = "North Terminal",
                 MaxCapacityTEUs = 500,
-                CurrentOccupancyTEUs = 100
+                CurrentOccupancyTEUs = 100,
+                Length = 10,
+                Width = 15,
+                Heigth = 8
             };
 
             var result = await service.UpdateAsync(area.Id, updateDto);
@@ -183,7 +189,7 @@ namespace DDDNetCore.Tests.Application
 
             var service = new StorageAreaService(uow, storageRepo, dockRepo);
 
-            var area = new StorageArea("SA01", "Storage", StorageAreaType.Refrigerated, new Location("41.123,-8.611", "North Terminal"), 500);
+            var area = new StorageArea("SA01", "Storage", StorageAreaType.Refrigerated, new Location("41.123,-8.611", "North Terminal"), 500, 10,15,8);
             await storageRepo.AddAsync(area);
 
             var vesselType = new VesselType("Cargo", "Cargo ships", 5000, 10, 15, 8);
@@ -208,7 +214,7 @@ namespace DDDNetCore.Tests.Application
 
             var service = new StorageAreaService(uow, storageRepo, dockRepo);
 
-            var area = new StorageArea("SA01", "Storage", StorageAreaType.Refrigerated, new Location("41.123,-8.611", "North Terminal"), 500);
+            var area = new StorageArea("SA01", "Storage", StorageAreaType.Refrigerated, new Location("41.123,-8.611", "North Terminal"), 500, 10,15,8);
             await storageRepo.AddAsync(area);
 
             var inactivated = await service.InactivateAsync(area.Id);
@@ -232,7 +238,10 @@ public async Task AddStorageArea_WithDuplicateCode_ShouldThrowException()
         StorageAreaType = StorageAreaType.Yard,
         Coordinates = "41.0,-8.0",
         LocationDescription = "Loc 1",
-        MaxCapacityTEUs = 200
+        MaxCapacityTEUs = 200,
+        Length = 10,
+        Width = 15,
+        Heigth = 8
     };
     await service.AddAsync(createDto1);
 
@@ -243,7 +252,10 @@ public async Task AddStorageArea_WithDuplicateCode_ShouldThrowException()
         StorageAreaType = StorageAreaType.Refrigerated,
         Coordinates = "41.1,-8.1",
         LocationDescription = "Loc 2",
-        MaxCapacityTEUs = 300
+        MaxCapacityTEUs = 300,
+        Length = 12,
+        Width = 18,
+        Heigth = 9
     };
 
     Func<Task> act = async () => await service.AddAsync(createDto2);
@@ -278,7 +290,7 @@ public async Task AssignDock_WithNegativeDistance_ShouldThrowException()
     var uow = new InMemoryUnitOfWork();
     var service = new StorageAreaService(uow, storageRepo, dockRepo);
 
-    var area = new StorageArea("SA01", "Storage", StorageAreaType.Yard, new Location("0,0", "Loc"), 100);
+    var area = new StorageArea("SA01", "Storage", StorageAreaType.Yard, new Location("0,0", "Loc"), 100, 10,10,10);
     await storageRepo.AddAsync(area);
 
     var vesselType = new VesselType("Cargo", "Cargo ships", 5000, 10, 15, 8);
@@ -300,8 +312,8 @@ public async Task GetStorageAreaById_ShouldReturnCorrectArea()
     var uow = new InMemoryUnitOfWork();
     var service = new StorageAreaService(uow, storageRepo, dockRepo);
 
-    var area1 = new StorageArea("SA01", "Storage 1", StorageAreaType.Yard, new Location("0,0", "Loc1"), 100);
-    var area2 = new StorageArea("SA02", "Storage 2", StorageAreaType.Refrigerated, new Location("1,1", "Loc2"), 200);
+    var area1 = new StorageArea("SA01", "Storage 1", StorageAreaType.Yard, new Location("0,0", "Loc1"), 100, 10,10,10);
+    var area2 = new StorageArea("SA02", "Storage 2", StorageAreaType.Refrigerated, new Location("1,1", "Loc2"), 200, 12,12,12);
     await storageRepo.AddAsync(area1);
     await storageRepo.AddAsync(area2);
 
@@ -320,8 +332,8 @@ public async Task GetAllStorageAreas_ShouldReturnAllAddedAreas()
     var uow = new InMemoryUnitOfWork();
     var service = new StorageAreaService(uow, storageRepo, dockRepo);
 
-    var area1 = new StorageArea("SA01", "Storage 1", StorageAreaType.Yard, new Location("0,0", "Loc1"), 100);
-    var area2 = new StorageArea("SA02", "Storage 2", StorageAreaType.Refrigerated, new Location("1,1", "Loc2"), 200);
+    var area1 = new StorageArea("SA01", "Storage 1", StorageAreaType.Yard, new Location("0,0", "Loc1"), 100, 10,10,10);
+    var area2 = new StorageArea("SA02", "Storage 2", StorageAreaType.Refrigerated, new Location("1,1", "Loc2"), 20,5, 12,12);
     await storageRepo.AddAsync(area1);
     await storageRepo.AddAsync(area2);
 

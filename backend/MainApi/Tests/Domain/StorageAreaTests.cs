@@ -21,7 +21,10 @@ namespace DDDNetCore.Tests.Domain
                 designation: "Main Storage",
                 storageAreaType: StorageAreaType.Refrigerated,
                 location: location,
-                maxCapacityTEUs: 500
+                maxCapacityTEUs: 500,
+                length: 100,
+                width: 50,
+                heigth: 30
             );
 
             storageArea.Code.Should().Be("SA01");
@@ -44,7 +47,10 @@ namespace DDDNetCore.Tests.Domain
                 designation: "Main Storage",
                 storageAreaType: StorageAreaType.Warehouse,
                 location: location1,
-                maxCapacityTEUs: 500
+                maxCapacityTEUs: 500,
+                length: 100,
+                width: 50,
+                heigth: 30
             );
 
             storageArea.UpdateDetails(
@@ -53,7 +59,10 @@ namespace DDDNetCore.Tests.Domain
                 storageAreaType: StorageAreaType.Yard,
                 location: location2,
                 maxCapacityTEUs: 600,
-                currentOccupancyTEUs: 100
+                currentOccupancyTEUs: 100,
+                length: 120,
+                depth: 60,
+                heigth: 40
             );
 
             storageArea.Code.Should().Be("SA02");
@@ -72,7 +81,10 @@ namespace DDDNetCore.Tests.Domain
                 "Main Storage",
                 StorageAreaType.Refrigerated,
                 new Location("41.123,-8.611", "North Terminal"),
-                500
+                500,
+                100,
+                50,
+                30
             );
 
             var dockId = new DockID(Guid.NewGuid());
@@ -91,7 +103,10 @@ namespace DDDNetCore.Tests.Domain
                 "Main Storage",
                 StorageAreaType.Refrigerated,
                 new Location("41.123,-8.611", "North Terminal"),
-                500
+                500,
+                100,
+                50,
+                30
             );
 
             var dockId = new DockID(Guid.NewGuid());
@@ -110,7 +125,10 @@ namespace DDDNetCore.Tests.Domain
                 "Main Storage",
                 StorageAreaType.Warehouse,
                 new Location("41.123,-8.611", "North Terminal"),
-                500
+                500,
+                100,
+                50,
+                30
             );
 
             storageArea.MarkAsInactive();
@@ -128,7 +146,10 @@ namespace DDDNetCore.Tests.Domain
                 "Main Storage",
                 StorageAreaType.Refrigerated,
                 new Location("41.123,-8.611", "North Terminal"),
-                500
+                500,
+                100,
+                50,
+                30
             );
 
             var dockId = new DockID(Guid.NewGuid());
@@ -147,7 +168,10 @@ namespace DDDNetCore.Tests.Domain
                 "Main Storage",
                 StorageAreaType.Yard,
                 new Location("41.123,-8.611", "North Terminal"),
-                500
+                500,
+                100,
+                50,
+                30
             );
 
             var dockId = new DockID(Guid.NewGuid());
@@ -162,10 +186,10 @@ namespace DDDNetCore.Tests.Domain
         {
             var location = new Location("41.123,-8.611", "North Terminal");
 
-            Action act1 = () => new StorageArea("", "Designation", StorageAreaType.Other, location, 100);
-            Action act2 = () => new StorageArea("Code", "", StorageAreaType.Other, location, 100);
-            Action act3 = () => new StorageArea("Code", "Designation", StorageAreaType.Other, null, 100);
-            Action act4 = () => new StorageArea("Code", "Designation", StorageAreaType.Other, location, 0);
+            Action act1 = () => new StorageArea("", "Designation", StorageAreaType.Other, location, 100, 50, 30, 20);
+            Action act2 = () => new StorageArea("Code", "", StorageAreaType.Other, location, 100, 50, 30, 20);
+            Action act3 = () => new StorageArea("Code", "Designation", StorageAreaType.Other, null, 100, 50, 30, 20);
+            Action act4 = () => new StorageArea("Code", "Designation", StorageAreaType.Other, location, 0, 50, 30, 20);
 
             act1.Should().Throw<BusinessRuleValidationException>();
             act2.Should().Throw<BusinessRuleValidationException>();
@@ -176,9 +200,9 @@ namespace DDDNetCore.Tests.Domain
         public void UpdateDetails_NegativeCurrentOccupancy_ShouldThrow()
         {
             var location = new Location("41.123,-8.611", "North Terminal");
-            var storageArea = new StorageArea("SA01", "Main Storage", StorageAreaType.Refrigerated, location, 500);
+            var storageArea = new StorageArea("SA01", "Main Storage", StorageAreaType.Refrigerated, location, 500, 100, 50, 30);
 
-            Action act = () => storageArea.UpdateDetails("SA01", "Main Storage", StorageAreaType.Refrigerated, location, 500, -1);
+            Action act = () => storageArea.UpdateDetails("SA01", "Main Storage", StorageAreaType.Refrigerated, location, 500, -1, 50, 30, 20);
 
             act.Should().Throw<BusinessRuleValidationException>()
                 .WithMessage("Current occupancy cannot be negative.");
@@ -188,9 +212,9 @@ namespace DDDNetCore.Tests.Domain
         public void UpdateDetails_CurrentOccupancyExceedsMax_ShouldThrow()
         {
             var location = new Location("41.123,-8.611", "North Terminal");
-            var storageArea = new StorageArea("SA01", "Main Storage", StorageAreaType.Refrigerated, location, 500);
+            var storageArea = new StorageArea("SA01", "Main Storage", StorageAreaType.Refrigerated, location, 500, 100, 50, 30);
 
-            Action act = () => storageArea.UpdateDetails("SA01", "Main Storage", StorageAreaType.Refrigerated, location, 500, 600);
+            Action act = () => storageArea.UpdateDetails("SA01", "Main Storage", StorageAreaType.Refrigerated, location, 500, 600, 50, 30, 20);
 
             act.Should().Throw<BusinessRuleValidationException>()
                 .WithMessage("Current occupancy cannot exceed maximum capacity.");
@@ -199,7 +223,7 @@ namespace DDDNetCore.Tests.Domain
         [Fact]
         public void AssignDock_InvalidDistance_ShouldThrow()
         {
-            var storageArea = new StorageArea("SA01", "Main Storage", StorageAreaType.Warehouse, new Location("41.123,-8.611", "North Terminal"), 500);
+            var storageArea = new StorageArea("SA01", "Main Storage", StorageAreaType.Warehouse, new Location("41.123,-8.611", "North Terminal"), 500, 100, 50, 30);
             var dockId = new DockID(Guid.NewGuid());
 
             Action act = () => storageArea.AssignDock(dockId, 0);
@@ -215,12 +239,12 @@ namespace DDDNetCore.Tests.Domain
         public void UpdateDetails_InvalidStorageAreaType_ShouldThrow()
         {
             var location = new Location("41.123,-8.611", "North Terminal");
-            var storageArea = new StorageArea("SA01", "Main Storage", StorageAreaType.Yard, location, 500);
+            var storageArea = new StorageArea("SA01", "Main Storage", StorageAreaType.Yard, location, 500, 100, 50, 30);
 
             // Force invalid enum casting
             var invalidType = (StorageAreaType)999;
 
-            Action act = () => storageArea.UpdateDetails("SA01", "Main Storage", invalidType, location, 500, 0);
+            Action act = () => storageArea.UpdateDetails("SA01", "Main Storage", invalidType, location, 500, 0, 50, 30, 20);
 
             act.Should().Throw<BusinessRuleValidationException>()
                 .WithMessage("Invalid storage area type provided.");
@@ -229,7 +253,7 @@ namespace DDDNetCore.Tests.Domain
         [Fact]
         public void MarkAsInactive_WhenAlreadyInactive_ShouldRemainFalse()
         {
-            var storageArea = new StorageArea("SA01", "Main Storage", StorageAreaType.Refrigerated, new Location("41.123,-8.611", "North Terminal"), 500);
+            var storageArea = new StorageArea("SA01", "Main Storage", StorageAreaType.Refrigerated, new Location("41.123,-8.611", "North Terminal"), 500, 100, 50, 30);
             storageArea.MarkAsInactive();
 
             storageArea.MarkAsInactive();
@@ -240,7 +264,7 @@ namespace DDDNetCore.Tests.Domain
         [Fact]
         public void MarkAsActive_WhenAlreadyActive_ShouldRemainTrue()
         {
-            var storageArea = new StorageArea("SA01", "Main Storage", StorageAreaType.Refrigerated, new Location("41.123,-8.611", "North Terminal"), 500);
+            var storageArea = new StorageArea("SA01", "Main Storage", StorageAreaType.Refrigerated, new Location("41.123,-8.611", "North Terminal"), 500, 100, 50, 30);
 
             storageArea.MarkAsActive();
 
@@ -250,7 +274,7 @@ namespace DDDNetCore.Tests.Domain
         [Fact]
         public void MultipleDockAssignments_ShouldStoreAllCorrectly()
         {
-            var storageArea = new StorageArea("SA01", "Main Storage", StorageAreaType.Yard, new Location("41.123,-8.611", "North Terminal"), 500);
+            var storageArea = new StorageArea("SA01", "Main Storage", StorageAreaType.Yard, new Location("41.123,-8.611", "North Terminal"), 500, 100, 50, 30);
             var dock1 = new DockID(Guid.NewGuid());
             var dock2 = new DockID(Guid.NewGuid());
 

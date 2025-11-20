@@ -12,6 +12,7 @@ using DDDSample1.Domain.Shared;
 // Using the correct entity namespace
 using DDDSample1.Domain.PortInfrastructure.StorageArea;
 using DDDSample1.Domain.StorageAreas.DTOs;
+using Microsoft.AspNetCore.Http;
 
 // Correct namespace for the service
 namespace DDDSample1.Domain.PortInfrastructure.StorageArea
@@ -98,7 +99,7 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
             var location = new Location(dto.Coordinates, dto.LocationDescription);
 
             // Use the StorageArea constructor matching your entity
-            var area = new StorageArea(dto.Code, dto.Designation, dto.StorageAreaType, location, dto.MaxCapacityTEUs);
+            var area = new StorageArea(dto.Code, dto.Designation, dto.StorageAreaType, location, dto.MaxCapacityTEUs, dto.Length, dto.Width, dto.Heigth);
 
             // Handle initial dock assignments if provided
             if (dto.InitialDockAssignments != null)
@@ -141,7 +142,7 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
             var location = new Location(dto.Coordinates, dto.LocationDescription);
 
             // Call the entity's update method matching your entity
-            area.UpdateDetails(dto.Code, dto.Designation, dto.StorageAreaType, location, dto.MaxCapacityTEUs, dto.CurrentOccupancyTEUs);
+            area.UpdateDetails(dto.Code, dto.Designation, dto.StorageAreaType, location, dto.MaxCapacityTEUs, dto.CurrentOccupancyTEUs, dto.Length, dto.Width, dto.Heigth);
 
             // Repository UpdateAsync might not be needed if UoW tracks changes
             // await _repo.UpdateAsync(area); // Check if needed based on BaseRepository/UoW implementation
@@ -246,7 +247,10 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
                 MaxCapacityTEUs = area.MaxCapacityTEUs,
                 CurrentOccupancyTEUs = area.CurrentOccupancyTEUs,
                 Active = area.Active,
-                AssignedDocks = dockAssignmentsDto
+                AssignedDocks = dockAssignmentsDto,
+                Length = area.Length,
+                Width = area.Width,
+                Heigth = area.Heigth
             };
         }
     }

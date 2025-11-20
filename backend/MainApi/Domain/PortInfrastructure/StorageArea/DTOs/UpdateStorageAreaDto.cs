@@ -32,5 +32,9 @@ namespace DDDSample1.Domain.StorageAreas.DTOs
         // Keep range validation
         [Range(0, int.MaxValue, ErrorMessage = "Current occupancy (TEUs) cannot be negative.")]
         public int CurrentOccupancyTEUs { get; set; }
+        
+        public int Length { get; set; }
+        public int Width { get; set; }
+        public int Heigth { get; set; }
     }
 }

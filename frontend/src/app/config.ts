@@ -6,7 +6,7 @@
 
 export const CONFIG = {
   // 🏠 LOCAL DEVELOPMENT - Uncomment these:
-  //apiUrl: 'https://localhost:5001/api',
+  apiLocalUrl: 'https://localhost:5001/api',
   //authUrl: 'https://localhost:5001/auth',
   frontendUrl: 'http://localhost:4200',
 

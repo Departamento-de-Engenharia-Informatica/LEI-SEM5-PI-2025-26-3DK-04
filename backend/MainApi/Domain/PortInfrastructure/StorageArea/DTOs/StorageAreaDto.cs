@@ -32,5 +32,9 @@ namespace DDDNetCore.Domain.PortInfrastructure.StorageArea.DTOs
 
         // Keep AssignedDocks (ensure DockAssignmentDto includes DockName if needed)
         public List<AssignDockDto> AssignedDocks { get; set; } = new List<AssignDockDto>();
+        
+        public int Length { get; set; }
+        public int Width { get; set; }
+        public int Heigth { get; set; }
     }
 }

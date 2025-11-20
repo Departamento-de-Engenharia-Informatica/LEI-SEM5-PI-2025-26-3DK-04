@@ -31,5 +31,9 @@ namespace DDDSample1.Domain.StorageAreas.DTOs
         public int MaxCapacityTEUs { get; set; }
 
         public List<AssignDockDto>? InitialDockAssignments { get; set; }
+        
+        public int Length { get; set; }
+        public int Width { get; set; }
+        public int Heigth { get; set; }
     }
 }

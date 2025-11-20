@@ -19,7 +19,11 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
 
         private readonly List<StorageDockAssignment> _dockAssignments = new();
         public IReadOnlyCollection<StorageDockAssignment> DockAssignments => _dockAssignments.AsReadOnly();
-
+        
+        public int Length { get; private set; }
+        public int Width { get; private set; }
+        public int Heigth { get; private set; }
+        
         
         private StorageArea()
         {
@@ -27,7 +31,7 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
         }
 
         
-        public StorageArea(string code, string designation, StorageAreaType storageAreaType, Location location, int maxCapacityTEUs)
+        public StorageArea(string code, string designation, StorageAreaType storageAreaType, Location location, int maxCapacityTEUs, int length, int width, int heigth)
         {
             this.Id = new StorageAreaID(Guid.NewGuid());
 
@@ -52,10 +56,13 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
             this.MaxCapacityTEUs = maxCapacityTEUs;
             this.CurrentOccupancyTEUs = 0;
             this.Active = true;
+            this.Length = length;
+            this.Width = width;
+            this.Heigth = heigth;
         }
 
         
-        public void UpdateDetails(string code, string designation, StorageAreaType storageAreaType, Location location, int maxCapacityTEUs, int currentOccupancyTEUs)
+        public void UpdateDetails(string code, string designation, StorageAreaType storageAreaType, Location location, int maxCapacityTEUs, int currentOccupancyTEUs, int length, int depth, int heigth)
         {
             
             if (string.IsNullOrWhiteSpace(code))
@@ -80,6 +87,9 @@ namespace DDDSample1.Domain.PortInfrastructure.StorageArea
             this.Location = location;
             this.MaxCapacityTEUs = maxCapacityTEUs;
             this.CurrentOccupancyTEUs = currentOccupancyTEUs;
+            this.Length = length;
+            this.Width = depth;
+            this.Heigth = heigth;
         }
 
         

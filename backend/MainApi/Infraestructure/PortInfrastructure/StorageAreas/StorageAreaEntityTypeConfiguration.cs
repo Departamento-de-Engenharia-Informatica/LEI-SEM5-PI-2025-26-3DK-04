@@ -60,6 +60,13 @@ namespace DDDSample1.Infrastructure.StorageAreas
              });
 
             builder.HasIndex(sa => sa.Code).IsUnique();
+            
+            builder.Property(sa => sa.Length)
+                   .IsRequired();
+            builder.Property(sa => sa.Width)
+                   .IsRequired();
+            builder.Property(sa => sa.Heigth)
+                .IsRequired();
         }
     }
 }

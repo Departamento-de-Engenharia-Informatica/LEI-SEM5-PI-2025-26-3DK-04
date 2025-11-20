@@ -22,6 +22,9 @@ interface StorageArea {
   currentOccupancyTEUs: number;
   active: boolean;
   dockAssignments: DockAssignment[];
+  length: number;
+  width: number;
+  height: number;
 }
 
 @Component({
@@ -49,13 +52,16 @@ export class ManageStorageAreas implements OnInit {
     coordinates: '',
     locationDescription: '',
     maxCapacityTEUs: 0,
-    dockAssignments: [] as DockAssignment[]
+    dockAssignments: [] as DockAssignment[],
+    length: 0,
+    width: 0,
+    height: 0
   };
 
   dockAssignmentsMap: { [dockId: string]: { assigned: boolean; distance: number } } = {};
 
   constructor(
-    private adminService: AdminService, 
+    private adminService: AdminService,
     private translation: TranslationService,
     private cdr: ChangeDetectorRef
   ) {}
@@ -95,7 +101,7 @@ export class ManageStorageAreas implements OnInit {
     }
 
     console.log('ManageStorageAreas: applying filter', this.filterName);
-    this.storageAreas = this.allStorageAreas.filter(sa => 
+    this.storageAreas = this.allStorageAreas.filter(sa =>
       sa.designation.toLowerCase().includes(this.filterName.toLowerCase()) ||
       sa.code.toLowerCase().includes(this.filterName.toLowerCase())
     );
@@ -143,7 +149,10 @@ export class ManageStorageAreas implements OnInit {
       InitialDockAssignments: this.storageForm.dockAssignments.map(a => ({
         DockId: a.dockId,
         DistanceMeters: a.distanceMeters
-      }))
+      })),
+      Length: this.storageForm.length,
+      Width: this.storageForm.width,
+      Height: this.storageForm.height
     };
 
     if (this.editing && this.editingId) {
@@ -190,7 +199,10 @@ export class ManageStorageAreas implements OnInit {
       dockAssignments: area.dockAssignments.map(a => ({
         dockId: a.dockId,
         distanceMeters: a.distanceMeters
-      }))
+      })),
+      length: area.length,
+      width: area.width,
+      height: area.height
     };
 
     // Atualiza o mapa de docks com os dados do storage
@@ -213,7 +225,10 @@ export class ManageStorageAreas implements OnInit {
       coordinates: '',
       locationDescription: '',
       maxCapacityTEUs: 0,
-      dockAssignments: []
+      dockAssignments: [],
+      length: 0,
+      width: 0,
+      height: 0
     };
     this.initDockAssignmentsMap();
   }
