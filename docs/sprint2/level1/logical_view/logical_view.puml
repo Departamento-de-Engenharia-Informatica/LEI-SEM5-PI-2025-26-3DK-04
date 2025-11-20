@@ -14,17 +14,19 @@ System(pms, "Port Management System")
 
 ' ==== API Interface ====
 interface "API" as apiIF
-interface "UI" as uiIF
 interface "IAM" as iamIF
+interface "SYSTEM" as sysIF
 
 ' ==== Relationships ====
 Rel(admin,   pms, "")
 Rel(agent,   pms, "")
 Rel(officer, pms, "")
 Rel(operator,pms, "")
+Rel(pms, sysIF, "")
 
-Rel(pms,     apiIF, "REST API")
-Rel(pms,     uiIF, "User Interface")
-Rel(pms,     iamIF, "Identity and Access Management")
+pms -down-( apiIF
+pms -down-( iamIF
+iamIF -up-( sysIF
+
 
 @enduml

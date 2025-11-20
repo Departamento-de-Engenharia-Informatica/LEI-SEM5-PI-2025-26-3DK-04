@@ -11,9 +11,9 @@ export class YardBuilder {
     const group = new THREE.Group();
 
     // ---- Chão do pátio ----
-    const groundHeight = 0.3;
+    const groundHeight = 1.3;
     const groundGeom = new THREE.BoxGeometry(width, groundHeight, depth);
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0x383838 });
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x696969 });
     const ground = new THREE.Mesh(groundGeom, groundMat);
 
     const groundTop = groundHeight / 2;

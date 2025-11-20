@@ -1,0 +1,16 @@
+@startuml system_sequence_diagram_update
+actor "System User" as User
+participant "SPA (Frontend)" as Frontend
+participant "Backend Module(s)" as Backend
+activate User
+User -> Frontend: Fills form and clicks "Update"
+activate Frontend
+Frontend -> Backend: PUT /api/resource/{id} {updated data}
+activate Backend
+Backend -> Backend: Validate updated data
+Backend --> Frontend: 200 OK {updated resource data}
+deactivate Backend
+Frontend --> User: Show success message and updated resource details
+deactivate Frontend
+deactivate User
+@enduml

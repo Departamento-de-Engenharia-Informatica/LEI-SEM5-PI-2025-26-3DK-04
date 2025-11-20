@@ -1,0 +1,21 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+title System Sequence Diagram (SSD)
+
+autonumber
+
+actor "System User" as Employee
+participant ":System" as System
+
+activate Employee
+
+    Employee -> System : logs in
+    activate System
+
+        System --> Employee : loads users internal authorization role
+    deactivate System
+
+@enduml

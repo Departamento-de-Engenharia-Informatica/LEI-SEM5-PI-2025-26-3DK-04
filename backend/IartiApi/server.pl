@@ -736,13 +736,19 @@ multi_crane_schedule_for_date(_Request, Date, DateStr, Format) :-
     
     format(user_error, '[DEBUG] Multi-crane - ResourcesData type: ~w~n', [ResourcesData]),
     
-    % Count cranes in the physical resources
+    % Count cranes in the physical resources 
     catch(
         (   is_list(ResourcesData)
         ->  (format(user_error, '[DEBUG] Multi-crane - ResourcesData is a list~n', []),
-             findall(1, (member(R, ResourcesData), get_dict(type, R, Type), Type = 'Crane'), CraneList),
+             % Find all resources where type contains CRANE (case-insensitive)
+             findall(1, (
+                 member(R, ResourcesData), 
+                 get_dict(type, R, Type),
+                 atom_string(Type, TypeStr),
+                 (sub_string(TypeStr, _, _, _, "CRANE") ; sub_string(TypeStr, _, _, _, "Crane"))
+             ), CraneList),
              length(CraneList, MaxCranes),
-             format(user_error, '[DEBUG] Multi-crane - CraneList length: ~w~n', [MaxCranes]))
+             format(user_error, '[DEBUG] Multi-crane - Found ~w total cranes ~n', [MaxCranes]))
         ;   (format(user_error, '[DEBUG] Multi-crane - ResourcesData is NOT a list, using default~n', []),
              MaxCranes = 2)  % fallback
         ),
@@ -752,15 +758,10 @@ multi_crane_schedule_for_date(_Request, Date, DateStr, Format) :-
     ),
     
     (   MaxCranes > 0
-    ->  format(user_error, '[INFO] Multi-crane - Found ~w cranes in database~n', [MaxCranes])
+    ->  (format(user_error, '[INFO] Multi-crane - Found ~w cranes in database~n', [MaxCranes]),
+         MaxCranesFinal = MaxCranes)
     ;   (format(user_error, '[WARN] Multi-crane - No cranes found, using default max=2~n', []),
-         MaxCranesFixed = 2)
-    ),
-    
-    % Use the correct variable
-    (   var(MaxCranesFixed)
-    ->  MaxCranesFinal = MaxCranes
-    ;   MaxCranesFinal = MaxCranesFixed
+         MaxCranesFinal = 2)
     ),
     
     % Set as global variable for use in generate_crane_allocation

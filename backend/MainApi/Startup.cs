@@ -86,9 +86,13 @@ namespace DDDSample1
             {
                 options.AddDefaultPolicy(builder =>
                 {
-                    builder.WithOrigins("http://localhost:4200")
+                    builder.WithOrigins(
+                            "http://localhost:4200",
+                            "http://vs1019.dei.isep.ipp.pt:4200",
+                            "http://vs1019.dei.isep.ipp.pt")
                         .AllowAnyHeader()
-                        .AllowAnyMethod();
+                        .AllowAnyMethod()
+                        .AllowCredentials();
                 });
             });
         }
