@@ -1,0 +1,63 @@
+@startuml
+title Level 3 Implementation View - Frontend
+
+skinparam packageStyle rectangle
+skinparam package {
+  BackgroundColor #87cefaff
+  BorderColor #000000
+  FontSize 12
+}
+skinparam rectangle {
+  BackgroundColor #87cefaff
+  BorderColor #000000
+}
+
+top to bottom direction
+
+package "Port Management System - Frontend" #87cefaff {
+    
+    together {
+        rectangle "Infrastructure                                                                                                    " as infra #87CEFA {
+            package Routes
+            package Interceptors
+            package Guards
+        }
+    }
+    
+    together {
+        rectangle "Interface Adapters                                                                                                " as adapters #87CEFA {
+            package Components
+            package Services
+        }
+    }
+    
+    together {
+        rectangle "Application Services / Use Case Services                                                             " as appserv #87CEFA {
+            package "HTTP Services"
+        }
+    }
+    
+    together {
+        rectangle "Entities/Core/Domain                                                                                            " as domain #87CEFA {
+            package Interfaces
+            package DTOs
+            package Models
+            package Configuration
+            package Translations
+        }
+    }
+}
+
+Routes .down.> Components
+Components .down.> "HTTP Services"
+Components .up.> Guards
+Services .up.> Interceptors
+Services .right.> "HTTP Services"
+
+"HTTP Services" .down.> Interfaces
+"HTTP Services" .down.> DTOs
+"HTTP Services" .down.> Models
+"HTTP Services" ..> Configuration
+"HTTP Services" ..> Translations
+
+@enduml
