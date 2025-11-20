@@ -18,6 +18,15 @@
   <nav class="nav-menu" [class.open]="mobileMenuOpen">
     <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
     <!-- <a routerLink="/cube" routerLinkActive="active">Cube</a> -->
+    <!-- Admin sees all role UIs -->
+    <ng-container *ngIf="isAdmin">
+      <a routerLink="/representative" routerLinkActive="active">Representative</a>
+      <a routerLink="/project-manager" routerLinkActive="active">Project Manager</a>
+      <a routerLink="/port-officer" routerLinkActive="active">Port Authority Officer</a>
+      <a routerLink="/logistics" routerLinkActive="active">Logistics Operator</a>
+    </ng-container>
+    
+    <!-- All logged-in users see their own role UI -->
     <a
       *ngIf="isLoggedIn"
       class="login-btn"

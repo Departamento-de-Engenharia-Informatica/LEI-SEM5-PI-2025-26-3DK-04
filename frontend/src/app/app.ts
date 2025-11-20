@@ -169,6 +169,10 @@ export class App implements OnInit, OnDestroy {
     return this.authService.status;
   }
 
+  get isAdmin(): boolean {
+    return this.authService.role === 'Admin';
+  }
+
   async handleGoogleCallback() {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
