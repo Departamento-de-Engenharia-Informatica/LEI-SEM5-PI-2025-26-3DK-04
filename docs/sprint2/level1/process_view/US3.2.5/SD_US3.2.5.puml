@@ -1,15 +1,10 @@
 @startuml system_sequence_diagram
-actor "Administrator" as User
-participant "SPA (Frontend)" as Frontend
-participant "Backend Module(s)" as Backend
+actor "Administrator" as Admin
+participant "System" as System
 
-User -> Frontend: Ask to assign role to user
-activate Frontend
-Frontend -> Backend: Request role assignment
-activate Backend
-Backend --> Frontend: Confirm role assigned
-deactivate Backend
-
-Frontend --> User: Notify role assignment success
-deactivate Frontend
+Admin -> System: Request to assign role to user
+activate System
+System -> System: Validate and assign role
+System --> Admin: Notify role assignment success
+deactivate System
 @enduml

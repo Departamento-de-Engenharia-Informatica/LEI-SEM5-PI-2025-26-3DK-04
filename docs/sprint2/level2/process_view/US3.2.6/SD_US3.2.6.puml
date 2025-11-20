@@ -1,0 +1,54 @@
+@startuml system_sequence_diagram
+actor "System User" as User
+participant "SPA (Frontend)" as Frontend
+participant "Backend\n(UserManagementController)" as Backend
+participant "IAM\n(Google Auth)" as IAM
+
+User -> Frontend: Click activation link\n(with token parameter)
+activate Frontend
+
+Frontend -> Backend: GET /api/UserManagement/activate?token={token}
+activate Backend
+
+Backend -> Backend: Validate token\n(check existence and expiration)
+
+alt Token is valid
+    Backend -> IAM: Redirect to Google OAuth authentication
+    activate IAM
+    
+    IAM -> User: Request authentication
+    User -> IAM: Provide credentials
+    IAM -> IAM: Authenticate user
+    
+    alt Authentication successful
+        IAM -> Backend: Return authenticated user data\n(email from JWT token)
+        deactivate IAM
+        
+        Backend -> Backend: Verify authenticated email\nmatches user linked to token
+        
+        alt Email matches
+            Backend -> Backend: Update user status to Active\nDelete activation token
+            Backend --> Frontend: Redirect to success page\n(status=success)
+            Frontend --> User: Display activation success message\n"Your account has been activated"
+            deactivate Backend
+        else Email mismatch
+            Backend --> Frontend: Redirect to error page\n(status=error)
+            deactivate Backend
+            Frontend --> User: Display error message\n"User data mismatch"
+        end
+    else Authentication failed
+        IAM --> Backend: Authentication error
+        deactivate IAM
+        Backend --> Frontend: Redirect to error page\n(status=error)
+        deactivate Backend
+        Frontend --> User: Display error message\n"Authentication failed"
+    end
+else Token is invalid or expired
+    Backend --> Frontend: Redirect to error page\n(status=error)
+    deactivate Backend
+    Frontend --> User: Display error message\n"Invalid or expired activation link"
+end
+
+deactivate Frontend
+
+@enduml

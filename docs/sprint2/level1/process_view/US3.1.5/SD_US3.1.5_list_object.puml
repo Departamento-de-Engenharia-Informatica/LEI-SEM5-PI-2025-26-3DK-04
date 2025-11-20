@@ -1,16 +1,10 @@
 @startuml system_sequence_diagram_list
 actor "System User" as User
-participant "SPA (Frontend)" as Frontend
-participant "Backend Module(s)" as Backend
-activate User
-User -> Frontend: Navigates to list page
-activate Frontend
-Frontend -> Backend: GET /api/resource/filters
-activate Backend
-Backend -> Backend: Fetch and filter data
-Backend --> Frontend: 200 OK {list of object}
-deactivate Backend
-Frontend --> User: Display list with data
-deactivate Frontend
-deactivate User
+participant "System" as System
+
+User -> System: Navigate to list page
+activate System
+System -> System: Fetch and filter data
+System --> User: Display list with data
+deactivate System
 @enduml

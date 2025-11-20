@@ -1,0 +1,18 @@
+@startuml
+actor "System User" as User
+participant "SPA (Frontend)" as Frontend
+participant "Backend Module(s)" as Backend
+activate User
+User -> Frontend: Fills form and clicks "Save"
+activate Frontend
+Frontend -> Frontend: Displays "Loading Indicator" 
+Frontend -> Backend: Request: POST /resource (form data)
+activate Backend
+Backend -> Backend: Validates and Saves Data
+Backend -> Frontend: Response: 200 OK (data saved)
+deactivate Backend
+Frontend -> Frontend: Removes "Loading Indicator" 
+Frontend -> Frontend: Displays "Success/Insuccess Message" 
+User <-- Frontend: Sees success/insuccess message and updates data or not
+deactivate Frontend
+@enduml

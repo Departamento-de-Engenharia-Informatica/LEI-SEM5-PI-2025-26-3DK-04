@@ -1,14 +1,9 @@
 @startuml UserMenus
 actor "System User" as User
-participant "SPA (Frontend)" as Frontend
-participant "Backend Module(s)" as Backend
+participant "System" as System
 
-User -> Frontend: Authenticate / Login (credentials or token)
-activate Frontend
-Frontend -> Backend: Request: GET /menu (with user role)
-activate Backend
-Backend --> Frontend: Response: 200 OK + Menu Data (based on role)
-deactivate Backend
-Frontend --> User: Render menus based on role
-deactivate Frontend
+User -> System: Authenticate / Login (credentials or token)
+activate System
+System --> User: Display menus based on role
+deactivate System
 @enduml
