@@ -228,7 +228,7 @@ namespace DDDNetCore.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<int>("Height")
+                    b.Property<int>("Heigth")
                         .HasColumnType("integer");
 
                     b.Property<int>("Length")

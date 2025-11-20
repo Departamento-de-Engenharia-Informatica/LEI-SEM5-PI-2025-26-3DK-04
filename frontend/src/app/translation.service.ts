@@ -483,6 +483,9 @@ export class TranslationService {
         edit: "Edit",
         delete: "Delete",
         cancel: "Cancel",
+        length: "Length",
+        width: "Width",
+        height: "Height",
 
         dockAssignments: "Dock Assignments",
         create: "Create Storage Area",
@@ -1301,6 +1304,9 @@ export class TranslationService {
         edit: "Editar",
         delete: "Eliminar",
         cancel: "Cancelar",
+        length: "Comprimento",
+        width: "Largura",
+        height: "Altura",
 
         dockAssignments: "Atribuições de Cais",
         create: "Criar Área de Armazenamento",
