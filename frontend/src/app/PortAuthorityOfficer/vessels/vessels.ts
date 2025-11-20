@@ -262,7 +262,7 @@ export class Vessels implements OnInit {
       return false;
     }
 
-    if (!/^IMO\d{7}$/.test(this.vesselForm.imoNumber)) {
+    if (!/^\d{7}$/.test(this.vesselForm.imoNumber)) {
       alert(this.t('manageVessels.imoInvalid') || 'IMO Number must follow the format IMO1234567');
       return false;
     }
