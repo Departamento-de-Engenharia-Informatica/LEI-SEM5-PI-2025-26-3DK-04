@@ -174,6 +174,8 @@ namespace DDDSample1
 
             services.AddTransient<IUserActivationRepository, UserActivationRepository>();
             services.AddTransient<EmailService>();
+
+            services.AddTransient<PortLayoutService>();
         }
     }
 }

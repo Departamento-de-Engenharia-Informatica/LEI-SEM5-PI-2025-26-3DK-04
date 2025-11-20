@@ -6,7 +6,7 @@ export class YardBuilder {
   static lastYardCenter: THREE.Vector3 = new THREE.Vector3();
   static lastYardSize: { width: number, depth: number } = { width: 0, depth: 0 };
 
-  static createYard(width: number, depth: number, position: THREE.Vector3, id: number): THREE.Group {
+  static createYard(width: number, depth: number, position: THREE.Vector3, id: string): THREE.Group {
 
     const group = new THREE.Group();
 
@@ -83,7 +83,7 @@ export class YardBuilder {
 
     return group;
   }
-  static lastBuiltYards: Map<number, {
+  static lastBuiltYards: Map<string, {
     group: THREE.Group,
     center: THREE.Vector3,
     width: number,

@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { AuthService } from '../auth.service';
 import { map } from 'rxjs/operators';
 import { CONFIG } from '../config';
-
+import { PortLayout } from '../dock-view/dock-view';
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private userBaseUrl = `${CONFIG.apiUrl}/UserManagement`;
@@ -25,9 +25,14 @@ export class AdminService {
 
   private vesselBaseUrl = `${CONFIG.apiUrl}/Vessels`;
   private physicalResourcesBaseUrl = `${CONFIG.apiUrl}/PhysicalResources`;
+  private portLayoutBaseUrl = `${CONFIG.apiUrl}/PortLayout`;
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
+
+  getPortLayout(): Observable<PortLayout> {
+    return this.http.get<PortLayout>(`${this.portLayoutBaseUrl}/get`);
+  }
   /* ===============================
             USER MANAGEMENT
   =============================== */

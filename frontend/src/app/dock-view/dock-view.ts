@@ -4,15 +4,31 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { firstValueFrom } from 'rxjs';
 import { DockBuilder } from '../scene/DockBuilder';
 import { PortBuilder } from '../scene/PortBuilder';
-import { AdminService } from '../admin/admin.service'; // JÁ IMPORTADO
+import { AdminService } from '../admin/admin.service';
+
 // NOVOS IMPORTS
 import { WarehouseBuilder } from '../scene/WarehouseBuilder';
 import { YardBuilder } from '../scene/YardBuilder';
 import { YardGantryCraneBuilder, YardCraneType } from '../scene/YardGantryCraneBuilder';
-// import { ContainerBuilder } from '../scene/ContainerBuilder'; // Não é usado diretamente aqui
-import { StsCraneBuilder } from '../scene/StsCraneBuilder'; // Não é usado diretamente aqui
-import { StorageAreaBuilder, StorageAreaType } from '../scene/StorageAreaBuilder'; // Importado mas não usado diretamente, mantido por segurança
+import { StsCraneBuilder } from '../scene/StsCraneBuilder';
 import { VesselBuilder } from '../scene/VesselBuilder';
+
+// -------------------------------------------------------------
+// --- NOVAS INTERFACES PARA O JSON DO LAYOUT (Backend) ---
+// -------------------------------------------------------------
+
+interface PortElement {
+  type: 'dock' | 'storage_area';
+  subtype?: 'yard' | 'warehouse';
+  id_placeholder: string;
+  position: { x: number; z: number; };
+  size: { width: number; depth: number; };
+}
+
+export interface PortLayout {
+  port_dimensions: { width: number; depth: number; };
+  elements: PortElement[];
+}
 
 @Component({
   selector: 'app-dock-view',
@@ -24,7 +40,7 @@ import { VesselBuilder } from '../scene/VesselBuilder';
 export class DockView implements AfterViewInit, OnDestroy {
   @ViewChild('myCanvas') private canvasRef!: ElementRef;
 
-  //* Stage Properties
+  // ... (Propriedades de Stage e Variáveis de Three.js mantidas) ...
   @Input() public cameraZ: number = 20;
   @Input() public fieldOfView: number = 60;
   @Input('nearClipping') public nearClippingPane: number = 1;
@@ -39,7 +55,6 @@ export class DockView implements AfterViewInit, OnDestroy {
   private camera!: THREE.PerspectiveCamera;
   private controls!: OrbitControls;
 
-  // === FIX IMPORTANTE ===
   private docks: THREE.Group[] = [];
 
   private water!: THREE.Mesh;
@@ -66,42 +81,55 @@ export class DockView implements AfterViewInit, OnDestroy {
     up: false,
     down: false
   };
+  // -------------------------------------------------------------------
 
   // 1. INJEÇÃO DO SERVIÇO
   constructor(private adminService: AdminService) {}
 
 
-  // 2. NOVO MÉTODO PARA CARREGAR DADOS ASINCRONAMENTE
+  // 2. MÉTODO PARA CARREGAR DADOS ASINCRONAMENTE (Inclui o novo endpoint)
   private async loadPortStructure(): Promise<void> {
     try {
-      const docks = await firstValueFrom(this.adminService.getAllDocks());
-      const storageAreas = await firstValueFrom(this.adminService.getAllStorageAreas());
-      const resources = await firstValueFrom(this.adminService.getAllPhysicalResources());
+      // NOVO: Obter o layout pré-calculado (JSON)
+      const layout : PortLayout = await firstValueFrom(this.adminService.getPortLayout());
 
-      const yards = storageAreas.filter(a => a.storageAreaType === "Yard");
-      const warehouses = storageAreas.filter(a => a.storageAreaType === "Warehouse");
+      // Dados complementares para Cranes e Vessels
+      const resources = await firstValueFrom(this.adminService.getAllPhysicalResources());
+      const approvedVesselVisits = await firstValueFrom(this.adminService.getApprovedVesselVisitNotifications());
+      const vessels = await firstValueFrom(this.adminService.getVessels());
+      const vesselTypes = await firstValueFrom(this.adminService.getVesselTypes());
 
       const stsCranes = resources.filter(r => r.type === "STS_CRANE");
-      console.log(stsCranes);
       const yardCranes = resources.filter(r => r.type === "YARD_CRANE");
-      console.log(yardCranes);
 
-      const approvedVesselvisits = await firstValueFrom(this.adminService.getApprovedVesselVisitNotifications());
-      console.log(approvedVesselvisits);
+      // Mapeamento dos Placeholders para os IDs reais e dados de layout
+      const docksData = layout.elements.filter(e => e.type === 'dock');
+      const yardsData = layout.elements.filter(e => e.subtype === 'yard');
+      const warehousesData = layout.elements.filter(e => e.subtype === 'warehouse');
 
-      const vessels = await firstValueFrom(this.adminService.getVessels());
-      console.log(vessels);
+      // O Map será usado para passar dados (tamanho/posição) para Cranes/Vessels que usam o ID real
+      const dockMap = new Map<string, PortElement>();
+      docksData.forEach(d => {
+        // Usa o ID real (ex: 'DOCK001') como chave do Map
+        const dockId = d.id_placeholder.replace(/[{}]/g, '').split('_')[2];
+        dockMap.set(dockId, d as PortElement);
+      });
 
-      const vesselTypes = await firstValueFrom(this.adminService.getVesselTypes());
-      console.log(vesselTypes);
+      const yardMap = new Map<string, PortElement>();
+      yardsData.forEach(y => {
+        // Usa o ID real (ex: 'YARD001') como chave do Map
+        const yardId = y.id_placeholder.replace(/[{}]/g, '').split('_')[2];
+        yardMap.set(yardId, y as PortElement);
+      });
 
       await this.createPortStructure(
-        docks,
-        yards,
-        warehouses,
+        layout.port_dimensions,
+        dockMap,
+        yardMap,
+        warehousesData,
         stsCranes,
         yardCranes,
-        approvedVesselvisits,
+        approvedVesselVisits,
         vessels,
         vesselTypes
       );
@@ -110,11 +138,11 @@ export class DockView implements AfterViewInit, OnDestroy {
     }
   }
 
-  // 3. REFACTORIZAÇÃO: Correção do Espaço Vazio (Gap)
   private async createPortStructure(
-    docks: any[],
-    yards: any[],
-    warehouses: any[],
+    portDimensions: { width: number, depth: number },
+    dockMap: Map<string, PortElement>,
+    yardMap: Map<string, PortElement>,
+    warehouses: PortElement[],
     stsCranes: any[],
     yardCranes: any[],
     approvedVesselVisits: any[],
@@ -122,174 +150,132 @@ export class DockView implements AfterViewInit, OnDestroy {
     vesselTypes: any[]
   ): Promise<void> {
 
-    // --- CONFIGURAÇÕES ---
-    const DOCK_WIDTH = 30;
-    const DOCK_DEPTH = 10;
-    const DOCK_GAP = 5;
+    const DOCK_DEPTH_SCALE = 1;
+    const CRANE_Z_POSITION = 6;
+    const VESSEL_DOCK_OFFSET = 15;
 
-    const YARD_WIDTH = 60;
-    const YARD_DEPTH = 40;
+    const portWidth = portDimensions.width;
+    const portDepth = portDimensions.depth;
 
-    const WH_WIDTH = 40;
-    const WH_DEPTH = 25;
-
-    const COL_GAP = 15;
-    const ROW_GAP = 20;
-    const MARGIN_SIDE = 20;
-    const ROAD_FRONT = 40;
-    const ZONE_GAP = 40;
-
-    const numWH = warehouses.length;
-    const numYD = yards.length;
-
-    const colsWH = numWH > 0 ? Math.round(Math.sqrt(numWH)) : 0;
-    const colsYD = numYD > 0 ? Math.round(Math.sqrt(numYD)) : 0;
-
-    const finalColsWH = (numWH > 0 && colsWH === 0) ? 1 : colsWH;
-    const finalColsYD = (numYD > 0 && colsYD === 0) ? 1 : colsYD;
-
-    const widthBlockWH = finalColsWH > 0 ? finalColsWH * (WH_WIDTH + COL_GAP) - COL_GAP : 0;
-    const widthBlockYD = finalColsYD > 0 ? finalColsYD * (YARD_WIDTH + COL_GAP) - COL_GAP : 0;
-
-    let buildingsTotalWidth = widthBlockWH + widthBlockYD;
-    if (numWH > 0 && numYD > 0) {
-      buildingsTotalWidth += ZONE_GAP;
-    }
-
-    const docksTotalWidth = docks.length * (DOCK_WIDTH + DOCK_GAP) - DOCK_GAP;
-
-    let portWidth = Math.max(docksTotalWidth, buildingsTotalWidth) + (MARGIN_SIDE * 2);
-    portWidth = Math.ceil(portWidth / 10) * 10;
-
-    const rowsWH = finalColsWH > 0 ? Math.ceil(numWH / finalColsWH) : 0;
-    const rowsYD = finalColsYD > 0 ? Math.ceil(numYD / finalColsYD) : 0;
-
-    const depthBlockWH = rowsWH > 0 ? rowsWH * (WH_DEPTH + ROW_GAP) - ROW_GAP : 0;
-    const depthBlockYD = rowsYD > 0 ? rowsYD * (YARD_DEPTH + ROW_GAP) - ROW_GAP : 0;
-
-    let maxBuildingDepth = Math.max(depthBlockWH, depthBlockYD);
-    let physicalDepth = ROAD_FRONT + maxBuildingDepth + MARGIN_SIDE;
-
-    let squaredDepth = portWidth * 0.6;
-
-    let portDepth = Math.max(physicalDepth, squaredDepth);
-
-    portDepth = Math.max(portDepth, 140);
-
-    portDepth = Math.ceil(portDepth / 10) * 10;
-
-    console.log(`Layout: ${finalColsWH} cols WH | ${finalColsYD} cols YD`);
-    console.log(`Port Size: ${portWidth}x${portDepth}`);
+    console.log(`Port Size: ${portWidth}x${portDepth} (Calculado pelo Backend)`);
 
     const port = PortBuilder.createPort(portWidth, portDepth);
-    port.position.set(0, 0, portDepth / 2);
+
+    port.position.set(0, 0, 0);
     this.scene.add(port);
 
-    const startDocksX = -((docks.length * (DOCK_WIDTH + DOCK_GAP)) - DOCK_GAP) / 2 + (DOCK_WIDTH/2);
+    Array.from(dockMap.entries()).forEach(([dockId, data]) => {
 
-    docks.forEach((dock, i) => {
-      const x = startDocksX + (i * (DOCK_WIDTH + DOCK_GAP));
+      const DOCK_LEN = data.size.width;
+      const DOCK_DEP = data.size.depth * DOCK_DEPTH_SCALE;
+
+      // NOVO: Usar as coordenadas X e Z diretamente
+      const x = data.position.x;
+      const z = data.position.z;
+
       const dockGroup = DockBuilder.createDock(
-        DOCK_WIDTH, DOCK_DEPTH,
-        new THREE.Vector3(x, 0, -(DOCK_DEPTH / 2)),
-        dock.name
+        DOCK_LEN, DOCK_DEP,
+        new THREE.Vector3(x, 0, z),
+        `Dock ${dockId}` // Nome de Exemplo
       );
-      DockBuilder.builtDocks.set(dock.id, dockGroup);
+      DockBuilder.builtDocks.set(dockId, dockGroup);
       this.scene.add(dockGroup);
       this.docks.push(dockGroup);
     });
 
-    const backLimitZ = portDepth - MARGIN_SIDE;
-    const totalContentWidth = buildingsTotalWidth;
-    let currentX = -(totalContentWidth / 2);
+    // --- WAREHOUSES ---
+    warehouses.forEach(wh => {
+      const whId = wh.id_placeholder.replace(/[{}]/g, '').split('_')[2];
+      const currentWH_WIDTH = wh.size.width;
+      const currentWH_DEPTH = wh.size.depth;
 
-    if (numWH > 0) {
-      const startZ_WH = backLimitZ - depthBlockWH + (WH_DEPTH / 2);
-      let whCursorX = currentX + (WH_WIDTH / 2);
+      // NOVO: Usar as coordenadas X e Z diretamente
+      const x = wh.position.x;
+      const z = wh.position.z;
 
-      warehouses.forEach((wh, index) => {
-        const colIndex = index % finalColsWH;
-        const rowIndex = Math.floor(index / finalColsWH);
+      const whGroup = WarehouseBuilder.createWarehouse(
+        currentWH_WIDTH, currentWH_DEPTH,
+        new THREE.Vector3(x, 0, z),
+        whId
+      );
+      this.scene.add(whGroup);
+    });
 
-        const x = whCursorX + (colIndex * (WH_WIDTH + COL_GAP));
-        const z = startZ_WH + (rowIndex * (WH_DEPTH + ROW_GAP));
+    // --- YARDS ---
+    Array.from(yardMap.entries()).forEach(([yardId, data]) => {
+      const currentYARD_WIDTH = data.size.width;
+      const currentYARD_DEPTH = data.size.depth;
 
-        const whGroup = WarehouseBuilder.createWarehouse(
-          WH_WIDTH, WH_DEPTH,
-          new THREE.Vector3(x, 0, z),
-          wh.id
-        );
-        this.scene.add(whGroup);
+      // NOVO: Usar as coordenadas X e Z diretamente
+      const x = data.position.x;
+      const z = data.position.z;
+
+      const yardGroup = YardBuilder.createYard(
+        currentYARD_WIDTH, currentYARD_DEPTH,
+        new THREE.Vector3(x, 0, z),
+        `Yard ${yardId}` // Code/Name de Exemplo
+      );
+      this.scene.add(yardGroup);
+
+      // Armazenar info para posicionamento de guindastes
+      YardBuilder.lastBuiltYards.set(yardId, {
+        group: yardGroup,
+        center: getYardCenter(yardGroup),
+        width: currentYARD_WIDTH, depth: currentYARD_DEPTH
       });
+    });
 
-      currentX += widthBlockWH + ZONE_GAP;
-    }
 
-    if (numYD > 0) {
-      const startZ_YD = backLimitZ - depthBlockYD + (YARD_DEPTH / 2);
-      let ydCursorX = currentX + (YARD_WIDTH / 2);
+    // -----------------------------------------------------------
+    // 2. CRANES e VESSELS (Mantido)
+    // -----------------------------------------------------------
 
-      yards.forEach((yd, index) => {
-        const colIndex = index % finalColsYD;
-        const rowIndex = Math.floor(index / finalColsYD);
-
-        const x = ydCursorX + (colIndex * (YARD_WIDTH + COL_GAP));
-        const z = startZ_YD + (rowIndex * (YARD_DEPTH + ROW_GAP + 4));
-
-        const yardGroup = YardBuilder.createYard(
-          YARD_WIDTH, YARD_DEPTH,
-          new THREE.Vector3(x, 0, z),
-          yd.code
-        );
-        this.scene.add(yardGroup);
-
-        YardBuilder.lastBuiltYards.set(yd.id, {
-          group: yardGroup,
-          center: getYardCenter(yardGroup),
-          width: YARD_WIDTH, depth: YARD_DEPTH
-        });
-      });
-    }
-
+    // --- STS CRANES ---
     stsCranes.forEach(crane => {
       const dock = DockBuilder.builtDocks.get(crane.assignedArea);
       if (!dock) return;
       const c = getDockCenter(dock);
-      const craneObj = StsCraneBuilder.createCrane(6, 25, 20, new THREE.Vector3(c.x, 0, 6), crane.id);
+
+      const craneObj = StsCraneBuilder.createCrane(
+        6, 25, 20,
+        new THREE.Vector3(c.x, 0, CRANE_Z_POSITION),
+        crane.id
+      );
       craneObj.rotation.y = Math.PI / 2;
       this.scene.add(craneObj);
     });
 
+    // --- YARD CRANES ---
     yardCranes.forEach(crane => {
       const info = YardBuilder.lastBuiltYards.get(crane.assignedArea);
       if (!info) return;
       const obj = YardGantryCraneBuilder.createCrane(info.width, info.depth, 18, info.center, crane.id);
       this.scene.add(obj);
     });
-    //const vesselVisits = await firstValueFrom(this.adminService.getAllVesselVisitNotifications());
-    //console.log(vesselVisits);
-    //const approvedVisits = vesselVisits.filter(v => v.status === 'Approved');
 
+    // --- VESSELS ---
     approvedVesselVisits.forEach(visit => {
-      // Encontrar o dock pelo id
-      const dockInfo = docks.find(d => d.id === visit.assignedDock);
-      if (!dockInfo) return;
+      // Usa o ID real
+      const dockLayoutElement = dockMap.get(visit.assignedDock);
+      const dock = DockBuilder.builtDocks.get(visit.assignedDock);
 
-      const dock = DockBuilder.builtDocks.get(dockInfo.name);
-      if (!dock) return;
+      if (!dock || !dockLayoutElement) return;
 
       const dockCenter = getDockCenter(dock);
-      // Encontrar o vessel pelo vesselId
+
+      // Obtém a profundidade real do dock a partir dos dados do layout (JSON)
+      const DOCK_DEP_REAL = dockLayoutElement.size.depth * DOCK_DEPTH_SCALE;
+
       const vesselData = vessels.find(v => v.id === visit.vesselId);
       if (!vesselData) return;
 
       const vesselTypeData = vesselTypes.find(vt => vt.id === vesselData.vesselTypeId);
       if (!vesselTypeData) return;
 
-      // posição do vessel ao lado do dock
       const vesselPosition = dockCenter.clone();
-      vesselPosition.z -= (DOCK_DEPTH * 2) ; // à frente do dock
-      vesselPosition.y = 0; // ao nível da água
+      // Posição da embarcação: Z do dock - metade da profundidade do dock - offset
+      vesselPosition.z -= (DOCK_DEP_REAL / 2) + VESSEL_DOCK_OFFSET;
+      vesselPosition.y = 0;
 
       const vessel = VesselBuilder.createVessel({
         maxRows: vesselTypeData.maxRows,
@@ -301,19 +287,16 @@ export class DockView implements AfterViewInit, OnDestroy {
 
       this.scene.add(vessel);
     });
-
   }
 
+  // ... (Outros métodos como onCanvasClick, highlightDock, animateScene, etc., mantidos) ...
 
   private onCanvasClick(event: MouseEvent): void {
-
     const rect = this.canvas.getBoundingClientRect();
     this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
     this.raycaster.setFromCamera(this.mouse, this.camera);
-
-    // IMPORTANTE: detectar sub-mesh dentro do Group
     const intersects = this.raycaster.intersectObjects(this.docks, true);
 
     if (intersects.length === 0) return;
@@ -331,7 +314,6 @@ export class DockView implements AfterViewInit, OnDestroy {
     this.highlightDock(clickedDock);
   }
 
-
   private highlightDock(dock: THREE.Group): void {
     this.docks.forEach(d => {
       d.traverse(obj => {
@@ -348,12 +330,9 @@ export class DockView implements AfterViewInit, OnDestroy {
     });
   }
 
-
-
   private easeInOutCubic(t: number): number {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
-
 
   private updateCameraAnimation(dt: number): void {
     if (!this.isAnimating) return;
@@ -537,6 +516,7 @@ export class DockView implements AfterViewInit, OnDestroy {
 
 
 }
+// Funções auxiliares mantidas
 function getYardCenter(yard: THREE.Group): THREE.Vector3 {
   const box = new THREE.Box3().setFromObject(yard);
   const center = new THREE.Vector3();
@@ -553,4 +533,3 @@ function getObjectTopY(object: THREE.Object3D): number {
   const box = new THREE.Box3().setFromObject(object);
   return box.max.y;
 }
-

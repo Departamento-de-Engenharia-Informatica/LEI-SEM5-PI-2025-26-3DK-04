@@ -2,7 +2,7 @@
 
 export class WarehouseBuilder {
 
-  static createWarehouse(width: number, depth: number, position: THREE.Vector3, id: number): THREE.Group {
+  static createWarehouse(width: number, depth: number, position: THREE.Vector3, id: string): THREE.Group {
 
     const group = new THREE.Group();
 

@@ -2,7 +2,7 @@
 
 export class DockBuilder {
 
-  static createDock(width: number, depth: number, position: THREE.Vector3, id: number): THREE.Group {
+  static createDock(width: number, depth: number, position: THREE.Vector3, id: string): THREE.Group {
     const group = new THREE.Group();
 
     // Alturas
@@ -88,5 +88,5 @@ export class DockBuilder {
 
     return group;
   }
-  static builtDocks: Map<number, THREE.Group> = new Map();
+  static builtDocks: Map<string, THREE.Group> = new Map();
 }
