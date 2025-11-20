@@ -1,0 +1,128 @@
+@startuml US3.1.4_FeedbackMechanisms_Frontend
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+title System Sequence Diagram - US 3.1.4: User Feedback Mechanisms (Frontend Only)
+
+autonumber
+
+actor "System User" as User
+participant "ManageUsers" as ManageUsers
+participant "AdminService" as AdminService
+
+== Save Operation with Loading Indicator and Validation ==
+
+activate User
+User -> ManageUsers: Fills form and clicks "Save"
+activate ManageUsers
+
+ManageUsers -> ManageUsers: Set isSaving = true
+
+ManageUsers -> ManageUsers: Validate form fields
+
+alt Validation fails (client-side)
+    ManageUsers -> ManageUsers: Set errors object\n(e.g., errors.email = "Invalid format")
+    
+    ManageUsers -> ManageUsers: Set isSaving = false
+    ManageUsers --> User: Display validation errors near input fields
+    deactivate ManageUsers
+else Validation passes
+    ManageUsers -> AdminService: updateUserRole(email, role)
+    activate AdminService
+    
+    AdminService -> AdminService: HTTP PUT request to backend
+    note right: Authorization: Bearer token
+    
+    alt Backend returns error (400/500)
+        AdminService --> ManageUsers: Observable error
+        deactivate AdminService
+        
+        ManageUsers -> ManageUsers: Catch error in subscribe callback
+        ManageUsers -> ManageUsers: Set messageError = "Error updating user"
+        ManageUsers -> ManageUsers: Set isSaving = false
+        ManageUsers -> ManageUsers: displayMessage(messageError)
+        
+        ManageUsers --> User: Display error alert
+        deactivate ManageUsers
+    else Backend returns success (200)
+        AdminService --> ManageUsers: Observable success
+        deactivate AdminService
+        
+        ManageUsers -> ManageUsers: Set messageSuccess = "User role updated successfully"
+        ManageUsers -> ManageUsers: displayMessage(messageSuccess)
+        
+        ManageUsers -> ManageUsers: resetForm()
+        ManageUsers -> ManageUsers: loadUsers()
+        ManageUsers -> ManageUsers: Set isSaving = false
+        
+        ManageUsers --> User: Display success message and refreshed user list
+        deactivate ManageUsers
+    end
+end
+
+== Asynchronous Validation with Real-time Feedback ==
+
+User -> ManageUsers: Types email address in form
+activate ManageUsers
+
+ManageUsers -> ManageUsers: Check email format\n(must end with @gmail.com)
+
+alt Invalid email format
+    ManageUsers -> ManageUsers: Set errors.email = "Email must be @gmail.com"
+    ManageUsers --> User: Show error message near email field (red text)
+    deactivate ManageUsers
+else Valid format
+    ManageUsers -> AdminService: checkUser(email)
+    activate AdminService
+    
+    AdminService -> AdminService: HTTP GET request to backend
+    note right: Check if email exists
+    
+    alt User already exists
+        AdminService --> ManageUsers: Observable { exists: true }
+        deactivate AdminService
+        
+        ManageUsers -> ManageUsers: Set errors.email = "Email already exists"
+        ManageUsers --> User: Show error message near email field
+        deactivate ManageUsers
+    else User does not exist
+        AdminService --> ManageUsers: Observable { exists: false }
+        deactivate AdminService
+        
+        ManageUsers -> ManageUsers: Clear errors.email
+        ManageUsers --> User: No error shown (field valid)
+        deactivate ManageUsers
+    end
+end
+
+== Loading Indicator During Data Fetch ==
+
+User -> ManageUsers: Opens Manage Users page
+activate ManageUsers
+
+ManageUsers -> ManageUsers: ngOnInit()
+
+ManageUsers -> ManageUsers: loadUsers()
+ManageUsers -> ManageUsers: Set loadingUsers = true
+
+ManageUsers --> User: Display "Loading..." message
+
+ManageUsers -> AdminService: getAllUsers()
+activate AdminService
+
+AdminService -> AdminService: HTTP GET request to backend
+note right: Authorization: Bearer token
+
+AdminService --> ManageUsers: Observable<UserDto[]>
+deactivate AdminService
+
+ManageUsers -> ManageUsers: Set users = result
+ManageUsers -> ManageUsers: Set loadingUsers = false
+ManageUsers -> ManageUsers: applyFilter()
+
+ManageUsers --> User: Display user list (loading indicator removed)
+deactivate ManageUsers
+deactivate User
+
+@enduml

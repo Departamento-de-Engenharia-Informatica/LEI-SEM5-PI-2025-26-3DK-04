@@ -1,0 +1,224 @@
+@startuml SD_US3.2.5_Frontend
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+title System Sequence Diagram - US 3.2.5: Assign/Update Internal Roles with Activation (Frontend Only)
+
+autonumber
+
+actor Admin as admin
+participant "ManageUsers" as frontend
+participant "AdminService" as service
+
+== Assign/Update User Role ==
+
+admin -> frontend : saveUser()
+activate frontend
+
+frontend -> frontend : validateEmail()
+frontend -> frontend : validateName()
+
+alt Local validation fails
+    frontend -> frontend : Set errors object
+    frontend -> admin : Display validation errors
+    deactivate frontend
+else Local validation success
+    frontend -> frontend : Set isSaving = true
+    
+    alt Create new user
+        frontend -> service : createUser(createDto)
+        activate service
+        service -> service : HTTP POST /api/UserManagement/create
+        note right: Authorization: Bearer token\\nBody: { email, name, role }
+        
+        alt Backend error - User already exists
+            service --> frontend : 400 Bad Request
+            deactivate service
+            frontend -> frontend : Set isSaving = false
+            frontend -> frontend : Set errors.email (if race condition)
+            frontend -> admin : Display error message
+            deactivate frontend
+        else Backend success
+            service --> frontend : 200 OK "User created. Activation email sent."
+            deactivate service
+            
+            frontend -> frontend : Set isSaving = false
+            frontend -> frontend : resetForm()
+            frontend -> frontend : loadUsers()
+            frontend -> admin : Display success message "Usuário criado; email de ativação enviado"
+            deactivate frontend
+        end
+        
+    else Update existing user role
+        frontend -> service : updateUserRole(email, role)
+        activate service
+        service -> service : HTTP PUT /api/UserManagement/{email}/role
+        note right: Authorization: Bearer token\\nBody: { role }
+        
+        alt Backend error - User not found
+            service --> frontend : 404 Not Found
+            deactivate service
+            frontend -> frontend : Set isSaving = false
+            frontend -> admin : Display error message
+            deactivate frontend
+        else Backend error - Representative role
+            service --> frontend : 400 Bad Request\\n"Cannot manually assign Representative role"
+            deactivate service
+            frontend -> frontend : Set isSaving = false
+            frontend -> admin : Display error message
+            deactivate frontend
+        else Backend success
+            service --> frontend : 200 OK "Role updated and activation email sent."
+            deactivate service
+            
+            frontend -> frontend : Set isSaving = false
+            frontend -> frontend : resetForm()
+            frontend -> frontend : loadUsers()
+            frontend -> admin : Display success message "Usuário atualizado; email de ativação enviado"
+            deactivate frontend
+        end
+    end
+end
+
+@enduml
+
+== Assign/Update User Role ==
+
+admin -> frontend : saveUser()
+activate frontend
+
+frontend -> frontend : validateEmail()
+frontend -> frontend : validateName()
+
+alt Local validation fails
+    frontend -> frontend : Set errors object
+    frontend -> admin : Display validation errors
+else Local validation success
+    frontend -> frontend : Set isSaving = true
+    
+    alt Create new user
+        frontend -> service : createUser(createDto)
+        activate service
+        service -> controller : POST /api/UserManagement/create
+        activate controller
+        controller -> userService : CreateUserAsync(dto)
+        activate userService
+        
+        userService -> userRepo : GetByIdAsync(email)
+        activate userRepo
+        userRepo -> db : SELECT user WHERE email
+        userRepo --> userService : User or null
+        deactivate userRepo
+        
+        alt User already exists
+            userService --> controller : (false, "User with this email already exists")
+            controller --> service : 400 Bad Request
+            service --> frontend : Error response
+            frontend -> frontend : Set isSaving = false
+            frontend -> frontend : Set errors.email (if race condition)
+            frontend -> admin : Display error message
+        else User does not exist
+            userService -> userService : new User(email, name, picture, role, Status.Inactive)
+            userService -> userRepo : AddAsync(user)
+            activate userRepo
+            userRepo -> db : INSERT user
+            userRepo --> userService : OK
+            deactivate userRepo
+            
+            userService -> userService : new UserActivation(user.Id)
+            userService -> activationRepo : AddAsync(activation)
+            activate activationRepo
+            activationRepo -> db : INSERT activation token (24h expiry)
+            activationRepo --> userService : OK
+            deactivate activationRepo
+            
+            userService -> email : SendActivationEmail(email, activationLink)
+            activate email
+            email --> userService : Email sent
+            deactivate email
+            
+            userService -> db : CommitAsync()
+            userService --> controller : (true, null)
+            deactivate userService
+            
+            controller --> service : 200 OK "User created. Activation email sent."
+            deactivate controller
+            service --> frontend : Success response
+            deactivate service
+            
+            frontend -> frontend : Set isSaving = false
+            frontend -> frontend : resetForm()
+            frontend -> frontend : loadUsers()
+            frontend -> admin : Display success message "Usuário criado; email de ativação enviado"
+        end
+        
+    else Update existing user role
+        frontend -> service : updateUserRole(email, role)
+        activate service
+        service -> controller : PUT /api/UserManagement/{email}/role
+        activate controller
+        controller -> userService : UpdateRoleAsync(email, dto)
+        activate userService
+        
+        userService -> userRepo : GetByIdAsync(email)
+        activate userRepo
+        userRepo -> db : SELECT user WHERE email
+        userRepo --> userService : User or null
+        deactivate userRepo
+        
+        alt User not found
+            userService --> controller : (false, "User not found")
+            controller --> service : 404 Not Found
+            service --> frontend : Error response
+            frontend -> frontend : Set isSaving = false
+            frontend -> admin : Display error message
+        else Role is Representative
+            alt dto.Role == Roles.Representative
+                userService --> controller : (false, "Cannot manually assign Representative role")
+                controller --> service : 400 Bad Request
+                service --> frontend : Error response
+                frontend -> frontend : Set isSaving = false
+                frontend -> admin : Display error message
+            end
+        else Valid update
+            userService -> userService : user.SetRole(dto.Role)
+            userService -> userService : user.SetStatus(Status.Inactive)
+            userService -> userRepo : UpdateAsync(user)
+            activate userRepo
+            userRepo -> db : UPDATE user SET role, status = Inactive
+            userRepo --> userService : OK
+            deactivate userRepo
+            
+            userService -> userService : new UserActivation(user.Id)
+            userService -> activationRepo : AddAsync(activation)
+            activate activationRepo
+            activationRepo -> db : INSERT activation token (24h expiry)
+            activationRepo --> userService : OK
+            deactivate activationRepo
+            
+            userService -> email : SendActivationEmail(email, activationLink)
+            activate email
+            email --> userService : Email sent
+            deactivate email
+            
+            userService -> db : CommitAsync()
+            userService --> controller : (true, null)
+            deactivate userService
+            
+            controller --> service : 200 OK "Role updated and activation email sent."
+            deactivate controller
+            service --> frontend : Success response
+            deactivate service
+            
+            frontend -> frontend : Set isSaving = false
+            frontend -> frontend : resetForm()
+            frontend -> frontend : loadUsers()
+            frontend -> admin : Display success message "Usuário atualizado; email de ativação enviado"
+        end
+    end
+end
+
+deactivate frontend
+
+@enduml

@@ -1,0 +1,544 @@
+@startuml US3.1.5_SPAFormsAndPages_Frontend
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+title System Sequence Diagram - US 3.1.5: SPA Forms and Pages with CRUD Operations (Frontend Only)
+
+autonumber
+
+actor "System User" as User
+participant "ManageComponent" as ManageComponent
+participant "AdminService" as AdminService
+
+== Scenario 1: List View with Filtering and Searching ==
+
+activate User
+User -> ManageComponent: Navigates to resource management page
+activate ManageComponent
+
+ManageComponent -> ManageComponent: ngOnInit()
+
+ManageComponent -> ManageComponent: loadData()
+note right: Loads all supporting data:\nrelated entities,\nreference data
+
+ManageComponent -> ManageComponent: loadAllResources()
+
+ManageComponent -> AdminService: getAllResources()
+activate AdminService
+
+AdminService -> AdminService: HTTP GET request to backend
+note right: Authorization: Bearer token
+
+AdminService --> ManageComponent: Observable<ResourceDto[]>
+deactivate AdminService
+
+ManageComponent -> ManageComponent: Set resources = result
+ManageComponent -> ManageComponent: Apply local filters/grouping if needed
+
+ManageComponent --> User: Display resource list with filter/search options
+deactivate ManageComponent
+
+User -> ManageComponent: Applies filter/search criteria\\n(e.g., by name, status, category)
+activate ManageComponent
+
+ManageComponent -> AdminService: searchResources(filter)
+activate AdminService
+note right: Optional: search endpoint\\nwith query parameters
+
+alt Using search endpoint with filters
+    AdminService -> AdminService: HTTP GET /api/Resource/search?params
+    
+    AdminService --> ManageComponent: Observable with filtered results
+    deactivate AdminService
+    
+    ManageComponent -> ManageComponent: Update resource list
+    ManageComponent --> User: Display filtered resources
+    deactivate ManageComponent
+else Client-side filtering
+    AdminService --> ManageComponent: (Not used - filter locally)
+    deactivate AdminService
+    ManageComponent -> ManageComponent: Filter resources array locally by criteria
+    ManageComponent --> User: Display filtered results
+    deactivate ManageComponent
+end
+
+== Scenario 2: Create New Resource with Form Validation ==
+
+User -> ManageComponent: Fills form and clicks "Create"
+activate ManageComponent
+
+ManageComponent -> ManageComponent: Validate required fields:\\nrequiredField1 != null\\nrequiredField2 != empty\\nformat validation
+
+alt Validation fails
+    ManageComponent -> ManageComponent: displayMessage("Please fill in all required fields")
+    ManageComponent --> User: Display validation error message
+    deactivate ManageComponent
+else Validation passes
+    ManageComponent -> ManageComponent: Set isSaving = true
+    note right: Loading indicator shown
+    
+    ManageComponent -> ManageComponent: mapFormToDto()
+    note right: Maps form data to CreateResourceDto\\nwith all required and optional fields
+    
+    ManageComponent -> AdminService: createResource(dto)
+    activate AdminService
+    
+    AdminService -> AdminService: HTTP POST request to backend
+    note right: Authorization: Bearer token\\nBody: dto
+    
+    alt Backend returns error
+        AdminService --> ManageComponent: Observable error
+        deactivate AdminService
+        
+        ManageComponent -> ManageComponent: Set isSaving = false
+        ManageComponent -> ManageComponent: displayMessage("Error creating resource")
+        ManageComponent --> User: Display error message
+        deactivate ManageComponent
+    else Backend returns success
+        AdminService --> ManageComponent: Observable<ResourceDto>
+        deactivate AdminService
+        
+        ManageComponent -> ManageComponent: Set isSaving = false
+        ManageComponent -> ManageComponent: displayMessage("Resource created successfully")
+        ManageComponent -> ManageComponent: resetForm()
+        ManageComponent -> ManageComponent: loadAllResources()
+        
+        ManageComponent --> User: Display success message and refreshed list
+        deactivate ManageComponent
+    end
+end
+
+== Scenario 3: Update Existing Resource (Edit Form) ==
+
+User -> ManageComponent: Selects resource from list and clicks "Edit"
+activate ManageComponent
+
+ManageComponent -> AdminService: getResourceById(id)
+activate AdminService
+
+AdminService -> AdminService: HTTP GET /api/Resource/{id}
+note right: Authorization: Bearer token
+
+AdminService --> ManageComponent: Observable<ResourceDto>
+deactivate AdminService
+
+ManageComponent -> ManageComponent: Populate form with resource data:\\nform.id = resource.id\\nform.field1 = resource.field1\\nform.field2 = resource.field2\\netc.
+
+ManageComponent -> ManageComponent: Set editing = true
+
+ManageComponent --> User: Display pre-filled form with "Update" button
+deactivate ManageComponent
+
+User -> ManageComponent: Modifies form data and clicks "Update"
+activate ManageComponent
+
+ManageComponent -> ManageComponent: Validate form fields
+
+alt Validation fails
+    ManageComponent -> ManageComponent: displayMessage("Please fill in all required fields")
+    ManageComponent --> User: Display validation error
+    deactivate ManageComponent
+else Validation passes
+    ManageComponent -> ManageComponent: Set isSaving = true
+    
+    ManageComponent -> ManageComponent: mapFormToDto()
+    
+    ManageComponent -> AdminService: updateResource(id, dto)
+    activate AdminService
+    
+    AdminService -> AdminService: HTTP PUT /api/Resource/{id}
+    note right: Authorization: Bearer token\\nBody: dto
+    
+    alt Backend returns error
+        AdminService --> ManageComponent: Observable error
+        deactivate AdminService
+        
+        ManageComponent -> ManageComponent: Set isSaving = false
+        ManageComponent -> ManageComponent: displayMessage("Error updating resource")
+        ManageComponent --> User: Display error message
+        deactivate ManageComponent
+    else Backend returns success
+        AdminService --> ManageComponent: Observable<ResourceDto>
+        deactivate AdminService
+        
+        ManageComponent -> ManageComponent: Set isSaving = false
+        ManageComponent -> ManageComponent: displayMessage("Resource updated successfully")
+        ManageComponent -> ManageComponent: resetForm()
+        ManageComponent -> ManageComponent: Set editing = false
+        ManageComponent -> ManageComponent: loadAllResources()
+        
+        ManageComponent --> User: Display success message and refreshed list
+        deactivate ManageComponent
+    end
+end
+
+== Scenario 4: Perform Action on Resource ==
+
+User -> ManageComponent: Selects resource and clicks action button\\n(e.g., "Activate", "Deactivate", "Submit")
+activate ManageComponent
+
+ManageComponent -> ManageComponent: Validate pre-conditions\\n(e.g., current status allows action)
+
+alt Pre-condition validation fails
+    ManageComponent -> ManageComponent: displayMessage("Action not allowed in current state")
+    ManageComponent --> User: Display error message
+    deactivate ManageComponent
+else Pre-condition satisfied
+    ManageComponent -> ManageComponent: Set isProcessing = true
+    
+    ManageComponent -> AdminService: performAction(resourceId, actionType)
+    activate AdminService
+    
+    AdminService -> AdminService: HTTP POST /api/Resource/{id}/action
+    note right: Authorization: Bearer token\\nBody: { actionType }
+    
+    alt Backend returns error
+        AdminService --> ManageComponent: Observable error
+        deactivate AdminService
+        
+        ManageComponent -> ManageComponent: Set isProcessing = false
+        ManageComponent -> ManageComponent: displayMessage("Error performing action")
+        ManageComponent --> User: Display error message
+        deactivate ManageComponent
+    else Backend returns success
+        AdminService --> ManageComponent: Observable success
+        deactivate AdminService
+        
+        ManageComponent -> ManageComponent: Set isProcessing = false
+        ManageComponent -> ManageComponent: displayMessage("Action completed successfully")
+        ManageComponent -> ManageComponent: loadAllResources()
+        
+        ManageComponent --> User: Display success message and refreshed list
+        deactivate ManageComponent
+    end
+end
+deactivate User
+
+@enduml
+
+== Scenario 1: List View with Filtering and Searching ==
+
+activate User
+User -> Frontend: Navigates to resource management page\n(role-based access via RoleGuard)
+activate Frontend
+
+Frontend -> ManageComponent: ngOnInit()
+activate ManageComponent
+
+ManageComponent -> ManageComponent: loadData()
+note right: Loads all supporting data:\nrelated entities,\nreference data
+
+ManageComponent -> ManageComponent: loadAllResources()
+
+ManageComponent -> AdminService: getAllResources()
+activate AdminService
+
+AdminService -> ResourceController: GET /api/Resource\n(Authorization: Bearer token)
+activate ResourceController
+
+ResourceController -> ResourceController: Verify authorization\n(AuthorizeRoleAttribute)
+
+ResourceController -> ResourceService: GetAllAsync()
+activate ResourceService
+
+ResourceService -> ResourceRepo: GetAllAsync()
+activate ResourceRepo
+
+ResourceRepo -> ResourceRepo: Query all resources\nwith related entities
+
+ResourceRepo --> ResourceService: List<Resource>
+deactivate ResourceRepo
+
+ResourceService -> ResourceService: Map to DTOs\n(MapToDto)
+
+ResourceService --> ResourceController: List<ResourceDto>
+deactivate ResourceService
+
+ResourceController --> AdminService: 200 OK\n[ { id, field1, field2, ... }, ... ]
+deactivate ResourceController
+
+AdminService --> ManageComponent: Observable<ResourceDto[]>
+deactivate AdminService
+
+ManageComponent -> ManageComponent: Set resources = result
+ManageComponent -> ManageComponent: Apply local filters/grouping\nif needed
+
+ManageComponent -> Frontend: Update view with resource list
+Frontend --> User: Displays resource list\nwith filter/search options
+deactivate ManageComponent
+deactivate Frontend
+
+User -> Frontend: Applies filter/search criteria\n(e.g., by name, status, category)
+activate Frontend
+
+Frontend -> ManageComponent: User interaction with filter inputs
+activate ManageComponent
+
+ManageComponent -> AdminService: searchResources(filter)
+note right: (Optional: could use search endpoint\nwith query parameters)
+
+alt Using search endpoint with filters
+    AdminService -> ResourceController: GET /api/Resource/search?\nfield1=...&status=...&dateFrom=...
+    activate ResourceController
+    
+    ResourceController -> ResourceService: SearchAsync(filter)
+    activate ResourceService
+    
+    ResourceService -> ResourceRepo: SearchAsync(filters)
+    activate ResourceRepo
+    
+    ResourceRepo -> ResourceRepo: Build query with filters:\nWHERE field1 = ...\nAND status = ...\nAND dateField >= dateFrom
+    
+    ResourceRepo --> ResourceService: Filtered List<Resource>
+    deactivate ResourceRepo
+    
+    ResourceService --> ResourceController: List<ResourceDto>
+    deactivate ResourceService
+    
+    ResourceController --> AdminService: 200 OK [filtered resources]
+    deactivate ResourceController
+    
+    AdminService --> ManageComponent: Observable with filtered results
+    
+    ManageComponent -> ManageComponent: Update resource list
+    ManageComponent -> Frontend: Refresh view with filtered data
+    Frontend --> User: Displays filtered resources
+    deactivate ManageComponent
+    deactivate Frontend
+else Client-side filtering
+    ManageComponent -> ManageComponent: Filter resources array locally\nby criteria
+    ManageComponent -> Frontend: Update view
+    Frontend --> User: Displays filtered results
+    deactivate ManageComponent
+    deactivate Frontend
+end
+
+== Scenario 2: Create New Resource with Form Validation ==
+
+User -> Frontend: Fills form and clicks "Create"
+activate Frontend
+
+Frontend -> ManageComponent: createOrUpdateResource()
+activate ManageComponent
+
+ManageComponent -> ManageComponent: Validate required fields:\nrequiredField1 != null\nrequiredField2 != empty\nformat validation
+
+alt Validation fails
+    ManageComponent -> ManageComponent: displayMessage(\n"Please fill in all required fields")
+    ManageComponent -> Frontend: Update view (show error)
+    Frontend --> User: Displays validation error message
+    deactivate ManageComponent
+    deactivate Frontend
+else Validation passes
+    ManageComponent -> ManageComponent: Set isSaving = true
+    note right: Loading indicator shown
+    
+    ManageComponent -> ManageComponent: mapFormToDto()
+    note right: Maps form data to CreateResourceDto\nwith all required and optional fields
+    
+    ManageComponent -> AdminService: createResource(dto)
+    activate AdminService
+    
+    AdminService -> ResourceController: POST /api/Resource\n(Authorization: Bearer token, Body: dto)
+    activate ResourceController
+    
+    ResourceController -> ResourceController: Verify authorization\n(AuthorizeRoleAttribute)
+    
+    ResourceController -> ResourceService: CreateAsync(dto)
+    activate ResourceService
+    
+    ResourceService -> ResourceService: Validate business rules:\n- Required fields present\n- Related entities exist\n- Data constraints satisfied
+    
+    ResourceService -> ResourceService: Create Resource entity
+    
+    ResourceService -> ResourceRepo: AddAsync(resource)
+    activate ResourceRepo
+    ResourceRepo --> ResourceService: Resource added
+    deactivate ResourceRepo
+    
+    ResourceService -> ResourceService: CommitAsync()
+    
+    ResourceService --> ResourceController: ResourceDto
+    deactivate ResourceService
+    
+    ResourceController --> AdminService: 201 Created\n{ id, field1, field2, ... }
+    deactivate ResourceController
+    
+    AdminService --> ManageComponent: Observable success
+    deactivate AdminService
+    
+    ManageComponent -> ManageComponent: displayMessage(\n"Resource created successfully")
+    ManageComponent -> ManageComponent: resetForm()
+    ManageComponent -> ManageComponent: loadAllResources()
+    ManageComponent -> ManageComponent: Set isSaving = false
+    
+    ManageComponent -> Frontend: Update view with success message\nand refreshed list
+    Frontend --> User: Displays success message\nand updated resource list
+    deactivate ManageComponent
+    deactivate Frontend
+end
+
+== Scenario 3: Update Existing Resource (Edit Form) ==
+
+User -> Frontend: Selects resource from list\nand clicks "Edit"
+activate Frontend
+
+Frontend -> ManageComponent: loadResourceDetails(resource)
+activate ManageComponent
+
+ManageComponent -> AdminService: getResourceById(id)
+activate AdminService
+
+AdminService -> ResourceController: GET /api/Resource/{id}\n(Authorization: Bearer token)
+activate ResourceController
+
+ResourceController -> ResourceService: GetByIdAsync(id)
+activate ResourceService
+
+ResourceService -> ResourceRepo: GetByIdAsync(id)
+activate ResourceRepo
+ResourceRepo --> ResourceService: Resource
+deactivate ResourceRepo
+
+ResourceService --> ResourceController: ResourceDto
+deactivate ResourceService
+
+ResourceController --> AdminService: 200 OK { resource details }
+deactivate ResourceController
+
+AdminService --> ManageComponent: Observable<ResourceDto>
+deactivate AdminService
+
+ManageComponent -> ManageComponent: Populate form with resource data:\nform.id = resource.id\nform.field1 = resource.field1\nform.field2 = resource.field2\netc.
+
+ManageComponent -> ManageComponent: Set editing = true
+
+ManageComponent -> Frontend: Update form view (edit mode)
+Frontend --> User: Displays pre-filled form\nwith "Update" button
+deactivate ManageComponent
+deactivate Frontend
+
+User -> Frontend: Modifies form data and clicks "Update"
+activate Frontend
+
+Frontend -> ManageComponent: createOrUpdateResource()
+activate ManageComponent
+
+ManageComponent -> ManageComponent: Validate form fields
+
+alt Validation fails
+    ManageComponent -> Frontend: Show validation errors
+    Frontend --> User: Displays errors near fields
+    deactivate ManageComponent
+    deactivate Frontend
+else Validation passes
+    ManageComponent -> ManageComponent: Set isSaving = true
+    ManageComponent -> ManageComponent: mapFormToDto()
+    
+    ManageComponent -> AdminService: updateResource(id, dto)
+    activate AdminService
+    
+    AdminService -> ResourceController: PUT /api/Resource/{id}\n(Authorization: Bearer token, Body: dto)
+    activate ResourceController
+    
+    ResourceController -> ResourceService: UpdateAsync(id, dto)
+    activate ResourceService
+    
+    ResourceService -> ResourceRepo: GetByIdAsync(id)
+    activate ResourceRepo
+    ResourceRepo --> ResourceService: Resource
+    deactivate ResourceRepo
+    
+    ResourceService -> ResourceService: Validate:\nBusiness rules valid\nConstraints satisfied
+    
+    ResourceService -> ResourceService: Update resource properties
+    
+    ResourceService -> ResourceRepo: UpdateAsync(resource)
+    activate ResourceRepo
+    ResourceRepo --> ResourceService: Updated
+    deactivate ResourceRepo
+    
+    ResourceService -> ResourceService: CommitAsync()
+    
+    ResourceService --> ResourceController: ResourceDto
+    deactivate ResourceService
+    
+    ResourceController --> AdminService: 200 OK { updated resource }
+    deactivate ResourceController
+    
+    AdminService --> ManageComponent: Observable success
+    deactivate AdminService
+    
+    ManageComponent -> ManageComponent: displayMessage("Resource updated successfully")
+    ManageComponent -> ManageComponent: resetForm()
+    ManageComponent -> ManageComponent: Set editing = false
+    ManageComponent -> ManageComponent: loadAllResources()
+    ManageComponent -> ManageComponent: Set isSaving = false
+    
+    ManageComponent -> Frontend: Update view
+    Frontend --> User: Displays success message\nand refreshed list
+    deactivate ManageComponent
+    deactivate Frontend
+end
+
+== Scenario 4: Perform Action on Resource ==
+
+User -> Frontend: Selects resource and clicks action button\n(e.g., "Activate", "Deactivate", "Submit")
+activate Frontend
+
+Frontend -> ManageComponent: performAction(resource, actionType)
+activate ManageComponent
+
+ManageComponent -> ManageComponent: Validate pre-conditions\n(e.g., current status allows action)
+
+alt Pre-condition validation fails
+    ManageComponent -> Frontend: displayMessage(\n"Action not allowed in current state")
+    Frontend --> User: Shows error message
+    deactivate ManageComponent
+    deactivate Frontend
+else Pre-condition satisfied
+    ManageComponent -> AdminService: performResourceAction(id, actionType)
+    activate AdminService
+    
+    AdminService -> ResourceController: PUT /api/Resource/{id}/{action}\n(Authorization: Bearer token)
+    activate ResourceController
+    
+    ResourceController -> ResourceService: PerformActionAsync(id, actionType)
+    activate ResourceService
+    
+    ResourceService -> ResourceRepo: GetByIdAsync(id)
+    activate ResourceRepo
+    ResourceRepo --> ResourceService: Resource
+    deactivate ResourceRepo
+    
+    ResourceService -> ResourceService: Execute action logic\n(e.g., state transition,\nupdate status, trigger workflow)
+    
+    ResourceService -> ResourceRepo: UpdateAsync(resource)
+    activate ResourceRepo
+    ResourceRepo --> ResourceService: Updated
+    deactivate ResourceRepo
+    
+    ResourceService -> ResourceService: CommitAsync()
+    
+    ResourceService --> ResourceController: ResourceDto
+    deactivate ResourceService
+    
+    ResourceController --> AdminService: 200 OK { updated resource }
+    deactivate ResourceController
+    
+    AdminService --> ManageComponent: Observable success
+    deactivate AdminService
+    
+    ManageComponent -> ManageComponent: displayMessage("Action performed successfully")
+    ManageComponent -> ManageComponent: loadAllResources()
+    note right: Refresh list to reflect changes
+    
+    ManageComponent -> Frontend: Update view
+    Frontend --> User: Displays success message\nand updated resource list
+    deactivate ManageComponent
+    deactivate Frontend
+end
+deactivate User
+
+@enduml

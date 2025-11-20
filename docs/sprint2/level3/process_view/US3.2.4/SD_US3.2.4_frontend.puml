@@ -1,0 +1,358 @@
+@startuml US3.2.4_RoleBasedAccessControl_Frontend
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+title System Sequence Diagram - US 3.2.4: Role-Based Access Control (Frontend Only)
+
+autonumber
+
+actor "System User" as User
+participant "Router" as Router
+participant "RoleGuard" as RoleGuard
+participant "AuthService" as AuthService
+participant "ManageUsers" as ManageUsers
+participant "AdminService" as AdminService
+
+== Frontend: Route Protection with RoleGuard ==
+
+activate User
+User -> Router: Attempts to navigate to restricted page\\n(e.g., /admin/manage-users)
+activate Router
+
+Router -> Router: Check route configuration\\ncanActivate: [RoleGuard]\\ndata: { roles: ['admin'] }
+
+Router -> RoleGuard: canActivate(route)
+activate RoleGuard
+
+RoleGuard -> RoleGuard: Extract expected roles from route.data['roles']
+
+RoleGuard -> AuthService: Get user role
+activate AuthService
+AuthService --> RoleGuard: userRole (from localStorage or signals)
+deactivate AuthService
+
+alt User has no role (not logged in)
+    RoleGuard -> RoleGuard: Log warning: "No role → Access denied"
+    
+    RoleGuard -> Router: return false + navigate('/access-denied')
+    deactivate RoleGuard
+    
+    Router --> User: Display "Access Denied" page
+    deactivate Router
+else User role does not match expected roles
+    RoleGuard -> RoleGuard: Normalize user role (trim, toLowerCase)
+    
+    RoleGuard -> RoleGuard: Check if userRole in expectedRoles array
+    
+    RoleGuard -> RoleGuard: Log warning: "Role invalid → Access denied"
+    
+    RoleGuard -> Router: return false + navigate('/access-denied')
+    deactivate RoleGuard
+    
+    Router --> User: Display "Access Denied" page
+    deactivate Router
+else User role matches expected roles
+    RoleGuard -> RoleGuard: Log: "ACCESS GRANTED"
+    
+    RoleGuard -> Router: return true
+    deactivate RoleGuard
+    
+    Router --> User: Display authorized page
+    deactivate Router
+end
+
+== Frontend: API Call with Authorization ==
+
+User -> ManageUsers: Performs action (e.g., clicks "Create User" button)
+activate ManageUsers
+
+ManageUsers -> ManageUsers: Validate form data
+
+alt Validation fails
+    ManageUsers --> User: Display validation error
+    deactivate ManageUsers
+else Validation passes
+    ManageUsers -> AdminService: createUser(dto)
+    activate AdminService
+    
+    AdminService -> AuthService: Get token
+    activate AuthService
+    AuthService --> AdminService: idToken
+    deactivate AuthService
+    
+    AdminService -> AdminService: HTTP POST /api/UserManagement/create
+    note right: Authorization: Bearer {idToken}\\nBody: { email, name, role }
+    
+    alt Backend returns 401 Unauthorized
+        AdminService --> ManageUsers: HTTP Error 401
+        deactivate AdminService
+        
+        ManageUsers --> User: Display error: "Unauthorized access"
+        deactivate ManageUsers
+    else Backend returns 403 Forbidden
+        AdminService --> ManageUsers: HTTP Error 403
+        deactivate AdminService
+        
+        ManageUsers --> User: Display error: "Access Denied - Insufficient permissions"
+        deactivate ManageUsers
+    else Backend returns success (200/201)
+        AdminService --> ManageUsers: Observable<UserDto>
+        deactivate AdminService
+        
+        ManageUsers -> ManageUsers: displayMessage("User created successfully")
+        ManageUsers -> ManageUsers: resetForm()
+        ManageUsers -> ManageUsers: loadUsers()
+        
+        ManageUsers --> User: Display success message and refreshed list
+        deactivate ManageUsers
+    end
+end
+deactivate User
+
+@enduml
+
+== Frontend: Route Protection with RoleGuard ==
+
+activate User
+User -> Frontend: Attempts to navigate to\nrestricted page (e.g., /admin/manage-users)
+activate Frontend
+
+Frontend -> Router: Navigate to route
+activate Router
+
+Router -> Router: Check route configuration\ncanActivate: [RoleGuard]\ndata: { roles: ['admin'] }
+
+Router -> RoleGuard: canActivate(route)
+activate RoleGuard
+
+RoleGuard -> RoleGuard: Extract expected roles\nfrom route.data['roles']
+
+RoleGuard -> RoleGuard: Get user role from\nAuthService.role or localStorage
+
+alt User has no role (not logged in)
+    RoleGuard -> RoleGuard: Log warning:\n"No role → Access denied"
+    
+    RoleGuard -> Router: return false
+    deactivate RoleGuard
+    
+    Router -> Frontend: Navigate to /access-denied
+    Frontend --> User: Displays "Access Denied" page
+    deactivate Router
+    deactivate Frontend
+else User role does not match expected roles
+    RoleGuard -> RoleGuard: Normalize user role\n(trim, toLowerCase)
+    
+    RoleGuard -> RoleGuard: Check if userRole\nin expectedRoles array
+    
+    RoleGuard -> RoleGuard: Log warning:\n"Role invalid → Access denied"
+    
+    RoleGuard -> Router: return false
+    deactivate RoleGuard
+    
+    Router -> Frontend: Navigate to /access-denied
+    Frontend --> User: Displays "Access Denied" page
+    deactivate Router
+    deactivate Frontend
+else User role matches expected roles
+    RoleGuard -> RoleGuard: Log: "ACCESS GRANTED"
+    
+    RoleGuard -> Router: return true
+    deactivate RoleGuard
+    
+    Router -> Frontend: Load requested component
+    deactivate Router
+    
+    Frontend --> User: Displays authorized page
+    deactivate Frontend
+end
+
+== Backend: API Endpoint Protection with AuthorizeRoleAttribute ==
+
+User -> Frontend: Performs action\n(e.g., clicks "Create User" button)
+activate Frontend
+
+Frontend -> ManageUsers: saveUser()
+activate ManageUsers
+
+ManageUsers -> AdminService: createUser(dto)
+activate AdminService
+
+AdminService -> UserController: POST /api/UserManagement/create\n(Authorization: Bearer {idToken}\nBody: { email, name, role })
+activate UserController
+
+UserController -> AuthFilter: OnAuthorizationAsync(context)
+activate AuthFilter
+note right: [AuthorizeRole(Roles.Admin)]\nfilter executes before\ncontroller action method
+
+AuthFilter -> AuthFilter: Extract Authorization header
+
+alt Missing or invalid Authorization header
+    AuthFilter -> Logger: LogWarning(\n"Unauthorized: missing/invalid header.\nPath: {Path}")
+    activate Logger
+    Logger --> AuthFilter: Logged
+    deactivate Logger
+    
+    AuthFilter -> UserController: Set context.Result\n= UnauthorizedResult (401)
+    deactivate AuthFilter
+    
+    UserController --> AdminService: 401 Unauthorized
+    deactivate UserController
+    
+    AdminService --> ManageUsers: HTTP Error 401
+    deactivate AdminService
+    
+    ManageUsers --> Frontend: Update view
+    deactivate ManageUsers
+    
+    Frontend --> User: Shows error message:\n"Unauthorized access"
+    deactivate Frontend
+else Authorization header present
+    AuthFilter -> AuthFilter: Extract idToken\nfrom "Bearer {token}"
+    
+    AuthFilter -> AuthFilter: Decode JWT token\n(JwtSecurityTokenHandler)
+    
+    alt Invalid JWT token
+        AuthFilter -> Logger: LogWarning(\n"Unauthorized: invalid JWT token.\nPath: {Path}")
+        activate Logger
+        Logger --> AuthFilter: Logged
+        deactivate Logger
+        
+        AuthFilter -> UserController: Set context.Result\n= UnauthorizedResult (401)
+        deactivate AuthFilter
+        
+        UserController --> AdminService: 401 Unauthorized
+        deactivate UserController
+        
+        AdminService --> ManageUsers: HTTP Error 401
+        deactivate AdminService
+        
+        ManageUsers --> Frontend: Update view
+        deactivate ManageUsers
+        
+        Frontend --> User: Shows error: "Invalid token"
+        deactivate Frontend
+    else Valid JWT token
+        AuthFilter -> AuthFilter: Extract email claim\nfrom token
+        
+        alt Email claim missing
+            AuthFilter -> Logger: LogWarning(\n"Unauthorized: token missing email.\nPath: {Path}")
+            activate Logger
+            Logger --> AuthFilter: Logged
+            deactivate Logger
+            
+            AuthFilter -> UserController: Set context.Result\n= UnauthorizedResult (401)
+            deactivate AuthFilter
+            
+            UserController --> AdminService: 401 Unauthorized
+            deactivate UserController
+            
+            AdminService --> ManageUsers: HTTP Error 401
+            deactivate AdminService
+            
+            ManageUsers --> Frontend: Update view
+            deactivate ManageUsers
+            
+            Frontend --> User: Shows error: "Invalid token"
+            deactivate Frontend
+        else Email claim present
+            AuthFilter -> UserRepo: GetByEmailAsync(email)
+            activate UserRepo
+            
+            UserRepo -> UserRepo: Query database\nfor user by email
+            
+            UserRepo --> AuthFilter: User entity
+            deactivate UserRepo
+            
+            alt User not found, inactive, or no role
+                AuthFilter -> Logger: LogWarning(\n"Unauthorized: user not found/inactive.\nEmail: {Email}, Path: {Path}")
+                activate Logger
+                Logger --> AuthFilter: Logged
+                deactivate Logger
+                
+                AuthFilter -> UserController: Set context.Result\n= UnauthorizedResult (401)
+                deactivate AuthFilter
+                
+                UserController --> AdminService: 401 Unauthorized
+                deactivate UserController
+                
+                AdminService --> ManageUsers: HTTP Error 401
+                deactivate AdminService
+                
+                ManageUsers --> Frontend: Update view
+                deactivate ManageUsers
+                
+                Frontend --> User: Shows error:\n"User account inactive or invalid"
+                deactivate Frontend
+            else User role not in allowed roles
+                AuthFilter -> AuthFilter: Check if user.GetRole()\nin _roles array\n(e.g., [Roles.Admin])
+                
+                AuthFilter -> Logger: LogWarning(\n"Forbidden: user role {Role} not allowed.\nEmail: {Email}, Path: {Path}")
+                activate Logger
+                Logger --> AuthFilter: Logged
+                deactivate Logger
+                
+                AuthFilter -> UserController: Set context.Result\n= ObjectResult (403 Forbidden)\n{ error: "Access Denied" }
+                deactivate AuthFilter
+                
+                UserController --> AdminService: 403 Forbidden\n{ error: "Access Denied" }
+                deactivate UserController
+                
+                AdminService --> ManageUsers: HTTP Error 403
+                deactivate AdminService
+                
+                ManageUsers --> Frontend: Update view
+                deactivate ManageUsers
+                
+                Frontend --> User: Shows error:\n"Access Denied - Insufficient permissions"
+                deactivate Frontend
+            else User role matches allowed roles
+                AuthFilter -> AuthFilter: Log: Authorization successful
+                
+                AuthFilter -> AuthFilter: Populate HttpContext.User\nwith claims identity
+                
+                AuthFilter -> UserController: Authorization passed\n(no context.Result set)
+                deactivate AuthFilter
+                
+                UserController -> UserService: CreateUserAsync(dto)
+                activate UserService
+                
+                UserService -> UserRepo: GetByIdAsync(email)
+                activate UserRepo
+                UserRepo --> UserService: null (user not exists)
+                deactivate UserRepo
+                
+                UserService -> UserService: Create User entity\nwith Status.Inactive
+                
+                UserService -> UserRepo: AddAsync(user)
+                activate UserRepo
+                UserRepo --> UserService: User added
+                deactivate UserRepo
+                
+                UserService -> UserService: Create activation token\nSend activation email
+                
+                UserService --> UserController: (Success: true)
+                deactivate UserService
+                
+                UserController --> AdminService: 200 OK\n{ message: "User created.\nActivation email sent." }
+                deactivate UserController
+                
+                AdminService --> ManageUsers: Observable success
+                deactivate AdminService
+                
+                ManageUsers -> ManageUsers: displayMessage(success)
+                ManageUsers -> ManageUsers: resetForm()
+                ManageUsers -> ManageUsers: loadUsers()
+                
+                ManageUsers --> Frontend: Update view
+                deactivate ManageUsers
+                
+                Frontend --> User: Shows success message:\n"User created successfully"
+                deactivate Frontend
+            end
+        end
+    end
+end
+deactivate User
+
+@enduml

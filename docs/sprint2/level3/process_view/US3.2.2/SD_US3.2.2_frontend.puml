@@ -1,0 +1,221 @@
+@startuml US3.2.2_AutoLoadRole_Frontend
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+title System Sequence Diagram - US 3.2.2: Auto-load Internal Authorization Role After Authentication (Frontend Only)
+
+autonumber
+
+actor "System User" as User
+participant "App" as App
+participant "AuthService" as AuthService
+
+activate User
+User -> App: Clicks "Login with Google"
+activate App
+
+App -> App: Redirect to Google OAuth
+note right: Opens Google login window\\nwith client_id, redirect_uri, scope
+
+User -> App: Completes Google authentication
+note left: User provides credentials\\nto Google (external process)
+
+App -> App: handleGoogleCallback()
+note right: Extracts authorization code\\nfrom URL params
+
+App -> AuthService: exchangeCodeForToken(code)
+activate AuthService
+
+AuthService -> AuthService: HTTP POST /auth/google
+note right: Send authorization code\\nto backend
+
+alt Backend authentication fails
+    AuthService --> App: Error response (401/404)
+    deactivate AuthService
+    
+    App --> User: Display error message: "User not found"
+    deactivate App
+else Backend returns tokens
+    AuthService --> App: { idToken, accessToken }
+    deactivate AuthService
+    
+    App -> AuthService: getUserInfo(idToken)
+    activate AuthService
+    
+    AuthService -> AuthService: HTTP POST /auth/google/user
+    note right: Send idToken to get user details
+    
+    alt User not found in database
+        AuthService --> App: 404 Not Found\\n{ error: "User not found" }
+        deactivate AuthService
+        
+        App --> User: Display error: "User not found"
+        deactivate App
+    else User has no assigned role
+        AuthService --> App: 401 Unauthorized\\n{ error: "User has no assigned role" }
+        deactivate AuthService
+        
+        App --> User: Display error: "User has no assigned role. Access denied."
+        deactivate App
+    else User account is inactive
+        AuthService --> App: 401 Unauthorized\\n{ error: "User account is Inactive" }
+        deactivate AuthService
+        
+        App --> User: Display error: "User account is Inactive. Access denied."
+        deactivate App
+    else User is active with valid role
+        AuthService --> App: 200 OK\\n{ email, name, foto, role, status }
+        deactivate AuthService
+        
+        App -> AuthService: setToken(idToken, name, email, picture, role, status)
+        activate AuthService
+        
+        AuthService -> AuthService: Set signals:\\n_token, _userName, _email,\\n_picture, _role, _status
+        
+        AuthService -> AuthService: Store in localStorage:\\ntoken, userName, email,\\npicture, role, status
+        
+        AuthService --> App: Token and user data stored
+        deactivate AuthService
+        
+        App -> App: goToRoleUI()
+        note right: Navigate based on role:\\nAdmin → /admin\\nRepresentative → /representative\\nPortAuthorityOfficer → /port-officer\\nLogisticsOperator → /logistics\\nProjectManager → /project-manager
+        
+        App --> User: Display role-based menu and redirect to role page
+        deactivate App
+    end
+end
+deactivate User
+
+@enduml
+
+activate User
+User -> Frontend: Clicks "Login with Google"
+activate Frontend
+
+Frontend -> App: login()
+activate App
+
+App -> GoogleIAM: Redirect to Google OAuth\n(client_id, redirect_uri, scope)
+activate GoogleIAM
+
+GoogleIAM -> User: Prompts for Google credentials
+User -> GoogleIAM: Provides credentials
+GoogleIAM -> GoogleIAM: Authenticate user
+
+GoogleIAM --> App: Redirect with authorization code
+deactivate GoogleIAM
+
+App -> App: handleGoogleCallback()
+note right: Extracts code from URL params
+
+App -> AuthController: POST /auth/google\n(Body: { code })
+activate AuthController
+
+AuthController -> GoogleAuthService: ExchangeCodeForToken(code)
+activate GoogleAuthService
+
+GoogleAuthService -> GoogleIAM: POST https://oauth2.googleapis.com/token\n(code, client_id, client_secret,\nredirect_uri, grant_type)
+activate GoogleIAM
+
+GoogleIAM -> GoogleIAM: Validate authorization code
+
+GoogleIAM --> GoogleAuthService: TokenResponse\n{ id_token, access_token }
+deactivate GoogleIAM
+
+GoogleAuthService --> AuthController: TokenResponse
+deactivate GoogleAuthService
+
+AuthController --> App: 200 OK\n{ idToken, accessToken }
+deactivate AuthController
+
+App -> AuthController: POST /auth/google/user\n(Body: { idToken })
+activate AuthController
+
+AuthController -> AuthController: Validate idToken not empty
+
+AuthController -> GoogleAuthService: GetUser(tokenResponse)
+activate GoogleAuthService
+
+GoogleAuthService -> GoogleAuthService: Decode JWT token\n(extract email from claims)
+
+GoogleAuthService -> UserRepo: GetByEmailAsync(email)
+activate UserRepo
+
+alt User not found in database
+    UserRepo -> UserRepo: Query database
+    
+    UserRepo --> GoogleAuthService: null (user not found)
+    deactivate UserRepo
+    
+    GoogleAuthService --> AuthController: Exception:\n"User not on database"
+    deactivate GoogleAuthService
+    
+    AuthController --> App: 404 Not Found\n{ error: "User not found" }
+    deactivate AuthController
+    
+    App -> Frontend: Display error alert
+    Frontend --> User: Shows error message:\n"User not found"
+    deactivate App
+    deactivate Frontend
+else User found
+    UserRepo -> UserRepo: Query database for user\nby email
+    
+    UserRepo --> GoogleAuthService: User entity
+    deactivate UserRepo
+    
+    GoogleAuthService --> AuthController: User
+    deactivate GoogleAuthService
+    
+    alt User has no assigned role
+        AuthController -> AuthController: Check user.GetRole()\n== Roles.NoRole
+        
+        AuthController --> App: 401 Unauthorized\n{ error: "User has no assigned role.\nAccess denied." }
+        deactivate AuthController
+        
+        App -> Frontend: Display error alert
+        Frontend --> User: Shows error message:\n"User has no assigned role.\nAccess denied."
+        deactivate App
+        deactivate Frontend
+    else User account is inactive
+        AuthController -> AuthController: Check user.GetRole()\n!= Roles.NoRole
+        
+        AuthController -> AuthController: Check user.GetStatus()\n== Status.Inactive
+        
+        AuthController --> App: 401 Unauthorized\n{ error: "User account is Inactive.\nAccess denied." }
+        deactivate AuthController
+        
+        App -> Frontend: Display error alert
+        Frontend --> User: Shows error message:\n"User account is Inactive.\nAccess denied."
+        deactivate App
+        deactivate Frontend
+    else User is active with valid role
+        AuthController -> AuthController: Check user.GetRole()\n!= Roles.NoRole
+        
+        AuthController -> AuthController: Check user.GetStatus()\n== Status.Active
+        
+        AuthController --> App: 200 OK\n{ email, name, foto, role, status }
+        deactivate AuthController
+        
+        App -> AuthService: setToken(idToken, name,\nemail, picture, role, status)
+        activate AuthService
+        
+        AuthService -> AuthService: Set signals:\n_token, _userName, _email,\n_picture, _role, _status
+        
+        AuthService -> AuthService: Store in localStorage:\ntoken, userName, email,\npicture, role, status
+        
+        AuthService --> App: Token and user data stored
+        deactivate AuthService
+        
+        App -> App: goToRoleUI()
+        note right: Navigate based on role:\nAdmin → /admin\nRepresentative → /representative\nPortAuthorityOfficer → /port-officer\nLogisticsOperator → /logistics\nProjectManager → /project-manager
+        
+        App -> Frontend: Update UI with user menu\n(role-specific options)
+        Frontend --> User: Displays role-based menu\nand redirects to role page
+        deactivate App
+        deactivate Frontend
+    end
+end
+deactivate User
+
+@enduml
