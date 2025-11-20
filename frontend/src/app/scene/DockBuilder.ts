@@ -81,12 +81,18 @@ export class DockBuilder {
     // ------ POSICIONAR ------
     group.position.copy(position);
     group.position.y = 0;
-
     group.name = `Dock_${id}`;
 
-    DockBuilder.builtDocks.set(id, group);
+    let z = position.z;
+    DockBuilder.builtDocks.set(id, {
+      group,
+      z
+    });
 
     return group;
   }
-  static builtDocks: Map<string, THREE.Group> = new Map();
+  static builtDocks: Map<string, {
+    group : THREE.Group
+    z : number
+  }> = new Map();
 }

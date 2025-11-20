@@ -92,7 +92,9 @@ export class DockView implements AfterViewInit, OnDestroy {
     try {
       // NOVO: Obter o layout pré-calculado (JSON)
       const layout : PortLayout = await firstValueFrom(this.adminService.getPortLayout());
-
+      const docks = await firstValueFrom(this.adminService.getAllDocks());
+      const storageAreas = await firstValueFrom(this.adminService.getAllStorageAreas());
+      const yards = storageAreas.filter(a => a.storageAreaType === "Yard");
       // Dados complementares para Cranes e Vessels
       const resources = await firstValueFrom(this.adminService.getAllPhysicalResources());
       const approvedVesselVisits = await firstValueFrom(this.adminService.getApprovedVesselVisitNotifications());
@@ -111,14 +113,14 @@ export class DockView implements AfterViewInit, OnDestroy {
       const dockMap = new Map<string, PortElement>();
       docksData.forEach(d => {
         // Usa o ID real (ex: 'DOCK001') como chave do Map
-        const dockId = d.id_placeholder.replace(/[{}]/g, '').split('_')[2];
+        const dockId = d.id_placeholder;
         dockMap.set(dockId, d as PortElement);
       });
 
       const yardMap = new Map<string, PortElement>();
       yardsData.forEach(y => {
         // Usa o ID real (ex: 'YARD001') como chave do Map
-        const yardId = y.id_placeholder.replace(/[{}]/g, '').split('_')[2];
+        const yardId = y.id_placeholder;
         yardMap.set(yardId, y as PortElement);
       });
 
@@ -126,6 +128,8 @@ export class DockView implements AfterViewInit, OnDestroy {
         layout.port_dimensions,
         dockMap,
         yardMap,
+        docks,
+        yards,
         warehousesData,
         stsCranes,
         yardCranes,
@@ -142,6 +146,8 @@ export class DockView implements AfterViewInit, OnDestroy {
     portDimensions: { width: number, depth: number },
     dockMap: Map<string, PortElement>,
     yardMap: Map<string, PortElement>,
+    docks: any[],
+    yards: any[],
     warehouses: PortElement[],
     stsCranes: any[],
     yardCranes: any[],
@@ -151,8 +157,8 @@ export class DockView implements AfterViewInit, OnDestroy {
   ): Promise<void> {
 
     const DOCK_DEPTH_SCALE = 1;
-    const CRANE_Z_POSITION = 6;
-    const VESSEL_DOCK_OFFSET = 15;
+    const CRANE_Z_POSITION = 17;
+    const VESSEL_DOCK_OFFSET = 20;
 
     const portWidth = portDimensions.width;
     const portDepth = portDimensions.depth;
@@ -165,27 +171,36 @@ export class DockView implements AfterViewInit, OnDestroy {
     this.scene.add(port);
 
     Array.from(dockMap.entries()).forEach(([dockId, data]) => {
+      let dockName: string = "";
 
+      docks.forEach((dock) => {
+          if (dock.id === dockId) {
+              dockName = dock.name;
+          }
+      });
       const DOCK_LEN = data.size.width;
       const DOCK_DEP = data.size.depth * DOCK_DEPTH_SCALE;
 
       // NOVO: Usar as coordenadas X e Z diretamente
       const x = data.position.x;
       const z = data.position.z;
-
+      let z2: number = z;
       const dockGroup = DockBuilder.createDock(
         DOCK_LEN, DOCK_DEP,
         new THREE.Vector3(x, 0, z),
-        `Dock ${dockId}` // Nome de Exemplo
+        dockName // Nome de Exemplo
       );
-      DockBuilder.builtDocks.set(dockId, dockGroup);
+      DockBuilder.builtDocks.set(dockId, {
+        group :dockGroup,
+        z : z2
+      });
       this.scene.add(dockGroup);
       this.docks.push(dockGroup);
     });
 
     // --- WAREHOUSES ---
     warehouses.forEach(wh => {
-      const whId = wh.id_placeholder.replace(/[{}]/g, '').split('_')[2];
+      const whId = wh.id_placeholder;
       const currentWH_WIDTH = wh.size.width;
       const currentWH_DEPTH = wh.size.depth;
 
@@ -203,6 +218,15 @@ export class DockView implements AfterViewInit, OnDestroy {
 
     // --- YARDS ---
     Array.from(yardMap.entries()).forEach(([yardId, data]) => {
+      let yardName: string = "";
+
+      yards.forEach((yard) => {
+        if (yard.id === yardId) {
+          yardName = yard.code;
+        }
+      });
+      console.log("YARD INFO:",yardName);
+
       const currentYARD_WIDTH = data.size.width;
       const currentYARD_DEPTH = data.size.depth;
 
@@ -213,7 +237,7 @@ export class DockView implements AfterViewInit, OnDestroy {
       const yardGroup = YardBuilder.createYard(
         currentYARD_WIDTH, currentYARD_DEPTH,
         new THREE.Vector3(x, 0, z),
-        `Yard ${yardId}` // Code/Name de Exemplo
+        yardName // Code/Name de Exemplo
       );
       this.scene.add(yardGroup);
 
@@ -233,12 +257,13 @@ export class DockView implements AfterViewInit, OnDestroy {
     // --- STS CRANES ---
     stsCranes.forEach(crane => {
       const dock = DockBuilder.builtDocks.get(crane.assignedArea);
+      console.log("CRANE DOCK:", crane.assignedArea, dock);
       if (!dock) return;
-      const c = getDockCenter(dock);
+      const c = getDockCenter(dock.group);
 
       const craneObj = StsCraneBuilder.createCrane(
         6, 25, 20,
-        new THREE.Vector3(c.x, 0, CRANE_Z_POSITION),
+        new THREE.Vector3(c.x, 0, dock.z + CRANE_Z_POSITION),
         crane.id
       );
       craneObj.rotation.y = Math.PI / 2;
@@ -248,6 +273,7 @@ export class DockView implements AfterViewInit, OnDestroy {
     // --- YARD CRANES ---
     yardCranes.forEach(crane => {
       const info = YardBuilder.lastBuiltYards.get(crane.assignedArea);
+      console.log("YARD CRANE INFO:", crane.assignedArea, info);
       if (!info) return;
       const obj = YardGantryCraneBuilder.createCrane(info.width, info.depth, 18, info.center, crane.id);
       this.scene.add(obj);
@@ -258,10 +284,11 @@ export class DockView implements AfterViewInit, OnDestroy {
       // Usa o ID real
       const dockLayoutElement = dockMap.get(visit.assignedDock);
       const dock = DockBuilder.builtDocks.get(visit.assignedDock);
+      console.log("VESSEL VISIT:", visit.assignedDock, dockLayoutElement, dock);
 
       if (!dock || !dockLayoutElement) return;
 
-      const dockCenter = getDockCenter(dock);
+      const dockCenter = getDockCenter(dock.group);
 
       // Obtém a profundidade real do dock a partir dos dados do layout (JSON)
       const DOCK_DEP_REAL = dockLayoutElement.size.depth * DOCK_DEPTH_SCALE;

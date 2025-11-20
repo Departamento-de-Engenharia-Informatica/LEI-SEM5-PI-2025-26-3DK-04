@@ -72,7 +72,7 @@ public class PortLayoutService
             adjustedDocks.Add(new LayoutElement
             {
                 Type = "dock",
-                IdPlaceholder = $"{{DOCK_ID_{dock.Id.AsString().ToUpper()}}}",
+                IdPlaceholder = dock.Id.AsString(),
                 Width = width,
                 Depth = depth
             });
@@ -87,7 +87,7 @@ public class PortLayoutService
             {
                 Type = "storage_area",
                 Subtype = "warehouse",
-                IdPlaceholder = $"{{STORAGE_ID_{wh.Id.AsString().ToUpper()}}}",
+                IdPlaceholder = wh.Id.AsString(),
                 Width = width,
                 Depth = depth
             });
@@ -102,7 +102,7 @@ public class PortLayoutService
             {
                 Type = "storage_area",
                 Subtype = "yard",
-                IdPlaceholder = $"{{STORAGE_ID_{yd.Id.AsString().ToUpper()}}}",
+                IdPlaceholder = yd.Id.AsString(),
                 Width = width,
                 Depth = depth
             });
