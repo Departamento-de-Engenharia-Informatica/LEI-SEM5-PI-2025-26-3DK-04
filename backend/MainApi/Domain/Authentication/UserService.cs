@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using DDDSample1.Domain.Organizations;
 using DDDSample1.Domain.Shared;
+using Microsoft.Extensions.Configuration;
 
 namespace DDDSample1.Domain.Authentication
 {
@@ -13,17 +14,20 @@ namespace DDDSample1.Domain.Authentication
         private readonly IUserRepository _repo;
         private readonly IUserActivationRepository _activationRepo;
         private readonly EmailService _emailService;
+        private readonly IConfiguration _configuration;
 
         public UserService(
             IUnitOfWork unitOfWork,
             IUserRepository repo,
             IUserActivationRepository activationRepo,
-            EmailService emailService)
+            EmailService emailService,
+            IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _repo = repo;
             _activationRepo = activationRepo;
             _emailService = emailService;
+            _configuration = configuration;
         }
 
         // -------------------------
@@ -78,7 +82,8 @@ namespace DDDSample1.Domain.Authentication
             var activation = new UserActivation(user.Id);
             await _activationRepo.AddAsync(activation);
 
-            var link = $"https://localhost:5001/api/UserManagement/activate?token={activation.Token}";
+            var backendUrl = _configuration["AppSettings:BackendUrl"] ?? "https://localhost:5001";
+            var link = $"{backendUrl}/api/UserManagement/activate?token={activation.Token}";
             _emailService.SendActivationEmail(dto.Email, link);
             await _unitOfWork.CommitAsync();
             
@@ -102,7 +107,8 @@ namespace DDDSample1.Domain.Authentication
             var activation = new UserActivation(user.Id);
             await _activationRepo.AddAsync(activation);
             
-            var link = $"https://localhost:5001/api/UserManagement/activate?token={activation.Token}";
+            var backendUrl = _configuration["AppSettings:BackendUrl"] ?? "https://localhost:5001";
+            var link = $"{backendUrl}/api/UserManagement/activate?token={activation.Token}";
             _emailService.SendActivationEmail(email, link);
             await _unitOfWork.CommitAsync();
             
@@ -114,19 +120,20 @@ namespace DDDSample1.Domain.Authentication
         {
             var activation = await _activationRepo.GetByTokenAsync(token);
 
+            var frontendUrl = _configuration["AppSettings:FrontendUrl"] ?? "http://localhost:4200";
             if (activation == null || !activation.IsValid(token))
-                return "http://localhost:4200/activate?status=error";
+                return $"{frontendUrl}/activate?status=error";
 
             var user = await _repo.GetByIdAsync(activation.UserId);
             if (user == null)
-                return "http://localhost:4200/activate?status=error";
+                return $"{frontendUrl}/activate?status=error";
 
             user.Activate();
             await _repo.UpdateAsync(user);
             await _activationRepo.DeleteAsync(activation);
             await _unitOfWork.CommitAsync();
             
-            return "http://localhost:4200/activate?status=success";
+            return $"{frontendUrl}/activate?status=success";
         }
 
 
@@ -191,7 +198,8 @@ namespace DDDSample1.Domain.Authentication
             await _unitOfWork.CommitAsync();
             
             // 4. Enviar email de ativação
-            var link = $"https://localhost:5001/api/UserManagement/activate?token={activation.Token}";
+            var backendUrl = _configuration["AppSettings:BackendUrl"] ?? "https://localhost:5001";
+            var link = $"{backendUrl}/api/UserManagement/activate?token={activation.Token}";
             _emailService.SendActivationEmail(email, link);
 
             return (true, null);

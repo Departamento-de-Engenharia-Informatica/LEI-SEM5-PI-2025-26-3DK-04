@@ -1,12 +1,14 @@
 ﻿import { Component, Inject, PLATFORM_ID } from '@angular/core';
 import { TranslationService } from '../translation.service';
-import { isPlatformBrowser } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-logistics-ui',
   standalone: true,
   templateUrl: './logistics.ui.html',
-  styleUrl: './logistics.ui.scss'
+  styleUrl: './logistics.ui.scss',
+  imports: [CommonModule, RouterLink]
 })
 export class LogisticsUI {
   currentLang = 'en';
