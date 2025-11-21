@@ -48,6 +48,7 @@ export class StsCraneBuilder {
 
     const crane = new THREE.Group();
     crane.name = `STS_Crane_${id}`;
+    boomLength = boomLength + 15; // exemplo
 
     // ---------------------------
     // Materiais
@@ -293,7 +294,7 @@ export class StsCraneBuilder {
 // TRAVESSAS VERTICAIS E DIAGONAIS DO TRIÂNGULO
 // -----------------------------------------
 
-    const segments = 6;
+    const segments = 10;
 
     for (let i = 1; i < segments; i++) {
       const x = (boomLength / segments) * i;
@@ -344,9 +345,9 @@ export class StsCraneBuilder {
     );
 
 // posiciona o hinge logo atrás do topo da torre (ligeiro recuo)
-    const hingeX = -dx - hingeWidth * 0.45; // ligeiramente atrás da face posterior das pernas
+    const hingeX = -dx - hingeWidth * 0.5; // hinge atrás da torre
     const hingeY = baseThickness + height * 0.88;
-    hingeBlock.position.set(hingeX, hingeY, 0);
+    hingeBlock.position.set(hingeX, baseThickness + height * 0.88, 0);
 
     crane.add(hingeBlock);
 
@@ -379,17 +380,18 @@ export class StsCraneBuilder {
       crane.add(plate);
     });
 
-    boomGroup.position.set(hingeBlock.position.x - hingeWidth * 0.5 + beamRadius * 0.15, hingeBlock.position.y + hingeHeight * 0.05, -5);
-    // boom já posicionada no X e Z
+
+// ajuste de altura total da boom
+    const boomRecuo = hingeWidth * 6; // recuo ajustável
     boomGroup.position.set(
-      hingeBlock.position.x + hingeWidth * 0.5 + beamRadius * 0.15,
-      hingeBlock.position.y - hingeHeight * 0.05,
+      hingeBlock.position.x - boomRecuo,  // começa atrás da torre
+      hingeBlock.position.y - hingeHeight * 0.05, // ligeiro ajuste vertical
       0
     );
 
-// ajuste de altura total da boom
+// ajuste fino da altura total da boom
     const boomClearance = boomHeightTri * 0.25;
-    const boomOffsetDown = boomHeightTri * 0.75; // quanto queres descer
+    const boomOffsetDown = boomHeightTri * 0.75;
 
     boomGroup.position.y =
       baseThickness + height + boomHeightTri / 2 + boomClearance
@@ -473,28 +475,60 @@ export class StsCraneBuilder {
 // ---------------------------
 // GANCHO
 // ---------------------------
-    const hookHeight = height * 0.58;
+    const spreader = new THREE.Group();
+    spreader.name = 'spreader';
 
-    const hookGeom = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(0, -trolleyBodyHeight * 0.5, 0),
-      new THREE.Vector3(0, -trolleyBodyHeight * 0.5 - hookHeight * 0.5, 0),
-      new THREE.Vector3(0, -trolleyBodyHeight * 0.5 - hookHeight, 0)
-    ]);
+// Corpo do spreader (barra superior)
+    const spreaderLength = 4; // comprimento do contentor 20' ≈ 6m / escala reduzida
+    const spreaderWidth = 1;  // largura do contentor ≈ 2,4m / escala reduzida
+    const spreaderHeight = 0.3;
 
-    const hookLine = new THREE.Line(hookGeom, lineMaterial);
-    trolleyGroup.add(hookLine);
+    const yellowMetal = new THREE.MeshStandardMaterial({ color: 0xffcc00, metalness: 0.5, roughness: 0.4 });
+    const darkMetal = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.6, roughness: 0.4 });
 
-    const hookBlock = new THREE.Mesh(
-      new THREE.BoxGeometry(triBase * 0.12, triBase * 0.12, triBase * 0.12),
-      trolleyMaterial
+// corpo principal
+    const spreaderBody = new THREE.Mesh(
+      new THREE.BoxGeometry(spreaderLength, spreaderHeight, spreaderWidth),
+      yellowMetal
     );
-    hookBlock.position.set(0, -trolleyBodyHeight * 0.5 - hookHeight, 0);
-    trolleyGroup.add(hookBlock);
+    spreaderBody.position.set(0, 0, 0);
+    spreader.add(spreaderBody);
+
+// ganchos nos cantos (simulando pinos de container)
+    const hookWidth = 0.15;
+    const hookHeight = 0.6;
+    const hookDepth = 0.15;
+
+    const hookPositions = [
+      [-spreaderLength / 2 + hookWidth / 2, -spreaderHeight / 2 - hookHeight / 2, -spreaderWidth / 2 + hookDepth / 2], // frente-esq
+      [ spreaderLength / 2 - hookWidth / 2, -spreaderHeight / 2 - hookHeight / 2, -spreaderWidth / 2 + hookDepth / 2], // frente-dir
+      [-spreaderLength / 2 + hookWidth / 2, -spreaderHeight / 2 - hookHeight / 2,  spreaderWidth / 2 - hookDepth / 2], // trás-esq
+      [ spreaderLength / 2 - hookWidth / 2, -spreaderHeight / 2 - hookHeight / 2,  spreaderWidth / 2 - hookDepth / 2], // trás-dir
+    ];
+
+    hookPositions.forEach(p => {
+      const hk = new THREE.Mesh(new THREE.BoxGeometry(hookWidth, hookHeight, hookDepth), darkMetal);
+      hk.position.set(p[0], p[1], p[2]);
+      spreader.add(hk);
+    });
+
+// cabos de ligação ao trolley
+    const cableGeom = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, -0.5, 0)
+    ]);
+    const cable = new THREE.Line(cableGeom, new THREE.LineBasicMaterial({ color: 0x000000 }));
+    spreader.add(cable);
+
+// posiciona spreader abaixo do trolley
+    spreader.position.set(0, -trolleyBodyHeight * 0.5 - hookHeight, 0);
+    trolleyGroup.add(spreader);
+
 
 // ---------------------------
 // POSIÇÃO AO LONGO DO BOOM
 // ---------------------------
-    const trolleyX = boomLength * 0.45;
+    const trolleyX = boomLength * 0.7;
     trolleyGroup.position.set(trolleyX, 0, 0);
 
     boomGroup.add(trolleyGroup);
@@ -522,22 +556,25 @@ export class StsCraneBuilder {
     // ---------------------------
     // CONTRAPESO (atrás da torre)
     // ---------------------------
-    const counterGeom = new THREE.BoxGeometry(width * 0.5, height * 0.22, width * 0.28);
+    // dimensões do contrapeso
+    const counterWidth = width * 0.5;
+    const counterHeight = height * 0.22;
+    const counterDepth = width * 0.28;
+
+    const counterGeom = new THREE.BoxGeometry(counterWidth, counterHeight, counterDepth);
     const counter = new THREE.Mesh(counterGeom, counterMaterial);
     counter.name = 'counter';
-    counter.position.set(-Math.max(width * 0.7, dx * 1.3), baseThickness + height * 0.9, 0);
+
+// posição atrás da torre, alinhado verticalmente com a base da torre
+    counter.position.set(
+      hingeBlock.position.x - counterWidth, // atrás do hinge
+      boomGroup.position.y - boomHeightTri + 1.2, // pousado sobre a base
+      0                                                 // alinhado centralmente
+    );
+
     crane.add(counter);
 
-    // ---------------------------
-    // CABOS / LINHAS ADICIONAIS (visual)
-    // ---------------------------
-    /*
-    const boomTipLocal = new THREE.Vector3(boomLength * Math.cos(-Math.PI / 12), -Math.abs(Math.sin(-Math.PI / 12)) * boomLength, 0);
-    const cablePoints = [boomTipLocal, new THREE.Vector3((boomTipLocal.x + trolleyX) / 2, (boomTipLocal.y + 0) / 2 + 0.2, 0), new THREE.Vector3(trolleyX, 0, 0)];
-    const cableGeo = new THREE.BufferGeometry().setFromPoints(cablePoints);
-    const cableLine = new THREE.Line(cableGeo, lineMaterial);
-    boomGroup.add(cableLine);
-    */
+
     // -------------------------------------------
 // Tower Peak (pico da torre + conexões por cabos)
 // -------------------------------------------
