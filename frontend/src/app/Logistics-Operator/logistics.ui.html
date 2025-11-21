@@ -6,29 +6,29 @@
 
     <div class="role-sections">
 
-      <div class="role-card" routerLink="/admin/manage-staff-members" style="cursor: pointer;">
+      <div class="role-card" routerLink="/manage-staff-members" style="cursor: pointer;">
         <h3>{{ t('adminUI.cards.manageStaffMembers') }}</h3>
         <p>{{ t('adminUI.cards.manageStaffMembersDesc') }}</p>
       </div>
 
-      <div class="role-card" routerLink="/admin/managePhysicalResources" style="cursor: pointer;">
+      <div class="role-card" routerLink="/managePhysicalResources" style="cursor: pointer;">
         <h3>{{ t('adminUI.cards.managePhysicalResources') }}</h3>
         <p>{{ t('adminUI.cards.managePhysicalResourcesDesc') }}</p>
       </div>
 
-      <div class="role-card" routerLink="/admin/manage-qualifications" style="cursor: pointer;">
+      <div class="role-card" routerLink="/manage-qualifications" style="cursor: pointer;">
         <h3>{{ t('adminUI.cards.manageQualifications') }}</h3>
         <p>{{ t('adminUI.cards.manageQualificationsDesc') }}</p>
       </div>
 
-      <div class="role-card">
-        <h3>{{ t('cards.cargo') }}</h3>
-        <p>{{ t('cards.cargoDesc') }}</p>
+      <div class="role-card" routerLink="/dock" style="cursor: pointer;">
+        <h3>{{ t('cards.dockView') }}</h3>
+        <p>{{ t('cards.dockViewDesc') }}</p>
       </div>
 
-      <div class="role-card">
-        <h3>{{ t('cards.fleet') }}</h3>
-        <p>{{ t('cards.fleetDesc') }}</p>
+      <div class="role-card" routerLink="/vessel-scheduling" style="cursor: pointer;">
+        <h3>{{ t('cards.vesselScheduling') }}</h3>
+        <p>{{ t('cards.vesselSchedulingDesc') }}</p>
       </div>
 
     </div>

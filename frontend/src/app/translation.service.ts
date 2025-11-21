@@ -342,7 +342,7 @@ export class TranslationService {
         edit: "Edit",
         deactivate: "Deactivate",
         reactivate: "Reactivate",
-
+        noStaffMembers: "No staff members found",
         operationalWindow: "Operational Window",
         status: "Status",
         create: "Create Staff Member",
@@ -1163,7 +1163,7 @@ export class TranslationService {
         edit: "Editar",
         deactivate: "Desativar",
         reactivate: "Reativar",
-
+        noStaffMembers: "Nenhum membro de staff encontrado",
         operationalWindow: "Janela Operacional",
         status: "Estado",
         create: "Criar Membro do Staff",

@@ -24,6 +24,9 @@ import { ManageVesselVisitNotifications } from './admin/manageVesselVisitNotific
 import { Vessels } from './PortAuthorityOfficer/vessels/vessels';
 import { VesselTypes } from './PortAuthorityOfficer/vessel-types/vessel-types';
 
+import { ManageVesselVisitNotificationsRep } from './admin/manageVesselVisitNotifications/manageVesselVisitNotificationsRep/manageVesselVisitNotificationsRep';
+import { SubmittedVesselVisitNotifications } from './admin/manageVesselVisitNotifications/submittedVesselVisitNotifications/submittedVesselVisitNotifications';
+
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'cube', component: Cube },
@@ -32,8 +35,26 @@ export const routes: Routes = [
     component: VesselSchedulingComponent
   },
 
-  { path: 'dock', component: DockView },
+  { path: 'dock',
+    component: DockView,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin', 'portauthorityofficer', 'logisticsoperator', 'projectmanager'] }
 
+  },
+
+  {
+    path: 'manageVesselVisitNotificationsRep',
+    component: ManageVesselVisitNotificationsRep,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin', 'representative'] }
+  },
+
+  {
+    path: 'submittedVesselVisitNotifications',
+    component: SubmittedVesselVisitNotifications,
+    canActivate: [RoleGuard],
+    data: { roles: ['admin', 'portauthorityofficer'] }
+  },
   {
     path: 'admin',
     component: AdminUI,
@@ -41,57 +62,58 @@ export const routes: Routes = [
     data: { roles: ['admin'] }
   },
   {
-    path: 'admin/manage-users',
+    path: 'manage-users',
     component: ManageUsers,
     canActivate: [RoleGuard],
     data: { roles: ['admin'] }
   },
 
   {
-    path: 'admin/manage-organizations',
+    path: 'manage-organizations',
     component: ManageOrganizations,
     canActivate: [RoleGuard],
-    data: { roles: ['admin'] }
+    data: { roles: ['admin','portauthorityofficer'] }
   },
 
   {
-    path: 'admin/manage-representatives',
+    path: 'manage-representatives',
     component: ManageRepresentatives,
     canActivate: [RoleGuard],
-    data: { roles: ['admin'] }
+    data: { roles: ['admin','portauthorityofficer'] }
   },
   {
-    path: 'admin/manageVesselVisitNotifications',
+    path: 'manageVesselVisitNotifications',
     component: ManageVesselVisitNotifications,
     canActivate: [RoleGuard],
     data: { roles: ['admin', 'portauthorityofficer', 'logisticsoperator', 'projectmanager'] }
   },
+
   {
-    path: 'admin/manage-docks',
+    path: 'manage-docks',
     component: ManageDocks,
     canActivate: [RoleGuard],
     data: { roles: ['admin', 'projectmanager'] } // allow whoever should be able to manage docks
   },
   {
-    path: 'admin/manage-storage-areas',
+    path: 'manage-storage-areas',
     component: ManageStorageAreas,
     canActivate: [RoleGuard],
     data: { roles: ['admin', 'logisticsoperator'] }
   },
   {
-    path: 'admin/manage-staff-members',
+    path: 'manage-staff-members',
     component: ManageStaffMembers,
     canActivate: [RoleGuard],
     data: { roles: ['admin', 'projectmanager'] }
   },
   {
-    path: 'admin/manage-qualifications',
+    path: 'manage-qualifications',
     component: ManageQualifications,
     canActivate: [RoleGuard],
     data: { roles: ['admin'] }
   },
   {
-  path: 'admin/managePhysicalResources',
+  path: 'managePhysicalResources',
   component: ManagePhysicalResources,
   canActivate: [RoleGuard],
   data: { roles: ['admin', 'logisticsoperator'] }
@@ -111,14 +133,14 @@ export const routes: Routes = [
   },
 
   {
-    path: 'port-officer/vessels',
+    path: 'vessels',
     component: Vessels,
     canActivate: [RoleGuard],
     data: { roles: ['portauthorityofficer','admin'] }
   },
 
   {
-    path: 'port-officer/vessel-types',
+    path: 'vessel-types',
     component: VesselTypes,
     canActivate: [RoleGuard],
     data: { roles: ['portauthorityofficer','admin'] }
