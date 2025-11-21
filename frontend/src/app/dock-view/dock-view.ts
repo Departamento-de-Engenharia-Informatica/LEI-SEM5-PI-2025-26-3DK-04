@@ -157,7 +157,7 @@ export class DockView implements AfterViewInit, OnDestroy {
   ): Promise<void> {
 
     const DOCK_DEPTH_SCALE = 1;
-    const CRANE_Z_POSITION = 17;
+    const CRANE_Z_POSITION = -65.5;
     const VESSEL_DOCK_OFFSET = 20;
 
     const portWidth = portDimensions.width;
@@ -260,10 +260,10 @@ export class DockView implements AfterViewInit, OnDestroy {
       console.log("CRANE DOCK:", crane.assignedArea, dock);
       if (!dock) return;
       const c = getDockCenter(dock.group);
-
+      let cranePosition:number =    CRANE_Z_POSITION + (-dock.z);
       const craneObj = StsCraneBuilder.createCrane(
         6, 25, 20,
-        new THREE.Vector3(c.x, 0, dock.z + CRANE_Z_POSITION),
+        new THREE.Vector3(c.x, 0, dock.z + cranePosition),
         crane.id
       );
       craneObj.rotation.y = Math.PI / 2;
