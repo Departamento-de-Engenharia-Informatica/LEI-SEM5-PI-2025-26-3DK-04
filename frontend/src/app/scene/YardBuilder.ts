@@ -114,7 +114,12 @@ export class YardBuilder {
       width,
       depth
     });
-
+    group.traverse(obj => {
+      if (obj instanceof THREE.Mesh) {
+        obj.castShadow = true;    // projeta sombra
+        obj.receiveShadow = true; // recebe sombra
+      }
+    });
     return group;
   }
   static lastBuiltYards: Map<string, {
@@ -124,30 +129,4 @@ export class YardBuilder {
     depth: number
   }> = new Map();
 
-
-
-
-  /*
-  static calculateCenter(yard: THREE.Group): THREE.Vector3 {
-    let minX = Infinity, maxX = -Infinity;
-    let minZ = Infinity, maxZ = -Infinity;
-
-    yard.children.forEach(obj => {
-      if (obj.name.startsWith('Container')) {
-        const worldPos = new THREE.Vector3();
-        obj.getWorldPosition(worldPos);
-        if (worldPos.x < minX) minX = worldPos.x;
-        if (worldPos.x > maxX) maxX = worldPos.x;
-        if (worldPos.z < minZ) minZ = worldPos.z;
-        if (worldPos.z > maxZ) maxZ = worldPos.z;
-      }
-    });
-
-    return new THREE.Vector3(
-      (minX + maxX) / 2,
-      0,
-      (minZ + maxZ) / 2
-    );
-  }
-  */
 }

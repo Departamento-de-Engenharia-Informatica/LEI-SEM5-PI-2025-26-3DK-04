@@ -408,6 +408,17 @@ export class DockView implements AfterViewInit, OnDestroy {
     const sun = new THREE.DirectionalLight(0xffffff, 0.6);
     sun.position.set(10, 10, 5);
     this.scene.add(sun);
+    this.renderer = new THREE.WebGLRenderer({
+      canvas: this.canvas,
+      antialias: true,
+      alpha: true
+    });
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight, false);
+
+// --- Setup lighting ---
+    this.setupLighting();
+
 
     // ALTERAÇÃO: Chamar o novo método de carregamento
     this.loadPortStructure();
@@ -459,6 +470,39 @@ export class DockView implements AfterViewInit, OnDestroy {
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   }
+  private setupLighting(): void {
+    // --- Luz Ambiente ---
+    const ambient = new THREE.AmbientLight(0xffffff, 0.6); // intensidade moderada
+    this.scene.add(ambient);
+
+    // --- Luz Direcional (Sol) ---
+    const sun = new THREE.DirectionalLight(0xffffff, 0.8);
+    sun.position.set(50, 100, 50); // posição "alta" para criar sombras suaves
+    sun.castShadow = true;
+
+    // Configuração de sombras
+    sun.shadow.mapSize.width = 2048;   // resolução de sombra (não muito alta p/ performance)
+    sun.shadow.mapSize.height = 2048;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 500;
+    sun.shadow.camera.left = -100;
+    sun.shadow.camera.right = 100;
+    sun.shadow.camera.top = 100;
+    sun.shadow.camera.bottom = -100;
+    sun.shadow.bias = -0.001; // reduz artefatos de shadow acne
+
+    this.scene.add(sun);
+
+    // --- Luz do Hemisfério (opcional, para suavizar sombras) ---
+    const hemi = new THREE.HemisphereLight(0xddeeff, 0x444422, 0.4);
+    // céu azul claro, chão levemente marrom, intensidade baixa
+    this.scene.add(hemi);
+
+    // --- Ativar sombras para o renderer ---
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // sombras suaves
+  }
+
 
 
   private onWindowResize(): void {

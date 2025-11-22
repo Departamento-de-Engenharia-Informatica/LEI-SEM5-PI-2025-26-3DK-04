@@ -191,7 +191,12 @@ export class WarehouseBuilder {
     group.position.copy(position);
     group.position.y = 0;
     group.name = `Warehouse_${id}`;
-
+    group.traverse(obj => {
+      if (obj instanceof THREE.Mesh) {
+        obj.castShadow = true;    // projeta sombra
+        obj.receiveShadow = true; // recebe sombra
+      }
+    });
     return group;
   }
 }
