@@ -103,12 +103,7 @@ export class VesselBuilder {
     vessel.position.copy(position);
     vessel.rotation.y = Math.PI / 2;
     vessel.position.y = -1;
-    vessel.traverse(obj => {
-      if (obj instanceof THREE.Mesh) {
-        obj.castShadow = true;    // projeta sombra
-        obj.receiveShadow = true; // recebe sombra
-      }
-    });
+
     return vessel;
   }
   private static getContainerMaterials(color: "blue" | "red" | "green" | "black" | "white" | "yellow"): THREE.Material[] {

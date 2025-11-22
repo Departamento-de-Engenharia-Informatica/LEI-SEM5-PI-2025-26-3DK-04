@@ -116,12 +116,7 @@ export class DockBuilder {
       group,
       z: position.z
     });
-    group.traverse(obj => {
-      if (obj instanceof THREE.Mesh) {
-        obj.castShadow = true;    // projeta sombra
-        obj.receiveShadow = true; // recebe sombra
-      }
-    });
+
 
     return group;
   }

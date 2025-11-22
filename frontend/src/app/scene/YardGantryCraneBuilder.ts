@@ -231,12 +231,7 @@ export class YardGantryCraneBuilder {
     // --------------------------
     crane.position.copy(position);
     crane.rotation.y = rotationY + Math.PI / 2;
-    crane.traverse(obj => {
-      if (obj instanceof THREE.Mesh) {
-        obj.castShadow = true;    // projeta sombra
-        obj.receiveShadow = true; // recebe sombra
-      }
-    });
+
     return crane;
   }
 }
