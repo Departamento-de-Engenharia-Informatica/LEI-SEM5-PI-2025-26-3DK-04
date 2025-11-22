@@ -7,25 +7,25 @@ import { CONFIG } from '../config';
 import { PortLayout } from '../dock-view/dock-view';
 @Injectable({ providedIn: 'root' })
 export class AdminService {
-  private userBaseUrl = `${CONFIG.apiLocalUrl}/UserManagement`;
+  private userBaseUrl = `${CONFIG.apiUrl}/UserManagement`;
 
-  private baseUrl = CONFIG.apiLocalUrl;
+  private baseUrl = CONFIG.apiUrl;
   // DOCK management routes
-  private dockBaseUrl = `${CONFIG.apiLocalUrl}/Dock`;
-  private vesselTypeBaseUrl = `${CONFIG.apiLocalUrl}/VesselTypes`;
+  private dockBaseUrl = `${CONFIG.apiUrl}/Dock`;
+  private vesselTypeBaseUrl = `${CONFIG.apiUrl}/VesselTypes`;
 
-  private storageAreaBaseUrl = `${CONFIG.apiLocalUrl}/StorageArea`;
+  private storageAreaBaseUrl = `${CONFIG.apiUrl}/StorageArea`;
 
-  private staffMembersBaseUrl = `${CONFIG.apiLocalUrl}/StaffMembers`;
-  private qualificationsBaseUrl = `${CONFIG.apiLocalUrl}/Qualifications`;
+  private staffMembersBaseUrl = `${CONFIG.apiUrl}/StaffMembers`;
+  private qualificationsBaseUrl = `${CONFIG.apiUrl}/Qualifications`;
 
-  private organizationBaseUrl = `${CONFIG.apiLocalUrl}/Organizations`;
-  private representativeBaseUrl = `${CONFIG.apiLocalUrl}/Representatives`;
-  private vesselVisitNotificationBaseUrl = `${CONFIG.apiLocalUrl}/VesselVisitNotifications`;
+  private organizationBaseUrl = `${CONFIG.apiUrl}/Organizations`;
+  private representativeBaseUrl = `${CONFIG.apiUrl}/Representatives`;
+  private vesselVisitNotificationBaseUrl = `${CONFIG.apiUrl}/VesselVisitNotifications`;
 
-  private vesselBaseUrl = `${CONFIG.apiLocalUrl}/Vessels`;
-  private physicalResourcesBaseUrl = `${CONFIG.apiLocalUrl}/PhysicalResources`;
-  private portLayoutBaseUrl = `${CONFIG.apiLocalUrl}/PortLayout`;
+  private vesselBaseUrl = `${CONFIG.apiUrl}/Vessels`;
+  private physicalResourcesBaseUrl = `${CONFIG.apiUrl}/PhysicalResources`;
+  private portLayoutBaseUrl = `${CONFIG.apiUrl}/PortLayout`;
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
