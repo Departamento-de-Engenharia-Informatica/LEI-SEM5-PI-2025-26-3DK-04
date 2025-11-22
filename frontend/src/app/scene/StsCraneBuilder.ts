@@ -148,7 +148,7 @@ export class StsCraneBuilder {
     const baseGroup = new THREE.Group();
     baseGroup.name = 'baseGroup';
     // base com exatamente a mesma largura/ comprimento das pernas
-    const baseGeom = new THREE.BoxGeometry(dx * 2, baseThickness * 1.5, dz * 2);
+    const baseGeom = new THREE.BoxGeometry(dx * 2, baseThickness, dz * 2);
     const baseMesh = new THREE.Mesh(baseGeom, railMaterial);
     baseMesh.position.set(0, baseThickness / 2, 0);
     baseGroup.add(baseMesh);
@@ -164,7 +164,7 @@ export class StsCraneBuilder {
     ];
     footPositions.forEach(p => {
       const foot = new THREE.Mesh(footGeom, railMaterial);
-      foot.position.set(p[0], baseThickness / 4, p[2]);
+      foot.position.set(p[0], baseThickness / 2, p[2]);
       baseGroup.add(foot);
     });
 
