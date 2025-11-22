@@ -25,7 +25,7 @@ namespace DDDSample1.Controllers
         /// Cria uma nova notificação de visita de navio com dados de carga e, opcionalmente, tripulação.
         /// </summary>
         [HttpPost]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.Representative)]
         public async Task<ActionResult<VesselVisitNotificationDto>> Create([FromBody] CreateNotificationDto dto)
         {
             try
@@ -40,7 +40,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpGet("submitted")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer,Roles.Representative)]
         public async Task<ActionResult<List<VesselVisitNotificationDto>>> GetSubmittedNotifications()
         {
             var notifications = await _service.GetSubmittedNotificationsAsync();
@@ -55,7 +55,7 @@ namespace DDDSample1.Controllers
             return Ok(notifications);
         }
         [HttpGet("withdrawn")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.Representative)]
         public async Task<ActionResult<List<VesselVisitNotificationDto>>> GetWithdrawnNotifications()
         {
             var notifications = await _service.GetWithdrawnAsync();
@@ -63,7 +63,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpGet("{id}")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.Representative,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<VesselVisitNotificationDto>> GetById(Guid id)
         {
             var notification = await _service.GetByIdAsync(id);
@@ -74,7 +74,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpPut("{id}/approve")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<VesselVisitNotificationDto>> Approve(Guid id, [FromBody] ApproveNotificationDto dto)
         {
             try
@@ -89,7 +89,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpPut("{id}/reject")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<VesselVisitNotificationDto>> Reject(Guid id, [FromBody] RejectNotificationDto dto)
         {
             try
@@ -104,7 +104,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpPut("{id}/update")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.Representative)]
         public async Task<ActionResult<VesselVisitNotificationDto>> UpdateInProgress(Guid id, [FromBody] UpdateNotificationDto dto)
         {
             try
@@ -119,7 +119,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpPut("{id}/submit")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.Representative)]
         public async Task<ActionResult<VesselVisitNotificationDto>> Submit(Guid id)
         {
             try
@@ -133,6 +133,7 @@ namespace DDDSample1.Controllers
             }
         }
         [HttpGet("in-progress")]
+        [AuthorizeRole(Roles.Admin,Roles.Representative)]
         public async Task<ActionResult<IEnumerable<VesselVisitNotificationDto>>> GetInProgress()
         {
             var notifications = await _service.GetInProgressNotificationsAsync();
@@ -140,7 +141,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpPut("{id}/withdraw")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.Representative)]
         public async Task<ActionResult<VesselVisitNotificationDto>> Withdraw(Guid id)
         {
             try
@@ -155,7 +156,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpPut("{id}/resume")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.Representative)]
         public async Task<ActionResult<VesselVisitNotificationDto>> Resume(Guid id)
         {
             try
@@ -174,7 +175,7 @@ namespace DDDSample1.Controllers
         /// Reseta uma notificação rejeitada para o estado "InProgress" para permitir edição.
         /// </summary>
         [HttpPut("{id}/reset")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.Representative)]
         public async Task<ActionResult<VesselVisitNotificationDto>> ResetToInProgress(Guid id)
         {
             try
@@ -193,7 +194,7 @@ namespace DDDSample1.Controllers
         /// Representatives can view their own notifications and those from colleagues in the same organization
         /// </summary>
         [HttpGet("search")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.Representative)]
         public async Task<ActionResult<List<VesselVisitNotificationDto>>> SearchNotifications(
             [FromQuery] Guid? vesselId = null,
             [FromQuery] string status = null,

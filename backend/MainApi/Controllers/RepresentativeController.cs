@@ -21,7 +21,7 @@ namespace DDDSample1.Controllers
 
         // POST: api/Representatives
         [HttpPost]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<RepresentativeDto>> AddRepresentative([FromBody] AddRepresentativeDto dto)
         {
             try
@@ -37,7 +37,7 @@ namespace DDDSample1.Controllers
 
         // PUT: api/Representatives/{id}/update
         [HttpPut("{id}/update")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<RepresentativeDto>> UpdateRepresentative([FromRoute] string id, [FromBody] UpdateRepresentativeDto dto)
         {
             try
@@ -53,7 +53,7 @@ namespace DDDSample1.Controllers
 
         // PUT: api/Representatives/{id}/deactivate
         [HttpPut("{id}/deactivate")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<RepresentativeDto>> DeactivateRepresentative(string id)
         {
             try
@@ -69,7 +69,7 @@ namespace DDDSample1.Controllers
 
         // PUT: api/Representatives/{id}/activate
         [HttpPut("{id}/activate")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<RepresentativeDto>> ActivateRepresentative(string id)
         {
             try
@@ -85,7 +85,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/Representatives
         [HttpGet]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<List<RepresentativeDto>>> GetAll()
         {
             var reps = await _service.GetAllAsync();
@@ -94,7 +94,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/Representatives/{id}
         [HttpGet("{id}")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<RepresentativeDto>> GetById(string id)
         {
             var rep = await _service.GetByIdAsync(id);
@@ -103,7 +103,7 @@ namespace DDDSample1.Controllers
         }
         
         [HttpGet("active")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<IEnumerable<RepresentativeDto>>> GetActiveRepresentatives()
         {
             var reps = await _service.GetActiveAsync();
@@ -111,7 +111,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpGet("inactive")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<IEnumerable<RepresentativeDto>>> GetInactiveRepresentatives()
         {
             var reps = await _service.GetInactiveAsync();
@@ -119,7 +119,7 @@ namespace DDDSample1.Controllers
         }
         
         [HttpGet("check-email/{email}")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<bool>> CheckEmail(string email)
         {
             var exists = await _service.EmailExistsAsync(email);
@@ -127,7 +127,7 @@ namespace DDDSample1.Controllers
         }
 
         [HttpGet("check-citizenid/{cid}")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<bool>> CheckCitizenId(string cid)
         {
             var exists = await _service.CitizenIdExistsAsync(cid);
@@ -135,7 +135,7 @@ namespace DDDSample1.Controllers
         }
         
         [HttpGet("check-phone/{phone}")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<bool>> CheckPhone(string phone)
         {
             var exists = await _service.PhoneExistsAsync(phone);

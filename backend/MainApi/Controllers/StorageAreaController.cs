@@ -28,7 +28,7 @@ namespace DDDSample1.Controllers // Your controller namespace
 
         // GET: api/StorageArea
         [HttpGet]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<IEnumerable<StorageAreaDto>>> GetAll()
         {
             // Assuming GetAllAsync returns only active ones or you filter in service
@@ -37,7 +37,7 @@ namespace DDDSample1.Controllers // Your controller namespace
 
         // GET: api/StorageArea/{id}
         [HttpGet("{id:guid}")] // Specify GUID constraint
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<StorageAreaDto>> GetById(Guid id)
         {
             var result = await _service.GetByIdAsync(new StorageAreaID(id));
@@ -50,7 +50,7 @@ namespace DDDSample1.Controllers // Your controller namespace
 
         // POST: api/StorageArea
         [HttpPost]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<StorageAreaDto>> Create(CreateStorageAreaDto dto) // Use Create DTO
         {
             try
@@ -67,7 +67,7 @@ namespace DDDSample1.Controllers // Your controller namespace
 
         // PUT: api/StorageArea/{id}
         [HttpPut("{id:guid}")] // Specify GUID constraint
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<StorageAreaDto>> Update(Guid id, UpdateStorageAreaDto dto) // Use Update DTO
         {
             // ID comes from the route, no need to check dto.Id if UpdateStorageAreaDto doesn't have it
@@ -90,7 +90,7 @@ namespace DDDSample1.Controllers // Your controller namespace
 
         // POST: api/StorageArea/{id}/assignDock
         [HttpPost("{id:guid}/assignDock")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<StorageAreaDto>> AssignDock(Guid id, AssignDockDto dto)
         {
              try
@@ -110,7 +110,7 @@ namespace DDDSample1.Controllers // Your controller namespace
 
         // DELETE: api/StorageArea/{id}/unassignDock/{dockId}
         [HttpDelete("{id:guid}/unassignDock/{dockId:guid}")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<StorageAreaDto>> UnassignDock(Guid id, Guid dockId)
         {
              try
@@ -131,7 +131,7 @@ namespace DDDSample1.Controllers // Your controller namespace
 
         // PATCH: api/StorageArea/{id}/inactivate
         [HttpPatch("{id:guid}/inactivate")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<StorageAreaDto>> Inactivate(Guid id)
         {
              try
@@ -151,7 +151,7 @@ namespace DDDSample1.Controllers // Your controller namespace
 
          // PATCH: api/StorageArea/{id}/activate
         [HttpPatch("{id:guid}/activate")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<StorageAreaDto>> Activate(Guid id)
         {
              try
@@ -170,14 +170,14 @@ namespace DDDSample1.Controllers // Your controller namespace
         }
         
         [HttpGet("yard")] 
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<IEnumerable<StorageAreaDto>>> GetAllYard()
         {
           
             return await _service.GetAllYardsAsync();
         }
         [HttpGet("warehouse")] // Specify GUID constraint
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer)]
         public async Task<ActionResult<IEnumerable<StorageAreaDto>>> GetAllWarehouse()
         {
            

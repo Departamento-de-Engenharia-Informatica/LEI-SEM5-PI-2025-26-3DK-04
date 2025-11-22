@@ -17,7 +17,7 @@ namespace DDDSample1.Controllers
 
         // GET: api/PortLayout
         [HttpGet("get")]
-        [AuthorizeRole(Roles.Admin)]
+        [AuthorizeRole(Roles.Admin,Roles.PortAuthorityOfficer,Roles.LogisticsOperator,Roles.ProjectManager)]
         public async Task<ActionResult<object>> GetPortLayout()
         {
             var layout = await _service.GeneratePortLayoutAsync();
