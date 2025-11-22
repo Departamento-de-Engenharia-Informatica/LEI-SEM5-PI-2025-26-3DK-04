@@ -45,20 +45,94 @@ export class StsCraneBuilder {
     options: { debug?: boolean } = {}
   ): THREE.Group {
     const { debug = false } = options;
-
+    const loader = new THREE.TextureLoader();
     const crane = new THREE.Group();
     crane.name = `STS_Crane_${id}`;
     boomLength = boomLength + 15; // exemplo
 
     // ---------------------------
-    // Materiais
+    // Materiais & Texturas
     // ---------------------------
-    const pillarMaterial = new THREE.MeshStandardMaterial({ color: 0xe6b800, metalness: 0.35, roughness: 0.55 });
-    const boomMaterial = new THREE.MeshStandardMaterial({ color: 0xffa500, metalness: 0.4, roughness: 0.35 });
-    const railMaterial = new THREE.MeshStandardMaterial({ color: 0x404040, metalness: 0.6, roughness: 0.5 });
-    const trolleyMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.25, roughness: 0.6 });
-    const cabinMaterial = new THREE.MeshStandardMaterial({ color: 0x1f4e79, metalness: 0.15, roughness: 0.6 });
-    const counterMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.3, roughness: 0.5 });
+    const pillarTexture = loader.load('/assets/textures/crane/pillar.jpg');
+    pillarTexture.wrapS = THREE.RepeatWrapping;
+    pillarTexture.wrapT = THREE.RepeatWrapping;
+    pillarTexture.repeat.set(1, Math.max(1, height / 2)); // repete verticalmente
+
+    const pillarMaterial = new THREE.MeshStandardMaterial({
+      map: pillarTexture,
+      metalness: 0.35,
+      roughness: 0.55
+    });
+    const boomTexture = loader.load('/assets/textures/crane/pillar.jpg');
+    boomTexture.wrapS = THREE.RepeatWrapping;
+    boomTexture.wrapT = THREE.RepeatWrapping;
+    boomTexture.repeat.set(Math.max(1, boomLength / 2), 1);
+
+    const boomMaterial = new THREE.MeshStandardMaterial({
+      map: boomTexture,
+      metalness: 0.4,
+      roughness: 0.35
+    });
+    const railTexture = loader.load('/assets/textures/crane/rail.jpg');
+    railTexture.wrapS = THREE.RepeatWrapping;
+    railTexture.wrapT = THREE.RepeatWrapping;
+    //railTexture.repeat.set(Math.max(1, width / 2), Math.max(1, width / 2));
+
+    const railMaterial = new THREE.MeshStandardMaterial({
+      map: railTexture,
+      metalness: 0.6,
+      roughness: 0.5
+    });
+    const trolleyTexture = loader.load('/assets/textures/crane/trolley.jpg');
+    trolleyTexture.wrapS = THREE.RepeatWrapping;
+    trolleyTexture.wrapT = THREE.RepeatWrapping;
+    trolleyTexture.repeat.set(1, 1);
+
+    const trolleyMaterial = new THREE.MeshStandardMaterial({
+      map: trolleyTexture,
+      metalness: 0.25,
+      roughness: 0.6
+    });
+    // Textura da cabine (metal)
+    const cabinTexture = loader.load('/assets/textures/crane/cabin.jpg');
+    cabinTexture.wrapS = THREE.RepeatWrapping;
+    cabinTexture.wrapT = THREE.RepeatWrapping;
+    cabinTexture.repeat.set(1, 1);
+
+    const metalMaterial = new THREE.MeshStandardMaterial({
+      map: cabinTexture,
+      metalness: 0.15,
+      roughness: 0.6
+    });
+
+// Material vidro (semi-transparente)
+    const glassMaterial = new THREE.MeshStandardMaterial({
+      color: 0x88ccee,
+      metalness: 0.1,
+      roughness: 0.2,
+      transparent: true,
+      opacity: 0.5
+    });
+
+// Array de materiais para cada face: [right, left, top, bottom, front, back]
+    const cabinMaterials = [
+      glassMaterial, // right
+      metalMaterial, // right
+      metalMaterial, // top
+      metalMaterial, // bottom
+      metalMaterial, // right, // front
+      glassMaterial  // back
+    ];
+    const counterTexture = loader.load('/assets/textures/crane/counter.jpg');
+    counterTexture.wrapS = THREE.RepeatWrapping;
+    counterTexture.wrapT = THREE.RepeatWrapping;
+    counterTexture.repeat.set(1, 1);
+
+    const counterMaterial = new THREE.MeshStandardMaterial({
+      map: counterTexture,
+      metalness: 0.3,
+      roughness: 0.5
+    });
     const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
 
     // Parâmetros derivados
@@ -74,14 +148,14 @@ export class StsCraneBuilder {
     const baseGroup = new THREE.Group();
     baseGroup.name = 'baseGroup';
     // base com exatamente a mesma largura/ comprimento das pernas
-    const baseGeom = new THREE.BoxGeometry(dx * 2, baseThickness, dz * 2);
+    const baseGeom = new THREE.BoxGeometry(dx * 2, baseThickness * 1.5, dz * 2);
     const baseMesh = new THREE.Mesh(baseGeom, railMaterial);
     baseMesh.position.set(0, baseThickness / 2, 0);
     baseGroup.add(baseMesh);
 
     // pés sob cada perna
     // pés sob cada perna (pequenos pads)
-    const footGeom = new THREE.BoxGeometry(pillarRadius * 1.6, baseThickness / 2, pillarRadius * 1.6);
+    const footGeom = new THREE.BoxGeometry(pillarRadius * 1.6, baseThickness, pillarRadius * 1.6);
     const footPositions = [
       [-dx, 0, -dz],
       [-dx, 0, dz],
@@ -252,7 +326,7 @@ export class StsCraneBuilder {
         new THREE.Vector3(x2, y2, z2),
         boomBaseWidth * 0.035,
         10,
-        trussMaterial
+        boomMaterial
       );
     }
 
@@ -483,9 +557,31 @@ export class StsCraneBuilder {
     const spreaderWidth = 1;  // largura do contentor ≈ 2,4m / escala reduzida
     const spreaderHeight = 0.3;
 
-    const yellowMetal = new THREE.MeshStandardMaterial({ color: 0xffcc00, metalness: 0.5, roughness: 0.4 });
-    const darkMetal = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.6, roughness: 0.4 });
+    // Spreader amarelo metálico
+    const yellowTexture = loader.load('/assets/textures/crane/yellow_metal.jpg');
+    yellowTexture.wrapS = THREE.RepeatWrapping;
+    yellowTexture.wrapT = THREE.RepeatWrapping;
+    yellowTexture.repeat.set(1, 1);
 
+    const yellowMetal = new THREE.MeshStandardMaterial({
+      color: 0xffcc00,
+      map: yellowTexture,
+      metalness: 0.5,
+      roughness: 0.4
+    });
+
+// Ganchos / metal escuro
+    const darkTexture = loader.load('/assets/textures/crane/dark_metal.jpg');
+    darkTexture.wrapS = THREE.RepeatWrapping;
+    darkTexture.wrapT = THREE.RepeatWrapping;
+    darkTexture.repeat.set(1, 1);
+
+    const darkMetal = new THREE.MeshStandardMaterial({
+      color: 0x222222,
+      map: darkTexture,
+      metalness: 0.6,
+      roughness: 0.4
+    });
 // corpo principal
     const spreaderBody = new THREE.Mesh(
       new THREE.BoxGeometry(spreaderLength, spreaderHeight, spreaderWidth),
@@ -543,7 +639,11 @@ export class StsCraneBuilder {
     const cabinWidth = width * 0.22;
     const cabinHeight = height * 0.18;
     const cabinDepth = width * 0.12;
-    const cabin = new THREE.Mesh(new THREE.BoxGeometry(cabinWidth, cabinHeight, cabinDepth), cabinMaterial);
+    const cabin = new THREE.Mesh(
+      new THREE.BoxGeometry(cabinWidth, cabinHeight, cabinDepth),
+      cabinMaterials
+    );
+
     cabin.name = 'cabin';
     cabin.position.set(
       dx * 0.55,                              // deslocada para o lado do boom
