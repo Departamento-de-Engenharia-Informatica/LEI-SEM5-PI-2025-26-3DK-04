@@ -88,7 +88,7 @@ export class VesselBuilder {
           c.castShadow = true;
           c.position.x = startX + r * (CONTAINER_W + gapX);
           c.position.z = startZ + b * (CONTAINER_D + gapZ);
-          c.position.y = baseY + t * (CONTAINER_H + gapY);
+          c.position.y = baseY + t * (CONTAINER_H);
           containerArea.add(c);
         }
       }
@@ -151,7 +151,7 @@ export class VesselBuilder {
     geom.rotateX(Math.PI / 2);
     geom.translate(0, keelDepth / 2, -length / 2);
 
-    const texture = this.textureLoader.load('assets/textures/hull/hull_blue.jpg');
+    const texture = this.textureLoader.load('assets/textures/vessel/hull.jpg');
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(2, 1);
 
@@ -169,7 +169,7 @@ export class VesselBuilder {
 
   private static createDeck(width: number, length: number): THREE.Mesh {
     const geom = new THREE.BoxGeometry(width * 0.98, 0.5, length * 0.98);
-    const texture = this.textureLoader.load('assets/textures/deck/wood.jpg');
+    const texture = this.textureLoader.load('assets/textures/vessel/wood.jpg');
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(4, 8);
 
@@ -186,7 +186,7 @@ export class VesselBuilder {
     const baseH = 5 + extraFloors * 1.6;
 
     const geom = new THREE.BoxGeometry(baseW, baseH, baseD);
-    const texture = this.textureLoader.load('assets/textures/bridge/metal.jpg');
+    const texture = this.textureLoader.load('assets/textures/vessel/metal.jpg');
     const mat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.5 });
     const bridge = new THREE.Mesh(geom, mat);
     bridge.userData = { height: baseH, depth: baseD };
@@ -206,14 +206,14 @@ export class VesselBuilder {
 
   private static createFunnel(): THREE.Mesh {
     const geom = new THREE.CylinderGeometry(0.6, 0.6, 3.6, 12);
-    const texture = this.textureLoader.load('assets/textures/funnel/metal_dark.jpg');
+    const texture = this.textureLoader.load('assets/textures/vessel/metal_dark.jpg');
     const mat = new THREE.MeshStandardMaterial({ map: texture, metalness: 0.6, roughness: 0.35 });
     return new THREE.Mesh(geom, mat);
   }
 
   private static createRails(hullWidth: number, hullLength: number, deckY: number): THREE.Group {
     const g = new THREE.Group();
-    const texture = this.textureLoader.load('assets/textures/rails/metal.jpg');
+    const texture = this.textureLoader.load('assets/textures/vessel/metal_shiny.jpg');
     const mat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.6 });
 
     const railHeight = Math.max(0.4, hullWidth * 0.03);
