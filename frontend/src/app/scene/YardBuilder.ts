@@ -72,9 +72,7 @@ export class YardBuilder {
           const posX = -width / 2 + x * spacing + spacing / 2;
           const posZ = -depth / 2 + z * spacing + spacing / 2;
 
-          // 👉 AQUI corrigimos: container fica exatamente no topo do chão.
           const posY =
-            groundTop +                // topo da plataforma
             (containerHeight / 2) -    // centro do contentor
             containerMinY +            // corrigir offset do modelo
             h * containerHeight;       // stack

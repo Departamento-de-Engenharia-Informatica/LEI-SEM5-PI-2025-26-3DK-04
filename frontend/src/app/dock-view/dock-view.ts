@@ -166,7 +166,8 @@ export class DockView implements AfterViewInit, OnDestroy {
     console.log(`Port Size: ${portWidth}x${portDepth} (Calculado pelo Backend)`);
 
     const port = PortBuilder.createPort(portWidth, portDepth);
-
+    // Habilitar a receção de sombras no chão (PortBuilder já modificado)
+    port.receiveShadow = true;
     port.position.set(0, 0, 0);
     this.scene.add(port);
 
@@ -174,9 +175,9 @@ export class DockView implements AfterViewInit, OnDestroy {
       let dockName: string = "";
 
       docks.forEach((dock) => {
-          if (dock.id === dockId) {
-              dockName = dock.name;
-          }
+        if (dock.id === dockId) {
+          dockName = dock.name;
+        }
       });
       const DOCK_LEN = data.size.width;
       const DOCK_DEP = data.size.depth * DOCK_DEPTH_SCALE;
@@ -193,6 +194,11 @@ export class DockView implements AfterViewInit, OnDestroy {
       DockBuilder.builtDocks.set(dockId, {
         group :dockGroup,
         z : z2
+      });
+      // Importante: garantir que os objetos do dock projetam e recebem sombras
+      dockGroup.traverse(obj => {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
       });
       this.scene.add(dockGroup);
       this.docks.push(dockGroup);
@@ -213,6 +219,11 @@ export class DockView implements AfterViewInit, OnDestroy {
         new THREE.Vector3(x, 0, z),
         whId
       );
+      // Garante que os warehouses projetam e recebem sombras
+      whGroup.traverse(obj => {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      });
       this.scene.add(whGroup);
     });
 
@@ -239,6 +250,11 @@ export class DockView implements AfterViewInit, OnDestroy {
         new THREE.Vector3(x, 0, z),
         yardName // Code/Name de Exemplo
       );
+      // Garante que os yards projetam e recebem sombras
+      yardGroup.traverse(obj => {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      });
       this.scene.add(yardGroup);
 
       // Armazenar info para posicionamento de guindastes
@@ -267,6 +283,11 @@ export class DockView implements AfterViewInit, OnDestroy {
         crane.id
       );
       craneObj.rotation.y = Math.PI / 2;
+      // Garante que os guindastes projetam e recebem sombras
+      craneObj.traverse(obj => {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      });
       this.scene.add(craneObj);
     });
 
@@ -276,6 +297,11 @@ export class DockView implements AfterViewInit, OnDestroy {
       console.log("YARD CRANE INFO:", crane.assignedArea, info);
       if (!info) return;
       const obj = YardGantryCraneBuilder.createCrane(info.width, info.depth, 18, info.center, crane.id);
+      // Garante que os guindastes projetam e recebem sombras
+      obj.traverse(obj => {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      });
       this.scene.add(obj);
     });
 
@@ -311,7 +337,11 @@ export class DockView implements AfterViewInit, OnDestroy {
         vesselId: visit.vesselId,
         position: vesselPosition
       });
-
+      // Garante que a embarcação projeta e recebe sombras
+      vessel.traverse(obj => {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      });
       this.scene.add(vessel);
     });
   }
@@ -402,15 +432,26 @@ export class DockView implements AfterViewInit, OnDestroy {
 
     this.scene.background = new THREE.Color(0xffffff);
 
-    const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
     this.scene.add(ambient);
 
-    const sun = new THREE.DirectionalLight(0xffffff, 0.6);
-    sun.position.set(10, 10, 5);
+    const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+    sun.position.set(20, 30, 10);
+    sun.castShadow = true;
+
+    const size = 100;
+    sun.shadow.camera.left = -size;
+    sun.shadow.camera.right = size;
+    sun.shadow.camera.top = size;
+    sun.shadow.camera.bottom = -size;
+    sun.shadow.camera.near = 0.1;
+    sun.shadow.camera.far = 100;
+    sun.shadow.mapSize.width = 2048;
+    sun.shadow.mapSize.height = 2048;
+
     this.scene.add(sun);
 
 
-    // ALTERAÇÃO: Chamar o novo método de carregamento
     this.loadPortStructure();
 
     const waterGeo = new THREE.PlaneGeometry(500, 500);
@@ -432,6 +473,8 @@ export class DockView implements AfterViewInit, OnDestroy {
     this.water = new THREE.Mesh(waterGeo, this.waterMaterial);
     this.water.rotation.x = -Math.PI / 2;
     this.water.position.y = -0.5;
+    // A água deve receber sombras, mas a sua opacidade torna o castShadow irrelevante/problemático
+    this.water.receiveShadow = true;
     this.scene.add(this.water);
 
     const aspect = this.canvas.clientWidth / this.canvas.clientHeight;
@@ -484,6 +527,11 @@ export class DockView implements AfterViewInit, OnDestroy {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight, false);
 
+    // 3. HABILITAR SOMBRAS no RENDERER
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Suavização de sombras
+
+
     // 1) Criar OrbitControls ANTES de usar
     this.controls = new OrbitControls(this.camera, this.canvas);
     this.controls.enableDamping = true;
@@ -522,22 +570,22 @@ export class DockView implements AfterViewInit, OnDestroy {
     window.addEventListener('keydown', (e) => {
       switch (e.key.toLowerCase()) {
         case 'w': this.movement.forward = true; break;
-        case 's': this.movement.backward = true; break;
+        //case 's': this.movement.backward = true; break;
         case 'a': this.movement.left = true; break;
         case 'd': this.movement.right = true; break;
         case ' ': this.movement.up = true; break;
-        case 'shift': this.movement.down = true; break;
+        //case 'shift': this.movement.down = true; break;
       }
     });
 
     window.addEventListener('keyup', (e) => {
       switch (e.key.toLowerCase()) {
         case 'w': this.movement.forward = false; break;
-        case 's': this.movement.backward = false; break;
+        //case 's': this.movement.backward = false; break;
         case 'a': this.movement.left = false; break;
         case 'd': this.movement.right = false; break;
         case ' ': this.movement.up = false; break;
-        case 'shift': this.movement.down = false; break;
+        //case 'shift': this.movement.down = false; break;
       }
     });
   }
