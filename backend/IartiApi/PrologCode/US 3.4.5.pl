@@ -83,7 +83,6 @@ obtain_seq_multi_crane_for_dock(_DockId, _Vessels, BestSchedule, MinDelay, BestC
 % Usa backtracking do Prolog para testar todas as combinações
 try_multi_crane_combinations(SeqV, SeqTriplets, CraneAllocation, TotalDelay) :-
     length(SeqV, N),
-    % Gerar uma combinação de guindastes (1 ou 2 por navio)
     generate_crane_allocation(N, Cranes),
     % Calcular temporização com esta alocação
     sequence_temporization_multi(0, SeqV, Cranes, SeqTriplets, CraneAllocation),

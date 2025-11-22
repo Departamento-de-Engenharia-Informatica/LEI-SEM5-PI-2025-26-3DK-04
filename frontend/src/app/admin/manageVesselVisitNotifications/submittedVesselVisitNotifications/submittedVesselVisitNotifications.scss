@@ -1,0 +1,28 @@
+﻿@use 'sass:color';
+@import '../manageVesselVisitNotifications.scss';
+
+.submittedVesselVisitNotifications {
+
+  @extend .manageVesselVisitNotifications;
+
+
+  .list-section {
+    table {
+      td button {
+
+        margin-right: 5px;
+        margin-bottom: 5px;
+      }
+    }
+  }
+
+
+  .table-scroll-limit {
+    overflow-x: auto;
+  }
+
+
+  .modal-overlay {
+
+  }
+}

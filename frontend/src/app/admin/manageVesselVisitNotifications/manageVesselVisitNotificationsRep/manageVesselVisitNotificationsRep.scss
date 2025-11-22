@@ -1,0 +1,39 @@
+﻿@use 'sass:color';
+@import '../manageVesselVisitNotifications.scss';
+
+.manageVesselVisitNotificationsRep {
+
+  @extend .manageVesselVisitNotifications;
+
+
+  .section-block {
+    .container-row {
+      grid-template-columns: 1fr repeat(2, 1.5fr) auto;
+    }
+  }
+
+  .list-section {
+    display: flex;
+    flex-direction: column;
+
+    h2 {
+      margin-bottom: 5px;
+    }
+
+    > button {
+      align-self: flex-start;
+      margin-top: 5px;
+    }
+  }
+
+  .table-scroll-limit {
+    overflow-x: auto;
+  }
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  background-color: #ddd;
+  margin: 20px 0;
+}

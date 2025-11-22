@@ -6,41 +6,45 @@
 
     <div class="role-sections">
 
-      <div class="role-card" routerLink="/port-officer/vessels" style="cursor: pointer;">
+      <div class="role-card" routerLink="/vessels" style="cursor: pointer;">
         <h3>{{ t('cards.manageVessels') }}</h3>
         <p>{{ t('cards.manageVesselsDesc') }}</p>
       </div>
 
-      <div class="role-card" routerLink="/port-officer/vessel-types" style="cursor: pointer;">
+      <div class="role-card" routerLink="/vessel-types" style="cursor: pointer;">
         <h3>{{ t('cards.manageVesselTypes') }}</h3>
         <p>{{ t('cards.manageVesselTypesDesc') }}</p>
       </div>
 
-      <div class="role-card" routerLink="/admin/manage-docks" style="cursor: pointer;">
+      <div class="role-card" routerLink="/manage-docks" style="cursor: pointer;">
         <h3>{{ t('cards.manageDocks') }}</h3>
         <p>{{ t('cards.manageDocksDesc') }}</p>
       </div>
 
-      <div class="role-card" routerLink="/admin/manage-storage-areas" style="cursor: pointer;">
+      <div class="role-card" routerLink="/manage-storage-areas" style="cursor: pointer;">
         <h3>{{ t('cards.manageStorageAreas') }}</h3>
         <p>{{ t('cards.manageStorageAreasDesc') }}</p>
       </div>
 
-      <div class="role-card" routerLink="/admin/manage-organizations" style="cursor: pointer;">
+      <div class="role-card" routerLink="/manage-organizations" style="cursor: pointer;">
         <h3>{{ t('cards.manageOrganizations') }}</h3>
         <p>{{ t('cards.manageOrganizationsDesc') }}</p>
       </div>
 
-      <div class="role-card" routerLink="/admin/manage-representatives" style="cursor: pointer;">
+      <div class="role-card" routerLink="/manage-representatives" style="cursor: pointer;">
         <h3>{{ t('cards.manageRepresentatives') }}</h3>
         <p>{{ t('cards.manageRepresentativesDesc') }}</p>
       </div>
 
-      <div class="role-card">
-        <h3>{{ t('cards.inspection') }}</h3>
-        <p>{{ t('cards.inspectionDesc') }}</p>
+      <div class="role-card" routerLink="/dock" style="cursor: pointer;">
+        <h3>{{ t('cards.dockView') }}</h3>
+        <p>{{ t('cards.dockViewDesc') }}</p>
       </div>
 
+      <div class="role-card" routerLink="/submittedVesselVisitNotifications" style="cursor: pointer;">
+        <h3>{{ t('adminUI.cards.manageVesselVisitNotifications') }}</h3>
+        <p>{{ t('adminUI.cards.manageVesselVisitNotificationsDesc') }}</p>
+      </div>
     </div>
   </div>
 </section>

@@ -20,7 +20,7 @@ obtain_seq_shortest_delay(SeqBetterTriplets, SShortestDelay) :-
     % Agrupar navios por dock
     findall(DockId, vessel(_, DockId, _, _, _, _), AllDocks),
     sort(AllDocks, UniqueDocks), % remove duplicados
-    format(user_error, '[INFO] Found ~w unique docks: ~w~n', [length(UniqueDocks), UniqueDocks]),
+    format(user_error, '[INFO] Found ~w unique docks: ~w~n', [length(UniqueDocks), UniqueDocks]), % apenas para debug
     % Para cada dock, calcular o melhor agendamento
     obtain_best_schedule_per_dock(UniqueDocks, AllSchedules, TotalDelay),
     % Combinar todos os schedules
@@ -31,11 +31,11 @@ obtain_seq_shortest_delay(SeqBetterTriplets, SShortestDelay) :-
 % Para cada dock, encontra o melhor agendamento e soma os delays
 obtain_best_schedule_per_dock([], [], 0).
 obtain_best_schedule_per_dock([DockId|RestDocks], [BestSchedule|RestSchedules], TotalDelay) :-
-    format(user_error, '[INFO] Processing dock: ~w~n', [DockId]),
+    format(user_error, '[INFO] Processing dock: ~w~n', [DockId]), % apenas para debug
     % Encontrar todos os navios deste dock
     findall(V, vessel(V, DockId, _, _, _, _), VesselsInDock),
     length(VesselsInDock, VesselCount),
-    format(user_error, '[INFO] Dock ~w has ~w vessels~n', [DockId, VesselCount]),
+    format(user_error, '[INFO] Dock ~w has ~w vessels~n', [DockId, VesselCount]), % apenas para debug
     (   VesselsInDock = []
     ->  % Sem navios neste dock
         BestSchedule = [],
@@ -43,7 +43,7 @@ obtain_best_schedule_per_dock([DockId|RestDocks], [BestSchedule|RestSchedules], 
     ;   % Calcular melhor agendamento para este dock
         obtain_seq_shortest_delay_for_dock(DockId, VesselsInDock, BestSchedule, DockDelay)
     ),
-    format(user_error, '[INFO] Dock ~w: delay = ~w~n', [DockId, DockDelay]),
+    format(user_error, '[INFO] Dock ~w: delay = ~w~n', [DockId, DockDelay]), % apenas para debug
     % Recursão para os restantes docks
     obtain_best_schedule_per_dock(RestDocks, RestSchedules, RestDelay),
     TotalDelay is DockDelay + RestDelay.
