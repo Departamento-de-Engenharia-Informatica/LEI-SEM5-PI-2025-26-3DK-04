@@ -9,19 +9,47 @@ export class YardBuilder {
   static createYard(width: number, depth: number, position: THREE.Vector3, id: string): THREE.Group {
 
     const group = new THREE.Group();
+    // ---------------------------------------
+    // 🟦 TEXTURA DO CHÃO
+    // ---------------------------------------
+    const textureLoader = new THREE.TextureLoader();
 
-    // ---- Chão do pátio ----
+    const groundTexture = textureLoader.load('assets/textures/yard/yard_ground.jpg');
+    groundTexture.wrapS = THREE.RepeatWrapping;
+    groundTexture.wrapT = THREE.RepeatWrapping;
+
+    // repetir conforme tamanho do pátio
+    groundTexture.repeat.set(width / 20, depth / 20);
+
+    groundTexture.anisotropy = 16;
+
+    // ---------------------------------------
+    // 🟫 CHÃO
+    // ---------------------------------------
     const groundHeight = 1.3;
     const groundGeom = new THREE.BoxGeometry(width, groundHeight, depth);
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0x696969 });
-    const ground = new THREE.Mesh(groundGeom, groundMat);
 
+    const groundMat = new THREE.MeshStandardMaterial({
+      map: groundTexture,
+      roughness: 0.9,
+      metalness: 0.1,
+    });
+
+    const ground = new THREE.Mesh(groundGeom, groundMat);
     const groundTop = groundHeight / 2;
+
     ground.position.y = groundTop;
     group.add(ground);
 
     // ---- Configuração de grelha ----
-    const containerHeight = 2.6;
+    // ---- Medir altura real do contentor, incluindo offsets internos ----
+    const tempContainer = ContainerBuilder.createContainer(true);
+    const tempBox = new THREE.Box3().setFromObject(tempContainer);
+    const containerMinY = tempBox.min.y;   // fundo real do contentor
+    const containerMaxY = tempBox.max.y;   // topo real do contentor
+    const containerHeight = containerMaxY - containerMinY;
+
+
     const containerLength = 6;
     const spacing = 7;
 
@@ -39,13 +67,19 @@ export class YardBuilder {
 
         for (let h = 0; h <= stackHeight; h++) {
 
-          const container = ContainerBuilder.createContainer(false);
+          const container = ContainerBuilder.createContainer(true);
 
           const posX = -width / 2 + x * spacing + spacing / 2;
           const posZ = -depth / 2 + z * spacing + spacing / 2;
 
           // 👉 AQUI corrigimos: container fica exatamente no topo do chão.
-          const posY = groundTop + containerHeight / 2 + h * containerHeight;
+          const posY =
+            groundTop +                // topo da plataforma
+            (containerHeight / 2) -    // centro do contentor
+            containerMinY +            // corrigir offset do modelo
+            h * containerHeight;       // stack
+
+
 
           container.position.set(posX, posY, posZ);
 
