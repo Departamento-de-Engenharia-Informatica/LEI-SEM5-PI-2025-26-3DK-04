@@ -21,11 +21,17 @@
 
     cy.intercept('POST', `${api}/auth/google/user`, {
       statusCode: 200,
-      body: adminUser
+      body: [
+        {email: "john@gmail.com", name: "John Doe", role: "Operator", status: "Active"},
+        {email: "maria@gmail.com", name: "Maria Silva", role: "ProjectManager", status: "Active"}
+      ]
     }).as('userAuth');
 
     cy.intercept('GET', `${api}/UserManagement/get`, {
-      fixture: 'users.json'
+      body: [
+        {email: "john@gmail.com", name: "John Doe", role: "Operator", status: "Active"},
+        {email: "maria@gmail.com", name: "Maria Silva", role: "ProjectManager", status: "Active"}
+      ]
     }).as('getUsers');
 
     cy.visit('/manage-users', {
